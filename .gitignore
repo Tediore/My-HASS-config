@@ -1,13 +1,9 @@
-*
-
-!.gitignore
+/*
+config/automations/archive/
 !configuration.yaml
-!config
+!config/
 !*.md
 
-.storage
-.cloud
-.google.token
 ip_bans.yaml
 secrets.yaml
 known_devices.yaml

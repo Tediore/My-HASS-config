@@ -1,0 +1,22 @@
+  runtime_adjustment:
+    name: Runtime adjustment
+    min: 0
+    max: 2000
+    mode: box
+    unit_of_measurement: 'h'
+
+  replacement_threshold:
+    name: Threshold
+    min: 100
+    max: 250
+    step: 25
+    mode: slider
+    unit_of_measurement: 'h'
+
+  hvac_runtime:
+    name: Runtime
+    icon: mdi:clock-outline
+    mode: box
+    min: -500
+    max: 500
+    unit_of_measurement: 'h'

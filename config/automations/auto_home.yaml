@@ -1,0 +1,35 @@
+- alias: Activate away mode when armed away
+  initial_state: 'on'
+  trigger:
+  - entity_id: alarm_control_panel.abode
+    platform: state
+    to: armed_away
+  action:
+  - service: script.away_mode
+
+
+- alias: Turn lights on at sunset if home
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dark_inside
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: disarmed
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: armed_home
+  action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Read
+  - service: switch.turn_on
+    entity_id: 
+    - switch.plug2
+    - switch.tuya_plug2

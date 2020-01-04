@@ -1,0 +1,8 @@
+  furnace_filter:
+    name: Furnace filter change date
+
+  time_cycle_start:
+    name: Time last cycle started
+  
+  time_cycle_end:
+    name: Time last cycle ended

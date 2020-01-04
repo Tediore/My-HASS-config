@@ -1,0 +1,19 @@
+    time_home_today:
+      friendly_name: "Time home today"
+      value_template: "{{ ((states('sensor.home_today') | float) + (states('sensor.standby_today') | float)) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    time_home_yesterday:
+      friendly_name: "Time home yesterday"
+      value_template: "{{ (24 - (states('sensor.time_away_yesterday') | float)) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    outside_temp:
+      friendly_name: "Outside"
+      value_template: "{{ float(states('sensor.dark_sky_temperature')) }}"
+      unit_of_measurement: '°F'
+
+    outside_dewpoint:
+      friendly_name: "Dew point"
+      value_template: "{{ float(states('sensor.dark_sky_dew_point')) }}"
+      unit_of_measurement: '°F'

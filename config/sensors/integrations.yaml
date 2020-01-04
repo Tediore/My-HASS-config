@@ -1,0 +1,61 @@
+- platform: darksky
+  api_key: !secret darksky_key
+  monitored_conditions:
+  - dew_point
+  - temperature
+  - humidity
+  - temperature_high
+  - temperature_low
+
+- platform: systemmonitor
+  resources:
+  - type: memory_use
+  - type: memory_use_percent
+  - type: processor_use
+
+- platform: filesize
+  file_paths:
+  - /config/home-assistant_v2.db
+
+- platform: dewpoint
+  sensors:
+    dewpoint_inside:
+      temperature: sensor.tstat_current_temp
+      rel_hum: sensor.tstat_current_humidity
+
+- platform: google_wifi
+  name: Router
+  host: 10.0.0.1
+
+- platform: huesensor
+
+- platform: command_line
+  name: CPU Temperature
+  command: "cat /sys/class/thermal/thermal_zone0/temp"
+  unit_of_measurement: "°F"
+  value_template: '{{ (((value | multiply(0.001)) | float * 9/5) + 32) | round(0) }}'
+
+- platform: template
+  sensors: !include_dir_merge_named templates/
+
+- platform: time_date
+  display_options:
+  - 'date'
+  - 'time'
+
+- platform: apcupsd
+  resources:
+    - apc
+    - date
+    - version
+    - upsmode
+    - starttime
+    - model
+    - status
+    - linev
+    - loadpct
+    - bcharge
+    - timeleft
+    - mbattchg
+    - mintimel
+    - maxtime

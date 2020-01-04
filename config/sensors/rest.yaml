@@ -1,0 +1,18 @@
+- platform: rest
+  resource: http://localhost:5557/device?ipaddr=10.0.0.49/status
+  name: Xbox status
+  value_template: !secret xbox_rest
+  verify_ssl: false
+
+- platform: rest
+  resource: !secret hue_rest
+  name: Hue bridge
+  value_template: "{{ value_json['swupdate2']['bridge']['state'] }}"
+  json_attributes:
+  - name
+  - zigbeechannel
+  - bridgeid
+  - ipaddress
+  - modelid
+  - swversion
+  - apiversion

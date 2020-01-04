@@ -1,0 +1,259 @@
+#################################
+###  Radio volume
+#################################
+
+- alias: Bedroom speaker volume - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.bedroom_speaker','app_name', 'iHeartRadio') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.bedroom_speaker
+      volume_level: 0.4
+
+
+- alias: Hub volume - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.hub','app_name', 'iHeartRadio') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.hub
+      volume_level: 0.5
+
+
+- alias: Kitchen speaker volume - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.kitchen_speaker','app_name', 'iHeartRadio') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.kitchen_speaker
+      volume_level: 0.4
+
+
+- alias: Living room speaker volume - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.living_room_speaker','app_name', 'iHeartRadio') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room_speaker
+      volume_level: 0.45
+
+
+- alias: Portable speaker volume - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.portable_speaker','app_name', 'iHeartRadio') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.portable_speaker
+      volume_level: 0.45
+
+
+- alias: Boost volume when furnace on - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'cooling') }}"
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'heating') }}"
+  condition:
+  - condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  - condition: state
+    entity_id: media_player.living_room
+    state: 'playing'
+  - condition: template
+    value_template: "{{ is_state_attr('media_player.living_room_speaker','app_name', 'iHeartRadio') }}"
+  action:
+    service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room
+      volume_level: 0.6
+
+
+- alias: Return volume when furnace off - radio
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'off') }}"
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'idle') }}"
+  condition:
+  - condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  - condition: state
+    entity_id: media_player.living_room
+    state: 'playing'
+  - condition: template
+    value_template: "{{ is_state_attr('media_player.living_room_speaker','app_name', 'iHeartRadio') }}"
+  action:
+    service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room
+      volume_level: 0.4
+
+
+
+#################################
+###  Music volume
+#################################
+
+- alias: Bedroom speaker volume - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.bedroom_speaker','app_name', 'Google Play Music') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.bedroom_speaker
+      volume_level: 0.36
+
+
+- alias: Hub volume - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.hub','app_name', 'Google Play Music') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.hub
+      volume_level: 0.4
+
+
+- alias: Kitchen speaker volume - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.kitchen_speaker','app_name', 'Google Play Music') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.kitchen_speaker
+      volume_level: 0.32
+
+
+- alias: Living room speaker volume - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.living_room_speaker','app_name', 'Google Play Music') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room_speaker
+      volume_level: 0.32
+
+
+- alias: Portable speaker volume - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('media_player.portable_speaker','app_name', 'Google Play Music') }}"
+  condition:
+    condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.portable_speaker
+      volume_level: 0.36
+
+
+- alias: Boost volume when furnace on - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'cooling') }}"
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'heating') }}"
+  condition:
+  - condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  - condition: state
+    entity_id: media_player.living_room
+    state: 'playing'
+  - condition: template
+    value_template: "{{ is_state_attr('media_player.living_room_speaker','app_name', 'Google Play Music') }}"
+  action:
+    service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room
+      volume_level: 0.4
+
+
+- alias: Return volume when furnace off - GPM
+  initial_state: 'on'
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'off') }}"
+  - platform: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'idle') }}"
+  condition:
+  - condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
+  - condition: state
+    entity_id: media_player.living_room
+    state: 'playing'
+  - condition: template
+    value_template: "{{ is_state_attr('media_player.living_room_speaker','app_name', 'Google Play Music') }}"
+  action:
+    service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room
+      volume_level: 0.32

@@ -1,0 +1,103 @@
+- platform: history_stats
+  name: Heating time today
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+
+- platform: history_stats
+  name: Heating cycles today
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: count
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+
+- platform: history_stats
+  name: Heating percent today
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: ratio
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+
+- platform: history_stats
+  name: Heating time yesterday
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+
+- platform: history_stats
+  name: Heating cycles yesterday
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: count
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+
+- platform: history_stats
+  name: Heating percent yesterday
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: ratio
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+
+- platform: history_stats
+  name: Heating before last filter change
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  start: "{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}"
+  end: "{{ as_timestamp(states('input_text.furnace_filter')) }}"
+
+
+- platform: history_stats
+  name: Heating time last 7 days
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+
+- platform: history_stats
+  name: Heating percent last 7 days
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: ratio
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+
+- platform: history_stats
+  name: Heating cycles last 7 days
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: count
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+
+- platform: history_stats
+  name: Heating since cycle start
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  start: "{{ states('input_text.time_cycle_start') }}"
+  end: '{{ now() }}'

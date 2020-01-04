@@ -1,0 +1,8 @@
+shut_down:
+  alias: Shutting down
+  sequence:
+  - service: notify.notify
+    data:
+      message: 'Power critical, shutting down. See you later :('
+  - delay: '00:00:05'
+  - service: hassio.host_shutdown

@@ -1,0 +1,56 @@
+- alias: Store HVAC runtime nightly
+  initial_state: 'on'
+  trigger:
+  - platform: time
+    at: '00:00:01'
+  action:
+  - service: input_number.set_value
+    entity_id: input_number.hvac_runtime
+    data_template:
+      value: "{{ ((states('sensor.furnace_filter_life') | float) + (states('sensor.cooling_time_yesterday') | float) + (states('sensor.heating_time_yesterday') | float)) | round(1) }}"
+
+
+- alias: Record time when cycle starts
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.hvac_action
+    to: 'cooling'
+  - platform: state
+    entity_id: sensor.hvac_action
+    to: 'heating'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.time_cycle_start
+    data_template:
+      value: '{{ now() }}'
+
+
+- alias: Record time when cycle ends
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.hvac_action
+    to: 'idle'
+  - platform: state
+    entity_id: sensor.hvac_action
+    from: 'cooling'
+    to: 'off'
+  - platform: state
+    entity_id: sensor.hvac_action
+    from: 'heating'
+    to: 'off'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.time_cycle_end
+    data_template:
+      value: '{{ now() }}'
+
+
+- alias: HVAC runtime adjustment
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: input_number.runtime_adjustment
+  action:
+  - service: script.hvac_runtime_adjustment

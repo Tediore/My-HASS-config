@@ -1,0 +1,171 @@
+- alias: Alarm disarmed - reset things
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 'disarmed'
+  action:
+  - service: automation.turn_off
+    entity_id:
+    - automation.vacation_mode_lights_on
+    - automation.vacation_mode_lights_off
+    - automation.vacation_mode_photo
+  - service: light.turn_on
+    entity_id: light.washer_blue_led
+
+
+- alias: Turn porch light on at night
+  initial_state: 'on'
+  trigger:
+  - platform: time
+    at: '22:00:00'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_home'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.porch_light
+      kelvin: 4000
+      brightness_pct: 50
+
+
+- alias: Turn porch light on when armed home
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 'armed_home'
+  condition:
+    condition: time
+    after: '22:00:00'
+    before: '05:00:00'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.porch_light
+      kelvin: 4000
+      brightness_pct: 50
+
+
+- alias: Turn porch light off at sunrise
+  initial_state: 'on'
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '-00:30:00'
+  action:
+  - service: light.turn_off
+    entity_id: light.porch_light
+
+
+- alias: Activate vacation mode
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: armed_away
+    for: '24:00:00'
+  action:
+  - service: automation.turn_on
+    data:
+      entity_id:
+      - automation.vacation_mode_lights_on
+      - automation.vacation_mode_lights_off
+      - automation.vacation_mode_photo
+
+
+- alias: Vacation mode lights on
+  trigger:
+  - platform: time
+    at: '21:07:17'
+  condition:
+    condition: state
+    entity_id: alarm_control_panel.abode
+    state: armed_away
+  action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Sconces
+
+
+- alias: Vacation mode photo
+  trigger:
+  - platform: time
+    at: '22:00:00'
+  condition:
+    condition: state
+    entity_id: alarm_control_panel.abode
+    state: armed_away
+  action:
+    service: abode.trigger_quick_action
+    entity_id: binary_sensor.photo
+
+
+- alias: Vacation mode lights off
+  trigger:
+  - platform: time
+    at: '22:43:21'
+  condition:
+    condition: state
+    entity_id: alarm_control_panel.abode
+    state: armed_away
+  action:
+  - service: light.turn_off
+    entity_id: all
+
+
+- alias: Turn lights on when alarm triggered
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: abode_alarm
+  condition:
+    condition: state
+    entity_id: alarm_control_panel.abode
+    state: armed_away
+  action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Bright
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Game room
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Entrance
+      scene_name: Read
+
+
+- alias: Flash lights when smoke or CO detected
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.zcombo_1_status
+    to: 'Smoke'
+  - platform: state
+    entity_id: sensor.zcombo_1_status
+    to: 'CO'
+  condition:
+    condition: or
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: armed_home
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: disarmed
+  action:
+  - service: script.emergency

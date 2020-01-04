@@ -1,0 +1,38 @@
+- alias: Shut down when power critical
+  initial_state: 'on'
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.ups_battery
+    below: 20
+  condition:
+  - condition: state
+    entity_id: sensor.ups_status
+    state: 'ONBATT'
+  action:
+  - service: script.shut_down
+
+
+- alias: Power lost notification
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.ups_status
+    from: 'ONLINE'
+    to: 'ONBATT'
+  action:
+  - service: notify.notify
+    data:
+      message: "Power has been lost. On battery."
+
+
+- alias: Power restored notification
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.ups_status
+    from: 'ONBATT'
+    to: 'ONLINE'
+  action:
+  - service: notify.notify
+    data:
+      message: "Power has been restored."

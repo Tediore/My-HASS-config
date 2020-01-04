@@ -1,0 +1,76 @@
+heat_home:
+  alias: Heat - home
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: heat
+      entity_id: climate.thermostat
+  - service: climate.set_temperature
+    data_template:
+      temperature: "{{ states('input_number.heat_home') | int }}"
+      entity_id: climate.thermostat
+
+
+heat_sleep:
+  alias: Heat - sleep
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: heat
+      entity_id: climate.thermostat
+  - service: climate.set_temperature
+    data_template:
+      temperature: "{{ states('input_number.heat_sleep') | int }}"
+      entity_id: climate.thermostat
+
+
+heat_away:
+  alias: Heat - away
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: heat
+      entity_id: climate.thermostat
+  - service: climate.set_temperature
+    data_template:
+      temperature: "{{ states('input_number.heat_away') | int }}"
+      entity_id: climate.thermostat
+
+
+cool_home:
+  alias: Cool - home
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: cool
+      entity_id: climate.thermostat
+  - service: climate.set_temperature
+    data_template:
+      temperature: "{{ states('input_number.cool_home') | int }}"
+      entity_id: climate.thermostat
+
+
+cool_sleep:
+  alias: Cool - sleep
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: cool
+      entity_id: climate.thermostat
+  - service: climate.set_temperature
+    data_template:
+      temperature: "{{ states('input_number.cool_sleep') | int }}"
+      entity_id: climate.thermostat
+
+
+cool_away:
+  alias: Cool - away
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: cool
+      entity_id: climate.thermostat
+  - service: climate.set_temperature
+    data_template:
+      temperature: "{{ states('input_number.cool_away') | int }}"
+      entity_id: climate.thermostat

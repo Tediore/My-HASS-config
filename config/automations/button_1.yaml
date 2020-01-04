@@ -1,0 +1,135 @@
+- alias: Bedroom button press
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: button_single
+      device_ieee: '28:6d:97:00:01:06:3a:09'
+  condition:
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.sleep_mode
+  - service_template: >
+      {% if is_state('input_boolean.andy_sleep', 'off') %}
+        script.good_night
+      {% else %}
+        script.good_night_no_noise
+      {% endif %}
+
+
+- alias: Bedroom button toggle fan
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: button_single
+      device_ieee: '28:6d:97:00:01:06:3a:09'
+  condition:
+  - condition: state
+    entity_id: media_player.bedroom_speaker
+    state: 'playing'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'on'
+  action:
+  - service: switch.toggle
+    entity_id: switch.plug1
+
+
+- alias: Bedroom button white noise only
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: button_single
+      device_ieee: '28:6d:97:00:01:06:3a:09'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: media_player.bedroom_speaker
+      state: 'off'
+    - condition: state
+      entity_id: media_player.bedroom_speaker
+      state: 'idle'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'on'
+  action:
+  - service: script.white_noise_bedroom
+
+
+- alias: Lights off backup attempt 1
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: input_boolean.sleep_mode
+    to: 'on'
+    for: '00:00:05'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: group.lights_interior
+      state: 'on'
+    - condition: state
+      entity_id: switch.plug2
+      state: 'on'
+  action:
+  - service: homeassistant.turn_off
+    entity_id: group.lights_interior
+  - service: switch.turn_off
+    entity_id: switch.plug2
+
+
+- alias: Lights off backup attempt 2
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: input_boolean.sleep_mode
+    to: 'on'
+    for: '00:00:10'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: group.lights_interior
+      state: 'on'
+    - condition: state
+      entity_id: switch.plug2
+      state: 'on'
+  action:
+  - service: homeassistant.turn_off
+    entity_id: group.lights_interior
+  - service: switch.turn_off
+    entity_id: switch.plug2
+
+
+- alias: Lights off backup attempt 3
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: input_boolean.sleep_mode
+    to: 'on'
+    for: '00:00:15'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: group.lights_interior
+      state: 'on'
+    - condition: state
+      entity_id: switch.plug2
+      state: 'on'
+  action:
+  - service: homeassistant.turn_off
+    entity_id: group.lights_interior
+  - service: switch.turn_off
+    entity_id: switch.plug2
+

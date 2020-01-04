@@ -1,0 +1,112 @@
+    alarm_mode:
+      friendly_name: "Alarm mode"
+      value_template: >
+        {% if is_state('alarm_control_panel.abode', 'armed_home') %}
+          Armed home
+        {% elif is_state('alarm_control_panel.abode', 'armed_away') %}
+          Armed away
+        {% elif is_state('alarm_control_panel.abode', 'disarmed') %}
+          Disarmed
+        {% else %}
+          Unknown
+        {% endif %}
+      icon_template: >
+        {% if is_state('alarm_control_panel.abode', 'armed_home') %}
+          mdi:home-lock
+        {% elif is_state('alarm_control_panel.abode', 'armed_away') %}
+          mdi:lock
+        {% elif is_state('alarm_control_panel.abode', 'disarmed') %}
+          mdi:lock-open-outline
+        {% else %}
+          mdi:lock-question
+        {% endif %}
+
+
+
+########################################
+##### SENSOR BATTERY LEVELS
+########################################
+
+    abode_door_1_battery:
+      friendly_name: "Front door"
+      value_template: >
+        {% set battery = state_attr('binary_sensor.front_door', 'battery_low') %}
+        {% if battery == false %}
+          OK
+        {% elif battery == true %}
+          Low
+        {% else %}
+          Unknown
+        {% endif %}
+      icon_template: >
+        {% set battery = state_attr('binary_sensor.front_door', 'battery_low') %}
+        {% if battery == false %}
+          mdi:battery
+        {% elif battery == true %}
+          mdi:battery-20
+        {% else %}
+          mdi:battery-unknown
+        {% endif %}
+
+    abode_door_2_battery:
+      friendly_name: "Balcony door"
+      value_template: >
+        {% set battery = state_attr('binary_sensor.balcony_door', 'battery_low') %}
+        {% if battery == false %}
+          OK
+        {% elif battery == true %}
+          Low
+        {% else %}
+          Unknown
+        {% endif %}
+      icon_template: >
+        {% set battery = state_attr('binary_sensor.balcony_door', 'battery_low') %}
+        {% if battery == false %}
+          mdi:battery
+        {% elif battery == true %}
+          mdi:battery-20
+        {% else %}
+          mdi:battery-unknown
+        {% endif %}
+
+    abode_door_3_battery:
+      friendly_name: "Drawer"
+      value_template: >
+        {% set battery = state_attr('binary_sensor.drawer', 'battery_low') %}
+        {% if battery == false %}
+          OK
+        {% elif battery == true %}
+          Low
+        {% else %}
+          Unknown
+        {% endif %}
+      icon_template: >
+        {% set battery = state_attr('binary_sensor.drawer', 'battery_low') %}
+        {% if battery == false %}
+          mdi:battery
+        {% elif battery == true %}
+          mdi:battery-20
+        {% else %}
+          mdi:battery-unknown
+        {% endif %}
+
+    abode_motion_1_battery:
+      friendly_name: "Motion camera"
+      value_template: >
+        {% set battery = state_attr('camera.motion_camera', 'battery_low') %}
+        {% if battery == false %}
+          OK
+        {% elif battery == true %}
+          Low
+        {% else %}
+          Unknown
+        {% endif %}
+      icon_template: >
+        {% set battery = state_attr('camera.motion_camera', 'battery_low') %}
+        {% if battery == false %}
+          mdi:battery
+        {% elif battery == true %}
+          mdi:battery-20
+        {% else %}
+          mdi:battery-unknown
+        {% endif %}

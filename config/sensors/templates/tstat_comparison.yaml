@@ -1,0 +1,64 @@
+    avg_cooling_week:
+      friendly_name: "Average cooling runtime per day"
+      value_template: "{{ ((states('sensor.cooling_time_last_7_days') | float) / 7) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    cooling_runtime_today:
+      friendly_name: "Cooling runtime today"
+      value_template: "{{ (states('sensor.cooling_time_today') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    cooling_runtime_yesterday:
+      friendly_name: "Cooling runtime yesterday"
+      value_template: "{{ (states('sensor.cooling_time_yesterday') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    cooling_runtime_week:
+      friendly_name: "Cooling runtime last 7 days"
+      value_template: "{{ (states('sensor.cooling_time_last_7_days') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    avg_heating_week:
+      friendly_name: "Average heating runtime per day"
+      value_template: "{{ ((states('sensor.heating_time_last_7_days') | float) / 7) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    heating_runtime_today:
+      friendly_name: "Heating runtime today"
+      value_template: "{{ (states('sensor.heating_time_today') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    heating_runtime_yesterday:
+      friendly_name: "Heating runtime yesterday"
+      value_template: "{{ (states('sensor.heating_time_yesterday') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    heating_runtime_week:
+      friendly_name: "Heating runtime last 7 days"
+      value_template: "{{ (states('sensor.heating_time_last_7_days') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    average_total_runtime_week:
+      friendly_name: "Average total runtime last 7 days"
+      value_template: "{{ (((states('sensor.cooling_time_last_7_days') | float) + (states('sensor.heating_time_last_7_days') | float)) / 7) | round(2) }}"
+      unit_of_measurement: 'h'
+
+    furnace_filter_life:
+      friendly_name: "Filter runtime"
+      value_template: >
+        {% set active = (states('sensor.cooling_time_today') | float) + (states('sensor.heating_time_today') | float) %}
+        {% set runtime = states('input_number.hvac_runtime') | float %}
+        {{ (runtime + active) | round(1) }}
+      unit_of_measurement: 'h'
+
+    furnace_filter_days_remaining:
+      friendly_name: "Furnace filter days remaining"
+      value_template: >
+        {% if (states('sensor.average_total_runtime_week') | float) == 0 %}
+          > 30
+        {% elif ((((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0)) > 30 %}
+          > 30
+        {% else %}
+          {{ (((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0) }}
+        {% endif %}
+      unit_of_measurement: 'd'

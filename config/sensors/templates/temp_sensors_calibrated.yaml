@@ -1,0 +1,29 @@
+    lumi_temp_1_calibrated:
+      friendly_name: Lumi temp 1 calibrated
+      value_template: "{{ (float(states('sensor.lumi_temp_1')) + float(states('input_number.weather_1_offset'))) | round(1) }}"
+      unit_of_measurement: '°F'
+
+    lumi_temp_1_calibrated_display:
+      friendly_name: Lumi temp 1 calibrated
+      value_template: "{{ (float(states('sensor.lumi_temp_1')) + float(states('input_number.weather_1_offset'))) | round(0) }}"
+      unit_of_measurement: '°F'
+
+    lumi_temp_2_calibrated:
+      friendly_name: Lumi temp 2 calibrated
+      value_template: "{{ (float(states('sensor.lumi_temp_2')) + float(states('input_number.weather_2_offset'))) | round(1) }}"
+      unit_of_measurement: '°F'
+
+    lumi_temp_2_calibrated_display:
+      friendly_name: Lumi temp 2 calibrated
+      value_template: "{{ (float(states('sensor.lumi_temp_2')) + float(states('input_number.weather_2_offset'))) | round(0) }}"
+      unit_of_measurement: '°F'
+
+    lumi_humidity_1_calibrated:
+      friendly_name: Lumi humidity 1 calibrated
+      value_template: "{{ (float(states('sensor.lumi_humidity_1')) + float(states('input_number.humidity_1_offset'))) | round(1) }}"
+      unit_of_measurement: '%'
+
+    lumi_humidity_2_calibrated:
+      friendly_name: Lumi humidity 2 calibrated
+      value_template: "{{ (float(states('sensor.lumi_humidity_2')) + float(states('input_number.humidity_2_offset'))) | round(1) }}"
+      unit_of_measurement: '%'

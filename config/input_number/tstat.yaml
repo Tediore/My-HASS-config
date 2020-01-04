@@ -1,0 +1,47 @@
+  cool_home:
+    name: Home
+    icon: mdi:home-outline
+    min: 70
+    max: 78
+    step: 1
+    unit_of_measurement: '°F'
+
+  cool_sleep:
+    name: Sleep
+    icon: mdi:sleep
+    min: 68
+    max: 74
+    step: 1
+    unit_of_measurement: '°F'
+
+  cool_away:
+    name: Away
+    icon: mdi:account-arrow-right
+    min: 78
+    max: 85
+    step: 1
+    unit_of_measurement: '°F'
+
+  heat_home:
+    name: Home
+    icon: mdi:home-outline
+    min: 66
+    max: 71
+    step: 1
+    unit_of_measurement: '°F'
+
+  heat_sleep:
+    name: Sleep
+    icon: mdi:sleep
+    min: 65
+    max: 70
+    step: 1
+    unit_of_measurement: '°F'
+
+  heat_away:
+    name: Away
+    icon: mdi:account-arrow-right
+    min: 63
+    max: 68
+    step: 1
+    unit_of_measurement: '°F'

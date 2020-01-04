@@ -1,0 +1,83 @@
+away_mode:
+  alias: Away mode
+  sequence:
+  - service: homeassistant.turn_off
+    entity_id:
+    - group.plugs
+    - switch.bedroom_tv
+  - service: media_player.turn_off
+    entity_id: all
+  - service: light.turn_off
+    entity_id: all
+  - service: climate.turn_off
+    entity_id: climate.space_heater
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.living_room_speaker
+      volume_level: 0.5
+  - service: cloud.remote_connect
+
+
+arrival:
+  alias: Alarm disarmed from away
+  sequence:
+  - service: switch.turn_on
+    entity_id: 
+    - switch.plug2
+    - switch.light_switch1
+    - switch.tuya_plug2
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Read
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Read lamps
+  - wait_template: "{{ is_state('binary_sensor.motion_sensor_1', 'on') }}"
+    timeout: '00:05:00'
+    continue_on_timeout: false
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Read
+
+
+arrival_christmas:
+  alias: Alarm disarmed from away - Christmas mode
+  sequence:
+  - service: switch.turn_on
+    entity_id: 
+    - switch.plug2
+    - switch.tuya_plug2
+    - switch.light_switch1
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Entrance
+      scene_name: Read
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Read
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Christmas
+  - service: script.christmas_lights_off
+  - wait_template: "{{ is_state('binary_sensor.motion_sensor_1', 'on') }}"
+    timeout: '00:05:00'
+    continue_on_timeout: false
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Read
+
+
+christmas_lights_off:
+  alias: Turn Christmas lights off after arrival
+  sequence:
+  - delay: '00:01:00'
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Read lamps

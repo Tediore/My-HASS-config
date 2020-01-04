@@ -1,0 +1,56 @@
+furnace_filter_date:
+  alias: Furnace filter change date
+  sequence:
+  - service: input_text.set_value
+    entity_id: input_text.furnace_filter
+    data_template:
+      value: '{{ now() }}'
+  - service: input_number.set_value
+    entity_id: input_number.hvac_runtime
+    data_template:
+      value: >
+        {% set active = (states('sensor.cooling_before_last_filter_change') | float) + (states('sensor.heating_before_last_filter_change') | float) %}
+        {{ 0 - active }}
+
+
+hvac_runtime_adjustment:
+  alias: HVAC runtime adjustment
+  sequence:
+  - service: input_number.set_value
+    entity_id: input_number.hvac_runtime
+    data_template:
+      value: >
+        {% set active = (states('sensor.cooling_time_today') | float) + (states('sensor.heating_time_today') | float) %}
+        {% set runtime = states('input_number.runtime_adjustment') | float %}
+        {{ runtime - active }}
+
+
+restart_hass:
+  alias: Restart Home Assistant
+  sequence:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.maintenance
+  - service: homeassistant.restart
+
+
+emergency:
+  alias: Turn lights on during emergency
+  sequence:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Dimmed
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Game room
+      scene_name: Red
+  - service: switch.turn_on
+    entity_id: switch.light_switch1

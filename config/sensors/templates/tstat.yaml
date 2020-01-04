@@ -1,0 +1,60 @@
+    tstat_mode:
+      friendly_name: "HVAC"
+      value_template: >
+        {% if is_state('climate.thermostat', 'off') %}
+          Off
+        {% elif is_state('climate.thermostat', 'cool') %}
+          Cool
+        {% elif is_state('climate.thermostat', 'heat') %}
+          Heat
+        {% else %}
+          -
+        {% endif %}
+
+    tstat_comfort_setting:
+      friendly_name: Profile
+      value_template: >
+        {% set setpoint = state_attr('climate.thermostat', 'temperature') | int %}
+        {% if setpoint == (states('input_number.heat_home') | int or states('input_number.cool_home') | int) %}
+          Home
+        {% elif setpoint == (states('input_number.heat_sleep') | int or states('input_number.cool_sleep') | int) %}
+          Sleep
+        {% elif setpoint == (states('input_number.heat_away') | int or states('input_number.cool_away') | int) %}
+          Away
+        {% elif is_state('sensor.tstat_setpoint', '-') %}
+          -
+        {% else %}
+          Hold
+        {% endif %}
+
+    tstat_current_temp:
+      friendly_name: "Inside"
+      value_template: "{{ state_attr('climate.thermostat','current_temperature') | float('-') | round(0) }}"
+      unit_of_measurement: '°F'
+
+    tstat_current_humidity:
+      friendly_name: "Humidity"
+      value_template: "{{ state_attr('climate.thermostat','current_humidity') | float('-') | round(0) }}"
+      unit_of_measurement: '%'
+
+    tstat_setpoint:
+      friendly_name: "Setpoint"
+      value_template: "{{ state_attr('climate.thermostat','temperature') | float('-') | round(0) }}"
+      unit_of_measurement: '°F'
+
+    hvac_action:
+      friendly_name: "HVAC action"
+      value_template: "{{ state_attr('climate.thermostat','hvac_action') }}"
+
+#    tstat_fan_mode:
+#      friendly_name: "Fan mode"
+#      value_template: "{{ state_attr('climate.thermostat_cloud','fan_mode') }}"
+
+    space_heater_action:
+      friendly_name: "Space heater action"
+      value_template: "{{ state_attr('climate.space_heater','hvac_action') }}"
+
+    current_cycle_length:
+      friendly_name: "Length of current cycle"
+      value_template: "{{ (((states('sensor.cooling_since_cycle_start') | float) * 60) + ((states('sensor.heating_since_cycle_start') | float) * 60)) | round(1) }}"
+      unit_of_measurement: 'm'

@@ -1,0 +1,41 @@
+fan_power:
+  alias: Fan power
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret living_room_fan_power
+
+
+fan_speed:
+  alias: Fan speed
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret living_room_fan_speed
+
+
+soundbar_vol_up:
+  alias: Increase soundbar volume
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret soundbar_vol_up
+
+
+soundbar_vol_dn:
+  alias: Decrease soundbar volume
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret soundbar_vol_dn
+
+
+living_room_tv_off:
+  alias: Turn living room TV off
+  sequence:
+  - service: media_player.turn_off
+    entity_id: media_player.vizio_smartcast

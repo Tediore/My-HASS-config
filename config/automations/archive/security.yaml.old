@@ -1,0 +1,111 @@
+- alias: Brighten porch light upon motion
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.motion_sensor_1
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.storm_door
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: 'armed_home'
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: 'armed_away'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.porch_light
+      kelvin: 4000
+      brightness_pct: 100
+      transition: 0.25
+
+
+- alias: Turn other lights on upon motion
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.motion_sensor_1
+    from: 'off'
+    to: 'on'
+    for: '00:00:03'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_away'
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Read lamps
+
+
+- alias: Dim porch light after motion - home
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.motion_sensor_1
+    from: 'on'
+    to: 'off'
+    for: '00:02:00'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_home'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.porch_light
+      kelvin: 4000
+      brightness_pct: 50
+      transition: 0.25
+
+
+- alias: Dim porch light after motion - away
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.motion_sensor_1
+    from: 'on'
+    to: 'off'
+    for: '00:02:00'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_away'
+  action:
+  - service: light.turn_off
+    entity_id: light.porch_light
+
+
+- alias: Record last time balcony motion triggered
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.motion_sensor_1
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: variable.set_variable
+    data:
+      variable: last_motion_balcony
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%x %I:%M %p') }}"

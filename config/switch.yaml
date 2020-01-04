@@ -1,0 +1,32 @@
+- platform: broadlink
+  host: 10.0.0.40
+  mac: !secret broadlink_mac
+  type: rm_mini
+  friendly_name: 'IR blaster'
+  switches:
+    living_room_fan:
+      friendly_name: 'Living room fan'
+      command_on: !secret living_room_fan_power
+      command_off: !secret living_room_fan_power
+
+#- platform: template
+#  switches:
+#    furnace_fan:
+#      friendly_name: Furnace fan
+#      value_template: "{{ is_state('sensor.tstat_fan_mode', 'on') }}"
+#      turn_on:
+#        service: climate.set_fan_mode
+#        entity_id: climate.thermostat_cloud
+#        data:
+#          fan_mode: 'on'
+#      turn_off:
+#        service: climate.set_fan_mode
+#        entity_id: climate.thermostat_cloud
+#        data:
+#          fan_mode: auto
+
+- platform: command_line
+  switches:
+    bedroom_tv:
+      command_on: !secret br_tv_on
+      command_off: !secret br_tv_off

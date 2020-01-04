@@ -1,0 +1,16 @@
+- alias: Andy button press
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: button_single
+      device_ieee: '28:6d:97:00:01:04:72:60'
+  action:
+  - service: light.turn_off
+    entity_id: light.master_bedroom
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.andy_sleep
+  - service: script.white_noise_bedroom
+  - service: switch.turn_off
+    entity_id: switch.bedroom_tv

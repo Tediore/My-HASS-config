@@ -1,0 +1,16 @@
+  project_id: !secret assistant_api_key
+  service_account: !include /config/hass-connect.json
+  report_state: true
+  exposed_domains:
+  - switch
+  entity_config:
+    switch.hdmi_0:
+      expose: false
+    switch.plug3:
+      expose: false
+    switch.plug4:
+      expose: false
+    switch.living_room_fan:
+      expose: false
+    switch.washer:
+      expose: false

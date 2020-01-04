@@ -1,0 +1,27 @@
+  weather_1_offset:
+    name: Lumi weather 1
+    min: -3
+    max: 3
+    step: 0.5
+    unit_of_measurement: '°F'
+
+  weather_2_offset:
+    name: Lumi weather 2
+    min: -3
+    max: 3
+    step: 0.5
+    unit_of_measurement: '°F'
+
+  humidity_1_offset:
+    name: Lumi humidity 1
+    min: -5
+    max: 5
+    step: 1
+    unit_of_measurement: '%'
+
+  humidity_2_offset:
+    name: Lumi humidity 2
+    min: -5
+    max: 5
+    step: 1
+    unit_of_measurement: '%'

@@ -1,0 +1,81 @@
+- alias: Turn entrance light on before work
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '07:25:00'
+  condition:
+  - condition: template
+    value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: disarmed
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: armed_home
+  action:
+  - service: switch.turn_on
+    entity_id: switch.light_switch1
+
+
+- alias: Turn entrance light off
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '07:50:00'
+  condition:
+  - condition: template
+    value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
+  action:
+  - service: switch.turn_off
+    entity_id: switch.light_switch1
+
+
+- alias: Turn front closet light on when door opened dark
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: binary_sensor.front_closet
+    from: 'off'
+    to: 'on'
+  condition:
+    condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'on'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.front_closet
+      brightness: 128
+
+
+- alias: Turn front closet light on when door opened
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: binary_sensor.front_closet
+    from: 'off'
+    to: 'on'
+  condition:
+    condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'off'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.front_closet
+      brightness: 254
+
+
+- alias: Turn front closet light off
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: binary_sensor.front_closet
+    from: 'on'
+    to: 'off'
+  action:
+  - service: light.turn_off
+    data:
+      entity_id: light.front_closet

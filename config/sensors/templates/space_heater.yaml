@@ -1,0 +1,29 @@
+    space_heater_runtime_today:
+      friendly_name: "Space heater runtime today"
+      value_template: "{{ (states('sensor.space_heater_time_today') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    space_heater_runtime_yesterday:
+      friendly_name: "Space heater runtime yesterday"
+      value_template: "{{ (states('sensor.space_heater_time_yesterday') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    space_heater_runtime_week:
+      friendly_name: "Space heater runtime last 7 days"
+      value_template: "{{ (states('sensor.space_heater_time_last_7_days') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+
+    space_heater_energy_today:
+      friendly_name: "Space heater energy usage today"
+      value_template: "{{ ((states('sensor.space_heater_time_today') | float) * 1.5) | round(1) }}"
+      unit_of_measurement: 'kWh'
+
+    space_heater_energy_yesterday:
+      friendly_name: "Space heater energy usage yesterday"
+      value_template: "{{ ((states('sensor.space_heater_time_yesterday') | float) * 1.5) | round(1) }}"
+      unit_of_measurement: 'kWh'
+
+    space_heater_energy_week:
+      friendly_name: "Space heater energy usage last 7 days"
+      value_template: "{{ ((states('sensor.space_heater_time_last_7_days') | float) * 1.5) | round(1) }}"
+      unit_of_measurement: 'kWh'

@@ -1,0 +1,45 @@
+  include:
+    entities:
+    - alarm_control_panel.abode
+    - binary_sensor.front_door
+    - binary_sensor.balcony_door
+    - binary_sensor.drawer
+    - binary_sensor.front_closet
+    - binary_sensor.storm_door
+    - binary_sensor.motion_sensor_1
+    - binary_sensor.keypad
+    - binary_sensor.water_sensor_1
+    - sensor.processor_use
+    - sensor.memory_use
+    - sensor.memory_use_percent
+    - sensor.tstat_mode
+    - sensor.tstat_fan_mode
+    - sensor.lumi_temp_1
+    - sensor.lumi_humidity_1
+    - sensor.lumi_temp_2
+    - sensor.lumi_humidity_2
+    - sensor.dewpoint
+    - sensor.tstat_current_humidity
+    - sensor.washer_power
+    - sensor.washer_current
+    - sensor.hvac_action
+    - sensor.space_heater_action
+    - sensor.ups_battery
+    - sensor.ups_load
+    - sensor.ups_status
+    - sensor.router_status
+    - binary_sensor.xbox
+    - sensor.hue_bridge
+    - sensor.cpu_temperature
+    domains:
+    - automation
+    - media_player
+    - switch
+    - zwave
+    - light
+    - climate
+  exclude:
+    entities:
+    - automation.dismiss_discovery_notification
+  purge_keep_days: 10
+  db_url: !secret db_url

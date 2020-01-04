@@ -1,0 +1,23 @@
+- alias: test
+  trigger:
+  - platform: state
+    entity_id: light.does_not_exist
+  action:
+  - service: scene.create
+    data:
+      scene_id: lights_lr
+      snapshot_entities:
+      - light.left_lamp
+      - light.right_lamp
+      - light.left_sconce
+      - light.right_sconce
+  - service: light.turn_off
+    entity_id: light.game_room
+
+- alias: test2
+  trigger:
+  - platform: state
+    entity_id: light.does_not_exist
+  action:
+  - service: scene.turn_on
+    entity_id: scene.lights_premedia
