@@ -1,0 +1,31 @@
+- alias: Notify when Home Assistant starts
+  trigger:
+    platform: homeassistant
+    event: start
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.router_uptime
+    above: 0.01
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data:
+      title: "Server online"
+      message: "Home Assistant has started."
+  - delay: '00:01:00'
+  - service: persistent_notification.dismiss
+    data:
+      notification_id: config_entry_discovery
+
+
+- alias: Notify when backup cron job fails
+  trigger:
+  - platform: state
+    entity_id: sensor.backup_error
+  action:
+  - service: notify.telegram
+    data:
+      message: "Backup cron job failed."
+  - service: persistent_notification.create
+    data:
+      title: "Backup failed"
+      message: "Backup cron job failed."

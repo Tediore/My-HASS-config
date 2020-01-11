@@ -9,6 +9,9 @@
   - condition: state
     entity_id: climate.thermostat
     state: 'heat'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -22,18 +25,6 @@
     entity_id: climate.space_heater
 
 
-- alias: Turn space heater off after gaming
-  initial_state: 'on'
-  trigger:
-  - entity_id: binary_sensor.xbox
-    platform: state
-    from: 'on'
-    to: 'off'
-  action:
-  - service: climate.turn_off
-    entity_id: climate.space_heater
-
-
 - alias: Turn bias light on when Xbox on
   initial_state: 'on'
   trigger:
@@ -42,7 +33,10 @@
     from: 'off'
     to: 'on'
   condition:
-    condition: or
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: or
     conditions:
     - condition: state
       entity_id: alarm_control_panel.abode
@@ -59,19 +53,21 @@
     - media_player.portable_speaker
 
 
-- alias: Turn bias light off when Xbox off
+- alias: Turn stuff off after gaming
   initial_state: 'on'
   trigger:
+  - entity_id: binary_sensor.xbox
     platform: state
-    entity_id: binary_sensor.xbox
     from: 'on'
     to: 'off'
   action:
   - service: switch.turn_off
     entity_id: switch.plug3
+  - service: climate.turn_off
+    entity_id: climate.space_heater
 
 
-- alias: Reset game room lights when xbox turned on
+- alias: Reset game room lights when Xbox turned on
   initial_state: 'on'
   trigger:
   - platform: state
@@ -79,6 +75,9 @@
     from: 'off'
     to: 'on'
   condition:
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
   - condition: state
     entity_id: light.game_room
     state: 'on'
@@ -111,6 +110,9 @@
   - condition: state
     entity_id: binary_sensor.dark_inside
     state: 'on'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -126,17 +128,18 @@
       scene_name: Read
 
 
-- alias: Turn game room lights on at sunset when gaming
+- alias: Turn game room lights on/off at sunset/sunrise
   initial_state: 'on'
   trigger:
   - platform: state
     entity_id: binary_sensor.dark_inside
-    from: 'off'
-    to: 'on'
   condition: 
   - condition: state
     entity_id: binary_sensor.xbox
     state: 'on'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -146,10 +149,15 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Game room
-      scene_name: Read
+  - service_template: >
+      {% set dark = trigger.to_state.state %}
+      {% if dark == 'on' %}
+        script.gr_lights_on
+      {% elif dark == 'off' %}
+        script.gr_lights_off
+      {% else %}
+        script.none
+      {% endif %}
 
 
 - alias: Turn space heater off if on for 1 hour

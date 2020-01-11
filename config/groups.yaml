@@ -1,16 +1,26 @@
   lights_interior:
     name: Interior lights
     entities:
+    - switch.light_switch1
     - light.master_bedroom
     - light.living_room
     - light.dining_room
     - light.game_room
+    - light.laundry_room
+
+  lights_all:
+    name: All lights
+    entities:
     - switch.light_switch1
+    - light.porch_light
+    - light.master_bedroom
+    - light.living_room
+    - light.dining_room
+    - light.game_room
     - light.laundry_room
 
   plugs:
     name: Smart plugs
-    # do not include the living room fan since the on and off commands are the same! also don't include the washer plug (always on)
     entities:
     - switch.plug1
     - switch.plug2

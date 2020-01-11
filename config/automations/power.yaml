@@ -20,7 +20,7 @@
     from: 'ONLINE'
     to: 'ONBATT'
   action:
-  - service: notify.notify
+  - service: notify.mobile_app_pixel_xl
     data:
       message: "Power has been lost. On battery."
 
@@ -33,6 +33,6 @@
     from: 'ONBATT'
     to: 'ONLINE'
   action:
-  - service: notify.notify
+  - service: notify.mobile_app_pixel_xl
     data:
       message: "Power has been restored."

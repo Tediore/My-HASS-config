@@ -34,3 +34,6 @@
     xbox:
       friendly_name: Xbox
       value_template: "{{ is_state('sensor.xbox_status', 'Available') }}"
+    bedroom_tv:
+      friendly_name: Bedroom TV
+      value_template: "{{ is_state('sensor.file_bedroom_tv', 'INFO:pyvizio.cli:Device is on') }}"

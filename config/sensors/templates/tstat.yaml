@@ -42,14 +42,6 @@
       value_template: "{{ state_attr('climate.thermostat','temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
 
-    hvac_action:
-      friendly_name: "HVAC action"
-      value_template: "{{ state_attr('climate.thermostat','hvac_action') }}"
-
-#    tstat_fan_mode:
-#      friendly_name: "Fan mode"
-#      value_template: "{{ state_attr('climate.thermostat_cloud','fan_mode') }}"
-
     space_heater_action:
       friendly_name: "Space heater action"
       value_template: "{{ state_attr('climate.space_heater','hvac_action') }}"

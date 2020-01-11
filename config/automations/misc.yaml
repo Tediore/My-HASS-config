@@ -21,32 +21,6 @@
       scene_name: Water
 
 
-- alias: Turn stuff off after power outage
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id:
-    - switch.hdmi_0
-    - switch.plug3
-    - light.porch_light
-    to: 'on'
-  condition:
-    condition: or
-    conditions:
-    - condition: numeric_state
-      entity_id: sensor.router_uptime
-      below: 0.01
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_away
-  action:
-  - service: homeassistant.turn_off
-    entity_id: 
-    - switch.hdmi_0
-    - switch.plug3
-    - light.porch_light
-
-
 - alias: Record washer on
   initial_state: 'on'
   trigger:
@@ -113,8 +87,3 @@
     service: persistent_notification.dismiss
     data:
       notification_id: config_entry_discovery
-
-
-
-
-

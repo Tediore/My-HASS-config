@@ -1,24 +1,11 @@
-- alias: Store HVAC runtime nightly
-  initial_state: 'on'
-  trigger:
-  - platform: time
-    at: '00:00:01'
-  action:
-  - service: input_number.set_value
-    entity_id: input_number.hvac_runtime
-    data_template:
-      value: "{{ ((states('sensor.furnace_filter_life') | float) + (states('sensor.cooling_time_yesterday') | float) + (states('sensor.heating_time_yesterday') | float)) | round(1) }}"
-
-
 - alias: Record time when cycle starts
   initial_state: 'on'
   trigger:
   - platform: state
     entity_id: sensor.hvac_action
-    to: 'cooling'
-  - platform: state
-    entity_id: sensor.hvac_action
-    to: 'heating'
+    to:
+    - 'cooling'
+    - 'heating'
   action:
   - service: input_text.set_value
     entity_id: input_text.time_cycle_start
@@ -34,11 +21,9 @@
     to: 'idle'
   - platform: state
     entity_id: sensor.hvac_action
-    from: 'cooling'
-    to: 'off'
-  - platform: state
-    entity_id: sensor.hvac_action
-    from: 'heating'
+    from:
+    - 'cooling'
+    - 'heating'
     to: 'off'
   action:
   - service: input_text.set_value

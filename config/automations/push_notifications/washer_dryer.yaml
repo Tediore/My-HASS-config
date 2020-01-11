@@ -1,0 +1,12 @@
+- alias: Notify when washer done
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: input_boolean.washer
+    from: 'on'
+    to: 'off'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data:
+      title: "Washer cycle done"
+      message: "Move clothes to the dryer."

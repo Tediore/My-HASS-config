@@ -1,13 +1,3 @@
-- alias: Activate away mode when armed away
-  initial_state: 'on'
-  trigger:
-  - entity_id: alarm_control_panel.abode
-    platform: state
-    to: armed_away
-  action:
-  - service: script.away_mode
-
-
 - alias: Turn lights on at sunset if home
   initial_state: 'on'
   trigger:

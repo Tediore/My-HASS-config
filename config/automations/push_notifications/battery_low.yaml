@@ -1,0 +1,57 @@
+# Yes, this automation works. Stop testing it.
+- alias: Notify when sensor battery low
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.button_1_battery
+    - sensor.button_2_battery
+    - sensor.lumi_weather_1_battery
+    - sensor.lumi_weather_2_battery
+    - sensor.water_sensor_1_battery
+    - sensor.water_sensor_2_battery
+    below: 21
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('sensor.dining_room_remote', 'battery') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('sensor.game_room_remote', 'battery') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('sensor.living_room_remote', 'battery') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('sensor.master_bedroom_remote', 'battery') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('binary_sensor.motion_sensor_motion', 'battery_level') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('binary_sensor.motion_sensor_1', 'battery_level') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('binary_sensor.front_closet', 'battery_level') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ state_attr('binary_sensor.storm_door', 'battery_level') | float < 21 }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ is_state_attr('binary_sensor.drawer', 'battery_low', true) }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ is_state_attr('binary_sensor.keypad', 'battery_low', true) }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ is_state_attr('binary_sensor.front_door', 'battery_low', true) }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ is_state_attr('binary_sensor.balcony_door', 'battery_low', true) }}"
+    for: '00:10:00'
+  - platform: template
+    value_template: "{{ is_state_attr('camera.motion_camera', 'battery_low', true) }}"
+    for: '00:10:00'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "Device battery low"
+      message: "{{ trigger.to_state.name }} battery is low."

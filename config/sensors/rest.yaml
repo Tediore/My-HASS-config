@@ -3,6 +3,7 @@
   name: Xbox status
   value_template: !secret xbox_rest
   verify_ssl: false
+  scan_interval: 4
 
 - platform: rest
   resource: !secret hue_rest

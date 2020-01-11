@@ -1,0 +1,171 @@
+automation:
+# Add previous day's runtime to input_number each night
+- alias: Store HVAC runtime nightly
+  initial_state: 'on'
+  trigger:
+  - platform: time
+    at: '00:00:01'
+  action:
+  - service: input_number.set_value
+    entity_id: input_number.hvac_runtime
+    data_template:
+      value: "{{ ((states('sensor.furnace_filter_life') | float) + (states('sensor.cooling_time_yesterday') | float) + (states('sensor.heating_time_yesterday') | float)) | round(1) }}"
+
+
+sensor:
+# Cooling time yesterday (for use in storing runtime each night)
+- platform: history_stats
+  name: Cooling time yesterday
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: time
+  duration:
+    hours: 24
+  end: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
+
+
+# Cooling time current day before filter change script is called
+- platform: history_stats
+  name: Cooling before last filter change
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: time
+  start: "{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}"
+  end: "{{ as_timestamp(states('input_text.furnace_filter')) }}"
+
+
+# Cooling time last 7 days (for use in calculating rolling runtime average)
+- platform: history_stats
+  name: Cooling time last 7 days
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: time
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+
+# Heating time yesterday (for use in storing runtime each night)
+- platform: history_stats
+  name: Heating time yesterday
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  duration:
+    hours: 24
+  end: "{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}"
+
+
+# Heating time current day before filter change script is called
+- platform: history_stats
+  name: Heating before last filter change
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  start: "{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}"
+  end: "{{ as_timestamp(states('input_text.furnace_filter')) }}"
+
+
+# Heating time last 7 days (for use in calculating rolling runtime average)
+- platform: history_stats
+  name: Heating time last 7 days
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+
+- platform: template
+  sensors:
+  # Created to use HVAC action state attribute in the history stats sensors
+    hvac_action:
+      friendly_name: "HVAC action"
+      value_template: "{{ state_attr('climate.thermostat','hvac_action') }}"
+
+
+  # Used to display current total runtime in frontend
+    furnace_filter_life:
+      friendly_name: "Filter runtime"
+      value_template: >
+        {% set active = (states('sensor.cooling_time_today') | float) + (states('sensor.heating_time_today') | float) %}
+        {% set runtime = states('input_number.hvac_runtime') | float %}
+        {{ (runtime + active) | round(1) }}
+      unit_of_measurement: 'h'
+
+
+  # Calculate average runtime in the last 7 days
+    average_total_runtime_week:
+      friendly_name: "Average total runtime last 7 days"
+      value_template: "{{ (((states('sensor.cooling_time_last_7_days') | float) + (states('sensor.heating_time_last_7_days') | float)) / 7) | round(2) }}"
+      unit_of_measurement: 'h'
+
+
+  # Calculate number of days until filter will need to be changed based on replacement threshold and rolling average
+    furnace_filter_days_remaining:
+      friendly_name: "Furnace filter days remaining"
+      value_template: >
+        {% if (states('sensor.average_total_runtime_week') | float) == 0 %}
+          > 30
+        {% elif ((((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0)) > 30 %}
+          > 30
+        {% else %}
+          {{ (((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0) }}
+        {% endif %}
+      unit_of_measurement: 'd'
+
+
+script:
+# Reset filter change date and set total runtime to zero
+  furnace_filter_date:
+    alias: Furnace filter change date
+    sequence:
+    - service: input_text.set_value
+      entity_id: input_text.furnace_filter
+      data_template:
+        value: '{{ now() }}'
+    - service: input_number.set_value
+      entity_id: input_number.hvac_runtime
+      data_template:
+        value: >
+          {% set active = (states('sensor.cooling_before_last_filter_change') | float) + (states('sensor.heating_before_last_filter_change') | float) %}
+          {{ 0 - active }}
+
+# Manually adjust total runtime if needed
+  hvac_runtime_adjustment:
+    alias: HVAC runtime adjustment
+    sequence:
+    - service: input_number.set_value
+      entity_id: input_number.hvac_runtime
+      data_template:
+        value: >
+          {% set active = (states('sensor.cooling_time_today') | float) + (states('sensor.heating_time_today') | float) %}
+          {% set runtime = states('input_number.runtime_adjustment') | float %}
+          {{ runtime - active }}
+
+
+input_text:
+# Store furnace filter change date
+  furnace_filter:
+    name: Furnace filter change date
+
+
+input_number:
+# Used to store runtime nightly to reduce reliance on history
+  hvac_runtime:
+    name: Runtime
+    icon: mdi:clock-outline
+    mode: box
+    min: -500
+    max: 500
+    unit_of_measurement: 'h'
+
+# Used to set max number of hours of filter runtime to calculate days until filter change required
+  replacement_threshold:
+    name: Threshold
+    min: 100
+    max: 250
+    step: 25
+    mode: slider
+    unit_of_measurement: 'h'

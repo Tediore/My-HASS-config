@@ -154,10 +154,9 @@
   trigger:
   - platform: state
     entity_id: sensor.zcombo_1_status
-    to: 'Smoke'
-  - platform: state
-    entity_id: sensor.zcombo_1_status
-    to: 'CO'
+    to: 
+    - 'Smoke'
+    - 'CO'
   condition:
     condition: or
     conditions:

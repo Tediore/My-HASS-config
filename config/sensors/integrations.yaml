@@ -59,3 +59,11 @@
     - mbattchg
     - mintimel
     - maxtime
+
+- platform: file
+  name: File bedroom TV
+  file_path: .br_tv.txt
+
+# - platform: file
+#   name: File backup error
+#   file_path: /home/pi/misc/.cronerr

@@ -4,10 +4,9 @@ away_mode:
   - service: homeassistant.turn_off
     entity_id:
     - group.plugs
+    - group.lights_all
     - switch.bedroom_tv
   - service: media_player.turn_off
-    entity_id: all
-  - service: light.turn_off
     entity_id: all
   - service: climate.turn_off
     entity_id: climate.space_heater

@@ -1,7 +1,7 @@
 homeassistant:
   name: Home
-  latitude: !secret lat
-  longitude: !secret lon
+  latitude: !secret lat_home
+  longitude: !secret lon_home
   elevation: !secret elev
   unit_system: imperial
   time_zone: America/Chicago
@@ -10,34 +10,12 @@ homeassistant:
   - type: homeassistant
   whitelist_external_dirs:
   - /config
-
-# http:
-#   use_x_forwarded_for: true
-#   trusted_proxies: 
-#   - !secret proxy_ip
+  packages: !include_dir_named config/packages/
 
 notify:
 - name: telegram
   platform: telegram
   chat_id: !secret telegram_chat_id
-- name: pushbullet
-  platform: pushbullet
-  api_key: !secret pushbullet_key
-- name: notify_all
-  platform: group
-  services:
-  - service: telegram
-  - service: pushbullet
-
-telegram_bot:
-- platform: polling
-  api_key: !secret telegram_api_key
-  allowed_chat_ids: !secret telegram_chat_id
-
-media_player:
-- platform: vizio
-  host: 10.0.0.50
-  access_token: !secret living_room_tv_token
 
 climate:
 - platform: generic_thermostat
@@ -70,11 +48,12 @@ zha:
 google:
   client_id: !secret google_cal_id
   client_secret: !secret google_cal_secret
+telegram_bot:
+- platform: polling
+  api_key: !secret telegram_api_key
+  allowed_chat_ids: !secret telegram_chat_id
 frontend:
   themes: !include_dir_merge_named themes/
-#hdmi_cec:
-#  platform: switch
-#zha_map:
 apcupsd:
 mobile_app:
 discovery:
@@ -86,6 +65,7 @@ tplink:
 sun:
 system_health:
 logbook:
+media_player: !include config/media_player.yaml
 scene: !include config/scenes.yaml
 google_assistant: !include config/google.yaml
 history: !include config/history/history.yaml
@@ -96,7 +76,7 @@ input_number: !include_dir_merge_named config/input_number/
 input_text: !include config/input_text.yaml
 group: !include config/groups.yaml
 automation: !include_dir_merge_list config/automations/
-#remote: !include config/remote.yaml
 sensor: !include_dir_merge_list config/sensors/
 script: !include_dir_merge_named config/scripts/
 switch: !include config/switch.yaml
+zone: !include config/zone.yaml

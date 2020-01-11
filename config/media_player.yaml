@@ -1,0 +1,4 @@
+- platform: vizio
+  host: 10.0.0.50
+  access_token: !secret living_room_tv_token
+  scan_interval: 4

@@ -25,9 +25,7 @@
     entity_id: climate.thermostat
     state: cool
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_home
+  - service: script.cool_home
 
 
 - alias: Home mode - cool - arrival - weekend
@@ -50,9 +48,7 @@
     entity_id: climate.thermostat
     state: cool
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_home
+  - service: script.cool_home
 
 
 - alias: Sleep mode - cool - arrival work night
@@ -78,9 +74,7 @@
     entity_id: climate.thermostat
     state: cool
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_sleep
+  - service: script.cool_sleep
 
 
 - alias: Sleep mode - cool - arrival weekend
@@ -103,9 +97,7 @@
     entity_id: climate.thermostat
     state: cool
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_sleep
+  - service: script.cool_sleep
 
 
 
@@ -138,9 +130,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_home
+  - service: script.cool_home
 
 
 - alias: Cool - Home mode - weekend
@@ -165,9 +155,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_home
+  - service: script.cool_home
 
 
 - alias: Cool - Sleep mode - work night
@@ -195,9 +183,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_sleep
+  - service: script.cool_sleep
 
 
 - alias: Cool - Sleep mode - weekend
@@ -222,9 +208,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_sleep
+  - service: script.cool_sleep
 
 
 
@@ -249,9 +233,7 @@
     entity_id: climate.thermostat
     state: heat
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_home
+  - service: script.heat_home
 
 
 - alias: Heat - Sleep mode - arrival
@@ -271,9 +253,7 @@
     entity_id: climate.thermostat
     state: heat
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_sleep
+  - service: script.heat_sleep
 
 
 
@@ -306,9 +286,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_home
+  - service: script.heat_home
 
 
 - alias: Heat - Home mode - weekend
@@ -333,9 +311,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_home
+  - service: script.heat_home
 
 
 - alias: Heat - Sleep mode
@@ -356,9 +332,7 @@
       entity_id: alarm_control_panel.abode
       state: armed_home
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_sleep
+  - service: script.heat_sleep
 
 
 
@@ -369,33 +343,37 @@
 - alias: Cool - Away mode
   initial_state: 'on'
   trigger:
-    platform: state
+  - platform: state
     entity_id: alarm_control_panel.abode
     to: armed_away
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: armed_away
+    for: '00:00:30'
   condition:
     condition: state
     entity_id: climate.thermostat
     state: cool
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_away
+  - service: script.cool_away
 
 
 - alias: Heat - away mode
   initial_state: 'on'
   trigger:
-    platform: state
+  - platform: state
     entity_id: alarm_control_panel.abode
     to: armed_away
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: armed_away
+    for: '00:00:30'
   condition:
     condition: state
     entity_id: climate.thermostat
     state: heat
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_away
+  - service: script.heat_away
 
 
 
@@ -422,9 +400,7 @@
     - wed
     - thu
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_sleep
+  - service: script.cool_sleep
 
 
 - alias: Start sleep mode early if running (cool - weekend)
@@ -443,9 +419,7 @@
     - fri
     - sat
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_sleep
+  - service: script.cool_sleep
 
 
 - alias: Start home mode early if not running (cool - week)
@@ -467,9 +441,7 @@
     - thu
     - fri
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_home
+  - service: script.cool_home
 
 
 - alias: Start home mode early if not running (cool - weekend)
@@ -488,9 +460,7 @@
     - sat
     - sun
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.cool_home
+  - service: script.cool_home
 
 
 - alias: Start sleep mode early if not running (heat)
@@ -505,6 +475,4 @@
   - condition: template
     value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'heating') }}"
   action:
-  - service: script.turn_on
-    data:
-      entity_id: script.heat_sleep
+  - service: script.heat_sleep

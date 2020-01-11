@@ -24,8 +24,8 @@
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    to: disarmed
     from: armed_away
+    to: disarmed
   condition:
   - condition: state
     entity_id: binary_sensor.dark_inside
@@ -44,8 +44,8 @@
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    to: disarmed
     from: armed_away
+    to: disarmed
   condition:
   - condition: state
     entity_id: binary_sensor.dark_inside

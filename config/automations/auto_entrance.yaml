@@ -32,24 +32,6 @@
     entity_id: switch.light_switch1
 
 
-- alias: Turn front closet light on when door opened dark
-  initial_state: 'on'
-  trigger:
-    platform: state
-    entity_id: binary_sensor.front_closet
-    from: 'off'
-    to: 'on'
-  condition:
-    condition: state
-    entity_id: binary_sensor.dark_inside
-    state: 'on'
-  action:
-  - service: light.turn_on
-    data:
-      entity_id: light.front_closet
-      brightness: 128
-
-
 - alias: Turn front closet light on when door opened
   initial_state: 'on'
   trigger:
@@ -57,15 +39,17 @@
     entity_id: binary_sensor.front_closet
     from: 'off'
     to: 'on'
-  condition:
-    condition: state
-    entity_id: binary_sensor.dark_inside
-    state: 'off'
   action:
   - service: light.turn_on
-    data:
-      entity_id: light.front_closet
-      brightness: 254
+    entity_id: light.front_closet
+    data_template:
+      brightness: >
+        {% set dark = states('binary_sensor.dark_inside') %}
+        {% if dark == 'on' %}
+          128
+        {% else %}
+          255
+        {% endif %}
 
 
 - alias: Turn front closet light off

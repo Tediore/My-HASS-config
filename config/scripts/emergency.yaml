@@ -1,0 +1,21 @@
+emergency:
+  alias: Turn lights on during emergency
+  sequence:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Dimmed
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Game room
+      scene_name: Red
+  - service: switch.turn_on
+    entity_id: switch.light_switch1

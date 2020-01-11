@@ -1,21 +1,4 @@
-- alias: Turn fan off at 7am workday
-  initial_state: 'on'
-  trigger:
-    platform: time
-    at: '07:00:00'
-  condition:
-  - condition: template
-    value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
-  action:
-  - service: switch.turn_off
-    entity_id: switch.plug1
-  - service: input_boolean.turn_off
-    entity_id: 
-    - input_boolean.sleep_mode
-    - input_boolean.andy_sleep
-
-
-- alias: Turn on bedroom lights on workday
+- alias: Good morning - workday
   initial_state: 'on'
   trigger:
     platform: time
@@ -32,22 +15,9 @@
       entity_id: alarm_control_panel.abode
       state: disarmed
   action:
-  - service: light.turn_on
-    entity_id: light.master_bedroom
-    data:
-      brightness_pct: 1
-      kelvin: 3000
-  - service: light.turn_on
-    entity_id: light.master_bedroom
-    data:
-      kelvin: 3000
-      transition: 10
-      brightness_pct: 100
-  - condition: state
-    entity_id: input_boolean.christmas_mode
-    state: 'on'
-  - service: switch.turn_on
-    entity_id: switch.tuya_plug2
+  - service: script.good_morning
+  - service: switch.turn_off
+    entity_id: switch.plug1
 
 
 - alias: Turn fan off at 7:30am on day off
@@ -61,28 +31,27 @@
   action:
   - service: switch.turn_off
     entity_id: switch.plug1
-  - service: input_boolean.turn_off
-    entity_id: 
-    - input_boolean.sleep_mode
-    - input_boolean.andy_sleep
 
 
 - alias: Reset bedroom speaker volume
   initial_state: 'on'
   trigger:
     platform: time
-    at: '07:10:00'
-  condition:
-    condition: or
-    conditions:
-     - condition: state
-       entity_id: media_player.bedroom_speaker
-       state: 'idle'
-     - condition: state
-       entity_id: media_player.bedroom_speaker
-       state: 'off'
+    at: '07:00:00'
   action:
     service: media_player.volume_set
     data:
       entity_id: media_player.bedroom_speaker
       volume_level: 0.4
+
+
+- alias: Turn off sleep mode
+  initial_state: 'on'
+  trigger:
+  - platform: time
+    at: '06:00:00'
+  action:
+  - service: input_boolean.turn_off
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
