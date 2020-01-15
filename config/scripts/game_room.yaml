@@ -1,10 +1,12 @@
 gr_lights_on:
   alias: Game room lights on
   sequence:
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id: light.game_room
     data:
-      group_name: Game room
-      scene_name: Read
+      kelvin: 3000
+      transition: 5
+      brightness_pct: 100
 
 gr_lights_off:
   alias: Game room lights off
@@ -12,7 +14,7 @@ gr_lights_off:
   - service: light.turn_off
     entity_id: light.game_room
     data:
-      transition: 60
+      transition: 30
 
 none:
   alias: Dummy script

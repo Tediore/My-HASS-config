@@ -18,4 +18,4 @@ emergency:
       group_name: Game room
       scene_name: Red
   - service: switch.turn_on
-    entity_id: switch.light_switch1
+    entity_id: switch.light_switch_1

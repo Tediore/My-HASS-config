@@ -9,47 +9,28 @@
     - sensor.lumi_weather_2_battery
     - sensor.water_sensor_1_battery
     - sensor.water_sensor_2_battery
+    - sensor.water_sensor_3_battery
+    - sensor.water_sensor_4_battery
+    - sensor.zcombo_1_battery_level
+    - sensor.dining_room_remote_battery
+    - sensor.game_room_remote_battery
+    - sensor.living_room_remote_battery
+    - sensor.master_bedroom_remote_battery
+    - sensor.motion_sensor_motion_battery_level
+    - sensor.motion_sensor_1_battery_level
+    - sensor.front_closet_battery_level
+    - sensor.storm_door_battery_level
     below: 21
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('sensor.dining_room_remote', 'battery') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('sensor.game_room_remote', 'battery') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('sensor.living_room_remote', 'battery') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('sensor.master_bedroom_remote', 'battery') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('binary_sensor.motion_sensor_motion', 'battery_level') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('binary_sensor.motion_sensor_1', 'battery_level') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('binary_sensor.front_closet', 'battery_level') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ state_attr('binary_sensor.storm_door', 'battery_level') | float < 21 }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ is_state_attr('binary_sensor.drawer', 'battery_low', true) }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ is_state_attr('binary_sensor.keypad', 'battery_low', true) }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ is_state_attr('binary_sensor.front_door', 'battery_low', true) }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ is_state_attr('binary_sensor.balcony_door', 'battery_low', true) }}"
-    for: '00:10:00'
-  - platform: template
-    value_template: "{{ is_state_attr('camera.motion_camera', 'battery_low', true) }}"
-    for: '00:10:00'
+    for: '01:00:00'
+  - platform: state
+    entity_id:
+    - sensor.drawer_battery_low
+    - sensor.keypad_battery_low
+    - sensor.front_door_battery_low
+    - sensor.balcony_door_battery_low
+    - sensor.motion_camera_battery_low
+    to: 'True'
+    for: '01:00:00'
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:

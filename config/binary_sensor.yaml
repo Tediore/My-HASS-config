@@ -1,18 +1,14 @@
-- platform: tod
-  name: Dark inside
-  after: sunset
-  after_offset: '-00:20'
-  before: sunrise
-  before_offset: '+00:20'
+# - platform: tod
+#   name: Dark inside
+#   after: sunset
+#   after_offset: '-00:20'
+#   before: sunrise
+#   before_offset: '+00:20'
 
 - platform: tod
   name: Quiet hours
   after: '23:00'
   before: '08:00'
-
-- platform: workday
-  name: Workday
-  country: US
 
 - platform: wyzesense
   device: auto
@@ -31,9 +27,15 @@
         {% set kitchen = states('media_player.kitchen_speaker') %}
         {% set hub = states('media_player.hub') %}
         {{ (bedroom == 'playing' and living == 'playing' and kitchen == 'playing' and hub == 'playing') or (bedroom == 'paused' and living == 'paused' and kitchen == 'paused' and hub == 'paused') }}
+    front_speakers:
+      friendly_name: Front speakers
+      value_template: >
+        {% set kitchen = states('media_player.kitchen_speaker') %}
+        {% set hub = states('media_player.hub') %}
+        {{ kitchen == 'playing' and hub == 'playing' }}
     xbox:
       friendly_name: Xbox
       value_template: "{{ is_state('sensor.xbox_status', 'Available') }}"
-    bedroom_tv:
-      friendly_name: Bedroom TV
-      value_template: "{{ is_state('sensor.file_bedroom_tv', 'INFO:pyvizio.cli:Device is on') }}"
+    dark_inside:
+      friendly_name: Dark inside
+      value_template: "{{ state_attr('sun.sun', 'elevation') < 0.5 }}"

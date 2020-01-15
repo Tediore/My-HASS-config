@@ -6,18 +6,12 @@
   condition:
   - condition: template
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.good_morning
   - service: switch.turn_off
-    entity_id: switch.plug1
+    entity_id: switch.plug_1
 
 
 - alias: Turn fan off at 7:30am on day off
@@ -30,7 +24,7 @@
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') != as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
   action:
   - service: switch.turn_off
-    entity_id: switch.plug1
+    entity_id: switch.plug_1
 
 
 - alias: Reset bedroom speaker volume

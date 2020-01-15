@@ -22,9 +22,9 @@ arrival:
   sequence:
   - service: switch.turn_on
     entity_id: 
-    - switch.plug2
-    - switch.light_switch1
-    - switch.tuya_plug2
+    - switch.plug_2
+    - switch.light_switch_1
+    - switch.tuya_plug_2
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
@@ -47,9 +47,9 @@ arrival_christmas:
   sequence:
   - service: switch.turn_on
     entity_id: 
-    - switch.plug2
-    - switch.tuya_plug2
-    - switch.light_switch1
+    - switch.plug_2
+    - switch.tuya_plug_2
+    - switch.light_switch_1
   - service: hue.hue_activate_scene
     data:
       group_name: Entrance

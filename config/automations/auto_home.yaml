@@ -6,20 +6,17 @@
     from: 'off'
     to: 'on'
   condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id: light.dining_room
     data:
-      group_name: Dining room
-      scene_name: Read
+      kelvin: 3000
+      transition: 30
+      brightness_pct: 100
+  - delay: '00:00:30'
   - service: switch.turn_on
     entity_id: 
-    - switch.plug2
-    - switch.tuya_plug2
+    - switch.plug_2
+    - switch.tuya_plug_2

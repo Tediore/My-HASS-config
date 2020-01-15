@@ -121,14 +121,8 @@
     - wed
     - thu
     - fri
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.cool_home
 
@@ -146,14 +140,8 @@
     weekday:
     - sat
     - sun
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.cool_home
 
@@ -174,14 +162,8 @@
     - tue
     - wed
     - thu
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.cool_sleep
 
@@ -199,14 +181,8 @@
     weekday:
     - fri
     - sat
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.cool_sleep
 
@@ -277,14 +253,8 @@
     - wed
     - thu
     - fri
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.heat_home
 
@@ -302,14 +272,8 @@
     weekday:
     - sat
     - sun
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.heat_home
 
@@ -323,14 +287,8 @@
   - condition: state
     entity_id: climate.thermostat
     state: heat
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.heat_sleep
 

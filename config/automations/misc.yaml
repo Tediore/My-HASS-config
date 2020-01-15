@@ -5,10 +5,12 @@
     entity_id:
     - binary_sensor.water_sensor_1
     - binary_sensor.water_sensor_2
+    - binary_sensor.water_sensor_3
+    - binary_sensor.water_sensor_4
     to: 'on'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode_alarm
+    entity_id: alarm_control_panel.abode
     state: 'armed_home'
   action:
   - service: hue.hue_activate_scene

@@ -17,14 +17,14 @@
   action:
     service: notify.mobile_app_pixel_xl
     data_template:
-      title: "{{ trigger.to_state.name }} lights have been turned on."
+      message: "{{ trigger.to_state.name }} lights have been turned on."
 
 
 - alias: Notify entrance light on when away
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id: switch.light_switch1
+    entity_id: switch.light_switch_1
     from: 'off'
     to: 'on'
     for: '00:00:45'
@@ -35,7 +35,7 @@
   action:
     service: notify.mobile_app_pixel_xl
     data:
-      title: "Entrance light has been turned on."
+      message: "Entrance light has been turned on."
 
 
 - alias: Notify lights off when away
@@ -53,7 +53,7 @@
   action:
     service: notify.mobile_app_pixel_xl
     data:
-      title: "Lights have been turned off."
+      message: "Lights have been turned off."
 
 
 - alias: Notify when storm door opened
@@ -64,18 +64,14 @@
     from: 'off'
     to: 'on'
   condition:
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'armed_away'
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'armed_home'
+  - condition: template
+    value_template: >
+      {% set alarm = states('alarm_control_panel.abode') %}
+      {{ alarm in ['armed_home', 'armed_away'] }}
   action:
     service: notify.mobile_app_pixel_xl
     data:
-      title: "Storm door has been opened!"
+      message: "Storm door has been opened!"
 
 
 - alias: Notify when storm door closed
@@ -86,33 +82,11 @@
     from: 'on'
     to: 'off'
   condition:
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'armed_away'
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'armed_home'
+  - condition: template
+    value_template: >
+      {% set alarm = states('alarm_control_panel.abode') %}
+      {{ alarm in ['armed_home', 'armed_away'] }}
   action:
     service: notify.mobile_app_pixel_xl
     data:
-      title: "Storm door has been closed."
-
-
-- alias: Notify when alarm not armed when away
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: device_tracker.pixel_xl
-    to: 'not_home'
-    for: '00:02:00'
-  condition:
-  - condition: state
-    entity_id: alarm_control_panel.abode
-    state: 'disarmed'
-  action:
-  - service: notify.mobile_app_pixel_xl
-    data:
-      title: "Security system not armed"
-      message: "You forgot to arm the alarm, dumbass."
+      message: "Storm door has been closed."

@@ -1,58 +1,31 @@
-dark_inside_premedia:
-  alias: Dark inside
+pre_media:
+  alias: Pre-media
   sequence:
-  - service: scene.create
-    data:
-      scene_id: lights_premedia
-      snapshot_entities:
-      - light.left_lamp
-      - light.right_lamp
-      - light.left_sconce
-      - light.right_sconce
   - service: light.turn_off
     entity_id: light.living_room
+    data:
+      transition: 3
   - service: switch.turn_off
-    entity_id: switch.tuya_plug2
+    entity_id: switch.tuya_plug_2
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
       scene_name: Media
 
-
-not_dark_inside_premedia:
-  alias: Not dark inside
+post_media:
+  alias: Post-media
   sequence:
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.not_dark
-  - service: light.turn_off
-    entity_id: light.living_room
-
-
-dark_inside_postmedia:
-  alias: Dark inside
-  sequence:
-  - service: scene.turn_on
-    entity_id: scene.lights_premedia
-  - service: switch.turn_on
-    entity_id: switch.tuya_plug2
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id: light.living_room_lamps
     data:
-      group_name: Dining room
-      scene_name: Read
-
-
-not_dark_inside_postmedia:
-  alias: Dark inside
-  sequence:
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.not_dark
-  - service: hue.hue_activate_scene
+      kelvin: 3000
+      transition: 5
+      brightness_pct: 100
+  - service: light.turn_on
+    entity_id: light.dining_room
     data:
-      group_name: Living room
-      scene_name: Read lamps
-  - service: switch.turn_on
-    entity_id: switch.tuya_plug2
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Dining room
-      scene_name: Read
+      kelvin: 3000
+      transition: 5
+      brightness_pct: 100
+  # - service: switch.turn_on
+  #   entity_id: switch.tuya_plug_2

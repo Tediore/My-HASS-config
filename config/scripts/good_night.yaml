@@ -26,11 +26,11 @@ good_night:
     data:
       volume_level: 0.65
   - service: switch.turn_off
-    entity_id: switch.tuya_plug2
+    entity_id: switch.tuya_plug_2
   - service: switch.turn_off
-    entity_id: switch.plug2
+    entity_id: switch.plug_2
   - service: switch.turn_on
-    entity_id: switch.plug1
+    entity_id: switch.plug_1
 
 
 good_night_no_noise:
@@ -41,13 +41,13 @@ good_night_no_noise:
   - service: homeassistant.turn_off
     entity_id: group.lights_interior
   - service: switch.turn_off
-    entity_id: switch.tuya_plug2
+    entity_id: switch.tuya_plug_2
   - service: switch.turn_off
     entity_id: 
-    - switch.plug2
+    - switch.plug_2
     - switch.bedroom_tv
   - service: switch.turn_on
-    entity_id: switch.plug1
+    entity_id: switch.plug_1
 
 
 white_noise_bedroom:

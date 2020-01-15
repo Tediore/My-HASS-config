@@ -9,6 +9,10 @@
     - binary_sensor.motion_sensor_1
     - binary_sensor.keypad
     - binary_sensor.water_sensor_1
+    - binary_sensor.water_sensor_2
+    - binary_sensor.water_sensor_3
+    - binary_sensor.water_sensor_4
+    - binary_sensor.xbox
     - sensor.processor_use
     - sensor.memory_use
     - sensor.memory_use_percent
@@ -28,7 +32,6 @@
     - sensor.ups_load
     - sensor.ups_status
     - sensor.router_status
-    - binary_sensor.xbox
     - sensor.hue_bridge
     - sensor.cpu_temperature
     domains:

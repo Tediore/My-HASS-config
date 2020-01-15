@@ -85,14 +85,8 @@
     - condition: state
       entity_id: media_player.portable_speaker
       state: 'idle'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'armed_home'
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'disarmed'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: tts.google
     entity_id: media_player.portable_speaker

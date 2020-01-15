@@ -1,3 +1,30 @@
+- alias: Repeat white noise in sleep mode
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: media_player.bedroom_speaker
+    from: 'playing'
+    to: 'idle'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.andy_sleep
+      state: 'on'
+  - condition: time
+    after: '18:00:00'
+    before: '05:00:00'
+  action:
+  - service: media_player.play_media
+    entity_id: media_player.bedroom_speaker
+    data:
+      media_content_id: "http://10.0.0.12:8123/local/audio/pink_noise.mp3"
+      media_content_type: audio/mp3
+
+
 #- alias: Turn bedroom fan off if too cold
 #  initial_state: 'on'
 #  trigger:
@@ -22,31 +49,4 @@
 #    state: 'on'
 #  action:
 #  - service: switch.turn_on
-#    entity_id: switch.plug1
-
-
-- alias: Repeat white noise in sleep mode
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: media_player.bedroom_speaker
-    from: 'playing'
-    to: 'idle'
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.andy_sleep
-      state: 'on'
-  - condition: time
-    after: '18:00:00'
-    before: '05:00:00'
-  action:
-  - service: media_player.play_media
-    entity_id: media_player.bedroom_speaker
-    data:
-      media_content_id: "http://10.0.0.2:8123/local/audio/pink_noise.mp3"
-      media_content_type: audio/mp3
+#    entity_id: switch.plug_1

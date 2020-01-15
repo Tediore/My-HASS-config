@@ -1,14 +1,14 @@
+  use_include_order: true
   include:
     entities:
     - alarm_control_panel.abode
     - binary_sensor.front_door
-    - binary_sensor.storm_door
     - binary_sensor.balcony_door
+    - binary_sensor.storm_door
     - binary_sensor.drawer
     - binary_sensor.front_closet
     - binary_sensor.motion_sensor_1
-    - binary_sensor.water_sensor_1
-    - light.entrance
+    - switch.light_switch_1
     - light.front_closet
     - light.dining_room
     - light.living_room
@@ -16,11 +16,10 @@
     - light.game_room
     - light.laundry_room
     - light.porch_light
-    - switch.plug2
-    - switch.plug3
-    - switch.plug1
+    - switch.plug_2
+    - switch.plug_3
+    - switch.plug_1
     - media_player.living_room_tv
     - media_player.bedroom_tv
-    - switch.hdmi_0
     - climate.thermostat
     - sensor.router_status

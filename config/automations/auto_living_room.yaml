@@ -22,29 +22,20 @@
         entity_id: light.left_lamp
         state: 'on'
   action:
-  - service_template: >-
-      {% if is_state('binary_sensor.dark_inside', 'on') %}
-        script.dark_inside_premedia
-      {% else %}
-        script.not_dark_inside_premedia
-      {% endif %}
+  - service: script.pre_media
 
 
 - alias: Restore lights when TV turned off
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id: media_player.living_room_tv
-    from: 
-    - 'idle'
-    - 'paused'
-    - 'playing'
-    to: 'off'
-  - platform: state
     entity_id: media_player.vizio_smartcast
     from: 'on'
     to: 'off'
   condition:
+  - condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'on'
   - condition: state
     entity_id: input_boolean.andy_sleep
     state: 'off'
@@ -52,12 +43,7 @@
     entity_id: input_boolean.sleep_mode
     state: 'off'
   action:
-  - service_template: >-
-      {% if is_state('input_boolean.not_dark', 'on') %}
-        script.not_dark_inside_postmedia
-      {% else %}
-        script.dark_inside_postmedia
-      {% endif %}
+  - service: script.post_media
 
 
 - alias: Boost TV volume when furnace on - cool

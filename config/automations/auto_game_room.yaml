@@ -12,14 +12,8 @@
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: climate.turn_on
     entity_id: climate.space_heater
@@ -36,17 +30,11 @@
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: switch.turn_on
-    entity_id: switch.plug3
+    entity_id: switch.plug_3
   - service: media_player.turn_off
     entity_id:
     - media_player.all_speakers
@@ -62,7 +50,7 @@
     to: 'off'
   action:
   - service: switch.turn_off
-    entity_id: switch.plug3
+    entity_id: switch.plug_3
   - service: climate.turn_off
     entity_id: climate.space_heater
 
@@ -81,19 +69,15 @@
   - condition: state
     entity_id: light.game_room
     state: 'on'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id: light.game_room
     data:
-      group_name: Game room
-      scene_name: Read
+      kelvin: 3000
+      transition: 3
+      brightness_pct: 100
 
 
 - alias: Turn on game room lights when bias light turned on
@@ -113,19 +97,10 @@
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Game room
-      scene_name: Read
+  - service: script.gr_lights_on
 
 
 - alias: Turn game room lights on/off at sunset/sunrise
@@ -140,23 +115,15 @@
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: disarmed
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: armed_home
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: >
       {% set dark = trigger.to_state.state %}
       {% if dark == 'on' %}
         script.gr_lights_on
-      {% elif dark == 'off' %}
-        script.gr_lights_off
       {% else %}
-        script.none
+        script.gr_lights_off
       {% endif %}
 
 
@@ -164,11 +131,11 @@
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id: switch.plug4
+    entity_id: switch.plug_4
     to: 'on'
     for: '01:00:00'
   action:
   - service: switch.turn_off
-    entity_id: switch.plug4
+    entity_id: switch.plug_4
   - service: climate.turn_off
     entity_id: climate.space_heater

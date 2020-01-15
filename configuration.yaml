@@ -11,27 +11,10 @@ homeassistant:
   whitelist_external_dirs:
   - /config
   packages: !include_dir_named config/packages/
-
-notify:
-- name: telegram
-  platform: telegram
-  chat_id: !secret telegram_chat_id
-
-climate:
-- platform: generic_thermostat
-  name: Space heater
-  heater: switch.plug4
-  target_sensor: sensor.lumi_temp_2_calibrated
-  min_temp: 65
-  max_temp: 71
-  cold_tolerance: 1
-  hot_tolerance: 1
-
 hpprinter:
   devices:
   - host: 10.0.0.51
     name: Printer
-
 tts:
 - platform: google_translate
   time_memory: 57600
@@ -40,11 +23,6 @@ updater:
   include_used_components: true
 hacs:
   token: !secret hacs_token
-zwave:
-  usb_path: /dev/ttyUSB0
-zha:
-  usb_path: /dev/ttyUSB1
-  database_path: /config/zigbee.db
 google:
   client_id: !secret google_cal_id
   client_secret: !secret google_cal_secret
@@ -54,6 +32,11 @@ telegram_bot:
   allowed_chat_ids: !secret telegram_chat_id
 frontend:
   themes: !include_dir_merge_named themes/
+zwave:
+  usb_path: /dev/ttyUSB0
+zha:
+  usb_path: /dev/ttyUSB1
+  database_path: /config/zigbee.db
 apcupsd:
 mobile_app:
 discovery:
@@ -65,7 +48,11 @@ tplink:
 sun:
 system_health:
 logbook:
+light: !include config/light.yaml
+cast: !include config/cast.yaml
+climate: !include config/climate.yaml
 media_player: !include config/media_player.yaml
+notify: !include config/notify.yaml
 scene: !include config/scenes.yaml
 google_assistant: !include config/google.yaml
 history: !include config/history/history.yaml
