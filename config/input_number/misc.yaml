@@ -1,6 +1,0 @@
-  low_battery:
-    name: Low battery
-    min: 0
-    max: 40
-    step: 5
-    unit_of_measurement: '%'

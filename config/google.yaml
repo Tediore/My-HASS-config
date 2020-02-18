@@ -1,16 +1,21 @@
-  project_id: !secret assistant_api_key
-  service_account: !include /config/hass-connect.json
-  report_state: true
-  exposed_domains:
-  - switch
-  entity_config:
-    switch.hdmi_0:
-      expose: false
-    switch.plug3:
-      expose: false
-    switch.plug4:
-      expose: false
-    switch.living_room_fan:
-      expose: false
-    switch.washer:
-      expose: false
+project_id: !secret assistant_project_id
+service_account: !include /config/.hass.json
+report_state: true
+expose_by_default: false
+entity_config:
+  switch.light_switch_1:
+    expose: true
+  switch.plug_1:
+    expose: true
+  switch.plug_2:
+    expose: true
+  switch.plug_3:
+    expose: true
+  switch.tuya_plug_2:
+    expose: true
+  climate.thermostat:
+    expose: true
+  script.move_music_portable:
+    expose: true
+  script.move_music_all:
+    expose: true

@@ -1,0 +1,120 @@
+- alias: Turn stuff on when Xbox on
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: binary_sensor.xbox
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: switch.turn_on
+    entity_id: switch.plug_3
+  - service: media_player.turn_off
+    entity_id:
+    - media_player.all_speakers
+    - media_player.portable_speaker
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'heat'
+  - service: climate.turn_on
+    entity_id: climate.space_heater
+
+
+- alias: Do stuff when Xbox turned off
+  initial_state: 'on'
+  trigger:
+  - entity_id: binary_sensor.xbox
+    platform: state
+    from: 'on'
+    to: 'off'
+  action:
+  - service: script.xbox_off
+
+
+- alias: Reset game room lights when Xbox turned on
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: state
+    entity_id: light.game_room
+    state: 'on'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: light.turn_on
+    entity_id: light.game_room
+    data:
+      kelvin: 3000
+      transition: 3
+      brightness_pct: 100
+
+
+- alias: Turn on game room lights when bias light turned on
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.game_room
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: script.gr_lights_on
+
+
+- alias: Turn game room lights on/off at sunset/sunrise
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dark_inside
+  condition:
+  - condition: state
+    entity_id: binary_sensor.xbox
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service_template: "{{ 'script.gr_lights_on' if trigger.to_state.state == 'on' else 'script.gr_lights_off' }}"
+
+
+- alias: Turn space heater off if on for 2 hours
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: switch.plug_4
+    to: 'on'
+    for: '02:00:00'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.xbox
+    state: 'off'
+  action:
+  - service: switch.turn_off
+    entity_id: switch.plug_4
+  - service: climate.turn_off
+    entity_id: climate.space_heater

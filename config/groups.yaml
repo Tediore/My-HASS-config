@@ -1,29 +1,29 @@
-  lights_interior:
-    name: Interior lights
-    entities:
-    - switch.light_switch_1
-    - light.master_bedroom
-    - light.living_room
-    - light.dining_room
-    - light.game_room
-    - light.laundry_room
+lights_interior:
+  name: Interior lights
+  entities:
+  - switch.light_switch_1
+  - light.master_bedroom
+  - light.living_room
+  - light.dining_room
+  - light.game_room
+  - light.laundry_room
 
-  lights_all:
-    name: All lights
-    entities:
-    - switch.light_switch_1
-    - light.porch_light
-    - light.master_bedroom
-    - light.living_room
-    - light.dining_room
-    - light.game_room
-    - light.laundry_room
+lights_all:
+  name: All lights
+  entities:
+  - switch.light_switch_1
+  - light.porch_light
+  - light.master_bedroom
+  - light.living_room
+  - light.dining_room
+  - light.game_room
+  - light.laundry_room
 
-  plugs:
-    name: Smart plugs
-    entities:
-    - switch.plug_1
-    - switch.plug_2
-    - switch.plug_3
-    - switch.plug_4
-    - switch.tuya_plug_2
+plugs:
+  name: Smart plugs
+  entities:
+  - switch.plug_1
+  - switch.plug_2
+  - switch.plug_3
+  - switch.plug_4
+  - switch.tuya_plug_2

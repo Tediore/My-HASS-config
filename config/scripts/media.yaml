@@ -5,12 +5,16 @@ pre_media:
     entity_id: light.living_room
     data:
       transition: 3
-  - service: switch.turn_off
-    entity_id: switch.tuya_plug_2
+  - condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'on'
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
       scene_name: Media
+  - service: switch.turn_off
+    entity_id: switch.tuya_plug_2
+
 
 post_media:
   alias: Post-media
@@ -27,5 +31,8 @@ post_media:
       kelvin: 3000
       transition: 5
       brightness_pct: 100
-  # - service: switch.turn_on
-  #   entity_id: switch.tuya_plug_2
+  - condition: state
+    entity_id: binary_sensor.christmas_mode
+    state: 'on'
+  - service: switch.turn_on
+    entity_id: switch.tuya_plug_2

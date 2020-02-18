@@ -3,7 +3,7 @@
   name: Xbox status
   value_template: !secret xbox_rest
   verify_ssl: false
-  scan_interval: 4
+  scan_interval: 5
 
 - platform: rest
   resource: !secret hue_rest
@@ -12,8 +12,14 @@
   json_attributes:
   - name
   - zigbeechannel
-  - bridgeid
   - ipaddress
   - modelid
   - swversion
   - apiversion
+  scan_interval: 1800
+
+- platform: rest
+  resource: !secret abode_rest
+  name: Abode
+  value_template: "{{ value_json['updates']['em_ver'] }}"
+  scan_interval: 43200

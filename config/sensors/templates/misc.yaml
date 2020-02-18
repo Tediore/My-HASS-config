@@ -1,19 +1,30 @@
-    time_home_today:
-      friendly_name: "Time home today"
-      value_template: "{{ ((states('sensor.home_today') | float) + (states('sensor.standby_today') | float)) | round(1) }}"
-      unit_of_measurement: 'h'
-
-    time_home_yesterday:
-      friendly_name: "Time home yesterday"
-      value_template: "{{ (24 - (states('sensor.time_away_yesterday') | float)) | round(1) }}"
-      unit_of_measurement: 'h'
-
-    outside_temp:
-      friendly_name: "Outside"
-      value_template: "{{ float(states('sensor.dark_sky_temperature')) }}"
-      unit_of_measurement: '°F'
-
-    outside_dewpoint:
-      friendly_name: "Dew point"
-      value_template: "{{ float(states('sensor.dark_sky_dew_point')) }}"
-      unit_of_measurement: '°F'
+zcombo_1_status:
+  friendly_name: Smoke alarm 1 status
+  value_template: >
+    {% set alarm = states('sensor.zcombo_1_alarm_type') | float %}
+    {% set level = states('sensor.zcombo_1_alarm_level') | float %}
+    {% if alarm == 13 and level == 255 %}
+      OK
+    {% elif alarm == 1 and level == 255 %}
+      Smoke
+    {% elif alarm == 2 and level == 255 %}
+      CO
+    {% elif alarm == 12 and level == 0 %}
+      Test
+    {% else %}
+      Unknown
+    {% endif %}
+  icon_template: >
+    {% set alarm = states('sensor.zcombo_1_alarm_type') | float %}
+    {% set level = states('sensor.zcombo_1_alarm_level') | float %}
+    {% if alarm == 13 and level == 255 %}
+      mdi:smoke-detector
+    {% elif alarm == 1 and level == 255 %}
+      mdi:fire
+    {% elif alarm == 2 and level == 255 %}
+      mdi:cloud-alert
+    {% elif alarm == 12 and level == 0 %}
+      mdi:smoke-detector
+    {% else %}
+      mdi:cloud-question
+    {% endif %}

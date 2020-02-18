@@ -1,5 +1,11 @@
-  time_cycle_start:
-    name: Time last cycle started
-  
-  time_cycle_end:
-    name: Time last cycle ended
+time_cycle_start:
+  name: Time last cycle started
+
+time_cycle_end:
+  name: Time last cycle ended
+
+time_power_lost:
+  name: Time power outage occurred
+
+time_power_restored:
+  name: Time power restored

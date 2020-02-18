@@ -1,0 +1,60 @@
+### See button 1 package for related scripts
+
+automation:
+- alias: Andy button initial press
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: button_single
+      device_ieee: '28:6d:97:00:01:04:72:60'
+  condition:
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: script.good_night_andy
+
+
+- alias: Andy button toggle fan
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: button_single
+      device_ieee: '28:6d:97:00:01:04:72:60'
+  condition:
+  - condition: state
+    entity_id: media_player.bedroom_speaker
+    state: 'playing'
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'on'
+  action:
+  - service: switch.toggle
+    entity_id: switch.plug_1
+
+
+script:
+  good_night_andy:
+    alias: Good night - Andy
+    sequence:
+    - service: media_player.turn_off
+      entity_id: media_player.bedroom_vizio
+    - service: script.white_noise_bedroom
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.andy_sleep
+    - condition: state
+      entity_id: light.game_room
+      state: 'on'
+    - service: light.turn_off
+      entity_id: 
+      - light.living_room
+      - light.dining_room
+
+
+input_boolean:
+  andy_sleep:
+    name: Andy sleep

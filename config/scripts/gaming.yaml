@@ -1,0 +1,47 @@
+gr_lights_on:
+  alias: Game room lights on
+  sequence:
+  - service: light.turn_on
+    entity_id: light.game_room
+    data:
+      kelvin: 3000
+      transition: 5
+      brightness_pct: 100
+
+gr_lights_off:
+  alias: Game room lights off
+  sequence:
+  - service: light.turn_off
+    entity_id: light.game_room
+    data:
+      transition: 30
+
+xbox_off:
+  alias: Do stuff when Xbox turned off
+  sequence:
+  - service: switch.turn_off
+    entity_id: switch.plug_3
+  - service: climate.turn_off
+    entity_id: climate.space_heater
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: state
+    entity_id: sensor.living_room_tv
+    state: 'off'
+  - service: scene.turn_on
+    entity_id: scene.before_gaming
+
+none:
+  alias: Dummy script
+  sequence:
+  - service: switch.turn_off
+    entity_id: switch.not_an_actual_switch

@@ -1,10 +1,3 @@
-# - platform: tod
-#   name: Dark inside
-#   after: sunset
-#   after_offset: '-00:20'
-#   before: sunrise
-#   before_offset: '+00:20'
-
 - platform: tod
   name: Quiet hours
   after: '23:00'
@@ -26,16 +19,31 @@
         {% set living = states('media_player.living_room_speaker') %}
         {% set kitchen = states('media_player.kitchen_speaker') %}
         {% set hub = states('media_player.hub') %}
-        {{ (bedroom == 'playing' and living == 'playing' and kitchen == 'playing' and hub == 'playing') or (bedroom == 'paused' and living == 'paused' and kitchen == 'paused' and hub == 'paused') }}
+        {{ (bedroom in ['playing', 'paused'] and living in ['playing', 'paused'] and kitchen in ['playing', 'paused'] and hub in ['playing', 'paused']) }}
+
     front_speakers:
       friendly_name: Front speakers
       value_template: >
         {% set kitchen = states('media_player.kitchen_speaker') %}
         {% set hub = states('media_player.hub') %}
-        {{ kitchen == 'playing' and hub == 'playing' }}
+        {{ kitchen in ['playing', 'paused'] and hub in ['playing', 'paused'] }}
+
+    any_media_player:
+      friendly_name: Any media player
+      value_template: >
+        {% set bedroom = states('media_player.bedroom_speaker') %}
+        {% set living = states('media_player.living_room_speaker') %}
+        {% set kitchen = states('media_player.kitchen_speaker') %}
+        {% set hub = states('media_player.hub') %}
+        {% set portable = states('media_player.portable_speaker') %}
+        {% set bedroom_tv = states('media_player.bedroom_vizio') %}
+        {% set living_tv = states('media_player.living_room_vizio') %}
+        {{ bedroom != 'off' and living != 'off' and kitchen != 'off' and hub != 'off' and portable != 'off' and bedroom_tv != 'off' and living_tv != 'off' }}
+
     xbox:
       friendly_name: Xbox
       value_template: "{{ is_state('sensor.xbox_status', 'Available') }}"
+
     dark_inside:
       friendly_name: Dark inside
-      value_template: "{{ state_attr('sun.sun', 'elevation') < 0.5 }}"
+      value_template: "{{ state_attr('sun.sun', 'elevation') | float < states('input_number.dark_inside') | float }}"

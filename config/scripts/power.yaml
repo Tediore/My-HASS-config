@@ -1,8 +1,0 @@
-shut_down:
-  alias: Shutting down
-  sequence:
-  - service: notify.mobile_app_pixel_xl
-    data:
-      message: 'Power critical, shutting down. See you later :('
-  - delay: '00:00:05'
-  - service: hassio.host_shutdown

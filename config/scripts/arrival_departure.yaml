@@ -5,7 +5,6 @@ away_mode:
     entity_id:
     - group.plugs
     - group.lights_all
-    - switch.bedroom_tv
   - service: media_player.turn_off
     entity_id: all
   - service: climate.turn_off
@@ -14,7 +13,6 @@ away_mode:
     data:
       entity_id: media_player.living_room_speaker
       volume_level: 0.5
-  - service: cloud.remote_connect
 
 
 arrival:
@@ -24,7 +22,6 @@ arrival:
     entity_id: 
     - switch.plug_2
     - switch.light_switch_1
-    - switch.tuya_plug_2
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
@@ -48,8 +45,8 @@ arrival_christmas:
   - service: switch.turn_on
     entity_id: 
     - switch.plug_2
-    - switch.tuya_plug_2
     - switch.light_switch_1
+    - switch.tuya_plug_2
   - service: hue.hue_activate_scene
     data:
       group_name: Entrance

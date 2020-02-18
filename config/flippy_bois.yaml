@@ -1,11 +1,2 @@
-  sleep_mode:
-    name: Sleep mode
-
-  andy_sleep:
-    name: Andy sleep
-
-  washer:
-    name: Washer status
-
-  christmas_mode:
-    name: Christmas mode
+christmas_mode:
+  name: Christmas mode

@@ -1,20 +1,32 @@
-    power_status:
-      friendly_name: Power status
-      value_template: >
-        {% set ups = states('sensor.ups_status') %}
-        {% if ups == 'ONLINE' %}
-          AC power
-        {% elif ups == 'ONBATT' %}
-          On battery: {{ states('sensor.ups_battery') | float }}% ({{ states('sensor.ups_time_left') | float | round(0) }} min)
-        {% else %}
-          Unknown
-        {% endif %}
-      icon_template: >
-        {% set ups = states('sensor.ups_status') %}
-        {% if ups == 'ONLINE' %}
-          mdi:power-plug
-        {% elif ups == 'ONBATT' %}
-          mdi:power-plug-off
-        {% else %}
-          mdi:battery-unknown
-        {% endif %}
+power_status:
+  friendly_name: Power status
+  value_template: >
+    {% set ups = states('sensor.ups_status') %}
+    {% if ups == 'ONLINE' %}
+      AC power
+    {% elif ups == 'ONBATT' %}
+      On battery: {{ states('sensor.ups_battery') | float }}% ({{ states('sensor.ups_time_left') | float | round(0) }} min)
+    {% else %}
+      Unknown
+    {% endif %}
+  icon_template: >
+    {% set ups = states('sensor.ups_status') %}
+    {% if ups == 'ONLINE' %}
+      mdi:power-plug
+    {% elif ups == 'ONBATT' %}
+      mdi:power-plug-off
+    {% else %}
+      mdi:battery-unknown
+    {% endif %}
+
+power_outage_length:
+  friendly_name: Power outage length
+  value_template: >
+    {% set diff = ((states('input_text.time_power_restored') | float - states('input_text.time_power_lost') | float) / 60) | round(0) %}
+    {% if diff < 1 %}
+      less than a minute.
+    {% elif diff == 1 %}
+      1 minute.
+    {% else %}
+      {{ diff }} minutes.
+    {% endif %}

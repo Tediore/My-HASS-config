@@ -1,0 +1,59 @@
+automation:
+- alias: Notify when update available
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.hass_update
+    from: 'Newest'
+  - platform: state
+    entity_id: input_boolean.hass_update
+    to: 'off'
+    for: '24:00:00'
+  condition:
+  - condition: template
+    value_template: "{{ states('sensor.hass_update') != 'Newest' }}"
+  - condition: state
+    entity_id: input_boolean.hass_update
+    state: 'off'
+    for: '24:00:00'
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.hass_update
+
+
+input_boolean:
+  hass_update:
+    name: HA update
+
+
+sensor:
+- platform: version
+  name: Latest version
+  beta: true
+  image: raspberrypi3
+  source: docker
+
+- platform: version
+  name: Current version
+  source: local
+
+- platform: template
+  sensors:
+    hass_update:
+      friendly_name: "Update notification"
+      value_template: >
+        {% set current = states('sensor.current_version') %}
+        {% set latest = states('sensor.latest_version') %}
+        {% if current.find('b') != -1 %}
+          {% if latest[latest.find('b') + 1] | float > current[current.find('b') + 1] | float %}
+            Version {{ latest }} is available, and you are running {{ current }}.
+          {% else %}
+            Newest
+          {% endif %}
+        {% else %}
+          {% if latest[2:] | float > current[2:] | float %}
+            Version {{ latest }} is available, and you are running {{ current }}.
+          {% else %}
+            Newest
+          {% endif %}
+        {% endif %}

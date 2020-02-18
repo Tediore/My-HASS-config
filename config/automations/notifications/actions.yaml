@@ -1,0 +1,10 @@
+- alias: Action - turn all lights off
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: lights_off
+  action:
+  - service: homeassistant.turn_off
+    entity_id: group.lights_interior

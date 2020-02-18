@@ -34,6 +34,15 @@ soundbar_vol_dn:
       packet: !secret soundbar_vol_dn
 
 
+soundbar_power:
+  alias: Toggle soundbar power
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret soundbar_power
+
+
 living_room_tv_off:
   alias: Turn living room TV off
   sequence:

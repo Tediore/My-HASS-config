@@ -1,0 +1,28 @@
+space_heater_action:
+  friendly_name: "Space heater action"
+  value_template: "{{ state_attr('climate.space_heater','hvac_action') }}"
+
+space_heater_runtime_today:
+  friendly_name: "Space heater runtime today"
+  value_template: "{{ (states('sensor.space_heater_time_today') | float) | round(1) }}"
+  unit_of_measurement: 'h'
+
+space_heater_runtime_yesterday:
+  friendly_name: "Space heater runtime yesterday"
+  value_template: "{{ (states('sensor.space_heater_time_yesterday') | float) | round(1) }}"
+  unit_of_measurement: 'h'
+
+space_heater_runtime_week:
+  friendly_name: "Space heater runtime last 7 days"
+  value_template: "{{ (states('sensor.space_heater_time_last_7_days') | float) | round(1) }}"
+  unit_of_measurement: 'h'
+
+outside_temp:
+  friendly_name: "Outside"
+  value_template: "{{ float(states('sensor.dark_sky_temperature')) }}"
+  unit_of_measurement: '°F'
+
+outside_dewpoint:
+  friendly_name: "Dew point"
+  value_template: "{{ float(states('sensor.dark_sky_dew_point')) }}"
+  unit_of_measurement: '°F'

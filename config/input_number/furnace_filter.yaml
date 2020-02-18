@@ -1,6 +1,0 @@
-  runtime_adjustment:
-    name: Runtime adjustment
-    min: 0
-    max: 2000
-    mode: box
-    unit_of_measurement: 'h'

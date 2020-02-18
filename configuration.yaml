@@ -8,62 +8,46 @@ homeassistant:
   customize: !include customize.yaml
   auth_providers:
   - type: homeassistant
+  packages: !include_dir_named packages/
   whitelist_external_dirs:
   - /config
-  packages: !include_dir_named config/packages/
-hpprinter:
-  devices:
-  - host: 10.0.0.51
-    name: Printer
-tts:
-- platform: google_translate
-  time_memory: 57600
-  service_name: google
-updater:
-  include_used_components: true
-hacs:
-  token: !secret hacs_token
-google:
-  client_id: !secret google_cal_id
-  client_secret: !secret google_cal_secret
-telegram_bot:
-- platform: polling
-  api_key: !secret telegram_api_key
-  allowed_chat_ids: !secret telegram_chat_id
-frontend:
-  themes: !include_dir_merge_named themes/
-zwave:
-  usb_path: /dev/ttyUSB0
-zha:
-  usb_path: /dev/ttyUSB1
-  database_path: /config/zigbee.db
 apcupsd:
-mobile_app:
-discovery:
-zeroconf:
-ssdp:
-config:
-cloud:
-tplink:
-sun:
-system_health:
-logbook:
-light: !include config/light.yaml
-cast: !include config/cast.yaml
-climate: !include config/climate.yaml
-media_player: !include config/media_player.yaml
-notify: !include config/notify.yaml
-scene: !include config/scenes.yaml
-google_assistant: !include config/google.yaml
-history: !include config/history/history.yaml
-recorder: !include config/history/recorder.yaml
-binary_sensor: !include config/binary_sensor.yaml
-input_boolean: !include config/flippy_bois.yaml
-input_number: !include_dir_merge_named config/input_number/
-input_text: !include config/input_text.yaml
-group: !include config/groups.yaml
 automation: !include_dir_merge_list config/automations/
-sensor: !include_dir_merge_list config/sensors/
+binary_sensor: !include config/binary_sensor.yaml
+climate: !include config/.climate.yaml
+cloudflare: !include config/.cloudflare.yaml
+config:
+discovery:
+frontend: !include config/.frontend.yaml
+google: !include config/.calendar.yaml
+google_assistant: !include config/google.yaml
+group: !include config/groups.yaml
+hacs: !include config/.hacs.yaml
+history: !include config/history.yaml
+hpprinter: !include config/.printer.yaml
+http: !include config/.http.yaml
+input_boolean: !include config/flippy_bois.yaml
+input_number: !include config/input_number.yaml
+input_text: !include config/input_text.yaml
+light: !include config/light.yaml
+logbook:
+logger: !include config/logger.yaml
+mobile_app:
+notify: !include config/.notify.yaml
+recorder: !include config/recorder.yaml
+scene: !include config/.scenes.yaml
 script: !include_dir_merge_named config/scripts/
+sensor: !include_dir_merge_list config/sensors/
+ssdp:
+sun:
 switch: !include config/switch.yaml
+system_health:
+telegram_bot: !include config/.telegram.yaml
+tplink: !include config/tplink.yaml
+tts: !include config/.tts.yaml
+updater: !include config/.updater.yaml
+vizio: !include config/vizio.yaml
+zeroconf:
+zha: !include config/.zha.yaml
 zone: !include config/zone.yaml
+zwave: !include config/.zwave.yaml

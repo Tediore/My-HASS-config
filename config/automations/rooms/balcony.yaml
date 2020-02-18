@@ -1,0 +1,46 @@
+- alias: Turn porch light on
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.balcony_door
+    - binary_sensor.storm_door
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: sun.sun
+    to: 'below_horizon'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: state
+    entity_id: light.porch_light
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.balcony_door
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.storm_door
+      state: 'on'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.porch_light
+      brightness: 255
+      kelvin: 4000
+
+
+- alias: Turn porch light off when balcony door closed
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.balcony_door
+    from: 'on'
+    to: 'off'
+  action:
+  - service: light.turn_off
+    data:
+      entity_id: light.porch_light
