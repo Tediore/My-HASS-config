@@ -6,7 +6,7 @@ automation:
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: '28:6d:97:00:01:06:3a:09'
+      device_ieee: !secret button_1_id
   condition:
   - condition: state
     entity_id: input_boolean.sleep_mode
@@ -22,7 +22,7 @@ automation:
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: '28:6d:97:00:01:06:3a:09'
+      device_ieee: !secret button_1_id
   condition:
   - condition: state
     entity_id: media_player.bedroom_speaker
@@ -42,7 +42,7 @@ automation:
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: '28:6d:97:00:01:06:3a:09'
+      device_ieee: !secret button_1_id
   condition:
   - condition: template
     value_template: "{{ states('media_player.bedroom_speaker') in ['off', 'idle'] }}"
@@ -71,9 +71,9 @@ automation:
       state: 'on'
   action:
   - service: homeassistant.turn_off
-    entity_id: group.lights_interior
-  - service: switch.turn_off
-    entity_id: switch.plug_2
+    entity_id: 
+    - group.lights_interior
+    - switch.plug_2
 
 
 script:
@@ -84,41 +84,34 @@ script:
       entity_id:
       - media_player.bedroom_vizio
       - group.lights_interior
+    - service: script.sleep_switches
     - service: script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id:
       - switch.tuya_plug_2
-      - switch.plug_2
       - input_boolean.washer
       - input_boolean.dryer
-    - service: media_player.turn_off
-      entity_id: media_player.living_room_vizio
-    - service: switch.turn_on
-      entity_id: switch.plug_1
+      - media_player.living_room_vizio
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode
-  
-  
+
   good_night_no_noise:
     alias: Good night routine - no white noise
     sequence:
     - service: homeassistant.turn_off
       entity_id: 
+      - media_player.bedroom_vizio
       - group.lights_interior
       - switch.tuya_plug_2
-      - switch.plug_2
-      - media_player.bedroom_vizio
       - media_player.living_room_vizio
-    - service: switch.turn_on
-      entity_id: switch.plug_1
+    - service: script.sleep_switches
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode
-  
-  
+
   white_noise_bedroom:
     alias: Play white noise on bedroom speaker
     sequence:
@@ -140,6 +133,13 @@ script:
       entity_id: media_player.bedroom_speaker
       data_template:
         volume_level: "{{ states('input_number.white_noise_vol') | int / 100 }}"
+
+  sleep_switches:
+    sequence:
+    - service: switch.turn_off
+      entity_id: switch.plug_2
+    - service: switch.turn_on
+      entity_id: switch.plug_1
 
 
 input_number:

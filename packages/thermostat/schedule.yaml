@@ -91,7 +91,6 @@ automation:
 ##############################
 ##### Heating
 ##############################
-
 - alias: Thermostat home - heat
   initial_state: 'on'
   trigger:
@@ -181,7 +180,6 @@ automation:
 ##############################
 ##### Special
 ##############################
-
 - alias: Start sleep mode early if running
   initial_state: 'on'
   trigger:

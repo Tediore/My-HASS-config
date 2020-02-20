@@ -76,11 +76,10 @@
   - condition: state
     entity_id: media_player.bedroom_speaker
     state: 'playing'
-  - service: media_player.media_seek
-    entity_id: media_player.bedroom_speaker
-    data:
-      seek_position: 3570
-  - wait_template: "{{ is_state('media_player.bedroom_speaker', 'idle') }}"
+  - service: script.volume_transition_to_zero
+  - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.01 }}"
+  - service: script.turn_off
+    entity_id: script.volume_transition_to_zero
   - service: media_player.volume_set
     data:
       entity_id: media_player.bedroom_speaker
@@ -96,14 +95,12 @@
     entity_id: sensor.lumi_temp_1_calibrated
     below: 65
   condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.andy_sleep
-      state: 'on'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
   action:
   - service: switch.turn_off
     entity_id: switch.plug_1

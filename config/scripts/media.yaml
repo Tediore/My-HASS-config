@@ -8,10 +8,12 @@ pre_media:
   - condition: state
     entity_id: binary_sensor.dark_inside
     state: 'on'
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id: light.dining_room
     data:
-      group_name: Dining room
-      scene_name: Media
+      kelvin: 3000
+      transition: 3
+      brightness_pct: 50
   - service: switch.turn_off
     entity_id: switch.tuya_plug_2
 
@@ -36,3 +38,492 @@ post_media:
     state: 'on'
   - service: switch.turn_on
     entity_id: switch.tuya_plug_2
+
+
+living_room_tv_off:
+  alias: Turn living room TV off
+  sequence:
+  - service: media_player.turn_off
+    entity_id: media_player.vizio_smartcast
+
+
+volume_transition_to_zero:
+  sequence:
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+  - delay:
+      milliseconds: 500
+  - service: media_player.volume_set
+    entity_id: media_player.bedroom_speaker
+    data_template:
+      volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"

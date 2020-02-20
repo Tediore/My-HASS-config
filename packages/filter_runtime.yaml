@@ -13,6 +13,20 @@ automation:
 
 
 # Exclude from repo
+- alias: Notify when furnace filter needs replacement
+  initial_state: 'on'
+  trigger:
+    platform: template
+    value_template: "{{ states('sensor.furnace_filter_life') | float > states('input_number.replacement_threshold') | float }}"
+    for: '00:01:00'
+  action:
+    service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "Change the furnace filter"
+      message: "Furnace filter has been used for {{ states('input_number.replacement_threshold') | int }} hours."
+
+
+# Exclude from repo
 - alias: HVAC runtime adjustment
   initial_state: 'on'
   trigger:
@@ -201,6 +215,14 @@ input_text:
 # Store furnace filter change date
   furnace_filter:
     name: Furnace filter change date
+
+#Exclude from repo
+  time_cycle_start:
+    name: Time last cycle started
+
+#Exclude from repo
+  time_cycle_end:
+    name: Time last cycle ended
 
 
 input_number:

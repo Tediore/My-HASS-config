@@ -1,25 +1,12 @@
-- alias: Notify when furnace filter needs replacement
-  initial_state: 'on'
-  trigger:
-    platform: template
-    value_template: "{{ states('sensor.furnace_filter_life') | float > states('input_number.replacement_threshold') | float }}"
-    for: '00:01:00'
-  action:
-    service: notify.mobile_app_pixel_xl
-    data_template:
-      title: "Change the furnace filter"
-      message: "Furnace filter has been used for {{ states('input_number.replacement_threshold') | int }} hours."
-
-
 - alias: Suggest opening the windows
   initial_state: 'on'
   trigger:
     platform: template
-    value_template: "{{ (float(states('sensor.tstat_current_temp')) - float(states('sensor.outside_temp'))) | round(2) >= 10 }}"
+    value_template: "{{ (states('sensor.tstat_current_temp') | float - states('sensor.outside_temp') | float) | round(2) >= 10 }}"
   condition:
   - condition: state
-    entity_id: sensor.tstat_mode
-    state: 'Cool'
+    entity_id: climate.thermostat
+    state: 'cool'
   - condition: numeric_state
     entity_id: sensor.outside_dewpoint
     below: 60
@@ -31,19 +18,7 @@
   - service: notify.mobile_app_pixel_xl
     data_template:
       title: "Consider opening the windows"
-      message: "It's {{float(states('sensor.tstat_current_temp')) | round(0) }} inside and only {{float(states('sensor.outside_temp')) | round(0) }} outside."
-
-
-- alias: Reset notify open windows
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: automation.suggest_opening_the_windows
-    to: 'off'
-    for: '08:00:00'
-  action:
-  - service: automation.turn_on
-    entity_id: automation.suggest_opening_the_windows
+      message: "It's {{ states('sensor.tstat_current_temp') | float | round(0) }} inside and only {{ states('sensor.outside_temp') | float | round(0) }} outside."
 
 
 - alias: Notify when humidity high
@@ -58,16 +33,19 @@
   - service: notify.mobile_app_pixel_xl
     data_template:
       title: "Humidity warning"
-      message: "Humidity is currently {{ float(states('sensor.tstat_current_humidity')) | round(0) }}%."
+      message: "Humidity is currently {{ states('sensor.tstat_current_humidity') | float | round(0) }}%."
 
 
-- alias: Reset notify when humidity high
+- alias: Reenable automations
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id: automation.notify_when_humidity_high
+    entity_id: 
+    - automation.suggest_opening_the_windows
+    - automation.notify_when_humidity_high
     to: 'off'
     for: '08:00:00'
   action:
   - service: automation.turn_on
-    entity_id: automation.notify_when_humidity_high
+    data_template:
+      entity_id: "{{ trigger.to_state.entity_id }}"

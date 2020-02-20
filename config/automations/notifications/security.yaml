@@ -61,26 +61,14 @@
       message: "Lights have been turned off."
 
 
-- alias: Notify when storm door opened
+- alias: Notify when storm door opened or closed
   initial_state: 'on'
   trigger:
-    platform: state
+  - platform: state
     entity_id: binary_sensor.storm_door
     from: 'off'
     to: 'on'
-  condition:
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'armed_away'] }}"
-  action:
-    service: notify.mobile_app_pixel_xl
-    data:
-      message: "Storm door has been opened!"
-
-
-- alias: Notify when storm door closed
-  initial_state: 'on'
-  trigger:
-    platform: state
+  - platform: state
     entity_id: binary_sensor.storm_door
     from: 'on'
     to: 'off'
@@ -89,5 +77,5 @@
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'armed_away'] }}"
   action:
     service: notify.mobile_app_pixel_xl
-    data:
-      message: "Storm door has been closed."
+    data_template:
+      message: "{{ 'Storm door has been opened!' if trigger.to_state.state == 'on' else 'Storm door has been closed.' }}"

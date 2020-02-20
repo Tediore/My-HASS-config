@@ -11,7 +11,7 @@ automation:
     for: '24:00:00'
   condition:
   - condition: template
-    value_template: "{{ states('sensor.hass_update') != 'Newest' }}"
+    value_template: "{{ not is_state('sensor.hass_update', 'Newest') }}"
   - condition: state
     entity_id: input_boolean.hass_update
     state: 'off'
@@ -20,10 +20,17 @@ automation:
   - service: input_boolean.turn_on
     entity_id: input_boolean.hass_update
 
-
-input_boolean:
-  hass_update:
-    name: HA update
+- alias: Turn on update bool on startup if update available
+  initial_state: 'on'
+  trigger:
+  - platform: homeassistant
+    event: start
+  condition:
+  - condition: template
+    value_template: "{{ not is_state('sensor.hass_update', 'Newest') }}"
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.hass_update
 
 
 sensor:
@@ -50,6 +57,12 @@ sensor:
           {% else %}
             Newest
           {% endif %}
+        {% elif current.find('b') == -1 and latest.find('b') != -1 %}
+          {% if latest[2:7] | float > current[2:] | float %}
+            Version {{ latest }} is available, and you are running {{ current }}.
+          {% else %}
+            Newest
+          {% endif %}
         {% else %}
           {% if latest[2:] | float > current[2:] | float %}
             Version {{ latest }} is available, and you are running {{ current }}.
@@ -57,3 +70,8 @@ sensor:
             Newest
           {% endif %}
         {% endif %}
+
+
+input_boolean:
+  hass_update:
+    name: HA update

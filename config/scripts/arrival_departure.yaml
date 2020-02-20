@@ -19,9 +19,7 @@ arrival:
   alias: Alarm disarmed from away
   sequence:
   - service: switch.turn_on
-    entity_id: 
-    - switch.plug_2
-    - switch.light_switch_1
+    entity_id: switch.plug_2
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
@@ -45,7 +43,6 @@ arrival_christmas:
   - service: switch.turn_on
     entity_id: 
     - switch.plug_2
-    - switch.light_switch_1
     - switch.tuya_plug_2
   - service: hue.hue_activate_scene
     data:

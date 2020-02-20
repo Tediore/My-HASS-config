@@ -6,12 +6,12 @@ automation:
     event_type: zha_event
     event_data:
       command: 'off'
-      device_ieee: 'cc:cc:cc:ff:fe:99:63:ae'
+      device_ieee: !secret eco_remote_1_id
   - platform: event
     event_type: zha_event
     event_data:
       command: 'on'
-      device_ieee: 'cc:cc:cc:ff:fe:99:63:ae'
+      device_ieee: !secret eco_remote_1_id
   condition:
   - condition: or
     conditions:
@@ -32,7 +32,7 @@ automation:
     event_type: zha_event
     event_data:
       command: 'move_to_color_temp'
-      device_ieee: 'cc:cc:cc:ff:fe:99:63:ae'
+      device_ieee: !secret eco_remote_1_id
   action:
   - service_template: "{{ 'script.move_music_all' if is_state('media_player.portable_speaker','playing') else 'script.move_music_portable' }}"
 
@@ -44,7 +44,7 @@ automation:
     event_type: zha_event
     event_data:
       command: 'move_to_level'
-      device_ieee: 'cc:cc:cc:ff:fe:99:63:ae'
+      device_ieee: !secret eco_remote_1_id
   action:
   - service: scene.turn_on
     entity_id: scene.before_gaming

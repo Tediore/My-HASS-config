@@ -20,7 +20,7 @@
     at: '06:55:00'
   condition:
   - condition: template
-    value_template: "{{ 'sound check' in state_attr('calendar.church', 'message').lower() }}"
+    value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
   - condition: template
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.church', 'start_time')) | timestamp_custom('%-d') }}"
   - condition: template
@@ -56,11 +56,11 @@
   - service: light.turn_on
     entity_id: light.front_closet
     data_template:
-      brightness: >
+      brightness_pct: >
         {% if is_state('binary_sensor.dark_inside', 'on') %}
-          128
+          50
         {% else %}
-          255
+          100
         {% endif %}
 
 
@@ -73,5 +73,4 @@
     to: 'off'
   action:
   - service: light.turn_off
-    data:
-      entity_id: light.front_closet
+    entity_id: light.front_closet

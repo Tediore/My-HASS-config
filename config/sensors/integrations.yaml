@@ -13,18 +13,29 @@
   - type: memory_use_percent
   - type: processor_use
 
-- platform: dewpoint
-  sensors:
-    dewpoint_inside:
-      temperature: sensor.tstat_current_temp
-      rel_hum: sensor.tstat_current_humidity
+### REST sensors
+- platform: rest
+  resource: http://localhost:5557/device?ipaddr=10.0.0.49/status
+  name: Xbox status
+  value_template: !secret xbox_rest
+  verify_ssl: false
+  scan_interval: 5
 
-- platform: google_wifi
-  name: Router
-  host: 10.0.0.1
+- platform: rest
+  resource: !secret hue_rest
+  name: Hue bridge
+  value_template: "{{ value_json['swupdate2']['bridge']['state'] }}"
+  json_attributes:
+  - name
+  - zigbeechannel
+  - ipaddress
+  - modelid
+  - swversion
+  - apiversion
+  scan_interval: 1800
 
-- platform: huesensor
 
+### Command line sensors
 - platform: command_line
   name: CPU Temperature
   command: "cat /sys/class/thermal/thermal_zone0/temp"
@@ -43,11 +54,6 @@
   scan_interval: 5
   command_timeout: 10
 
-- platform: time_date
-  display_options:
-  - 'date'
-  - 'time'
-
 - platform: apcupsd
   resources:
   - apc
@@ -65,5 +71,16 @@
   - mintimel
   - maxtime
 
-- platform: template
-  sensors: !include_dir_merge_named templates/
+- platform: dewpoint
+  sensors:
+    dewpoint_inside:
+      temperature: sensor.tstat_current_temp
+      rel_hum: sensor.tstat_current_humidity
+- platform: google_wifi
+  name: Router
+  host: 10.0.0.1
+- platform: time_date
+  display_options:
+  - 'date'
+  - 'time'
+- platform: huesensor

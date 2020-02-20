@@ -1,0 +1,164 @@
+automation:
+- alias: Notify water leaked detected or cleared
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: 
+    - binary_sensor.water_sensor_1
+    - binary_sensor.water_sensor_2
+    - binary_sensor.water_sensor_3
+    - binary_sensor.water_sensor_4
+  condition:
+  - condition: template
+    value_template: "{{ (trigger.from_state.state == 'off' and trigger.to_state.state == 'on') or (trigger.from_state.state == 'on' and trigger.to_state.state == 'off') }}"
+  action:
+  - service: notify.telegram
+    data_template:
+      message: >
+        {% if trigger.to_state.state == 'on' %}
+          LEAK DETECTED BY {{ trigger.to_state.name }}!
+        {% else %}
+          {{ trigger.to_state.name }} cleared
+        {% endif %}
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: >
+        {% if trigger.to_state.state == 'on' %}
+          LEAK DETECTED!
+        {% else %}
+          Leak no longer detected
+        {% endif %}
+      message: >
+        {% if trigger.to_state.state == 'on' %}
+          Leak detected by {{ trigger.to_state.name }}!
+        {% else %}
+          {{ trigger.to_state.name }} cleared
+        {% endif %}
+
+
+- alias: Notify smoke or CO
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.zcombo_1_status
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: armed_away
+  - condition: template
+    value_template: "{{ (trigger.to_state.state in ['Smoke', 'CO']) or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
+  action:
+  - service: notify.telegram
+    data_template:
+      message: >
+        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
+          {{ trigger.to_state.state }} detected!
+        {% else %}
+          {{ trigger.from_state.state }} no longer detected.
+        {% endif %}
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: >
+        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
+          {{ trigger.to_state.state }} warning
+        {% else %}
+          {{ trigger.from_state.state }} cleared.
+        {% endif %}
+      message: >
+        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
+          {{ trigger.to_state.state }} detected!
+        {% else %}
+          {{ trigger.from_state.state }} no longer detected.
+        {% endif %}
+
+
+- alias: Turn on lights when smoke or CO detected
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: sensor.zcombo_1_status
+    to: 
+    - 'Smoke'
+    - 'CO'
+  condition:
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Red
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Dining room
+      scene_name: Dimmed
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Game room
+      scene_name: Red
+  - service: switch.turn_on
+    entity_id: switch.light_switch_1
+
+
+- alias: Turn lights on when leak detected
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.water_sensor_1
+    - binary_sensor.water_sensor_2
+    - binary_sensor.water_sensor_3
+    - binary_sensor.water_sensor_4
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_home'
+  action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Water
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Water
+
+
+sensor:
+- platform: template
+  sensors:
+    zcombo_1_status:
+      friendly_name: Smoke alarm 1 status
+      value_template: >
+        {% set alarm = states('sensor.zcombo_1_alarm_type') | float %}
+        {% set level = states('sensor.zcombo_1_alarm_level') | float %}
+        {% if alarm == 13 and level == 255 %}
+          OK
+        {% elif alarm == 1 and level == 255 %}
+          Smoke
+        {% elif alarm == 2 and level == 255 %}
+          CO
+        {% elif alarm == 12 and level == 0 %}
+          Test
+        {% else %}
+          Unknown
+        {% endif %}
+      icon_template: >
+        {% set alarm = states('sensor.zcombo_1_alarm_type') | float %}
+        {% set level = states('sensor.zcombo_1_alarm_level') | float %}
+        {% if alarm == 13 and level == 255 %}
+          mdi:smoke-detector
+        {% elif alarm == 1 and level == 255 %}
+          mdi:fire
+        {% elif alarm == 2 and level == 255 %}
+          mdi:cloud-alert
+        {% elif alarm == 12 and level == 0 %}
+          mdi:smoke-detector
+        {% else %}
+          mdi:cloud-question
+        {% endif %}

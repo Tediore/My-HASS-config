@@ -1,15 +1,3 @@
-- platform: tod
-  name: Quiet hours
-  after: '23:00'
-  before: '08:00'
-
-- platform: wyzesense
-  device: auto
-
-- platform: huesensor
-
-- platform: apcupsd
-
 - platform: template
   sensors:
     all_speakers:
@@ -47,3 +35,15 @@
     dark_inside:
       friendly_name: Dark inside
       value_template: "{{ state_attr('sun.sun', 'elevation') | float < states('input_number.dark_inside') | float }}"
+
+
+- platform: tod
+  name: Quiet hours
+  after: '23:00'
+  before: '08:00'
+
+
+- platform: huesensor
+- platform: apcupsd
+- platform: wyzesense
+  device: auto

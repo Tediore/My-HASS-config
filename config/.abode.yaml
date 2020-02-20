@@ -1,0 +1,2 @@
+username: !secret abode_username
+password: !secret abode_password

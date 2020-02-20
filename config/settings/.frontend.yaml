@@ -1,0 +1,1 @@
+themes: !include_dir_named /config/themes

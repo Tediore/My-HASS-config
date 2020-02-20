@@ -19,3 +19,5 @@ entity_config:
     expose: true
   script.move_music_all:
     expose: true
+  script.alarm_arm_home:
+    expose: true

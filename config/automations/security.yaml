@@ -36,17 +36,6 @@
       brightness_pct: 50
 
 
-- alias: Turn porch light off at sunrise
-  initial_state: 'on'
-  trigger:
-  - platform: sun
-    event: sunrise
-    offset: '-00:30:00'
-  action:
-  - service: light.turn_off
-    entity_id: light.porch_light
-
-
 - alias: Activate vacation mode
   initial_state: 'on'
   trigger:
@@ -56,26 +45,27 @@
     for: '24:00:00'
   action:
   - service: automation.turn_on
-    data:
-      entity_id:
-      - automation.vacation_mode_lights_on
-      - automation.vacation_mode_lights_off
-      - automation.vacation_mode_photo
+    entity_id:
+    - automation.vacation_mode_lights_on
+    - automation.vacation_mode_lights_off
+    - automation.vacation_mode_photo
 
 
 - alias: Vacation mode lights on
   trigger:
   - platform: time
-    at: '21:07:17'
+    at: '21:00:00'
   condition:
     condition: state
     entity_id: alarm_control_panel.abode
     state: armed_away
   action:
+  - delay:
+      seconds: "{{ range(0,600) | random | int }}"
   - service: hue.hue_activate_scene
     data:
       group_name: Living room
-      scene_name: Sconces
+      scene_name: Read
 
 
 - alias: Vacation mode photo
@@ -94,12 +84,14 @@
 - alias: Vacation mode lights off
   trigger:
   - platform: time
-    at: '22:43:21'
+    at: '22:45:00'
   condition:
     condition: state
     entity_id: alarm_control_panel.abode
     state: armed_away
   action:
+  - delay:
+      seconds: "{{ range(0,600) | random | int }}" 
   - service: light.turn_off
     entity_id: all
 
@@ -124,7 +116,7 @@
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
-      scene_name: Bright
+      scene_name: Read
   - service: hue.hue_activate_scene
     data:
       group_name: Game room
@@ -133,47 +125,5 @@
     data:
       group_name: Master bedroom
       scene_name: Red
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Entrance
-      scene_name: Read
-
-
-- alias: Turn on lights when smoke or CO detected
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: sensor.zcombo_1_status
-    to: 
-    - 'Smoke'
-    - 'CO'
-  condition:
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: script.emergency
-
-
-- alias: Turn lights on when leak detected
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.water_sensor_1
-    - binary_sensor.water_sensor_2
-    - binary_sensor.water_sensor_3
-    - binary_sensor.water_sensor_4
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: alarm_control_panel.abode
-    state: 'armed_home'
-  action:
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Master bedroom
-      scene_name: Water
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Living room
-      scene_name: Water
+  - service: switch.turn_on
+    entity_id: switch.light_switch_1

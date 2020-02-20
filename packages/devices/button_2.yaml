@@ -8,7 +8,7 @@ automation:
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: '28:6d:97:00:01:04:72:60'
+      device_ieee: !secret button_2_id
   condition:
   - condition: state
     entity_id: input_boolean.andy_sleep
@@ -24,7 +24,7 @@ automation:
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: '28:6d:97:00:01:04:72:60'
+      device_ieee: !secret button_2_id
   condition:
   - condition: state
     entity_id: media_player.bedroom_speaker
