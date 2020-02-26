@@ -29,7 +29,7 @@
   - service: light.turn_on
     data:
       entity_id: light.porch_light
-      brightness: 255
+      brightness_pct: 100
       kelvin: 4000
 
 

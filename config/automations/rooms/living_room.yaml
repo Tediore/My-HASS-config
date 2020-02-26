@@ -1,29 +1,14 @@
-- alias: Dim lights when LR playing
+- alias: Turn off lights with TV
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id: media_player.living_room_tv
-    to: 'playing'
-  - platform: state
-    entity_id:
-    - media_player.vizio_smartcast
-    - sensor.living_room_tv
+    entity_id: media_player.living_room_vizio
     to: 'on'
     for: '00:00:01'
   condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.living_room
-      state: 'off'
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: light.right_lamp
-        state: 'on'
-      - condition: state
-        entity_id: light.left_lamp
-        state: 'on'
+  - condition: state
+    entity_id: light.living_room_lamps
+    state: 'on'
   - condition: template
     value_template: "{{ state_attr('media_player.living_room_tv', 'app_name') == None or state_attr('media_player.living_room_tv', 'app_name')[:3] != 'BOD' }}"
   action:
@@ -34,9 +19,7 @@
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id:
-    - media_player.vizio_smartcast
-    - sensor.living_room_tv
+    entity_id: media_player.living_room_vizio
     from: 'on'
     to: 'off'
   condition:
@@ -56,46 +39,25 @@
   - service: script.post_media
 
 
-- alias: Boost TV volume when furnace on - cool
+- alias: Boost TV volume when furnace on
   initial_state: 'on'
   trigger:
   - platform: state
     entity_id: sensor.hvac_action
     to: 'cooling'
-  condition:
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: media_player.vizio_smartcast
-      state: 'on'
-    - condition: state
-      entity_id: sensor.living_room_tv
-      state: 'on'
-  action:
-  - service: script.tv_vol_up
-
-
-- alias: Boost TV volume when furnace on - heat
-  initial_state: 'on'
-  trigger:
   - platform: state
     entity_id: sensor.hvac_action
     to: 'heating'
-    for: '00:00:15'
+    for: '00:00:55'
   condition:
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: media_player.vizio_smartcast
-      state: 'on'
-    - condition: state
-      entity_id: sensor.living_room_tv
-      state: 'on'
+  - condition: state
+    entity_id: media_player.living_room_vizio
+    state: 'on'
   action:
-  - service: script.tv_vol_up_heat
+  - service_template: "script.tv_vol_up_{{ trigger.to_state.state[:4] }}"
 
 
-- alias: Lower TV volume when furnace off - cool
+- alias: Lower TV volume when furnace off
   initial_state: 'on'
   trigger:
   - platform: state
@@ -104,64 +66,54 @@
     to:
     - 'idle'
     - 'off'
-    for: '00:00:15'
-  condition:
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: media_player.vizio_smartcast
-      state: 'on'
-    - condition: state
-      entity_id: sensor.living_room_tv
-      state: 'on'
-  action:
-  - service: script.tv_vol_dn
-
-
-- alias: Lower TV volume when furnace off - heat
-  initial_state: 'on'
-  trigger:
+    for: '00:00:35'
   - platform: state
     entity_id: sensor.hvac_action
     from: 'heating'
     to:
     - 'idle'
     - 'off'
-    for: '00:01:00'
+    for: '00:01:25'
   condition:
-    condition: or
-    conditions:
-    - condition: state
-      entity_id: media_player.vizio_smartcast
-      state: 'on'
-    - condition: state
-      entity_id: sensor.living_room_tv
-      state: 'on'
+  - condition: state
+    entity_id: media_player.living_room_vizio
+    state: 'on'
   action:
-  - service: script.tv_vol_dn_heat
+  - service_template: "script.tv_vol_dn_{{ trigger.from_state.state[:4] }}"
 
 
 - alias: Turn soundbar on/off with TV
   initial_state: 'on'
   trigger:
   - platform: state
-    entity_id:
-    - media_player.vizio_smartcast
-    - sensor.living_room_tv
+    entity_id: media_player.living_room_vizio
     from: 'off'
     to: 'on'
   - platform: state
-    entity_id:
-    - media_player.vizio_smartcast
-    - sensor.living_room_tv
+    entity_id: media_player.living_room_vizio
     from: 'on'
     to: 'off'
   action:
-  - service_template: >
-      {% set trigger = trigger.to_state.state %}
-      {% set cast = states('media_player.living_room_tv') %}
-      {% if (trigger == 'on' and cast != 'off') or trigger == 'off' %}
-        script.soundbar_power
-      {% else %}
-        script.none
-      {% endif %}
+  - service: switch.toggle
+    data_template:
+      entity_id: >
+        {% set trigger = trigger.to_state.state %}
+        {% set cast = states('media_player.living_room_tv') %}
+        {% if (trigger == 'on' and cast != 'off') or trigger == 'off' %}
+          switch.soundbar
+        {% else %}
+          none
+        {% endif %}
+
+
+- alias: Update living room TV status faster
+  initial_state: 'on'
+  trigger:
+  - platform: time_pattern
+    seconds: '/5'
+  condition:
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: homeassistant.update_entity
+    entity_id: media_player.living_room_vizio

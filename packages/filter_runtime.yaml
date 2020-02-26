@@ -148,7 +148,7 @@ sensor:
 
   # Used to display current total runtime in frontend
     furnace_filter_life:
-      friendly_name: "Filter runtime"
+      friendly_name: "Filter"
       value_template: >
         {% set active = (states('sensor.cooling_time_today') | float) + (states('sensor.heating_time_today') | float) %}
         {% set runtime = states('input_number.hvac_runtime') | float %}

@@ -1,3 +1,39 @@
+- alias: Notify when away mode activated
+  initial_state: 'on'
+  trigger:
+  - entity_id: alarm_control_panel.abode
+    platform: state
+    to: armed_away
+    for: '00:00:05'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sensor.tstat_comfort_setting
+      state: 'Away'
+    - condition: state
+      entity_id: climate.thermostat
+      state: 'off'
+  - condition: state
+    entity_id: group.lights_interior
+    state: 'off'
+  action:
+    service: notify.mobile_app_pixel_xl
+    data_template:
+      title: Away mode activated
+      message: >
+        {% set comfort = states('sensor.tstat_comfort_setting') %}
+        {% set tstat = states('climate.thermostat') %}
+        {% if tstat == 'off' %}
+          Lights are off, thermostat is off.
+        {% elif comfort == 'Away' %}
+          Lights are off, thermostat is set to away.
+        {% else %}
+          Uhh... this shouldn't be possible.
+        {% endif %}
+
+
+### Notify when lights on/off when away
 - alias: Notify lights on when away
   initial_state: 'on'
   trigger:
@@ -10,24 +46,6 @@
     - light.laundry_room
     from: 'off'
     to: 'on'
-  condition:
-  - condition: state
-    entity_id: alarm_control_panel.abode
-    state: armed_away
-  action:
-    service: notify.mobile_app_pixel_xl
-    data_template:
-      title: Lights have been turned on
-      message: "{{ trigger.to_state.name }} lights have been turned on."
-      data:
-        actions:
-        - action: lights_off
-          title: Turn off
-
-
-- alias: Notify entrance light on when away
-  initial_state: 'on'
-  trigger:
   - platform: state
     entity_id: switch.light_switch_1
     from: 'off'
@@ -38,9 +56,33 @@
     entity_id: alarm_control_panel.abode
     state: armed_away
   action:
-    service: notify.mobile_app_pixel_xl
-    data:
-      message: "Entrance light has been turned on."
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: Lights have been turned on
+      message: >
+        {% set entity = trigger.to_state.entity_id %}
+        {% set name = trigger.to_state.name %}
+        {% if entity == 'switch.light_switch_1' %}
+          {{ name }} has been turned on.
+        {% else %}
+          {{ name }} lights have been turned on.
+        {% endif %}
+      data:
+        actions:
+        - action: lights_off
+          title: Turn off
+
+
+- alias: Action - turn all lights off
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: lights_off
+  action:
+  - service: homeassistant.turn_off
+    entity_id: group.lights_interior
 
 
 - alias: Notify lights off when away
@@ -61,6 +103,43 @@
       message: "Lights have been turned off."
 
 
+### Other
+- alias: Notify if alarm not armed when away
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: person.matt
+    from: 'home'
+    to: 'not_home'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'disarmed'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data:
+      title: "Alarm not armed"
+      message: "You're away and the alarm is disarmed. Arm in away mode?"
+      data:
+        ttl: 0
+        priority: high
+        actions:
+        - action: alarm_arm_away
+          title: Arm alarm
+
+
+- alias: Action - arm alarm in away mode
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: alarm_arm_away
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    entity_id: alarm_control_panel.abode
+
+
 - alias: Notify when storm door opened or closed
   initial_state: 'on'
   trigger:
@@ -79,3 +158,6 @@
     service: notify.mobile_app_pixel_xl
     data_template:
       message: "{{ 'Storm door has been opened!' if trigger.to_state.state == 'on' else 'Storm door has been closed.' }}"
+      data:
+        ttl: 0
+        priority: high

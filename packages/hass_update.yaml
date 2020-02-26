@@ -4,7 +4,6 @@ automation:
   trigger:
   - platform: state
     entity_id: sensor.hass_update
-    from: 'Newest'
   - platform: state
     entity_id: input_boolean.hass_update
     to: 'off'
@@ -53,19 +52,19 @@ sensor:
         {% set latest = states('sensor.latest_version') %}
         {% if current.find('b') != -1 %}
           {% if latest[latest.find('b') + 1] | float > current[current.find('b') + 1] | float %}
-            Version {{ latest }} is available, and you are running {{ current }}.
+            {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest
           {% endif %}
         {% elif current.find('b') == -1 and latest.find('b') != -1 %}
           {% if latest[2:7] | float > current[2:] | float %}
-            Version {{ latest }} is available, and you are running {{ current }}.
+            {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest
           {% endif %}
         {% else %}
           {% if latest[2:] | float > current[2:] | float %}
-            Version {{ latest }} is available, and you are running {{ current }}.
+            {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest
           {% endif %}

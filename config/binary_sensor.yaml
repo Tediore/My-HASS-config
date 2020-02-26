@@ -7,14 +7,14 @@
         {% set living = states('media_player.living_room_speaker') %}
         {% set kitchen = states('media_player.kitchen_speaker') %}
         {% set hub = states('media_player.hub') %}
-        {{ (bedroom in ['playing', 'paused'] and living in ['playing', 'paused'] and kitchen in ['playing', 'paused'] and hub in ['playing', 'paused']) }}
+        {{ (bedroom in ['playing', 'paused', 'idle'] and living in ['playing', 'paused', 'idle'] and kitchen in ['playing', 'paused', 'idle'] and hub in ['playing', 'paused', 'idle']) }}
 
     front_speakers:
       friendly_name: Front speakers
       value_template: >
         {% set kitchen = states('media_player.kitchen_speaker') %}
         {% set hub = states('media_player.hub') %}
-        {{ kitchen in ['playing', 'paused'] and hub in ['playing', 'paused'] }}
+        {{ kitchen in ['playing', 'paused', 'idle'] and hub in ['playing', 'paused', 'idle'] }}
 
     any_media_player:
       friendly_name: Any media player
@@ -37,11 +37,16 @@
       value_template: "{{ state_attr('sun.sun', 'elevation') | float < states('input_number.dark_inside') | float }}"
 
 
+- platform: ping
+  host: 8.8.8.8
+  count: 4
+  name: Internet
+  scan_interval: 20
+
 - platform: tod
   name: Quiet hours
   after: '23:00'
   before: '08:00'
-
 
 - platform: huesensor
 - platform: apcupsd

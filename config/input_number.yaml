@@ -25,6 +25,6 @@ low_battery:
 dark_inside:
   name: Sun elevation when dark inside
   min: 0
-  max: 2
+  max: 2.5
   step: 0.1
   mode: slider

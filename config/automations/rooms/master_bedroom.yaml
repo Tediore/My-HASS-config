@@ -77,30 +77,12 @@
     entity_id: media_player.bedroom_speaker
     state: 'playing'
   - service: script.volume_transition_to_zero
-  - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.01 }}"
+  - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.05 }}"
   - service: script.turn_off
     entity_id: script.volume_transition_to_zero
+  - service: media_player.turn_off
+    entity_id: media_player.bedroom_speaker
   - service: media_player.volume_set
     data:
       entity_id: media_player.bedroom_speaker
       volume_level: 0.4
-  - service: media_player.turn_off
-    entity_id: media_player.bedroom_speaker
-
-
-- alias: Turn bedroom fan off if too cold
-  initial_state: 'on'
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.lumi_temp_1_calibrated
-    below: 65
-  condition:
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'on'
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'off'
-  action:
-  - service: switch.turn_off
-    entity_id: switch.plug_1

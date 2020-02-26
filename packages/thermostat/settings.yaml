@@ -131,6 +131,13 @@ input_number:
 input_boolean:
   tstat_hold:
     name: Ignore thermostat schedule
+  tstat_sched_resume:
+    name: Resume thermostat schedule
+
+
+input_text:
+  tstat_prev_mode:
+    name: Previous thermostat mode
 
 
 sensor:
@@ -180,3 +187,35 @@ sensor:
       friendly_name: "Setpoint"
       value_template: "{{ state_attr('climate.thermostat','temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
+
+
+automation:
+- alias: Record previous thermostat mode
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: climate.thermostat
+    from:
+    - heat
+    - cool
+    to: 'off'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.tstat_prev_mode
+    data_template:
+      value: "{{ trigger.from_state.state }}"
+
+- alias: Resume schedule - set mode
+  initial_state: 'on'
+  trigger:
+  - platform: state
+    entity_id: input_boolean.tstat_sched_resume
+    to: 'on'
+  action:
+  - service: climate.set_hvac_mode
+    entity_id: climate.thermostat
+    data_template:
+      hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
+  - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.tstat_sched_resume

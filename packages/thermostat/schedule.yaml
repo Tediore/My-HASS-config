@@ -1,6 +1,4 @@
-##############################
-##### Cooling
-##############################
+### Cooling
 automation:
 - alias: Thermostat home - cool
   initial_state: 'on'
@@ -11,6 +9,10 @@ automation:
     to: disarmed
   - platform: state
     entity_id: input_number.cool_home
+  - platform: state
+    entity_id: input_boolean.tstat_sched_resume
+    from: 'on'
+    to: 'off'
   - platform: homeassistant
     event: start
   - platform: time
@@ -55,6 +57,10 @@ automation:
     to: disarmed
   - platform: state
     entity_id: input_number.cool_sleep
+  - platform: state
+    entity_id: input_boolean.tstat_sched_resume
+    from: 'on'
+    to: 'off'
   - platform: homeassistant
     event: start
   - platform: time
@@ -88,9 +94,7 @@ automation:
   - service: script.cool_sleep
 
 
-##############################
-##### Heating
-##############################
+### Heating
 - alias: Thermostat home - heat
   initial_state: 'on'
   trigger:
@@ -100,6 +104,10 @@ automation:
     to: disarmed
   - platform: state
     entity_id: input_number.heat_home
+  - platform: state
+    entity_id: input_boolean.tstat_sched_resume
+    from: 'on'
+    to: 'off'
   - platform: homeassistant
     event: start
   - platform: time
@@ -144,6 +152,10 @@ automation:
     to: disarmed
   - platform: state
     entity_id: input_number.heat_sleep
+  - platform: state
+    entity_id: input_boolean.tstat_sched_resume
+    from: 'on'
+    to: 'off'
   - platform: homeassistant
     event: start
   - platform: time
@@ -177,9 +189,7 @@ automation:
   - service: script.heat_sleep
 
 
-##############################
-##### Special
-##############################
+### Special
 - alias: Start sleep mode early if running
   initial_state: 'on'
   trigger:
@@ -238,3 +248,47 @@ automation:
     value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
   action:
   - service_template: "{{ 'script.cool_away' if is_state('climate.thermostat', 'cool') else 'script.heat_away' }}"
+
+
+- alias: Ask to turn heat back on
+  initial_state: 'on'
+  trigger:
+  - platform: time
+    at: !secret heat_sleep_work
+  - platform: time
+    at: !secret heat_sleep_weekend
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.dark_sky_temperature
+    below: 40
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: time
+      after: !secret heat_sleep_work
+      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
+    - condition: time
+      after: !secret heat_sleep_weekend
+      weekday: ['fri', 'sat']
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "Turn heat back on in sleep mode?"
+      message: "It's currently {{ states('sensor.dark_sky_temperature') | float | round(0) }}° outside."
+      data:
+        actions:
+        - action: heat_reenable
+          title: Turn heat on
+
+
+- alias: Action - turn heat back on
+  initial_state: 'on'
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: heat_reenable
+  action:
+  - service: script.heat_sleep

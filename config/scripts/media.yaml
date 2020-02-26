@@ -4,7 +4,7 @@ pre_media:
   - service: light.turn_off
     entity_id: light.living_room
     data:
-      transition: 3
+      transition: 2
   - condition: state
     entity_id: binary_sensor.dark_inside
     state: 'on'
@@ -12,8 +12,11 @@ pre_media:
     entity_id: light.dining_room
     data:
       kelvin: 3000
-      transition: 3
+      transition: 2
       brightness_pct: 50
+  - condition: state
+    entity_id: input_boolean.christmas_mode
+    state: 'on'
   - service: switch.turn_off
     entity_id: switch.tuya_plug_2
 
@@ -25,13 +28,13 @@ post_media:
     entity_id: light.living_room_lamps
     data:
       kelvin: 3000
-      transition: 5
+      transition: 3
       brightness_pct: 100
   - service: light.turn_on
     entity_id: light.dining_room
     data:
       kelvin: 3000
-      transition: 5
+      transition: 3
       brightness_pct: 100
   - condition: state
     entity_id: binary_sensor.christmas_mode
@@ -44,7 +47,7 @@ living_room_tv_off:
   alias: Turn living room TV off
   sequence:
   - service: media_player.turn_off
-    entity_id: media_player.vizio_smartcast
+    entity_id: media_player.living_room_vizio
 
 
 volume_transition_to_zero:

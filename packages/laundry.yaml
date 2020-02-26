@@ -23,7 +23,7 @@ automation:
   initial_state: 'on'
   trigger:
   - platform: time_pattern
-    seconds: "/15"
+    seconds: '/15'
   condition:
   - condition: state
     entity_id: binary_sensor.laundry_room_door

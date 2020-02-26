@@ -24,12 +24,24 @@ automation:
       command: button_single
       device_ieee: !secret button_1_id
   condition:
-  - condition: state
-    entity_id: media_player.bedroom_speaker
-    state: 'playing'
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: media_player.bedroom_speaker
+        state: 'playing'
+      - condition: state
+        entity_id: input_boolean.sleep_mode
+        state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.sleep_mode
+        state: 'off'
+      - condition: time
+        after: '06:30:00'
+        before: '10:00:00'
   action:
   - service: switch.toggle
     entity_id: switch.plug_1
@@ -145,7 +157,7 @@ script:
 input_number:
   white_noise_vol:
     name: White noise volume
-    min: 50
+    min: 40
     max: 80
     step: 2
     unit_of_measurement: '%'

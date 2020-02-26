@@ -23,21 +23,23 @@ sensor:
     alarm_mode:
       friendly_name: "Alarm mode"
       value_template: >
-        {% if is_state('alarm_control_panel.abode', 'armed_home') %}
+        {% set alarm = states('alarm_control_panel.abode') %}
+        {% if alarm == 'armed_home' %}
           Armed home
-        {% elif is_state('alarm_control_panel.abode', 'armed_away') %}
+        {% elif alarm == 'armed_away' %}
           Armed away
-        {% elif is_state('alarm_control_panel.abode', 'disarmed') %}
+        {% elif alarm == 'disarmed' %}
           Disarmed
         {% else %}
           Unknown
         {% endif %}
       icon_template: >
-        {% if is_state('alarm_control_panel.abode', 'armed_home') %}
+        {% set alarm = states('alarm_control_panel.abode') %}
+        {% if alarm == 'armed_home' %}
           mdi:home-lock
-        {% elif is_state('alarm_control_panel.abode', 'armed_away') %}
+        {% elif alarm == 'armed_away' %}
           mdi:lock
-        {% elif is_state('alarm_control_panel.abode', 'disarmed') %}
+        {% elif alarm == 'disarmed' %}
           mdi:lock-open-outline
         {% else %}
           mdi:lock-question
@@ -138,5 +140,8 @@ script:
   alarm_arm_home:
     alias: Arm alarm in home mode
     sequence:
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: 'disarmed'
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode

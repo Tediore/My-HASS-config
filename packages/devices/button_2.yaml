@@ -43,6 +43,8 @@ script:
     sequence:
     - service: media_player.turn_off
       entity_id: media_player.bedroom_vizio
+    - service: light.turn_off
+      entity_id: light.master_bedroom
     - service: script.white_noise_bedroom
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep
