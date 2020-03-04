@@ -1,7 +1,7 @@
 ### Cooling
 automation:
 - alias: Thermostat home - cool
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
@@ -49,7 +49,7 @@ automation:
 
 
 - alias: Thermostat sleep - cool
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
@@ -96,7 +96,7 @@ automation:
 
 ### Heating
 - alias: Thermostat home - heat
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
@@ -144,7 +144,7 @@ automation:
 
 
 - alias: Thermostat sleep - heat
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
@@ -189,52 +189,9 @@ automation:
   - service: script.heat_sleep
 
 
-### Special
-- alias: Start sleep mode early if running
-  initial_state: 'on'
-  trigger:
-  - platform: time
-    at: '20:45:00'
-  - platform: time
-    at: '21:15:00'
-  condition:
-  - condition: or
-    conditions:
-    - condition: time
-      after: '20:45:00'
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      after: '21:15:00'
-      weekday: ['fri', 'sat']
-  - condition: state
-    entity_id: climate.thermostat
-    state: cool
-  - condition: template
-    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'cooling') and states('sensor.tstat_comfort_setting') != 'Sleep' }}"
-  action:
-  - service: script.cool_sleep
-
-
-- alias: Start home schedule earlier - sound check
-  initial_state: 'on'
-  trigger:
-  - platform: time
-    at: '06:40:00'
-  condition:
-  - condition: template
-    value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
-  - condition: template
-    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
-  - condition: time
-    weekday: sun
-  action:
-  - service_template: "{{ 'script.cool_home' if is_state('climate.thermostat', 'cool') else 'script.heat_home' }}"
-
-
+### Away
 - alias: Thermostat away
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
@@ -245,50 +202,8 @@ automation:
     for: '00:00:30'
   condition:
   - condition: template
-    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
+    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] and not is_state('sensor.tstat_comfort_setting', 'Away') }}"
   action:
-  - service_template: "{{ 'script.cool_away' if is_state('climate.thermostat', 'cool') else 'script.heat_away' }}"
-
-
-- alias: Ask to turn heat back on
-  initial_state: 'on'
-  trigger:
-  - platform: time
-    at: !secret heat_sleep_work
-  - platform: time
-    at: !secret heat_sleep_weekend
-  condition:
-  - condition: numeric_state
-    entity_id: sensor.dark_sky_temperature
-    below: 40
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'off'
-  - condition: or
-    conditions:
-    - condition: time
-      after: !secret heat_sleep_work
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      after: !secret heat_sleep_weekend
-      weekday: ['fri', 'sat']
-  action:
-  - service: notify.mobile_app_pixel_xl
-    data_template:
-      title: "Turn heat back on in sleep mode?"
-      message: "It's currently {{ states('sensor.dark_sky_temperature') | float | round(0) }}° outside."
-      data:
-        actions:
-        - action: heat_reenable
-          title: Turn heat on
-
-
-- alias: Action - turn heat back on
-  initial_state: 'on'
-  trigger:
-  - platform: event
-    event_type: mobile_app_notification_action
-    event_data:
-      action: heat_reenable
-  action:
-  - service: script.heat_sleep
+  - service_template: "script.{{ states('climate.thermostat') }}_away"
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.tstat_hold

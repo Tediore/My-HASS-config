@@ -38,8 +38,7 @@ xbox_off:
   - condition: state
     entity_id: sensor.living_room_tv
     state: 'off'
-  - service: scene.turn_on
-    entity_id: scene.before_gaming
+  - scene: scene.before_gaming
 
 gr_lights_on:
   alias: Game room lights on

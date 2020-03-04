@@ -1,5 +1,5 @@
 - alias: Speak alarm disarmed - home
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
@@ -21,7 +21,7 @@
 
 
 - alias: Speak welcome home
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
@@ -40,7 +40,7 @@
 
 
 - alias: Speak alarm on home
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
@@ -59,7 +59,7 @@
 
 
 - alias: Speak when Home Assistant starts
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: homeassistant
     event: start

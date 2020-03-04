@@ -1,5 +1,5 @@
 - alias: Turn lights on at sunset if home
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.dark_inside
@@ -8,6 +8,8 @@
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: time
+    after: '15:00:00'
   action:
   - service: light.turn_on
     entity_id: light.dining_room
@@ -26,7 +28,7 @@
 
 
 - alias: Toggle Christmas mode
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: time
     at: '00:00:00'

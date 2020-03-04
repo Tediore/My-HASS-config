@@ -1,5 +1,5 @@
 - alias: Turn entrance light on before work
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: time
     at: '07:25:00'
@@ -14,7 +14,7 @@
 
 
 - alias: Turn entrance light on before sound check
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: time
     at: '06:55:00'
@@ -33,7 +33,7 @@
 
 
 - alias: Turn entrance light off
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: time
     at: '07:50:00'
@@ -45,32 +45,10 @@
     entity_id: switch.light_switch_1
 
 
-- alias: Turn front closet light on when door opened
-  initial_state: 'on'
+- alias: Turn front closet light on/off
+  initial_state: true
   trigger:
     platform: state
     entity_id: binary_sensor.front_closet
-    from: 'off'
-    to: 'on'
   action:
-  - service: light.turn_on
-    entity_id: light.front_closet
-    data_template:
-      brightness_pct: >
-        {% if is_state('binary_sensor.dark_inside', 'on') %}
-          50
-        {% else %}
-          100
-        {% endif %}
-
-
-- alias: Turn front closet light off
-  initial_state: 'on'
-  trigger:
-    platform: state
-    entity_id: binary_sensor.front_closet
-    from: 'on'
-    to: 'off'
-  action:
-  - service: light.turn_off
-    entity_id: light.front_closet
+  - service_template: "script.front_closet_{{ trigger.to_state.state }}"

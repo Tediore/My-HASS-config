@@ -34,8 +34,14 @@
 
     dark_inside:
       friendly_name: Dark inside
-      value_template: "{{ state_attr('sun.sun', 'elevation') | float < states('input_number.dark_inside') | float }}"
-
+      value_template: >
+        {% set cover = states('sensor.dark_sky_cloud_coverage') | float %}
+        {% set threshold = states('input_number.cloud_threshold') | float %}
+        {% set elev = state_attr('sun.sun', 'elevation') | float %}
+        {% set when_cloudy = states('input_number.dark_inside_cloudy') | float %}
+        {% set not_cloudy = states('input_number.dark_inside_not_cloudy') | float %}
+        {% set sun = states('sun.sun') %}
+        {{ sun == 'below_horizon' or (cover >= threshold and elev < when_cloudy) or (cover < threshold and elev < not_cloudy) }}
 
 - platform: ping
   host: 8.8.8.8

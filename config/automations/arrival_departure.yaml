@@ -1,6 +1,6 @@
 ### Arrival
-- alias: Turn lights on upon entrance
-  initial_state: 'on'
+- alias: Turn entrance light on upon entrance
+  initial_state: true
   trigger:
   - entity_id: binary_sensor.front_door
     platform: state
@@ -9,39 +9,41 @@
   condition:
   - condition: state
     entity_id: alarm_control_panel.abode
-    state: armed_away
+    state: 'armed_away'
   action:
-  - service: switch.turn_on
-    entity_id: switch.light_switch_1
-  - service: media_player.turn_on
-    entity_id: media_player.living_room_speaker
-  - delay: '00:01:30'
+  - service: homeassistant.turn_on
+    entity_id: 
+    - switch.light_switch_1
+    - input_boolean.sensor_tripped
+    - media_player.living_room_speaker
+  - delay: '00:01:00'
   - service: switch.turn_off
     entity_id: switch.light_switch_1
 
 
-- alias: Turn lights on when alarm disarmed dark inside
-  initial_state: 'on'
+- alias: Turn lights on when alarm disarmed
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    from: armed_away
-    to: disarmed
-  condition:
+    from: 'armed_away'
+    to: 'disarmed'
+  action:
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.sensor_tripped
   - condition: state
     entity_id: binary_sensor.dark_inside
-    state: 'on'
-  action:
+    state: 'on'  
   - service_template: "{{ 'script.arrival' if is_state('input_boolean.christmas_mode', 'off') else 'script.arrival_christmas' }}"
 
 
 - alias: Turn entrance light on when alarm disarmed before entering
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    from: armed_away
-    to: disarmed
+    from: 'armed_away'
+    to: 'disarmed'
   action:
   - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
     timeout: '00:10:00'
@@ -55,21 +57,21 @@
 
 ### Departure
 - alias: Activate away mode when armed away
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    to: armed_away
+    to: 'armed_away'
   action:
   - service: script.away_mode
 
 
 - alias: Away mode backup attempt
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    to: armed_away
+    to: 'armed_away'
     for: '00:00:30'
   condition:
   - condition: or
@@ -85,3 +87,17 @@
     entity_id: all
   - service: media_player.turn_off
     entity_id: all
+  - delay: '00:00:05'
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: Away mode activated (second attempt)
+      message: >
+        {% set comfort = states('sensor.tstat_comfort_setting') %}
+        {% set tstat = states('climate.thermostat') %}
+        {% if tstat == 'off' %}
+          Lights are off, thermostat is off.
+        {% elif comfort == 'Away' %}
+          Lights are off, thermostat is set to away.
+        {% else %}
+          Uhh... this shouldn't be possible.
+        {% endif %}

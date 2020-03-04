@@ -1,6 +1,6 @@
 automation:
 - alias: Notify when shutting down
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: sensor.ups_battery
@@ -17,7 +17,7 @@ automation:
 
 
 - alias: Notify when power lost or restored
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.ups_status

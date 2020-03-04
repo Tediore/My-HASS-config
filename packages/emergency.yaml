@@ -1,6 +1,6 @@
 automation:
 - alias: Notify water leaked detected or cleared
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: state
     entity_id: 
@@ -40,7 +40,7 @@ automation:
 
 
 - alias: Notify smoke or CO
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.zcombo_1_status
@@ -79,7 +79,7 @@ automation:
 
 
 - alias: Turn on lights when smoke or CO detected
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.zcombo_1_status
@@ -111,7 +111,7 @@ automation:
 
 
 - alias: Turn lights on when leak detected
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id:
@@ -121,9 +121,8 @@ automation:
     - binary_sensor.water_sensor_4
     to: 'on'
   condition:
-  - condition: state
-    entity_id: alarm_control_panel.abode
-    state: 'armed_home'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: hue.hue_activate_scene
     data:

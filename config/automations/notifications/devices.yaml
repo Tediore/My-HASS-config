@@ -1,5 +1,5 @@
 - alias: Notify when device unavailable
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id:
@@ -31,7 +31,7 @@
 
 
 - alias: Notify when sensor battery low
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id:
@@ -71,7 +71,7 @@
 
 
 - alias: Notify when printer ink is low
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: 
@@ -86,7 +86,7 @@
 
 
 - alias: Notify when Hue bridge is ready to update
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.hue_bridge
@@ -100,7 +100,7 @@
 
 
 - alias: Notify if space heater turned on when away
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: switch.plug_4
@@ -110,6 +110,10 @@
     entity_id: alarm_control_panel.abode
     state: armed_away
   action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - climate.space_heater
+    - switch.plug_4
   - service: notify.mobile_app_pixel_xl
     data:
       title: "Space heater warning"

@@ -1,5 +1,5 @@
 - alias: Suggest opening the windows
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: template
     value_template: "{{ (states('sensor.tstat_current_temp') | float - states('sensor.outside_temp') | float) >= 10 }}"
@@ -22,7 +22,7 @@
 
 
 - alias: Notify when humidity high
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: sensor.tstat_current_humidity
@@ -37,7 +37,7 @@
 
 
 - alias: Reenable automations
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: 

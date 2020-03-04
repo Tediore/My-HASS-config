@@ -30,74 +30,62 @@ soundbar_vol_dn:
       host: 10.0.0.40
       packet: !secret soundbar_vol_dn
 
+
 tv_vol_up_cool:
   alias: Increase TV volume by 5
   sequence:
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
+
 
 tv_vol_dn_cool:
   alias: Decrease TV volume by 5
   sequence:
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
+
 
 tv_vol_up_heat:
   alias: Increase TV volume by 3
   sequence:
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_up
+  - service: script.soundbar_vol_up
+
 
 tv_vol_dn_heat:
   alias: Decrease TV volume by 3
   sequence:
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn
   - delay:
       milliseconds: 300
-  - service: script.turn_on
-    entity_id: script.soundbar_vol_dn
+  - service: script.soundbar_vol_dn

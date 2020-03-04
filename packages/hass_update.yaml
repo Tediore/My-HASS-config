@@ -1,6 +1,6 @@
 automation:
 - alias: Notify when update available
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.hass_update
@@ -20,7 +20,7 @@ automation:
     entity_id: input_boolean.hass_update
 
 - alias: Turn on update bool on startup if update available
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: homeassistant
     event: start
@@ -50,7 +50,7 @@ sensor:
       value_template: >
         {% set current = states('sensor.current_version') %}
         {% set latest = states('sensor.latest_version') %}
-        {% if current.find('b') != -1 %}
+        {% if current.find('b') != -1 and latest.find('b') != -1 %}
           {% if latest[latest.find('b') + 1] | float > current[current.find('b') + 1] | float %}
             {{ latest }} is available, and you are running {{ current }}.
           {% else %}
@@ -73,4 +73,3 @@ sensor:
 
 input_boolean:
   hass_update:
-    name: HA update

@@ -1,20 +1,5 @@
-- alias: Alarm disarmed - reset things
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: alarm_control_panel.abode
-    from: 'armed_away'
-    to: 'disarmed'
-  action:
-  - service: automation.turn_off
-    entity_id:
-    - automation.vacation_mode_lights_on
-    - automation.vacation_mode_lights_off
-    - automation.vacation_mode_photo
-
-
 - alias: Turn porch light on when armed home
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
@@ -36,29 +21,31 @@
       brightness_pct: 50
 
 
-- alias: Activate vacation mode
-  initial_state: 'on'
+- alias: Toggle vacation mode
+  initial_state: true
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
-    to: armed_away
+    to: 'armed_away'
     for: '24:00:00'
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    from: 'armed_away'
+    to: 'disarmed'
   action:
-  - service: automation.turn_on
-    entity_id:
-    - automation.vacation_mode_lights_on
-    - automation.vacation_mode_lights_off
-    - automation.vacation_mode_photo
+  - service_template: "{{ 'input_boolean.turn_on' if is_state('alarm_control_panel.abode', 'armed_away') else 'input_boolean.turn_off' }}"
+    entity_id: input_boolean.vacation_mode
 
 
 - alias: Vacation mode lights on
+  initial_state: true
   trigger:
   - platform: time
     at: '21:00:00'
   condition:
-    condition: state
-    entity_id: alarm_control_panel.abode
-    state: armed_away
+  - condition: state
+    entity_id: input_boolean.vacation_mode
+    state: 'on'
   action:
   - delay:
       seconds: "{{ range(0,600) | random | int }}"
@@ -69,26 +56,28 @@
 
 
 - alias: Vacation mode photo
+  initial_state: true
   trigger:
   - platform: time
     at: '22:00:00'
   condition:
-    condition: state
-    entity_id: alarm_control_panel.abode
-    state: armed_away
+  - condition: state
+    entity_id: input_boolean.vacation_mode
+    state: 'on'
   action:
     service: abode.trigger_quick_action
     entity_id: binary_sensor.photo
 
 
 - alias: Vacation mode lights off
+  initial_state: true
   trigger:
   - platform: time
     at: '22:45:00'
   condition:
-    condition: state
-    entity_id: alarm_control_panel.abode
-    state: armed_away
+  - condition: state
+    entity_id: input_boolean.vacation_mode
+    state: 'on'
   action:
   - delay:
       seconds: "{{ range(0,600) | random | int }}" 
@@ -97,7 +86,7 @@
 
 
 - alias: Turn lights on when alarm triggered
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: event
     event_type: abode_alarm
@@ -125,5 +114,3 @@
     data:
       group_name: Master bedroom
       scene_name: Red
-  - service: switch.turn_on
-    entity_id: switch.light_switch_1

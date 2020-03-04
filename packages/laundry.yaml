@@ -1,6 +1,6 @@
 automation:
 - alias: Notify when washer/dryer done
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: 
@@ -17,10 +17,13 @@ automation:
     data_template:
       title: "{{ trigger.to_state.name }} cycle done"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
+  - service: input_boolean.turn_on
+    data_template:
+      entity_id: "{{ trigger.to_state.entity_id }}_reminder"
 
 
 - alias: Poll power strip
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: time_pattern
     seconds: '/15'
@@ -43,7 +46,7 @@ automation:
 
 
 - alias: Keep power strip happy
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: time_pattern
     hours: "/4"
@@ -61,7 +64,7 @@ automation:
 
 
 - alias: Record washer on and off
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: sensor.power_strip_outlet_1_power
@@ -75,7 +78,7 @@ automation:
 
 
 - alias: Record dryer on and off
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: sensor.power_strip_outlet_2_power
@@ -89,8 +92,51 @@ automation:
     entity_id: input_boolean.dryer
 
 
+- alias: Washer/dryer done reminder
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.washer_reminder
+    - input_boolean.dryer_reminder
+    to: 'on'
+    for: '01:00:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "{{ trigger.to_state.name }} done reminder"
+      message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
+  - service: input_boolean.turn_off
+    data_template:
+      entity_id: "{{ trigger.to_state.entity_id }}"
+
+
+- alias: Reset laundry reminder booleans
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.laundry_room_door
+    to: 'on'
+  action:
+  - service: input_boolean.turn_off
+    entity_id:
+    - input_boolean.washer_reminder
+    - input_boolean.dryer_reminder
+
+
 input_boolean:
   washer:
     name: Washer
   dryer:
+    name: Dryer
+  washer_reminder:
+    name: Washer
+  dryer_reminder:
     name: Dryer

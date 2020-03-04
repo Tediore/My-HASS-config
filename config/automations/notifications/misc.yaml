@@ -16,7 +16,7 @@
 
 
 - alias: Notify when issue with auto-backup
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.backup_log
@@ -31,7 +31,7 @@
 
 
 - alias: Birthday reminder
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: calendar.birthdays
@@ -45,7 +45,7 @@
 
 
 - alias: Dismiss discovery notification
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: state
     entity_id: persistent_notification.config_entry_discovery

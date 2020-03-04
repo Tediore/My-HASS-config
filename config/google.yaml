@@ -21,3 +21,5 @@ entity_config:
     expose: true
   script.alarm_arm_home:
     expose: true
+  script.fan_power:
+    expose: true

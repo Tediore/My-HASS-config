@@ -1,7 +1,7 @@
 automation:
 # Add previous day's runtime to input_number each night
 - alias: Store HVAC runtime nightly
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: time
     at: '00:00:01'
@@ -14,7 +14,7 @@ automation:
 
 # Exclude from repo
 - alias: Notify when furnace filter needs replacement
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: template
     value_template: "{{ states('sensor.furnace_filter_life') | float > states('input_number.replacement_threshold') | float }}"
@@ -28,7 +28,7 @@ automation:
 
 # Exclude from repo
 - alias: HVAC runtime adjustment
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: input_number.runtime_adjustment
@@ -39,7 +39,7 @@ automation:
 
 # Exclude from repo
 - alias: Record time when cycle starts
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.hvac_action
@@ -55,7 +55,7 @@ automation:
 
 # Exclude from repo
 - alias: Record time when cycle ends
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.hvac_action

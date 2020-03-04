@@ -169,6 +169,8 @@ sensor:
           Away
         {% elif is_state('sensor.tstat_setpoint', '-') %}
           -
+        {% elif is_state('climate.thermostat', 'off') %}
+          Off
         {% else %}
           Hold
         {% endif %}
@@ -191,7 +193,7 @@ sensor:
 
 automation:
 - alias: Record previous thermostat mode
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: climate.thermostat
@@ -205,8 +207,9 @@ automation:
     data_template:
       value: "{{ trigger.from_state.state }}"
 
+
 - alias: Resume schedule - set mode
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: input_boolean.tstat_sched_resume

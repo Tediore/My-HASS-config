@@ -18,6 +18,18 @@ good_morning:
   - service: switch.turn_on
     entity_id: switch.tuya_plug_2
 
+front_closet_on:
+  sequence:
+  - service: light.turn_on
+    entity_id: light.front_closet
+    data:
+      brightness_pct: 100
+
+front_closet_off:
+  sequence:
+  - service: light.turn_off
+    entity_id: light.front_closet
+
 
 reload_input_boolean:
   alias: Input boolean

@@ -1,5 +1,5 @@
 - alias: Turn porch light on
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id:
@@ -34,7 +34,7 @@
 
 
 - alias: Turn porch light off when balcony door closed
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.balcony_door

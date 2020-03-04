@@ -1,5 +1,5 @@
 - alias: Turn off lights with TV
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: media_player.living_room_vizio
@@ -16,7 +16,7 @@
 
 
 - alias: Restore lights when TV turned off
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: media_player.living_room_vizio
@@ -35,12 +35,14 @@
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.post_media
 
 
 - alias: Boost TV volume when furnace on
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.hvac_action
@@ -58,7 +60,7 @@
 
 
 - alias: Lower TV volume when furnace off
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.hvac_action
@@ -82,38 +84,19 @@
   - service_template: "script.tv_vol_dn_{{ trigger.from_state.state[:4] }}"
 
 
-- alias: Turn soundbar on/off with TV
-  initial_state: 'on'
-  trigger:
-  - platform: state
-    entity_id: media_player.living_room_vizio
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: media_player.living_room_vizio
-    from: 'on'
-    to: 'off'
-  action:
-  - service: switch.toggle
-    data_template:
-      entity_id: >
-        {% set trigger = trigger.to_state.state %}
-        {% set cast = states('media_player.living_room_tv') %}
-        {% if (trigger == 'on' and cast != 'off') or trigger == 'off' %}
-          switch.soundbar
-        {% else %}
-          none
-        {% endif %}
-
-
 - alias: Update living room TV status faster
-  initial_state: 'on'
   trigger:
   - platform: time_pattern
     seconds: '/5'
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
   action:
   - service: homeassistant.update_entity
     entity_id: media_player.living_room_vizio

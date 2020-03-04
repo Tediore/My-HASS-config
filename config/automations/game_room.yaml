@@ -1,5 +1,5 @@
 - alias: Xbox turned on/off
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.xbox
@@ -8,7 +8,7 @@
 
 
 - alias: Turn game room lights on/off at sunset/sunrise
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.dark_inside
@@ -25,19 +25,17 @@
   - service_template: "script.gr_lights_{{ trigger.to_state.state }}"
 
 
-- alias: Turn space heater off if on for 2 hours
-  initial_state: 'on'
+- alias: Game room dimmer off press
+  initial_state: true
   trigger:
   - platform: state
-    entity_id: switch.plug_4
-    to: 'on'
-    for: '02:00:00'
+    entity_id: sensor.game_room_remote
+    to: 
+    - 4_click
+    - 4_click_up
   condition:
   - condition: state
     entity_id: binary_sensor.xbox
-    state: 'off'
+    state: 'on'
   action:
-  - service: homeassistant.turn_off
-    entity_id:
-    - switch.plug_4
-    - climate.space_heater
+  - service: script.xbox_off

@@ -1,6 +1,6 @@
 automation:
-- alias: Bedroom button initial press
-  initial_state: 'on'
+- alias: Matt button initial press
+  initial_state: true
   trigger:
   - platform: event
     event_type: zha_event
@@ -15,8 +15,8 @@ automation:
   - service_template: "{{ 'script.good_night' if is_state('input_boolean.andy_sleep', 'off') else 'script.good_night_no_noise' }}"
 
 
-- alias: Bedroom button toggle fan
-  initial_state: 'on'
+- alias: Matt button toggle fan
+  initial_state: true
   trigger:
   - platform: event
     event_type: zha_event
@@ -24,31 +24,19 @@ automation:
       command: button_single
       device_ieee: !secret button_1_id
   condition:
-  - condition: or
-    conditions:
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: media_player.bedroom_speaker
-        state: 'playing'
-      - condition: state
-        entity_id: input_boolean.sleep_mode
-        state: 'on'
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: input_boolean.sleep_mode
-        state: 'off'
-      - condition: time
-        after: '06:30:00'
-        before: '10:00:00'
+  - condition: state
+    entity_id: media_player.bedroom_speaker
+    state: 'playing'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'on'
   action:
   - service: switch.toggle
     entity_id: switch.plug_1
 
 
-- alias: Bedroom button white noise only
-  initial_state: 'on'
+- alias: Matt button white noise only
+  initial_state: true
   trigger:
   - platform: event
     event_type: zha_event
@@ -66,7 +54,7 @@ automation:
 
 
 - alias: Lights off backup attempt
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: input_boolean.sleep_mode
@@ -166,4 +154,3 @@ input_number:
 
 input_boolean:
   sleep_mode:
-    name: Sleep mode

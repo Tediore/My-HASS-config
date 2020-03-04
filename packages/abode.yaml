@@ -1,6 +1,6 @@
 automation:
 - alias: Notify when sensor unresponsive
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: template
     value_template: >
@@ -45,89 +45,6 @@ sensor:
           mdi:lock-question
         {% endif %}
     
-    abode_door_1_battery:
-      friendly_name: "Front door"
-      value_template: >
-        {% set battery = state_attr('binary_sensor.front_door', 'battery_low') %}
-        {% if battery == false %}
-          OK
-        {% elif battery == true %}
-          Low
-        {% else %}
-          Unknown
-        {% endif %}
-      icon_template: >
-        {% set battery = state_attr('binary_sensor.front_door', 'battery_low') %}
-        {% if battery == false %}
-          mdi:battery
-        {% elif battery == true %}
-          mdi:battery-20
-        {% else %}
-          mdi:battery-unknown
-        {% endif %}
-    
-    abode_door_2_battery:
-      friendly_name: "Balcony door"
-      value_template: >
-        {% set battery = state_attr('binary_sensor.balcony_door', 'battery_low') %}
-        {% if battery == false %}
-          OK
-        {% elif battery == true %}
-          Low
-        {% else %}
-          Unknown
-        {% endif %}
-      icon_template: >
-        {% set battery = state_attr('binary_sensor.balcony_door', 'battery_low') %}
-        {% if battery == false %}
-          mdi:battery
-        {% elif battery == true %}
-          mdi:battery-20
-        {% else %}
-          mdi:battery-unknown
-        {% endif %}
-    
-    abode_door_3_battery:
-      friendly_name: "Drawer"
-      value_template: >
-        {% set battery = state_attr('binary_sensor.drawer', 'battery_low') %}
-        {% if battery == false %}
-          OK
-        {% elif battery == true %}
-          Low
-        {% else %}
-          Unknown
-        {% endif %}
-      icon_template: >
-        {% set battery = state_attr('binary_sensor.drawer', 'battery_low') %}
-        {% if battery == false %}
-          mdi:battery
-        {% elif battery == true %}
-          mdi:battery-20
-        {% else %}
-          mdi:battery-unknown
-        {% endif %}
-    
-    abode_motion_1_battery:
-      friendly_name: "Motion camera"
-      value_template: >
-        {% set battery = state_attr('camera.motion_camera', 'battery_low') %}
-        {% if battery == false %}
-          OK
-        {% elif battery == true %}
-          Low
-        {% else %}
-          Unknown
-        {% endif %}
-      icon_template: >
-        {% set battery = state_attr('camera.motion_camera', 'battery_low') %}
-        {% if battery == false %}
-          mdi:battery
-        {% elif battery == true %}
-          mdi:battery-20
-        {% else %}
-          mdi:battery-unknown
-        {% endif %}
 
 - platform: rest
   resource: !secret abode_rest
@@ -145,3 +62,8 @@ script:
       state: 'disarmed'
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode
+
+
+input_boolean:
+  sensor_tripped:
+  vacation_mode:

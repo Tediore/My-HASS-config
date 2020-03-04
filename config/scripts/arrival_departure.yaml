@@ -23,6 +23,8 @@ away_mode:
 arrival:
   alias: Alarm disarmed from away
   sequence:
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.sensor_tripped
   - service: switch.turn_on
     entity_id: switch.plug_2
   - service: hue.hue_activate_scene
@@ -45,14 +47,12 @@ arrival:
 arrival_christmas:
   alias: Alarm disarmed from away - Christmas mode
   sequence:
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.sensor_tripped
   - service: switch.turn_on
     entity_id: 
     - switch.plug_2
     - switch.tuya_plug_2
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Entrance
-      scene_name: Read
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room

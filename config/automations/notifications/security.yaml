@@ -1,5 +1,5 @@
 - alias: Notify when away mode activated
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
@@ -18,7 +18,7 @@
     entity_id: group.lights_interior
     state: 'off'
   action:
-    service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_pixel_xl
     data_template:
       title: Away mode activated
       message: >
@@ -35,7 +35,7 @@
 
 ### Notify when lights on/off when away
 - alias: Notify lights on when away
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id:
@@ -74,7 +74,7 @@
 
 
 - alias: Action - turn all lights off
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: event
     event_type: mobile_app_notification_action
@@ -86,7 +86,7 @@
 
 
 - alias: Notify lights off when away
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: state
     entity_id: group.lights_interior
@@ -104,8 +104,25 @@
 
 
 ### Other
+- alias: Notify if disarmed signal not received
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.sensor_tripped
+    to: 'on'
+    for: '00:00:45'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data:
+      title: "Possible crash and smash attempt!"
+      message: "Disarmed signal not received within 45 seconds of entry!"
+      data:
+        ttl: 0
+        priority: high
+
+
 - alias: Notify if alarm not armed when away
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: person.matt
@@ -129,7 +146,7 @@
 
 
 - alias: Action - arm alarm in away mode
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: event
     event_type: mobile_app_notification_action
@@ -140,24 +157,25 @@
     entity_id: alarm_control_panel.abode
 
 
-- alias: Notify when storm door opened or closed
-  initial_state: 'on'
+- alias: Notify door opened when away
+  initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.storm_door
-    from: 'off'
+    entity_id:
+    - binary_sensor.front_door
+    - binary_sensor.balcony_door
+    - binary_sensor.storm_door
     to: 'on'
-  - platform: state
-    entity_id: binary_sensor.storm_door
-    from: 'on'
-    to: 'off'
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'armed_away'] }}"
+    value_template: "{{ not is_state('person.matt', 'home') }}"
   action:
-    service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_pixel_xl
     data_template:
-      message: "{{ 'Storm door has been opened!' if trigger.to_state.state == 'on' else 'Storm door has been closed.' }}"
+      title: "{{ trigger.to_state.name }} opened"
+      message: >
+        {% set time = as_timestamp(now()) | timestamp_custom('%I:%M %p') %}
+        {{ trigger.to_state.name }} was opened at {{ time.lower().lstrip('0') }}.
       data:
         ttl: 0
         priority: high

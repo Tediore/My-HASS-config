@@ -17,7 +17,7 @@ binary_sensor: !include config/binary_sensor.yaml
 climate: !include config/.climate.yaml
 cloudflare: !include config/.cloudflare.yaml
 config:
-discovery:
+discovery: !include config/settings/discovery.yaml
 frontend: !include config/settings/.frontend.yaml
 google: !include config/.calendar.yaml
 google_assistant: !include config/google.yaml
@@ -26,6 +26,7 @@ hacs: !include config/.hacs.yaml
 history: !include config/settings/history.yaml
 hpprinter: !include config/.printer.yaml
 http: !include config/settings/.http.yaml
+hue: !include config/.hue.yaml
 input_boolean: !include config/flippy_bois.yaml
 input_number: !include config/input_number.yaml
 input_text: !include config/input_text.yaml

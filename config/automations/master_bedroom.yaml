@@ -1,8 +1,8 @@
 - alias: Good morning - workday
-  initial_state: 'on'
+  initial_state: true
   trigger:
     platform: time
-    at: '07:00:00'
+    at: '06:50:00'
   condition:
   - condition: template
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
@@ -10,25 +10,31 @@
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.good_morning
-  - service: switch.turn_off
-    entity_id: switch.plug_1
+  - service: homeassistant.turn_off
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    - switch.plug_1
 
 
-- alias: Turn fan off at 7:30am on day off
-  initial_state: 'on'
+- alias: Turn fan off at 7:15am on day off
+  initial_state: true
   trigger:
     platform: time
-    at: '07:30:00'
+    at: '07:15:00'
   condition:
   - condition: template
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') != as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
   action:
-  - service: switch.turn_off
-    entity_id: switch.plug_1
+  - service: homeassistant.turn_off
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    - switch.plug_1
 
 
 - alias: Repeat white noise in sleep mode
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: state
     entity_id: media_player.bedroom_speaker
@@ -45,7 +51,7 @@
       state: 'on'
   - condition: time
     after: '18:00:00'
-    before: '06:29:29'
+    before: '06:19:29'
   action:
   - service: media_player.play_media
     entity_id: media_player.bedroom_speaker
@@ -54,11 +60,11 @@
       media_content_type: audio/mp3
 
 
-- alias: Turn off sleep mode and stop white noise
-  initial_state: 'on'
+- alias: Stop white noise
+  initial_state: true
   trigger:
   - platform: time
-    at: '06:30:00'
+    at: '06:20:00'
   condition:
   - condition: or
     conditions:
@@ -68,16 +74,12 @@
     - condition: state
       entity_id: input_boolean.andy_sleep
       state: 'on'
-  action:
-  - service: input_boolean.turn_off
-    entity_id:
-    - input_boolean.sleep_mode
-    - input_boolean.andy_sleep
   - condition: state
     entity_id: media_player.bedroom_speaker
     state: 'playing'
+  action:
   - service: script.volume_transition_to_zero
-  - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.05 }}"
+  - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.15 }}"
   - service: script.turn_off
     entity_id: script.volume_transition_to_zero
   - service: media_player.turn_off

@@ -1,6 +1,6 @@
 automation:
 - alias: Ecosmart remote 1 power press
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: event
     event_type: zha_event
@@ -26,7 +26,7 @@ automation:
 
 
 - alias: Move music
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: event
     event_type: zha_event
@@ -38,7 +38,7 @@ automation:
 
 
 - alias: Ecosmart remote 1 revert press
-  initial_state: 'on'
+  initial_state: true
   trigger:
   - platform: event
     event_type: zha_event
@@ -46,8 +46,7 @@ automation:
       command: 'move_to_level'
       device_ieee: !secret eco_remote_1_id
   action:
-  - service: scene.turn_on
-    entity_id: scene.before_gaming
+  - scene: scene.before_gaming
 
 
 script:
