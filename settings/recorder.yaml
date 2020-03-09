@@ -32,10 +32,8 @@ include:
   - sensor.ups_load
   - sensor.ups_status
   - sensor.router_status
-  - sensor.living_room_tv
   - sensor.power_strip_outlet_1_power
   - sensor.power_strip_outlet_2_power
-  - input_boolean.hass_update
   domains:
   - automation
   - media_player
@@ -50,7 +48,5 @@ exclude:
   - automation.record_washer_on_and_off
   - automation.record_dryer_on_and_off
   - automation.set_speaker_volume_based_on_app
-  - automation.update_living_room_tv_status_faster
-  - automation.update_living_room_tv_status_faster_2 
 purge_keep_days: 10
 db_url: !secret db_url

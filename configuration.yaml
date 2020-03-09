@@ -8,47 +8,46 @@ homeassistant:
   customize: !include customize.yaml
   auth_providers:
   - type: homeassistant
-  packages: !include_dir_named packages/
+  packages: !include_dir_named conf/packages/
   whitelist_external_dirs:
   - /config
 apcupsd:
-automation: !include_dir_merge_list config/automations/
-binary_sensor: !include config/binary_sensor.yaml
-climate: !include config/.climate.yaml
-cloudflare: !include config/.cloudflare.yaml
+automation: !include_dir_merge_list conf/automations/
+binary_sensor: !include conf/binary_sensor.yaml
+climate: !include conf/.climate.yaml
+cloudflare: !include conf/.cloudflare.yaml
 config:
-discovery: !include config/settings/discovery.yaml
-frontend: !include config/settings/.frontend.yaml
-google: !include config/.calendar.yaml
-google_assistant: !include config/google.yaml
-group: !include config/settings/groups.yaml
-hacs: !include config/.hacs.yaml
-history: !include config/settings/history.yaml
-hpprinter: !include config/.printer.yaml
-http: !include config/settings/.http.yaml
-hue: !include config/.hue.yaml
-input_boolean: !include config/flippy_bois.yaml
-input_number: !include config/input_number.yaml
-input_text: !include config/input_text.yaml
-light: !include config/light.yaml
+discovery: !include settings/discovery.yaml
+frontend: !include settings/frontend.yaml
+google: !include conf/.calendar.yaml
+google_assistant: !include conf/google.yaml
+group: !include settings/groups.yaml
+hacs: !include conf/.hacs.yaml
+history: !include settings/history.yaml
+http: !include settings/http.yaml
+hue: !include conf/.hue.yaml
+input_boolean: !include conf/flippy_bois.yaml
+input_number: !include conf/input_number.yaml
+input_text: !include conf/input_text.yaml
+light: !include conf/light.yaml
 logbook:
-logger: !include config/settings/logger.yaml
+logger: !include settings/logger.yaml
 mobile_app:
-notify: !include config/.notify.yaml
-recorder: !include config/settings/recorder.yaml
-scene: !include config/.scenes.yaml
-script: !include_dir_merge_named config/scripts/
-sensor: !include_dir_merge_list config/sensors/
+notify: !include conf/.notify.yaml
+recorder: !include settings/recorder.yaml
+scene: !include conf/.scenes.yaml
+script: !include_dir_merge_named conf/scripts/
+sensor: !include_dir_merge_list conf/sensors/
 ssdp:
 sun:
-switch: !include config/switch.yaml
+switch: !include conf/switch.yaml
 system_health:
-telegram_bot: !include config/.telegram.yaml
-tplink: !include config/tplink.yaml
-tts: !include config/.tts.yaml
-updater: !include config/settings/.updater.yaml
-vizio: !include config/vizio.yaml
+telegram_bot: !include conf/.telegram.yaml
+tplink: !include conf/tplink.yaml
+tts: !include conf/.tts.yaml
+updater: !include settings/updater.yaml
+vizio: !include conf/vizio.yaml
 zeroconf:
-zha: !include config/.zha.yaml
-zone: !include config/settings/zone.yaml
-zwave: !include config/.zwave.yaml
+zha: !include conf/.zha.yaml
+zone: !include settings/zone.yaml
+zwave: !include conf/.zwave.yaml

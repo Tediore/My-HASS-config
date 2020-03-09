@@ -1,7 +1,7 @@
 /*
 !configuration.yaml
 !config/
-!packages/
+!settings/
 !*.md
 
 ip_bans.yaml
