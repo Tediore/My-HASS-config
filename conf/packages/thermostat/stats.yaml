@@ -1,0 +1,224 @@
+sensor:
+- platform: template
+  sensors:
+    current_cycle_length:
+      friendly_name: "Length of current cycle"
+      value_template: "{{ (((states('sensor.cooling_since_cycle_start') | float) * 60) + ((states('sensor.heating_since_cycle_start') | float) * 60)) | round(1) }}"
+      unit_of_measurement: 'm'
+
+    cooling_runtime_today:
+      friendly_name: "Cooling runtime today"
+      value_template: "{{ (states('sensor.cooling_time_today') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    cooling_runtime_yesterday:
+      friendly_name: "Cooling runtime yesterday"
+      value_template: "{{ (states('sensor.cooling_time_yesterday') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    cooling_runtime_week:
+      friendly_name: "Cooling runtime last 7 days"
+      value_template: "{{ (states('sensor.cooling_time_last_7_days') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    avg_cooling_week:
+      friendly_name: "Average cooling runtime per day"
+      value_template: "{{ ((states('sensor.cooling_time_last_7_days') | float) / 7) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    heating_runtime_today:
+      friendly_name: "Heating runtime today"
+      value_template: "{{ (states('sensor.heating_time_today') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    heating_runtime_yesterday:
+      friendly_name: "Heating runtime yesterday"
+      value_template: "{{ (states('sensor.heating_time_yesterday') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    heating_runtime_week:
+      friendly_name: "Heating runtime last 7 days"
+      value_template: "{{ (states('sensor.heating_time_last_7_days') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    avg_heating_week:
+      friendly_name: "Average heating runtime per day"
+      value_template: "{{ ((states('sensor.heating_time_last_7_days') | float) / 7) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    time_home_today:
+      friendly_name: "Time home today"
+      value_template: "{{ ((states('sensor.home_today') | float) + (states('sensor.standby_today') | float)) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    time_home_yesterday:
+      friendly_name: "Time home yesterday"
+      value_template: "{{ (24 - (states('sensor.time_away_yesterday') | float)) | round(1) }}"
+      unit_of_measurement: 'h'
+
+
+### History stats - heating
+- platform: history_stats
+  name: Heating time today
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Heating cycles today
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: count
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Heating percent today
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: ratio
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Heating cycles yesterday
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: count
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Heating percent yesterday
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: ratio
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Heating percent last 7 days
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: ratio
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+- platform: history_stats
+  name: Heating cycles last 7 days
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: count
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+- platform: history_stats
+  name: Heating since cycle start
+  entity_id: sensor.hvac_action
+  state: 'heating'
+  type: time
+  start: "{{ states('input_text.time_cycle_start') }}"
+  end: '{{ now() }}'
+
+
+### History stats - cooling
+- platform: history_stats
+  name: Cooling time today
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: time
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Cooling cycles today
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: count
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Cooling percent today
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: ratio
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Cooling cycles yesterday
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: count
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Cooling percent yesterday
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: ratio
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Cooling percent last 7 days
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: ratio
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+- platform: history_stats
+  name: Cooling cycles last 7 days
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: count
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7
+
+- platform: history_stats
+  name: Cooling since cycle start
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: time
+  start: "{{ states('input_text.time_cycle_start') }}"
+  end: '{{ now() }}'
+
+
+### History stats - other
+- platform: history_stats
+  name: Home today
+  entity_id: alarm_control_panel.abode
+  state: 'armed_home'
+  type: time
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Standby today
+  entity_id: alarm_control_panel.abode
+  state: 'disarmed'
+  type: time
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Time away yesterday
+  entity_id: alarm_control_panel.abode
+  state: 'armed_away'
+  type: time
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'

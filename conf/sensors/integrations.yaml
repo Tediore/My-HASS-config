@@ -1,0 +1,86 @@
+- platform: darksky
+  api_key: !secret darksky_key
+  monitored_conditions:
+  - dew_point
+  - temperature
+  - humidity
+  - temperature_high
+  - temperature_low
+  - cloud_cover
+  - icon
+  - summary
+
+- platform: systemmonitor
+  resources:
+  - type: memory_use
+  - type: memory_use_percent
+  - type: processor_use
+
+### REST sensors
+- platform: rest
+  resource: http://localhost:5557/device?ipaddr=10.0.0.49/status
+  name: Xbox status
+  value_template: !secret xbox_rest
+  verify_ssl: false
+  scan_interval: 5
+
+- platform: rest
+  resource: !secret hue_rest
+  name: Hue bridge
+  value_template: "{{ value_json['swupdate2']['bridge']['state'] }}"
+  json_attributes:
+  - name
+  - zigbeechannel
+  - ipaddress
+  - modelid
+  - swversion
+  - apiversion
+  scan_interval: 1800
+
+
+### Command line sensors
+- platform: command_line
+  name: CPU Temperature
+  command: "cat /sys/class/thermal/thermal_zone0/temp"
+  unit_of_measurement: "°F"
+  value_template: '{{ (((value | multiply(0.001)) | float * 9/5) + 32) | round(0) }}'
+
+- platform: command_line
+  name: Backup log
+  command: "cat .logs/backup.log"
+  scan_interval: 3600
+
+- platform: apcupsd
+  resources:
+  - apc
+  - date
+  - version
+  - upsmode
+  - starttime
+  - model
+  - status
+  - linev
+  - loadpct
+  - bcharge
+  - timeleft
+  - mbattchg
+  - mintimel
+  - maxtime
+
+- platform: dewpoint
+  sensors:
+    dewpoint_inside:
+      temperature: sensor.tstat_current_temp
+      rel_hum: sensor.tstat_current_humidity
+
+- platform: google_wifi
+  name: Router
+  host: 10.0.0.1
+
+- platform: time_date
+  display_options:
+  - date
+  - time
+  - date_time_iso
+
+- platform: huesensor

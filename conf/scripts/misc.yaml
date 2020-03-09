@@ -1,0 +1,58 @@
+good_morning:
+  alias: Workday wakeup routine
+  sequence:
+  - service: script.lights_wakeup
+  - service: homeassistant.turn_off
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    - switch.plug_1
+  - condition: state
+    entity_id: input_boolean.christmas_mode
+    state: 'on'
+  - service: switch.turn_on
+    entity_id: switch.tuya_plug_2
+
+lights_wakeup:
+  sequence:
+  - service: light.turn_on
+    entity_id: light.master_bedroom
+    data:
+      brightness_pct: 1
+      kelvin: 3000
+  - delay: '00:00:30'
+  - service: light.turn_on
+    entity_id: light.master_bedroom
+    data:
+      transition: 90
+      brightness_pct: 100
+
+front_closet_on:
+  sequence:
+  - service: light.turn_on
+    entity_id: light.front_closet
+    data:
+      brightness_pct: 100
+
+front_closet_off:
+  sequence:
+  - service: light.turn_off
+    entity_id: light.front_closet
+
+
+reload_input_boolean:
+  alias: Input boolean
+  sequence:
+  - service: input_boolean.reload
+
+
+reload_input_number:
+  alias: Input number
+  sequence:
+  - service: input_number.reload
+
+
+reload_input_text:
+  alias: Input text
+  sequence:
+  - service: input_text.reload

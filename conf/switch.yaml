@@ -1,0 +1,14 @@
+- platform: broadlink
+  host: 10.0.0.40
+  mac: !secret broadlink_mac
+  type: rm_mini
+  friendly_name: 'IR blaster'
+  switches:
+    living_room_fan:
+      friendly_name: 'Living room fan'
+      command_on: !secret living_room_fan_power
+      command_off: !secret living_room_fan_power
+    soundbar:
+      friendly_name: 'Soundbar'
+      command_on: !secret soundbar_power
+      command_off: !secret soundbar_power

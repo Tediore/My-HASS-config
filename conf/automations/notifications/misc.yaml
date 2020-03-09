@@ -1,0 +1,59 @@
+- alias: Notify when Home Assistant starts
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data:
+      title: "Server online"
+      message: "Home Assistant has started."
+  - wait_template: "{{ is_state('persistent_notification.config_entry_discovery', 'notifying') }}"
+    timeout: "00:01:00"
+    continue_on_timeout: true
+  - service: persistent_notification.dismiss
+    data:
+      notification_id: config_entry_discovery
+
+
+- alias: Notify when issue with auto-backup
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.backup_log
+  condition:
+  - condition: template
+    value_template: "{{ states('sensor.backup_log') != '' }}"
+  action:
+  - service: persistent_notification.create
+    data:
+      title: Backup error
+      message: Backup error. Check log for details.
+
+
+- alias: Birthday reminder
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: calendar.birthdays
+    from: 'off'
+    to: 'on'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "{{ state_attr('calendar.birthdays', 'message') }} is today!"
+      message: Don't forget to say happy birthday!
+      data:
+        ttl: 0
+        priority: high
+
+
+- alias: Dismiss discovery notification
+  initial_state: true
+  trigger:
+    platform: state
+    entity_id: persistent_notification.config_entry_discovery
+    to: 'notifying'
+  action:
+    service: persistent_notification.dismiss
+    data:
+      notification_id: config_entry_discovery

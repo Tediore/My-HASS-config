@@ -1,0 +1,8 @@
+- platform: generic_thermostat
+  name: Space heater
+  heater: switch.plug_4
+  target_sensor: sensor.lumi_temp_2_calibrated
+  min_temp: 65
+  max_temp: 71
+  cold_tolerance: 1
+  hot_tolerance: 1

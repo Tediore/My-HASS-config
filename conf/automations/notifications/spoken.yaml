@@ -1,0 +1,65 @@
+- alias: Speak alarm disarmed - home
+  initial_state: true
+  trigger:
+  - entity_id: alarm_control_panel.abode
+    platform: state
+    from: armed_home
+    to: disarmed
+  condition:
+  - condition: template
+    value_template: "{{ states('media_player.living_room_speaker') in ['off', 'idle'] }}"
+  - condition: time
+    after: '08:00:00'
+  action:
+  - service: tts.google
+    entity_id: media_player.living_room_speaker
+    data:
+      message: "Alarm off."
+  - wait_template: "{{ is_state('media_player.living_room_speaker', 'idle') }}"
+  - service: media_player.turn_off
+    entity_id: media_player.living_room_speaker
+
+
+- alias: Speak alarm on home
+  initial_state: true
+  trigger:
+  - entity_id: alarm_control_panel.abode
+    platform: state
+    to: armed_home
+  condition:
+  - condition: template
+    value_template: "{{ states('media_player.living_room_speaker') in ['off', 'idle'] }}"
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  action:
+  - service: tts.google
+    entity_id: media_player.living_room_speaker
+    data:
+      message: "Alarm on. Home."
+  - wait_template: "{{ is_state('media_player.living_room_speaker', 'idle') }}"
+  - service: media_player.turn_off
+    entity_id: media_player.living_room_speaker
+
+
+- alias: Speak when Home Assistant starts
+  initial_state: true
+  trigger:
+    platform: homeassistant
+    event: start
+  condition:
+  - condition: template
+    value_template: "{{ states('media_player.portable_speaker') in ['off', 'idle'] }}"
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: tts.google
+    entity_id: media_player.portable_speaker
+    data:
+      message: "Server online."
+  - wait_template: "{{ is_state('media_player.portable_speaker', 'idle') }}"
+  - service: media_player.turn_off
+    entity_id: media_player.portable_speaker

@@ -1,0 +1,242 @@
+automation:
+- alias: Turn entrance light on upon entrance
+  initial_state: true
+  trigger:
+  - entity_id: binary_sensor.front_door
+    platform: state
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_away'
+  action:
+  - service: script.entrance_light_on
+  - service: homeassistant.turn_on
+    entity_id:
+    - input_boolean.sensor_tripped
+    - media_player.living_room_speaker
+
+
+- alias: Alarm disarmed from away
+  initial_state: true
+  trigger:
+  - entity_id: alarm_control_panel.abode
+    platform: state
+    from: 'armed_away'
+    to: 'disarmed'
+  action:
+  - service_template: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'app' }}"
+
+
+- alias: Re-arm alarm in away mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.disarmed_app
+    from: 'off'
+    to: 'on'
+    for: '00:10:00'
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    entity_id: alarm_control_panel.abode
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.disarmed_app
+
+
+- alias: Activate away mode when armed away
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 'armed_away'
+  action:
+  - service: script.away_mode
+  - delay: '00:00:05'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sensor.tstat_profile
+      state: 'Away'
+    - condition: state
+      entity_id: climate.thermostat
+      state: 'off'
+  - condition: state
+    entity_id: group.lights_interior
+    state: 'off'
+  - service: script.notify_away
+    data_template:
+      title: Away mode activated
+
+
+- alias: Away mode backup attempt
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 'armed_away'
+    for: '00:00:15'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: group.lights_all
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.any_media_player
+      state: 'on'
+  action:
+  - service: script.away_mode
+  - service: script.notify_away
+    data_template:
+      title: Away mode activated (second attempt)
+
+
+script:
+  away_mode:
+    sequence:
+    - service: homeassistant.turn_off
+      entity_id:
+      - input_boolean.disarmed_app
+      - input_boolean.sensor_tripped
+      - group.plugs
+      - climate.space_heater
+    - service: light.turn_off
+      entity_id: all
+    - service: media_player.turn_off
+      entity_id: all
+    - service: media_player.volume_set
+      data:
+        entity_id: media_player.living_room_speaker
+        volume_level: 0.45
+    - condition: state
+      entity_id: input_boolean.christmas_mode
+      state: 'on'
+    - service: switch.turn_off
+      entity_id: switch.tuya_plug_2
+
+
+  notify_away:
+    sequence:
+    - service: notify.mobile_app_pixel_xl
+      data_template:
+        title: "{{ title }}"
+        message: >
+          {% set profile = states('sensor.tstat_profile') %}
+          {% set tstat = states('climate.thermostat') %}
+          {% if tstat == 'off' %}
+            Lights are off, thermostat is off.
+          {% elif profile == 'Away' %}
+            Lights are off, thermostat is set to away.
+          {% else %}
+            Uhh... this shouldn't be possible.
+          {% endif %}
+        data:
+          ttl: 0
+          priority: high
+  
+  
+  disarmed_keypad:
+    sequence:
+    - service: script.speak_welcome_home
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.sensor_tripped
+    - service: script.tstat_smart_resume_cool
+    - service: script.arrival_night
+  
+  
+  disarmed_app:
+    sequence:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.disarmed_app
+    - service: switch.turn_on
+      entity_id: switch.light_switch_1
+    - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
+      timeout: '00:10:00'
+      continue_on_timeout: false
+    - service: script.entrance_light_on
+    - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
+      timeout: '00:10:00'
+      continue_on_timeout: false
+    - service: script.toggle_sensor_tripped
+    - service: script.speak_welcome_home
+    - service: script.tstat_smart_resume_cool
+    - service: script.arrival_night
+
+
+  toggle_sensor_tripped:
+    sequence:
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.disarmed_app
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.sensor_tripped
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.sensor_tripped
+
+
+  entrance_light_on:
+    sequence:
+    - service: switch.turn_on
+      entity_id: switch.light_switch_1
+    - delay: '00:01:00'
+    - service: switch.turn_off
+      entity_id: switch.light_switch_1
+  
+  
+  arrival_night:
+    alias: Alarm disarmed from away at night
+    sequence:
+    - condition: state
+      entity_id: binary_sensor.dark_inside
+      state: 'on'
+    - service_template: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas_mode', 'on') else 'normal' }}"
+    - wait_template: "{{ is_state('binary_sensor.motion_sensor_1', 'on') }}"
+      timeout: '00:05:00'
+      continue_on_timeout: false
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Master bedroom
+        scene_name: Read
+  
+
+  lights_normal:
+    sequence:
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Dining room
+        scene_name: Read
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Living room
+        scene_name: Read lamps
+    - service: switch.turn_on
+      entity_id: switch.plug_2
+
+
+  lights_christmas:
+    sequence:
+    - service: switch.turn_on
+      entity_id: 
+      - switch.tuya_plug_2
+      - switch.plug_2
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Dining room
+        scene_name: Read
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Living room
+        scene_name: Christmas
+    - delay: '00:01:00'
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Living room
+        scene_name: Read lamps
+
+
+  speak_welcome_home:
+    sequence:
+    - service: tts.google
+      entity_id: media_player.living_room_speaker
+      data:
+        message: "Welcome home."

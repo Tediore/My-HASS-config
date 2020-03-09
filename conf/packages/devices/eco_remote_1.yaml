@@ -1,0 +1,101 @@
+automation:
+- alias: Ecosmart remote 1 power press
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'off'
+      device_ieee: !secret eco_remote_1_id
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'on'
+      device_ieee: !secret eco_remote_1_id
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.living_room
+      state: 'on'
+    - condition: state
+      entity_id: light.dining_room
+      state: 'on'
+  action:
+  - service: script.other_lights_off
+
+
+- alias: Move music
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'move_to_color_temp'
+      device_ieee: !secret eco_remote_1_id
+  action:
+  - service_template: "script.{{ 'move_music_all' if is_state('media_player.portable_speaker','playing') else 'move_music_portable' }}"
+
+
+- alias: Ecosmart remote 1 revert press
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'move_to_level'
+      device_ieee: !secret eco_remote_1_id
+  action:
+  - scene: scene.before_gaming
+
+
+script:
+  other_lights_off:
+    alias: Other lights off when gaming
+    sequence:
+    - service: scene.create
+      data:
+        scene_id: before_gaming
+        snapshot_entities:
+        - light.left_sconce
+        - light.right_sconce
+        - light.left_lamp
+        - light.right_lamp
+        - light.dining_room
+        - switch.plug_2
+    - service: light.turn_off
+      entity_id:
+      - light.living_room
+      - light.dining_room
+
+  move_music_all:
+    alias: Move music to all speakers
+    sequence:
+    - service: media_player.play_media
+      entity_id: media_player.all_speakers
+      data_template:
+        media_content_id: "{{ state_attr('media_player.portable_speaker', 'media_content_id') }}"
+        media_content_type: music
+    - wait_template: "{{ state_attr('media_player.portable_speaker', 'media_content_id') == state_attr('media_player.living_room_speaker', 'media_content_id') }}"
+    - service: media_player.media_pause
+      entity_id: media_player.all_speakers
+    - service: media_player.media_play
+      entity_id: media_player.all_speakers
+    - service: media_player.turn_off
+      entity_id: media_player.portable_speaker
+
+  move_music_portable:
+    alias: Move music to portable speaker
+    sequence:
+    - service: media_player.play_media
+      entity_id: media_player.portable_speaker
+      data_template:
+        media_content_id: "{{ state_attr('media_player.living_room_speaker', 'media_content_id') }}"
+        media_content_type: music
+    - wait_template: "{{ state_attr('media_player.portable_speaker', 'media_content_id') == state_attr('media_player.living_room_speaker', 'media_content_id') }}"
+    - service: media_player.media_pause
+      entity_id: media_player.portable_speaker
+    - service: media_player.media_play
+      entity_id: media_player.portable_speaker
+    - service: media_player.turn_off
+      entity_id: media_player.living_room_speaker

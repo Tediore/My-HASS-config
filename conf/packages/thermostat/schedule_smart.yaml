@@ -1,0 +1,193 @@
+automation:
+- alias: Start sleep mode cool early if running
+  initial_state: true
+  trigger:
+  - platform: time
+    at: !secret cool_sleep_work_early
+  - platform: time
+    at: !secret cool_sleep_weekend_early
+  condition:
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'cool'
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: time
+      after: !secret cool_sleep_work_early
+      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
+    - condition: time
+      after: !secret cool_sleep_weekend_early
+      weekday: ['fri', 'sat']
+  - condition: template
+    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'cooling') and not is_state('sensor.tstat_profile', 'Sleep') }}"
+  action:
+  - service: script.cool_sleep
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.tstat_smart
+
+
+- alias: Start home schedule earlier - sound check
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '06:30:00'
+  condition:
+  - condition: time
+    weekday: sun
+  - condition: template
+    value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: script.good_morning
+  - condition: template
+    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - service_template: "script.{{ states('climate.thermostat') }}_home"
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.tstat_smart
+
+
+- alias: Turn heat off if nice outside
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.dark_sky_temperature
+    above: 55
+    for: '02:00:00'
+  condition:
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'heat'
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.heat_home') | float }}"
+  action:
+  - service: climate.turn_off
+    entity_id: climate.thermostat
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.tstat_smart
+
+
+- alias: Ask to turn heat back on
+  initial_state: true
+  trigger:
+  - platform: time
+    at: !secret heat_sleep_work
+  - platform: time
+    at: !secret heat_sleep_weekend
+  condition:
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'off'
+  - condition: numeric_state
+    entity_id: sensor.dark_sky_temperature
+    below: 35
+  - condition: or
+    conditions:
+    - condition: time
+      after: !secret heat_sleep_work
+      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
+    - condition: time
+      after: !secret heat_sleep_weekend
+      weekday: ['fri', 'sat']
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "Turn heat back on in sleep mode?"
+      message: "It's currently {{ states('sensor.dark_sky_temperature') | float | round(0) }}° outside."
+      data:
+        actions:
+        - action: heat_reenable
+          title: Turn heat on
+
+
+- alias: Action - turn heat back on
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: heat_reenable
+  action:
+  - service: script.heat_sleep
+
+
+- alias: Record previous thermostat mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: climate.thermostat
+    from:
+    - heat
+    - cool
+    to: 'off'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.tstat_prev_mode
+    data_template:
+      value: "{{ trigger.from_state.state }}"
+
+
+- alias: Resume tstat schedule - set mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.tstat_sched_resume
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: input_boolean.tstat_peak_savings
+    from: 'on'
+    to: 'off'
+  action:
+  - service: climate.set_hvac_mode
+    entity_id: climate.thermostat
+    data_template:
+      hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
+  - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.tstat_sched_resume
+
+
+- alias: Turn cooling off - peak time savings
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.tstat_peak_savings
+    from: 'off'
+    to: 'on'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.tstat_prev_mode
+    data_template:
+      value: "{{ 'cool' if is_state('climate.thermostat', 'cool') else 'off' }}"
+  - service: climate.turn_off
+    entity_id: climate.thermostat
+
+
+script:
+  tstat_smart_resume_cool:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.tstat_peak_savings
+      state: 'off'
+    - condition: numeric_state
+      entity_id: sensor.tstat_current_temp
+      above: 77.9
+    - condition: numeric_state
+      entity_id: sensor.dark_sky_temperature
+      above: 74.9
+    - service: input_text.set_value
+      entity_id: input_text.tstat_prev_mode
+      data:
+        value: 'cool'
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.tstat_sched_resume

@@ -1,0 +1,91 @@
+fan_power:
+  alias: Fan power
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret living_room_fan_power
+
+fan_speed:
+  alias: Fan speed
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret living_room_fan_speed
+
+soundbar_vol_up:
+  alias: Increase soundbar volume
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret soundbar_vol_up
+
+soundbar_vol_dn:
+  alias: Decrease soundbar volume
+  sequence:
+  - service: broadlink.send
+    data:
+      host: 10.0.0.40
+      packet: !secret soundbar_vol_dn
+
+
+tv_vol_up_cool:
+  alias: Increase TV volume by 5
+  sequence:
+  - service: script.soundbar_vol_up
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_up
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_up
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_up
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_up
+
+
+tv_vol_dn_cool:
+  alias: Decrease TV volume by 5
+  sequence:
+  - service: script.soundbar_vol_dn
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_dn
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_dn
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_dn
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_dn
+
+
+tv_vol_up_heat:
+  alias: Increase TV volume by 3
+  sequence:
+  - service: script.soundbar_vol_up
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_up
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_up
+
+
+tv_vol_dn_heat:
+  alias: Decrease TV volume by 3
+  sequence:
+  - service: script.soundbar_vol_dn
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_dn
+  - delay:
+      milliseconds: 300
+  - service: script.soundbar_vol_dn

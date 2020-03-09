@@ -1,0 +1,65 @@
+- platform: template
+  sensors:
+    space_heater_action:
+      friendly_name: "Space heater action"
+      value_template: "{{ state_attr('climate.space_heater', 'hvac_action') }}"
+    
+    space_heater_runtime_today:
+      friendly_name: "Space heater runtime today"
+      value_template: "{{ (states('sensor.space_heater_time_today') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    space_heater_runtime_yesterday:
+      friendly_name: "Space heater runtime yesterday"
+      value_template: "{{ (states('sensor.space_heater_time_yesterday') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    space_heater_runtime_week:
+      friendly_name: "Space heater runtime last 7 days"
+      value_template: "{{ (states('sensor.space_heater_time_last_7_days') | float) | round(1) }}"
+      unit_of_measurement: 'h'
+    
+    outside_temp:
+      friendly_name: "Outside"
+      value_template: "{{ states('sensor.dark_sky_temperature') | float | round(0) }}"
+      unit_of_measurement: '°F'
+    
+    outside_dewpoint:
+      friendly_name: "Dew point"
+      value_template: "{{ states('sensor.dark_sky_dew_point') | float | round(0) }}"
+      unit_of_measurement: '°F'
+
+    inside_dewpoint:
+      friendly_name: "Dew point"
+      value_template: "{{ states('sensor.dewpoint') | float | round(0) }}"
+      unit_of_measurement: '°F'
+    
+    lumi_temp_1_calibrated:
+      friendly_name: Lumi temp 1 calibrated
+      value_template: "{{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset')  | float) | round(1) }}"
+      unit_of_measurement: '°F'
+    
+    lumi_temp_1_calibrated_display:
+      friendly_name: Lumi temp 1 calibrated
+      value_template: "{{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset') | float) | round(0) }}"
+      unit_of_measurement: '°F'
+    
+    lumi_temp_2_calibrated:
+      friendly_name: Lumi temp 2 calibrated
+      value_template: "{{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(1) }}"
+      unit_of_measurement: '°F'
+    
+    lumi_temp_2_calibrated_display:
+      friendly_name: Lumi temp 2 calibrated
+      value_template: "{{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(0) }}"
+      unit_of_measurement: '°F'
+
+    avg_temp_master_bedroom:
+      friendly_name: Master bedroom
+      value_template: "{{ ((states('sensor.button_1_temp') | float + states('sensor.button_2_temp') | float) / 2) | round(0) }}"
+      unit_of_measurement: '°F'
+    
+    internet:
+      friendly_name: Status
+      value_template: "{{ 'Online' if is_state('binary_sensor.internet', 'on') else 'LAN only' }}"
+      icon_template: "{{ 'mdi:server-network' if is_state('binary_sensor.internet', 'on') else 'mdi:server-network-off' }}"

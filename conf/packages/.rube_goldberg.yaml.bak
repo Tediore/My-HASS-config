@@ -1,0 +1,181 @@
+automation:
+### 1
+- alias: RG start
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: light.dining_room
+    to: 'on'
+  action:
+  - service: automation.turn_on
+    entity_id:
+    - automation.rg_text
+    - automation.rg_number
+    - automation.rg_select
+    - automation.rg_timer
+    - automation.rg_time
+    - automation.rg_flippy_bois
+    - automation.rg_end
+  - service: input_select.select_option
+    entity_id: input_select.rg
+    data:
+      option: 'On!'
+
+### 2
+- alias: RG select
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: input_select.rg
+    to: 'On!'
+    for: '00:00:01'
+  action:
+  - service: input_number.set_value
+    entity_id: input_number.rg
+    data_template:
+      value: "{{ state_attr('light.dining_room', 'brightness') }}"
+
+### 3
+- alias: RG number
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: input_number.rg
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.rg
+    data_template:
+      value: "{{ states('input_number.rg') }}"
+
+### 4
+- alias: RG text
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: input_text.rg
+  action:
+  - service: timer.start
+    entity_id: timer.rg
+
+### 5
+- alias: RG timer
+  initial_state: false
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.rg
+  action:
+  - service: input_datetime.set_datetime
+    entity_id: input_datetime.rg
+    data_template:
+      time: "{{ now().strftime('%H:%M:%S') }}"
+
+### 6
+- alias: RG time
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: input_datetime.rg
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.rg1
+
+### 7
+- alias: RG flippy bois
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: 
+    - input_boolean.rg1
+    - input_boolean.rg2
+    - input_boolean.rg3
+    - input_boolean.rg4
+    - input_boolean.rg5
+    - input_boolean.rg6
+    - input_boolean.rg7
+    - input_boolean.rg8
+    - input_boolean.rg9
+    to: 'on'
+  action:
+  - service: input_boolean.turn_on
+    data_template:
+      entity_id: "input_boolean.rg{{ trigger.to_state.entity_id[-1:] | int + 1 }}"
+  - service: input_boolean.turn_off
+    data_template:
+      entity_id: "{{ trigger.to_state.entity_id }}"
+
+### END
+- alias: RG end
+  initial_state: false
+  trigger:
+  - platform: state
+    entity_id: input_boolean.rg10
+    to: 'on'
+  action:
+  - service: script.rg_reset
+
+
+input_text:
+  rg:
+
+input_number:
+  rg:
+    min: 0
+    max: 255
+
+input_select:
+  rg:
+    options:
+    - 'Off.'
+    - 'On!'
+
+timer:
+  rg:
+    duration: 5
+
+input_datetime:
+  rg:
+    has_time: true
+
+input_boolean:
+  rg1:
+  rg2:
+  rg3:
+  rg4:
+  rg5:
+  rg6:
+  rg7:
+  rg8:
+  rg9:
+  rg10:
+
+script:
+  rg_reset:
+    sequence:
+    - service: homeassistant.turn_off
+      entity_id:
+      - light.dining_room
+      - input_boolean.rg10
+    - service: input_select.select_option
+      entity_id: input_select.rg
+      data:
+        option: 'Off.'
+    - service: automation.turn_off
+      entity_id:
+      - automation.rg_start
+      - automation.rg_text
+      - automation.rg_number
+      - automation.rg_select
+      - automation.rg_timer
+      - automation.rg_time
+      - automation.rg_flippy_bois
+      - automation.rg_end
+    - service: input_number.set_value
+      entity_id: input_number.rg
+      data:
+        value: 0
+    - service: input_text.set_value
+      entity_id: input_text.rg
+      data:
+        value: 0
