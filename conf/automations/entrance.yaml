@@ -20,7 +20,7 @@
 - alias: Turn entrance light on before work
   initial_state: true
   trigger:
-    platform: time
+  - platform: time
     at: '07:25:00'
   condition:
   - condition: template
@@ -35,8 +35,8 @@
 - alias: Turn entrance light off
   initial_state: true
   trigger:
-    platform: time
-    at: '07:50:00'
+  - platform: time
+    at: '07:45:00'
   condition:
   - condition: template
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
@@ -61,7 +61,23 @@
 - alias: Turn front closet light on/off
   initial_state: true
   trigger:
-    platform: state
+  - platform: state
     entity_id: binary_sensor.front_closet
   action:
   - service_template: "script.front_closet_{{ trigger.to_state.state }}"
+
+
+- alias: Turn off front closet light after power outage
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.front_closet
+    to: 'on'
+    for: '00:00:01'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.front_closet
+    state: 'off'
+  action:
+  - service: light.turn_off
+    entity_id: light.front_closet

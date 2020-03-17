@@ -39,3 +39,21 @@
     state: 'on'
   action:
   - service: script.xbox_off
+
+
+- alias: Change lights based on Internet connectivity
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.internet
+  condition:
+  - condition: state
+    entity_id: light.game_room
+    state: 'on'
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+  action:
+  - service: hue.hue_activate_scene
+    data_template:
+      group_name: Game room
+      scene_name: "{{ 'Legendary' if trigger.to_state.state == 'off' else 'Read' }}"

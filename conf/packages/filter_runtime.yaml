@@ -18,7 +18,6 @@ automation:
   trigger:
     platform: template
     value_template: "{{ states('sensor.furnace_filter_life') | float > states('input_number.replacement_threshold') | float }}"
-    for: '00:01:00'
   action:
     service: notify.mobile_app_pixel_xl
     data_template:
@@ -38,7 +37,7 @@ automation:
 
 
 # Exclude from repo
-- alias: Record time when cycle starts
+- alias: Record time when cycle starts/ends
   initial_state: true
   trigger:
   - platform: state
@@ -46,31 +45,19 @@ automation:
     to:
     - 'cooling'
     - 'heating'
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.time_cycle_start
-    data_template:
-      value: '{{ now() }}'
-
-
-# Exclude from repo
-- alias: Record time when cycle ends
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.hvac_action
-    to: 'idle'
   - platform: state
     entity_id: sensor.hvac_action
     from:
     - 'cooling'
     - 'heating'
-    to: 'off'
+    to: 
+    - 'off'
+    - 'idle'
   action:
   - service: input_text.set_value
-    entity_id: input_text.time_cycle_end
     data_template:
-      value: '{{ now() }}'
+      entity_id: "input_text.time_cycle_{{ 'start' if trigger.to_state.state in ['heating', 'cooling'] else 'end' }}"
+      value: "{{ now() }}"
 
 
 sensor:
@@ -167,7 +154,7 @@ sensor:
     furnace_filter_days_remaining:
       friendly_name: "Furnace filter days remaining"
       value_template: >
-        {% if (states('sensor.average_total_runtime_week') | float) == 0 %}
+        {% if (states('sensor.average_total_runtime_week') | int) == 0 %}
           > 30
         {% elif ((((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0)) > 30 %}
           > 30
@@ -218,11 +205,7 @@ input_text:
 
 #Exclude from repo
   time_cycle_start:
-    name: Time last cycle started
-
-#Exclude from repo
   time_cycle_end:
-    name: Time last cycle ended
 
 
 input_number:

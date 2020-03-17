@@ -1,0 +1,29 @@
+- alias: Notify actions
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+  action:
+    service_template: >
+      {% set action = trigger.event.data.action %}
+      {% if action in ['heat_reenable'] %}
+        homeassistant.turn_on
+      {% elif action in ['lights_off'] %}
+        homeassistant.turn_off
+      {% elif action == 'alarm_arm_away' %}
+        alarm_control_panel.alarm_arm_away
+      {% else %}
+        switch.turn_off
+      {% endif %}
+    data_template:
+      entity_id: >
+        {% set action = trigger.event.data.action %}
+        {% if action == 'alarm_arm_away' %}
+          alarm_control_panel.abode_hk
+        {% elif action == 'heat_reenable' %}
+          script.heat_sleep
+        {% elif action == 'lights_off' %}
+          group.lights_interior
+        {% else %}
+          none
+        {% endif %}

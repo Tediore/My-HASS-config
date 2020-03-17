@@ -33,7 +33,7 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '06:30:00'
+    at: '06:20:00'
   condition:
   - condition: time
     weekday: sun
@@ -107,17 +107,6 @@ automation:
         actions:
         - action: heat_reenable
           title: Turn heat on
-
-
-- alias: Action - turn heat back on
-  initial_state: true
-  trigger:
-  - platform: event
-    event_type: mobile_app_notification_action
-    event_data:
-      action: heat_reenable
-  action:
-  - service: script.heat_sleep
 
 
 - alias: Record previous thermostat mode

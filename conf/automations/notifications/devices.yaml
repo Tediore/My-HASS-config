@@ -9,8 +9,10 @@
     - binary_sensor.water_sensor_2
     - binary_sensor.water_sensor_3
     - binary_sensor.water_sensor_4
+    - binary_sensor.lumi_motion_1
     - sensor.lumi_temp_1
     - sensor.lumi_temp_2
+    - light.front_closet
     to: 'unavailable'
   - platform: state
     entity_id:
@@ -21,6 +23,7 @@
     - switch.plug_3
     - switch.plug_4
     - switch.light_switch_1
+    - light.porch_light
     to: 'unavailable'
     for: '00:01:00'
   action:
@@ -42,6 +45,7 @@
     - sensor.button_2_battery
     - sensor.lumi_weather_1_battery
     - sensor.lumi_weather_2_battery
+    - sensor.lumi_motion_1_battery
     - sensor.water_sensor_1_battery
     - sensor.water_sensor_2_battery
     - sensor.water_sensor_3_battery
@@ -52,7 +56,7 @@
     - sensor.living_room_remote_battery
     - sensor.master_bedroom_remote_battery
     - sensor.motion_sensor_motion_battery_level
-    - sensor.motion_sensor_1_battery_level
+    - sensor.wyze_motion_1_battery_level
     - sensor.front_closet_battery_level
     - sensor.storm_door_battery_level
     below: 21

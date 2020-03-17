@@ -1,12 +1,14 @@
 include:
   entities:
   - alarm_control_panel.abode
+  - alarm_control_panel.abode_hk
   - binary_sensor.front_door
   - binary_sensor.balcony_door
   - binary_sensor.drawer
   - binary_sensor.front_closet
   - binary_sensor.storm_door
-  - binary_sensor.motion_sensor_1
+  - binary_sensor.wyze_motion_1
+  - binary_sensor.lumi_motion_1
   - binary_sensor.keypad
   - binary_sensor.water_sensor_1
   - binary_sensor.water_sensor_2
@@ -14,6 +16,7 @@ include:
   - binary_sensor.water_sensor_4
   - binary_sensor.xbox
   - binary_sensor.internet
+  - device_tracker.pixel_xl
   - sensor.processor_use
   - sensor.memory_use
   - sensor.memory_use_percent
@@ -34,6 +37,9 @@ include:
   - sensor.router_status
   - sensor.power_strip_outlet_1_power
   - sensor.power_strip_outlet_2_power
+  - sensor.dark_sky_temperature
+  - sensor.dark_sky_dew_point
+  - sensor.outside_temp
   domains:
   - automation
   - media_player
@@ -45,8 +51,11 @@ exclude:
   entities:
   - automation.dismiss_discovery_notification
   - automation.poll_power_strip
-  - automation.record_washer_on_and_off
-  - automation.record_dryer_on_and_off
+  - automation.record_washer_dryer_on_off
   - automation.set_speaker_volume_based_on_app
+  - automation.record_time_when_cycle_starts_ends
+  - automation.keep_power_strip_happy
+  - automation.toggle_power_strip_polling
+  - automation.toggle_vacation_mode
 purge_keep_days: 10
 db_url: !secret db_url

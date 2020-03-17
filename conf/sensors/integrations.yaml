@@ -47,7 +47,7 @@
 
 - platform: command_line
   name: Backup log
-  command: "cat .logs/backup.log"
+  command: "cat /config/.logs/backup.log"
   scan_interval: 3600
 
 - platform: apcupsd

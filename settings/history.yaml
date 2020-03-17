@@ -7,7 +7,8 @@ include:
   - binary_sensor.storm_door
   - binary_sensor.drawer
   - binary_sensor.front_closet
-  - binary_sensor.motion_sensor_1
+  - binary_sensor.wyze_motion_1
+  - binary_sensor.lumi_motion_1
   - switch.light_switch_1
   - light.front_closet
   - light.dining_room
@@ -19,7 +20,7 @@ include:
   - switch.plug_2
   - switch.plug_3
   - switch.plug_1
-  - media_player.living_room_tv
-  - media_player.bedroom_tv
+  - media_player.living_room_vizio
+  - media_player.bedroom_vizio
   - climate.thermostat
   - binary_sensor.internet

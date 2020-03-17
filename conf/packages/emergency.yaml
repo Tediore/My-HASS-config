@@ -22,12 +22,7 @@ automation:
         {% endif %}
   - service: notify.mobile_app_pixel_xl
     data_template:
-      title: >
-        {% if trigger.to_state.state == 'on' %}
-          LEAK DETECTED!
-        {% else %}
-          Leak no longer detected
-        {% endif %}
+      title: "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
       message: >
         {% if trigger.to_state.state == 'on' %}
           LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
@@ -49,7 +44,7 @@ automation:
     entity_id: alarm_control_panel.abode
     state: armed_away
   - condition: template
-    value_template: "{{ (trigger.to_state.state in ['Smoke', 'CO']) or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
+    value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
   action:
   - service: notify.telegram
     data_template:

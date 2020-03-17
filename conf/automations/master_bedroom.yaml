@@ -1,7 +1,7 @@
 - alias: Good morning - workday
   initial_state: true
   trigger:
-    platform: time
+  - platform: time
     at: '06:50:00'
   condition:
   - condition: template
@@ -10,12 +10,16 @@
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.good_morning
+  - condition: state
+    entity_id: binary_sensor.dark_inside
+    state: 'on'
+  - service: script.lights_sunset
 
 
 - alias: Turn fan off at 7:15am on day off
   initial_state: true
   trigger:
-    platform: time
+  - platform: time
     at: '07:15:00'
   condition:
   - condition: template
@@ -26,60 +30,3 @@
     - input_boolean.sleep_mode
     - input_boolean.andy_sleep
     - switch.plug_1
-
-
-- alias: Repeat white noise in sleep mode
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: media_player.bedroom_speaker
-    from: 'playing'
-    to: 'idle'
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.andy_sleep
-      state: 'on'
-  - condition: time
-    after: '18:00:00'
-    before: '06:19:29'
-  action:
-  - service: media_player.play_media
-    entity_id: media_player.bedroom_speaker
-    data:
-      media_content_id: !secret white_noise
-      media_content_type: audio/mp3
-
-
-- alias: Stop white noise
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '06:20:00'
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.andy_sleep
-      state: 'on'
-  - condition: state
-    entity_id: media_player.bedroom_speaker
-    state: 'playing'
-  action:
-  - service: script.volume_transition_to_zero
-  - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.15 }}"
-  - service: script.turn_off
-    entity_id: script.volume_transition_to_zero
-  - service: media_player.turn_off
-    entity_id: media_player.bedroom_speaker
-  - service: media_player.volume_set
-    data:
-      entity_id: media_player.bedroom_speaker
-      volume_level: 0.4

@@ -1,30 +1,60 @@
-- alias: Turn lights on at sunset if home
+- alias: Turn lights on/off at sunset/sunrise if home
   initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.dark_inside
-    from: 'off'
-    to: 'on'
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
-  - condition: time
-    after: '15:00:00'
+  action:
+  - service_template: "script.lights_{{ 'sunset' if trigger.to_state.state == 'on' else 'sunrise' }}"
+
+
+- alias: Turn porch light on
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.balcony_door_hk
+    - binary_sensor.storm_door
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: sun.sun
+    to: 'below_horizon'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: state
+    entity_id: light.porch_light
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.balcony_door_hk
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.storm_door
+      state: 'on'
   action:
   - service: light.turn_on
-    entity_id: light.dining_room
     data:
-      kelvin: 3000
-      transition: 30
+      entity_id: light.porch_light
       brightness_pct: 100
-  - delay: '00:01:00'
-  - service: switch.turn_on
-    entity_id: switch.plug_2
-  - condition: state
-    entity_id: input_boolean.christmas_mode
-    state: 'on'
-  - service: switch.turn_on
-    entity_id: switch.tuya_plug_2
+      kelvin: 4000
+
+
+- alias: Turn porch light off when balcony door closed
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.balcony_door_hk
+    from: 'on'
+    to: 'off'
+  action:
+  - service: light.turn_off
+    entity_id: light.porch_light
 
 
 - alias: Toggle Christmas mode

@@ -3,10 +3,7 @@
     platform: homeassistant
     event: start
   action:
-  - service: notify.mobile_app_pixel_xl
-    data:
-      title: "Server online"
-      message: "Home Assistant has started."
+  - service: script.server_online
   - wait_template: "{{ is_state('persistent_notification.config_entry_discovery', 'notifying') }}"
     timeout: "00:01:00"
     continue_on_timeout: true

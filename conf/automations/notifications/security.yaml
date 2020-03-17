@@ -40,18 +40,6 @@
           title: Turn off
 
 
-- alias: Action - turn all lights off
-  initial_state: true
-  trigger:
-  - platform: event
-    event_type: mobile_app_notification_action
-    event_data:
-      action: lights_off
-  action:
-  - service: homeassistant.turn_off
-    entity_id: group.lights_interior
-
-
 - alias: Notify lights off when away
   initial_state: true
   trigger:
@@ -94,14 +82,16 @@
 - alias: Notify if alarm not armed when away
   initial_state: true
   trigger:
-  - platform: state
-    entity_id: person.matt
-    from: 'home'
-    to: 'not_home'
+  - platform: zone
+    entity_id: device_tracker.pixel_xl
+    zone: zone.home
+    event: leave
   condition:
   - condition: state
     entity_id: alarm_control_panel.abode
     state: 'disarmed'
+  - condition: template
+    value_template: "{{ not is_state('device_tracker.pixel_xl', 'home') }}"
   action:
   - service: notify.mobile_app_pixel_xl
     data:
@@ -115,18 +105,6 @@
           title: Arm alarm
 
 
-- alias: Action - arm alarm in away mode
-  initial_state: true
-  trigger:
-  - platform: event
-    event_type: mobile_app_notification_action
-    event_data:
-      action: alarm_arm_away
-  action:
-  - service: alarm_control_panel.alarm_arm_away
-    entity_id: alarm_control_panel.abode
-
-
 - alias: Notify door opened when away
   initial_state: true
   trigger:
@@ -137,8 +115,11 @@
     - binary_sensor.storm_door
     to: 'on'
   condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: armed_away
   - condition: template
-    value_template: "{{ not is_state('person.matt', 'home') }}"
+    value_template: "{{ not is_state('device_tracker.pixel_xl', 'home') }}"
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:

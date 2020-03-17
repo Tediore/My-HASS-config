@@ -1,8 +1,26 @@
 automation:
+- alias: Disarm alarm - location
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: device_tracker.pixel_xl
+    from: 'not_home'
+    to: 'home'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_away'
+  action:
+  - service: alarm_control_panel.alarm_disarm
+    entity_id: alarm_control_panel.abode_hk
+
+
 - alias: Turn entrance light on upon entrance
   initial_state: true
   trigger:
-  - entity_id: binary_sensor.front_door
+  - entity_id: 
+    - binary_sensor.front_door_hk
+    - binary_sensor.lumi_motion_1
     platform: state
     from: 'off'
     to: 'on'
@@ -11,11 +29,12 @@ automation:
     entity_id: alarm_control_panel.abode
     state: 'armed_away'
   action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.sensor_tripped
+  - condition: state
+    entity_id: switch.light_switch_1
+    state: 'off'
   - service: script.entrance_light_on
-  - service: homeassistant.turn_on
-    entity_id:
-    - input_boolean.sensor_tripped
-    - media_player.living_room_speaker
 
 
 - alias: Alarm disarmed from away
@@ -26,22 +45,20 @@ automation:
     from: 'armed_away'
     to: 'disarmed'
   action:
-  - service_template: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'app' }}"
+  - service_template: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'loc' }}"
 
 
 - alias: Re-arm alarm in away mode
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_boolean.disarmed_app
+    entity_id: input_boolean.disarmed_loc
     from: 'off'
     to: 'on'
     for: '00:10:00'
   action:
   - service: alarm_control_panel.alarm_arm_away
-    entity_id: alarm_control_panel.abode
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.disarmed_app
+    entity_id: alarm_control_panel.abode_hk
 
 
 - alias: Activate away mode when armed away
@@ -87,9 +104,33 @@ automation:
       state: 'on'
   action:
   - service: script.away_mode
+  - delay: '00:00:05'
+  - condition: state
+    entity_id: group.lights_all
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.any_media_player
+    state: 'off'
   - service: script.notify_away
     data_template:
       title: Away mode activated (second attempt)
+
+
+- alias: Manage master bedroom lights night arrival
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.wyze_motion_1
+    from: 'off'
+    to: 'on'
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_bedroom_enter
+  action:
+    service_template: "{{ 'timer.cancel' if trigger.platform == 'state' else 'light.turn_off' }}"
+    data_template:
+      entity_id: "{{ 'timer.master_bedroom_enter' if trigger.platform == 'state' else 'light.master_bedroom' }}"
 
 
 script:
@@ -97,18 +138,17 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id:
-      - input_boolean.disarmed_app
+      - input_boolean.disarmed_loc
       - input_boolean.sensor_tripped
       - group.plugs
+      - group.lights_all
       - climate.space_heater
-    - service: light.turn_off
-      entity_id: all
     - service: media_player.turn_off
       entity_id: all
     - service: media_player.volume_set
       data:
         entity_id: media_player.living_room_speaker
-        volume_level: 0.45
+        volume_level: 0.5
     - condition: state
       entity_id: input_boolean.christmas_mode
       state: 'on'
@@ -138,36 +178,57 @@ script:
   
   disarmed_keypad:
     sequence:
-    - service: script.speak_welcome_home
+    - service: script.tts_living_room
+      data:
+        message: "Welcome home."
     - service: input_boolean.turn_off
       entity_id: input_boolean.sensor_tripped
     - service: script.tstat_smart_resume_cool
     - service: script.arrival_night
   
   
-  disarmed_app:
+  disarmed_loc:
     sequence:
     - service: input_boolean.turn_on
-      entity_id: input_boolean.disarmed_app
+      entity_id: input_boolean.disarmed_loc
     - service: switch.turn_on
       entity_id: switch.light_switch_1
-    - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
+    - wait_template: "{{ is_state('binary_sensor.front_door', 'on') or is_state('binary_sensor.lumi_motion_1', 'on') }}"
       timeout: '00:10:00'
       continue_on_timeout: false
+    - service: media_player.volume_mute
+      entity_id: media_player.living_room_speaker
+      data:
+        is_volume_muted: true
+    - service: media_player.turn_on
+      entity_id: media_player.living_room_speaker
     - service: script.entrance_light_on
     - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
       timeout: '00:10:00'
       continue_on_timeout: false
     - service: script.toggle_sensor_tripped
-    - service: script.speak_welcome_home
+    - service: media_player.volume_mute
+      entity_id: media_player.living_room_speaker
+      data:
+        is_volume_muted: false
+    - service: media_player.play_media
+      entity_id: media_player.living_room_speaker
+      data_template:
+        media_content_id: "http://10.0.0.2:8123/local/audio/welcome_home.mp3"
+        media_content_type: audio/mp3
     - service: script.tstat_smart_resume_cool
     - service: script.arrival_night
+    - wait_template: "{{ is_state('media_player.living_room_speaker', 'idle') }}"
+      timeout: '00:00:10'
+      continue_on_timeout: true
+    - service: media_player.turn_off
+      entity_id: media_player.living_room_speaker
 
 
   toggle_sensor_tripped:
     sequence:
     - service: input_boolean.turn_off
-      entity_id: input_boolean.disarmed_app
+      entity_id: input_boolean.disarmed_loc
     - service: input_boolean.turn_on
       entity_id: input_boolean.sensor_tripped
     - service: input_boolean.turn_off
@@ -184,23 +245,21 @@ script:
   
   
   arrival_night:
-    alias: Alarm disarmed from away at night
     sequence:
     - condition: state
       entity_id: binary_sensor.dark_inside
       state: 'on'
     - service_template: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas_mode', 'on') else 'normal' }}"
-    - wait_template: "{{ is_state('binary_sensor.motion_sensor_1', 'on') }}"
-      timeout: '00:05:00'
-      continue_on_timeout: false
-    - service: hue.hue_activate_scene
+    - service: timer.start
+      entity_id: timer.master_bedroom_enter
       data:
-        group_name: Master bedroom
-        scene_name: Read
+        duration: '00:05:00'
   
 
   lights_normal:
     sequence:
+    - service: timer.start
+      entity_id: timer.master_bedroom_enter
     - service: hue.hue_activate_scene
       data:
         group_name: Dining room
@@ -209,6 +268,10 @@ script:
       data:
         group_name: Living room
         scene_name: Read lamps
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Master bedroom
+        scene_name: Read
     - service: switch.turn_on
       entity_id: switch.plug_2
 
@@ -227,16 +290,12 @@ script:
       data:
         group_name: Living room
         scene_name: Christmas
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Master bedroom
+        scene_name: Read
     - delay: '00:01:00'
     - service: hue.hue_activate_scene
       data:
         group_name: Living room
         scene_name: Read lamps
-
-
-  speak_welcome_home:
-    sequence:
-    - service: tts.google
-      entity_id: media_player.living_room_speaker
-      data:
-        message: "Welcome home."

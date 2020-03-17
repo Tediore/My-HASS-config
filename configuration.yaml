@@ -26,8 +26,10 @@ hacs: !include conf/.hacs.yaml
 history: !include settings/history.yaml
 http: !include settings/http.yaml
 hue: !include conf/.hue.yaml
-input_boolean: !include conf/flippy_bois.yaml
+input_boolean: !include conf/input_boolean.yaml
+input_datetime: !include conf/input_datetime.yaml
 input_number: !include conf/input_number.yaml
+input_select: !include conf/input_select.yaml
 input_text: !include conf/input_text.yaml
 light: !include conf/light.yaml
 logbook:
@@ -43,6 +45,7 @@ sun:
 switch: !include conf/switch.yaml
 system_health:
 telegram_bot: !include conf/.telegram.yaml
+timer: !include conf/timer.yaml
 tplink: !include conf/tplink.yaml
 tts: !include conf/.tts.yaml
 updater: !include settings/updater.yaml

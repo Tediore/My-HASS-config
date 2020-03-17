@@ -1,7 +1,6 @@
 ### See button 1 package for related scripts
-
 automation:
-- alias: Andy button initial press
+- alias: Andy button
   initial_state: true
   trigger:
   - platform: event
@@ -9,42 +8,22 @@ automation:
     event_data:
       command: button_single
       device_ieee: !secret button_2_id
-  condition:
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'off'
   action:
-  - service: script.good_night_andy
-
-
-- alias: Andy button toggle fan
-  initial_state: true
-  trigger:
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: button_single
-      device_ieee: !secret button_2_id
-  condition:
-  - condition: state
-    entity_id: media_player.bedroom_speaker
-    state: 'playing'
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'on'
-  action:
-  - service: switch.toggle
-    entity_id: switch.plug_1
+    service_template: >
+      {% if is_state('input_boolean.andy_sleep', 'off') %}
+        script.good_night{{ '_andy' if is_state('device_tracker.pixel_xl', 'home') else '' }}
+      {% else %}
+        script.toggle_bedroom_fan
+      {% endif %}
 
 
 script:
   good_night_andy:
-    alias: Good night - Andy
     sequence:
-    - service: media_player.turn_off
-      entity_id: media_player.bedroom_vizio
-    - service: light.turn_off
-      entity_id: light.master_bedroom
+    - service: homeassistant.turn_off
+      entity_id:
+      - light.master_bedroom
+      - media_player.bedroom_vizio
     - service: script.white_noise_bedroom
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep

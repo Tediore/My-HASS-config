@@ -177,5 +177,5 @@ script:
 
 input_boolean:
   sensor_tripped:
-  disarmed_app:
+  disarmed_loc:
   vacation_mode:

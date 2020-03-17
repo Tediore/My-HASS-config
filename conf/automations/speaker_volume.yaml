@@ -20,11 +20,11 @@
       entity_id: "media_player.{{ trigger.to_state.name.lower().replace(' ','_') }}"
       volume_level: >
         {% set app = trigger.to_state.state %}
-        {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('_app_name','').replace('_',' ') %}
+        {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
         {% if app in ['iHeartRadio'] %}
-          {% if speaker in ['portable speaker', 'living room speaker'] %}
+          {% if speaker in ['portable', 'living room'] %}
             0.45
-          {% elif speaker in ['bedroom speaker', 'kitchen speaker'] %}
+          {% elif speaker in ['bedroom', 'kitchen'] %}
             0.4
           {% elif speaker in ['hub'] %}
             0.5
@@ -32,11 +32,11 @@
             0.4
           {% endif %}
         {% elif app in ['Google Play Music', 'Spotify'] %}
-          {% if speaker in ['bedroom speaker', 'kitchen speaker'] %}
+          {% if speaker in ['bedroom', 'kitchen', 'living room'] %}
             0.36
-          {% elif speaker in ['portable speaker'] %}
+          {% elif speaker in ['portable'] %}
             0.3
-          {% elif speaker in ['living room speaker', 'hub'] %}
+          {% elif speaker in ['hub'] %}
             0.4
           {% else %}
             0.36
@@ -55,7 +55,7 @@
   - platform: state
     entity_id: sensor.hvac_action
     to: 'heating'
-    for: '00:00:45'
+    for: '00:00:43'
   - platform: state
     entity_id: media_player.living_room_speaker
     to: 'playing'
@@ -66,7 +66,7 @@
   - condition: state
     entity_id: sensor.hvac_action
     state: 'heating'
-    for: '00:00:45'
+    for: '00:00:43'
   - condition: template
     value_template: "{{ is_state('media_player.living_room_speaker', 'playing') }}"
   - condition: state
@@ -94,14 +94,14 @@
     to:
     - 'idle'
     - 'off'
-    for: '00:00:45'
+    for: '00:00:43'
   - platform: state
     entity_id: sensor.hvac_action
     from: 'heating'
     to:
     - 'idle'
     - 'off'
-    for: '00:01:25'
+    for: '00:01:28'
   condition:
   - condition: state
     entity_id: binary_sensor.quiet_hours

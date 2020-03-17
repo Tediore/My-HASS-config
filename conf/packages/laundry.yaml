@@ -8,34 +8,78 @@ automation:
     - input_boolean.dryer
     from: 'on'
     to: 'off'
+  - platform: state
+    entity_id:
+    - input_boolean.washer_reminder
+    - input_boolean.dryer_reminder
+    to: 'on'
+    for: '00:30:00'
   condition:
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:
-      title: "{{ trigger.to_state.name }} cycle done"
+      title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  - service: input_boolean.turn_on
+  - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
     data_template:
-      entity_id: "{{ trigger.to_state.entity_id }}_reminder"
+      entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
+
+
+- alias: Record washer/dryer on/off
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.power_strip_outlet_1_power
+    above: 550
+  - platform: numeric_state
+    entity_id: sensor.power_strip_outlet_1_power
+    below: 1.5
+  - platform: numeric_state
+    entity_id: sensor.power_strip_outlet_2_power
+    above: 250
+    for: '00:05:00'
+  - platform: numeric_state
+    entity_id: sensor.power_strip_outlet_2_power
+    below: 50
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if states(trigger.to_state.entity_id) | float > 250 else 'off' }}"
+    data_template:
+      entity_id: "input_boolean.{{ 'washer' if '1' in trigger.to_state.entity_id else 'dryer' }}"
+
+
+- alias: Toggle power strip polling
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.laundry_room_door
+  - platform: state
+    entity_id: input_boolean.sleep_mode
+  - platform: state
+    entity_id: alarm_control_panel.abode
+  action:
+    service_template: >
+      {% set door = states('binary_sensor.laundry_room_door') %}
+      {% set sleep = states('input_boolean.sleep_mode') %}
+      {% set alarm = states('alarm_control_panel.abode') %}
+      {% if door == 'on' or sleep == 'on' or alarm == 'armed_away' %}
+        automation.turn_off
+      {% elif door == 'off' and sleep == 'off' and alarm in ['armed_home', 'disarmed'] %}
+        automation.turn_on
+      {% else %}
+        automation.turn_off
+      {% endif %}
+    entity_id: automation.poll_power_strip
 
 
 - alias: Poll power strip
-  initial_state: true
   trigger:
   - platform: time_pattern
     seconds: '/15'
-  condition:
-  - condition: state
-    entity_id: binary_sensor.laundry_room_door
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: zwave.refresh_entity
     data:
@@ -49,11 +93,11 @@ automation:
   initial_state: true
   trigger:
   - platform: time_pattern
-    hours: "/4"
+    hours: '/3'
   condition:
   - condition: state
-    entity_id: binary_sensor.laundry_room_door
-    state: 'on'
+    entity_id: automation.poll_power_strip
+    state: 'off'
   action:
   - service: zwave.refresh_entity
     data:
@@ -63,66 +107,17 @@ automation:
       entity_id: sensor.power_strip_outlet_2_power
 
 
-- alias: Record washer on and off
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_1_power
-    above: 550
-  - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_1_power
-    below: 1.5
-  action:
-  - service_template: "input_boolean.turn_{{ 'on' if states(trigger.to_state.entity_id) | float > 550 else 'off' }}"
-    entity_id: input_boolean.washer
-
-
-- alias: Record dryer on and off
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_2_power
-    above: 250
-    for: '00:05:00'
-  - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_2_power
-    below: 50
-  action:
-  - service_template: "input_boolean.turn_{{ 'on' if states(trigger.to_state.entity_id) | float > 250 else 'off' }}"
-    entity_id: input_boolean.dryer
-
-
-- alias: Washer/dryer done reminder
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id:
-    - input_boolean.washer_reminder
-    - input_boolean.dryer_reminder
-    to: 'on'
-    for: '01:00:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'off'
-  action:
-  - service: notify.mobile_app_pixel_xl
-    data_template:
-      title: "{{ trigger.to_state.name }} done reminder"
-      message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  - service: input_boolean.turn_off
-    data_template:
-      entity_id: "{{ trigger.to_state.entity_id }}"
-
-
 - alias: Reset laundry reminder booleans
   initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.laundry_room_door
+    to: 'on'
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 'armed_away'
+  - platform: state
+    entity_id: input_boolean.sleep_mode
     to: 'on'
   action:
   - service: input_boolean.turn_off

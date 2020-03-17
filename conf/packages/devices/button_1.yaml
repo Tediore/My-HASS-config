@@ -1,5 +1,5 @@
 automation:
-- alias: Matt button initial press
+- alias: Matt button
   initial_state: true
   trigger:
   - platform: event
@@ -7,50 +7,30 @@ automation:
     event_data:
       command: button_single
       device_ieee: !secret button_1_id
-  condition:
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'off'
-  action:
-  - service_template: "script.{{ 'good_night' if is_state('input_boolean.andy_sleep', 'off') else 'good_night_no_noise' }}"
-
-
-- alias: Matt button toggle fan
-  initial_state: true
-  trigger:
   - platform: event
     event_type: zha_event
     event_data:
-      command: button_single
+      command: button_double
       device_ieee: !secret button_1_id
-  condition:
-  - condition: state
-    entity_id: media_player.bedroom_speaker
-    state: 'playing'
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'on'
-  action:
-  - service: switch.toggle
-    entity_id: switch.plug_1
-
-
-- alias: Matt button white noise only
-  initial_state: true
-  trigger:
   - platform: event
     event_type: zha_event
     event_data:
-      command: button_single
+      command: button_hold
       device_ieee: !secret button_1_id
-  condition:
-  - condition: template
-    value_template: "{{ not is_state('media_player.bedroom_speaker', 'playing') }}"
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'on'
   action:
-  - service: script.white_noise_bedroom
+    service_template: >
+      {% set command = trigger.event.data.command %}
+      {% if command == 'button_single' %}
+        {% if is_state('input_boolean.sleep_mode', 'off') %}
+          script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+        {% else %}
+          script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
+        {% endif %}
+      {% elif command == 'button_double' %}
+        script.toggle_bedroom_fan
+      {% else %}
+        script.early_departure
+      {% endif %}
 
 
 - alias: Lights off backup attempt
@@ -70,10 +50,49 @@ automation:
       entity_id: switch.plug_2
       state: 'on'
   action:
-  - service: homeassistant.turn_off
-    entity_id: 
-    - group.lights_interior
-    - switch.plug_2
+  - service: script.good_night_no_noise
+
+
+- alias: Repeat white noise in sleep mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.bedroom_speaker
+    from: 'playing'
+    to: 'idle'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.andy_sleep
+      state: 'on'
+  action:
+  - service: media_player.play_media
+    entity_id: media_player.bedroom_speaker
+    data:
+      media_content_id: !secret white_noise
+      media_content_type: audio/mp3
+
+
+- alias: Stop white noise
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '06:20:00'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.andy_sleep
+      state: 'on'
+  action:
+  - service: script.stop_white_noise
 
 
 script:
@@ -82,17 +101,16 @@ script:
     sequence:
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
-    - service: media_player.turn_off
-      entity_id: all
+    - service: script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id: 
       - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
+    - service: script.media_players_off
     - service: script.sleep_switches
-    - service: script.white_noise_bedroom
     - service: alarm_control_panel.alarm_arm_home
-      entity_id: alarm_control_panel.abode
+      entity_id: alarm_control_panel.abode_hk
     - condition: state
       entity_id: input_boolean.christmas_mode
       state: 'on'
@@ -104,7 +122,6 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id: 
-      - media_player.bedroom_vizio
       - group.lights_interior
       - switch.tuya_plug_2
       - media_player.living_room_vizio
@@ -120,21 +137,61 @@ script:
     - service: media_player.volume_mute
       entity_id: media_player.bedroom_speaker
       data:
-        is_volume_muted: yes
+        is_volume_muted: true
+    - service: media_player.turn_on
+      entity_id: media_player.bedroom_speaker
+    - delay: '00:00:01'
     - service: media_player.play_media
       entity_id: media_player.bedroom_speaker
       data:
         media_content_id: !secret white_noise
         media_content_type: audio/mp3
-    - delay: '00:00:01'
-    - service: media_player.volume_mute
-      entity_id: media_player.bedroom_speaker
-      data:
-        is_volume_muted: no
+    - wait_template: "{{ is_state('media_player.bedroom_speaker', 'playing') }}"
+      timeout: '00:00:10'
+      continue_on_timeout: true
     - service: media_player.volume_set
       entity_id: media_player.bedroom_speaker
       data_template:
         volume_level: "{{ states('input_number.white_noise_vol') | int / 100 }}"
+    - service: media_player.volume_mute
+      entity_id: media_player.bedroom_speaker
+      data:
+        is_volume_muted: false
+
+  stop_white_noise:
+    sequence:
+    - service: script.volume_transition_to_zero_foo
+    - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.10 }}"
+      timeout: '00:01:00'
+      continue_on_timeout: true
+    - service: homeassistant.turn_off
+      entity_id: 
+      - script.volume_transition_to_zero_foo
+      - script.volume_transition_to_zero_bar
+      - media_player.bedroom_speaker
+    - service: media_player.volume_mute
+      entity_id: media_player.bedroom_speaker
+      data:
+        is_volume_muted: true
+    - service: media_player.volume_set
+      data:
+        entity_id: media_player.bedroom_speaker
+        volume_level: 0.4
+    - service: media_player.volume_mute
+      entity_id: media_player.bedroom_speaker
+      data:
+        is_volume_muted: false
+
+  media_players_off:
+    sequence:
+    - service: media_player.turn_off
+      entity_id:
+      - media_player.bedroom_vizio
+      - media_player.living_room_vizio
+      - media_player.living_room_speaker
+      - media_player.portable_speaker
+      - media_player.hub
+      - media_player.kitchen_speaker
 
   sleep_switches:
     sequence:
@@ -142,6 +199,30 @@ script:
       entity_id: switch.plug_2
     - service: switch.turn_on
       entity_id: switch.plug_1
+
+  toggle_bedroom_fan:
+    sequence:
+    - service: switch.toggle
+      entity_id: switch.plug_1
+  
+  early_departure:
+    sequence:
+    - service: script.stop_white_noise
+    - service: input_boolean.turn_off
+      entity_id:
+      - input_boolean.sleep_mode
+      - input_boolean.andy_sleep
+    - service: light.turn_on
+      entity_id: 
+      - light.master_bedroom
+      - light.living_room_lamps
+      - light.dining_room
+      data:
+        transition: 30
+        kelvin: 3000
+        brightness_pct: 50
+    - service: switch.turn_on
+      entity_id: switch.plug_2    
 
 
 input_number:
