@@ -1,12 +1,8 @@
 pre_media:
   alias: Turn lights off when TV turned on
   sequence:
-  - service: light.turn_off
-    entity_id: light.living_room
-    data:
-      transition: 2
   - condition: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
     state: 'on'
   - service: light.turn_on
     entity_id: light.dining_room
@@ -14,32 +10,40 @@ pre_media:
       kelvin: 3000
       transition: 2
       brightness_pct: 50
+  - service: script.christmas_tree_off
   - condition: state
-    entity_id: input_boolean.christmas_mode
+    entity_id: light.living_room_lamps
     state: 'on'
-  - service: switch.turn_off
-    entity_id: switch.tuya_plug_2
+  - service: light.turn_off
+    entity_id: light.living_room
+    data:
+      transition: 2
 
 
 post_media:
   alias: Turn lights back on when TV turned off
   sequence:
   - service: light.turn_on
-    entity_id: light.living_room_lamps
-    data:
-      kelvin: 3000
-      transition: 3
-      brightness_pct: 100
-  - service: light.turn_on
-    entity_id: light.dining_room
+    entity_id: 
+    - light.living_room_lamps
+    - light.dining_room
     data:
       kelvin: 3000
       transition: 3
       brightness_pct: 100
   - condition: state
-    entity_id: binary_sensor.christmas_mode
+    entity_id: input_boolean.christmas_mode
     state: 'on'
   - service: switch.turn_on
+    entity_id: switch.tuya_plug_2
+
+
+christmas_tree_off:
+  sequence:
+  - condition: state
+    entity_id: input_boolean.christmas_mode
+    state: 'on'
+  - service: switch.turn_off
     entity_id: switch.tuya_plug_2
 
 

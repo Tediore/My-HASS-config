@@ -1,0 +1,4 @@
+- platform: xboxone
+  device: !secret xbox_id
+  ip_address: 10.0.0.49
+  name: Xbox One

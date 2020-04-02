@@ -1,8 +1,32 @@
+- alias: Toggle dark inside boolean
+  initial_state: true
+  trigger:
+  - platform: template # True when dark inside
+    value_template: >
+      {% set elev = state_attr('sun.sun', 'elevation') | float %}
+      {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
+      {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
+      {{ states('sun.sun') == 'below_horizon' or (states('weather.kmdw') in ['overcast'] and elev < elev_cloudy) or (states('weather.kmdw') not in ['overcast'] and elev < elev_sunny) }}
+  - platform: template # True when not dark inside
+    value_template: >
+      {% set elev = state_attr('sun.sun', 'elevation') | float %}
+      {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
+      {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
+      {{ states('sun.sun') != 'below_horizon' and not (states('weather.kmdw') in ['overcast'] and elev < elev_cloudy) and not (states('weather.kmdw') not in ['overcast'] and elev < elev_sunny) }}
+  action:
+    service_template: >
+      {% set elev = state_attr('sun.sun', 'elevation') | float %}
+      {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
+      {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
+      input_boolean.turn_{{ 'on' if states('sun.sun') == 'below_horizon' or (states('weather.kmdw') in ['overcast'] and elev < elev_cloudy) or (states('weather.kmdw') not in ['overcast'] and elev < elev_sunny) else 'off' }}
+    entity_id: input_boolean.dark_inside
+
+
 - alias: Turn lights on/off at sunset/sunrise if home
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
@@ -10,54 +34,114 @@
   - service_template: "script.lights_{{ 'sunset' if trigger.to_state.state == 'on' else 'sunrise' }}"
 
 
-- alias: Turn porch light on
+- alias: Turn porch light white when door opened
   initial_state: true
   trigger:
   - platform: state
-    entity_id:
-    - binary_sensor.balcony_door_hk
-    - binary_sensor.storm_door
-    from: 'off'
+    entity_id: binary_sensor.balcony_door_hk
     to: 'on'
   - platform: state
     entity_id: sun.sun
     to: 'below_horizon'
   condition:
   - condition: state
+    entity_id: binary_sensor.balcony_door_hk
+    state: 'on'
+  - condition: state
     entity_id: sun.sun
     state: 'below_horizon'
   - condition: state
-    entity_id: light.porch_light
+    entity_id: input_boolean.on_balcony
     state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.balcony_door_hk
-      state: 'on'
-    - condition: state
-      entity_id: binary_sensor.storm_door
-      state: 'on'
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
   action:
-  - service: light.turn_on
+  - service: scene.create
     data:
-      entity_id: light.porch_light
-      brightness_pct: 100
+      scene_id: save_porch_light
+      snapshot_entities:
+      - light.porch_light
+  - service: light.turn_on
+    entity_id: light.porch_light
+    data:
       kelvin: 4000
+      brightness_pct: 100
+      transition: 0.4
 
 
-- alias: Turn porch light off when balcony door closed
+- alias: Restore porch light state when door closed
   initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.balcony_door_hk
+    to: 'off'
+    for: '00:00:10'
+  condition:
+  - condition: state
+    entity_id: input_boolean.on_balcony
+    state: 'off'
+  action:
+  - scene: scene.save_porch_light
+
+
+- alias: Record when on balcony
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.storm_door
+  - platform: state
+    entity_id: binary_sensor.balcony_door_hk
+    from: 'off'
+    to: 'on'
+    for: '00:00:01'
+  - platform: state
+    entity_id: binary_sensor.balcony_door_hk
     from: 'on'
     to: 'off'
+  - platform: state
+    entity_id:
+    - input_boolean.on_balcony_init1
+    - input_boolean.on_balcony_init2
+    - input_boolean.on_balcony
+    to: 'on'
   action:
-  - service: light.turn_off
-    entity_id: light.porch_light
+  - service: input_boolean.turn_on
+    data_template:
+      entity_id: >
+        {% set tstate = trigger.to_state.state %}
+        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('_hk', '').replace('input_boolean.', '') %} 
+        {% set balcony = states('binary_sensor.balcony_door_hk') %}
+        {% set storm = states('binary_sensor.storm_door') %}
+        {% if entity == 'balcony' and tstate == 'on' and storm == 'off' %}
+          input_boolean.on_balcony_init0
+        {% elif entity == 'storm' and tstate == 'on' and is_state('input_boolean.on_balcony_init0', 'on') %}
+          input_boolean.on_balcony_init1
+        {% elif entity == 'balcony' and tstate == 'off' and is_state('input_boolean.on_balcony_init1', 'on') %}
+          input_boolean.on_balcony_init2
+        {% elif entity == 'storm' and tstate == 'off' and is_state('input_boolean.on_balcony_init2', 'on') %}
+          input_boolean.on_balcony
+        {% else %}
+          none
+        {% endif %}
+  - service: input_boolean.turn_off
+    data_template:
+      entity_id: >
+        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('_hk', '').replace('input_boolean.', '') %}
+        {% set tstate = trigger.to_state.state %}
+        {% if entity == 'on_balcony_init1' %}
+          input_boolean.on_balcony_init0
+        {% elif entity == 'on_balcony_init2' %}
+          input_boolean.on_balcony_init1
+        {% elif entity == 'on_balcony' %}
+          input_boolean.on_balcony_init2
+        {% elif entity == 'balcony' and tstate == 'on' and is_state('input_boolean.on_balcony', 'on') %}
+          input_boolean.on_balcony
+        {% else %}
+          none
+        {% endif %}
 
 
-- alias: Toggle Christmas mode
+- alias: Toggle holiday modes
   initial_state: true
   trigger:
   - platform: time
@@ -66,7 +150,67 @@
     event: start
   condition:
   - condition: template
-    value_template: "{{ (now().month == 12 and now().day == 1) or (now().month == 1 and now().day == 2) }}"
+    value_template: >
+      {% set month = now().month %}
+      {% set day = now().day %}
+      {{ (month == 2 and day in [14, 15]) or (month in [1, 4, 5, 11] and day == 1) or (month == 10 and day == 24) or (month == 12 and day == 14) }}
   action:
-  - service_template: "input_boolean.turn_{{ 'on' if now().month == 12 else 'off' }}"
-    entity_id: input_boolean.christmas_mode
+    service_template: >
+      {% set month = now().month %}
+      {% set day = now().day %}
+        input_boolean.turn_{{ 'on' if (month == 2 and day == 14) or month in [4, 10, 12] else 'off' }}
+    data_template:
+      entity_id: >
+        {% set month = now().month %}
+        {% set day = now().day %}
+        {% if month == 2 %}
+          input_boolean.valentines_day
+        {% elif month in [4, 5] %}
+          input_boolean.autism_awareness
+        {% elif month in [10, 11] %}
+          input_boolean.halloween
+        {% else %}
+          input_boolean.christmas
+        {% endif %}
+
+
+- alias: HVAC closet door opened/closed
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.hvac_closet
+  condition:
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: light.turn_on
+    entity_id: light.laundry_room
+    data_template:
+      brightness_pct: "{{ 100 if trigger.to_state.state == 'on' else 0 }}"
+      kelvin: 4000
+  - service_template: "switch.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
+    entity_id: switch.hue_motion_sensor_1
+
+
+- alias: Reenable throttled automations
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: automation.toggle_song_polling
+    to: 'off'
+    for: '00:00:10'
+  - platform: state
+    entity_id: 
+    - automation.suggest_opening_the_windows
+    - automation.notify_when_humidity_high
+    - automation.notify_if_alarm_not_armed_when_away
+    to: 'off'
+    for: '08:00:00'
+  action:
+  - service: automation.turn_on
+    data_template:
+      entity_id: "{{ trigger.to_state.entity_id }}"

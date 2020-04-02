@@ -111,7 +111,7 @@ xbox_off:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   - condition: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: state
     entity_id: input_boolean.andy_sleep
@@ -131,7 +131,7 @@ gr_lights_on:
   alias: Game room lights on
   sequence:
   - condition: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
     state: 'on'
   - service: light.turn_on
     entity_id: light.game_room
@@ -150,17 +150,6 @@ gr_lights_off:
 
 
 #########################
-### Entrance
+### Balcony
 #########################
-front_closet_on:
-  sequence:
-  - service: light.turn_on
-    entity_id: light.front_closet
-    data:
-      brightness_pct: 100
-      transition: 0.4
 
-front_closet_off:
-  sequence:
-  - service: light.turn_off
-    entity_id: light.front_closet

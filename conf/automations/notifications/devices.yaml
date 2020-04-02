@@ -23,9 +23,22 @@
     - switch.plug_3
     - switch.plug_4
     - switch.light_switch_1
-    - light.porch_light
+    - light.andy
+    - light.buffet
+    - light.dresser
+    - light.laundry_room
+    - light.left_lamp
+    - light.left_sconce
+    - light.matt
+    - light.right_lamp
+    - light.right_sconce
+    - light.stand_lamp
     to: 'unavailable'
     for: '00:01:00'
+  - platform: state
+    entity_id: light.porch_light
+    to: 'unavailable'
+    for: '01:00:00'
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:
@@ -51,10 +64,10 @@
     - sensor.water_sensor_3_battery
     - sensor.water_sensor_4_battery
     - sensor.zcombo_1_battery_level
-    - sensor.dining_room_remote_battery
-    - sensor.game_room_remote_battery
-    - sensor.living_room_remote_battery
-    - sensor.master_bedroom_remote_battery
+    - sensor.dining_room_remote_battery_level
+    - sensor.game_room_remote_battery_level
+    - sensor.living_room_remote_battery_level
+    - sensor.master_bedroom_remote_battery_level
     - sensor.motion_sensor_motion_battery_level
     - sensor.wyze_motion_1_battery_level
     - sensor.front_closet_battery_level
@@ -75,6 +88,22 @@
     data_template:
       title: "Device battery low"
       message: "{{ trigger.to_state.name }} battery is low."
+      data:
+        ttl: 0
+        priority: high
+
+
+- alias: Controller battery warning
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.controller_battery
+    above: 10
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data:
+      title: Controller batteries used for 10 hours
+      message: Might want to swap batteries soon.
       data:
         ttl: 0
         priority: high

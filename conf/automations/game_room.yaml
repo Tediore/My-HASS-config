@@ -11,7 +11,7 @@
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
   condition:
   - condition: state
     entity_id: binary_sensor.xbox
@@ -28,11 +28,11 @@
 - alias: Game room dimmer off press
   initial_state: true
   trigger:
-  - platform: state
-    entity_id: sensor.game_room_remote
-    to: 
-    - 4_click
-    - 4_click_up
+  - platform: event
+    event_type: hue_event
+    event_data:
+      id: 'game_room_remote'
+      event: 4002
   condition:
   - condition: state
     entity_id: binary_sensor.xbox

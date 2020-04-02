@@ -4,7 +4,7 @@ automation:
   trigger:
   - platform: numeric_state
     entity_id: sensor.ups_battery
-    below: 20
+    below: 25
   condition:
   - condition: state
     entity_id: sensor.ups_status
@@ -13,7 +13,7 @@ automation:
   - service: notify.mobile_app_pixel_xl
     data:
       title: "Server shutting down"
-      message: "Power critical, shutting down. See you later :("
+      message: "Power critical, shutdown imminent. See you later :("
 
 
 - alias: Notify when power lost or restored

@@ -111,6 +111,7 @@ script:
     - service: script.sleep_switches
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode_hk
+    - service: script.porch_light_security
     - condition: state
       entity_id: input_boolean.christmas_mode
       state: 'on'
@@ -195,8 +196,11 @@ script:
 
   sleep_switches:
     sequence:
-    - service: switch.turn_off
-      entity_id: switch.plug_2
+    - service: homeassistant.turn_off
+      entity_id: 
+      - switch.plug_2
+      - switch.plug_4
+      - climate.space_heater
     - service: switch.turn_on
       entity_id: switch.plug_1
 

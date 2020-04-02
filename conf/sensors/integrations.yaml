@@ -1,15 +1,3 @@
-- platform: darksky
-  api_key: !secret darksky_key
-  monitored_conditions:
-  - dew_point
-  - temperature
-  - humidity
-  - temperature_high
-  - temperature_low
-  - cloud_cover
-  - icon
-  - summary
-
 - platform: systemmonitor
   resources:
   - type: memory_use
@@ -21,7 +9,6 @@
   resource: http://localhost:5557/device?ipaddr=10.0.0.49/status
   name: Xbox status
   value_template: !secret xbox_rest
-  verify_ssl: false
   scan_interval: 5
 
 - platform: rest
@@ -35,7 +22,7 @@
   - modelid
   - swversion
   - apiversion
-  scan_interval: 1800
+  scan_interval: 600
 
 
 ### Command line sensors
@@ -47,7 +34,7 @@
 
 - platform: command_line
   name: Backup log
-  command: "cat /config/.logs/backup.log"
+  command: "cat /config/.other/backup.log"
   scan_interval: 3600
 
 - platform: apcupsd
@@ -70,8 +57,13 @@
 - platform: dewpoint
   sensors:
     dewpoint_inside:
+      friendly_name: Indoor dew point
       temperature: sensor.tstat_current_temp
       rel_hum: sensor.tstat_current_humidity
+    dewpoint_outside:
+      friendly_name: Outdoor dew point
+      temperature: sensor.outside_temp
+      rel_hum: sensor.outside_humidity
 
 - platform: google_wifi
   name: Router
@@ -83,4 +75,5 @@
   - time
   - date_time_iso
 
-- platform: huesensor
+- platform: uptime
+- platform: websocket_api

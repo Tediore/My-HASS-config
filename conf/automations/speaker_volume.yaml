@@ -14,6 +14,9 @@
   - condition: state
     entity_id: input_boolean.andy_sleep
     state: 'off'
+  - condition: state
+    entity_id: binary_sensor.quiet_hours
+    state: 'off'
   action:
   - service: media_player.volume_set
     data_template:
@@ -22,8 +25,8 @@
         {% set app = trigger.to_state.state %}
         {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
         {% if app in ['iHeartRadio'] %}
-          {% if speaker in ['portable', 'living room'] %}
-            0.45
+          {% if speaker in ['living room', 'portable'] %}
+            0.42
           {% elif speaker in ['bedroom', 'kitchen'] %}
             0.4
           {% elif speaker in ['hub'] %}

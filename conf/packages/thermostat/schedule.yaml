@@ -14,9 +14,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: !secret cool_home_work
+    at: '06:45:00' # Workday
   - platform: time
-    at: !secret cool_home_weekend
+    at: '07:30:00' # Weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -31,18 +31,18 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: !secret cool_home_work
+      after: '06:45:00'
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      after: !secret cool_home_weekend
+      after: '07:30:00'
       weekday: ['sat', 'sun']
   - condition: or
     conditions:
     - condition: time
-      before: !secret cool_sleep_work
+      before: '21:00:00'
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      before: !secret cool_sleep_weekend
+      before: '21:30:00'
       weekday: ['fri', 'sat']
   action:
   - service: script.cool_home
@@ -64,9 +64,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: !secret cool_sleep_work
+    at: '21:00:00' # Work night
   - platform: time
-    at: !secret cool_sleep_weekend
+    at: '21:30:00' # Weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -81,16 +81,16 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: !secret cool_sleep_work
+      after: '21:00:00'
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      after: !secret cool_sleep_weekend
+      after: '21:30:00'
       weekday: ['fri', 'sat']
     - condition: time
-      before: !secret cool_home_work
+      before: '06:45:00'
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      before: !secret cool_home_weekend
+      before: '07:30:00'
       weekday: ['sat', 'sun']
   action:
   - service: script.cool_sleep
@@ -113,9 +113,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: !secret heat_home_work
+    at: '06:45:00' # Workday
   - platform: time
-    at: !secret heat_home_weekend
+    at: '07:30:00' # Weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -130,18 +130,18 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: !secret heat_home_work
+      after: '06:45:00'
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      after: !secret heat_home_weekend
+      after: '07:30:00'
       weekday: ['sat', 'sun']
   - condition: or
     conditions:
     - condition: time
-      before: !secret heat_sleep_work
+      before: '21:00:00'
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      before: !secret heat_sleep_weekend
+      before: '21:30:00'
       weekday: ['fri', 'sat']
   action:
   - service: script.heat_home
@@ -163,9 +163,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: !secret heat_sleep_work
+    at: '21:00:00' # Work night
   - platform: time
-    at: !secret heat_sleep_weekend
+    at: '21:30:00' # Weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -180,16 +180,16 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: !secret heat_sleep_work
+      after: '21:00:00'
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      after: !secret heat_sleep_weekend
+      after: '21:30:00'
       weekday: ['fri', 'sat']
     - condition: time
-      before: !secret heat_home_work
+      before: '06:45:00'
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      before: !secret heat_home_weekend
+      before: '07:30:00'
       weekday: ['sat', 'sun']
   action:
   - service: script.heat_sleep

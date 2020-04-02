@@ -35,10 +35,3 @@ dark_inside_not_cloudy:
   max: 15
   step: 1
   mode: slider
-
-cloud_threshold:
-  name: Cloud coverage threshold
-  min: 0
-  max: 100
-  step: 5
-  mode: slider

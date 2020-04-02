@@ -2,21 +2,12 @@
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.living_room_vizio_app_name
-    to:
-    - Netflix
-    - Hulu
-    - YouTube
-  - platform: state
-    entity_id: media_player.living_room_cast
-    from:
-    - 'off'
-    - 'idle'
-    to: 'playing'
+    entity_id:
+    - sensor.living_room_vizio_app_name
+    - sensor.living_room_cast_app_name
   condition:
-  - condition: state
-    entity_id: light.living_room_lamps
-    state: 'on'
+  - condition: template
+    value_template: "{{ trigger.to_state.state not in ['', 'BOD Receiver PROD', 'SmartCast Home', 'unknown', '_UNKNOWN_APP'] }}"
   action:
   - service: script.pre_media
 
@@ -40,7 +31,7 @@
     to: 'off'
   condition:
   - condition: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: state
     entity_id: light.living_room

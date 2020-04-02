@@ -21,17 +21,22 @@
     
     outside_temp:
       friendly_name: "Outside"
-      value_template: "{{ states('sensor.dark_sky_temperature') | float | round(0) }}"
+      value_template: "{{ state_attr('weather.kmdw', 'temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
+
+    outside_humidity:
+      friendly_name: "Outside"
+      value_template: "{{ state_attr('weather.kmdw', 'humidity') | float('-') | round(0) }}"
+      unit_of_measurement: '%'
     
     outside_dewpoint:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dark_sky_dew_point') | float | round(0) }}"
+      value_template: "{{ states('sensor.dewpoint_outside') | float | round(0) }}"
       unit_of_measurement: '°F'
 
     inside_dewpoint:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dewpoint') | float | round(0) }}"
+      value_template: "{{ states('sensor.dewpoint_inside') | float | round(0) }}"
       unit_of_measurement: '°F'
     
     lumi_temp_1_calibrated:

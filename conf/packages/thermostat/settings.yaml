@@ -136,7 +136,6 @@ input_boolean:
   tstat_smart:
   tstat_peak_savings:
 
-
 input_text:
   tstat_prev_mode:
     name: Previous thermostat mode

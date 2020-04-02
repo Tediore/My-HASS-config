@@ -30,11 +30,11 @@ script:
     - condition: state
       entity_id: light.game_room
       state: 'on'
+    - service: script.porch_light_security
     - service: light.turn_off
       entity_id: 
       - light.living_room
       - light.dining_room
-
 
 input_boolean:
   andy_sleep:

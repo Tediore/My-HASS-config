@@ -17,31 +17,20 @@
     entity_id: switch.light_switch_1
 
 
-- alias: Turn entrance light on before work
+- alias: Turn entrance light on/off before work
   initial_state: true
   trigger:
   - platform: time
     at: '07:25:00'
-  condition:
-  - condition: template
-    value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: switch.turn_on
-    entity_id: switch.light_switch_1
-
-
-- alias: Turn entrance light off
-  initial_state: true
-  trigger:
   - platform: time
     at: '07:45:00'
   condition:
   - condition: template
-    value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
+    value_template: "{{ is_state_attr('calendar.work', 'message', 'Work') and as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: switch.turn_off
+  - service_template: "switch.turn_{{ 'on' if as_timestamp(now()) | timestamp_custom('%M') == '25' else 'off' }}"
     entity_id: switch.light_switch_1
 
 
@@ -64,7 +53,17 @@
   - platform: state
     entity_id: binary_sensor.front_closet
   action:
-  - service_template: "script.front_closet_{{ trigger.to_state.state }}"
+  - service: light.turn_on
+    entity_id: light.front_closet
+    data_template:
+      brightness_pct: >
+        {% set hour = now().hour | int %}
+        {% if trigger.to_state.state == 'on' %}
+          {{ 75 if 7 >= hour >= 21 else 100 }}
+        {% else %}
+          0
+        {% endif %}
+      transition: 0.4
 
 
 - alias: Turn off front closet light after power outage

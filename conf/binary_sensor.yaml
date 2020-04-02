@@ -16,32 +16,27 @@
         {% set hub = states('media_player.hub') %}
         {{ kitchen in ['playing', 'paused', 'idle'] and hub in ['playing', 'paused', 'idle'] }}
 
-    any_media_player:
-      friendly_name: Any media player
+    any_speaker:
+      friendly_name: Any speaker
       value_template: >
         {% set bedroom = states('media_player.bedroom_speaker') %}
         {% set living = states('media_player.living_room_speaker') %}
         {% set kitchen = states('media_player.kitchen_speaker') %}
         {% set hub = states('media_player.hub') %}
         {% set portable = states('media_player.portable_speaker') %}
+        {{ bedroom != 'off' or living != 'off' or kitchen != 'off' or hub != 'off' or portable != 'off' }}
+
+    any_tv:
+      friendly_name: Any TV
+      value_template: >
         {% set bedroom_tv = states('media_player.bedroom_vizio') %}
         {% set living_tv = states('media_player.living_room_vizio') %}
-        {{ bedroom != 'off' and living != 'off' and kitchen != 'off' and hub != 'off' and portable != 'off' and bedroom_tv != 'off' and living_tv != 'off' }}
+        {{ bedroom_tv != 'off' or living_tv != 'off' }}
 
     xbox:
       friendly_name: Xbox
       value_template: "{{ is_state('sensor.xbox_status', 'Available') }}"
 
-    dark_inside:
-      friendly_name: Dark inside
-      value_template: >
-        {% set cover = states('sensor.dark_sky_cloud_coverage') | float %}
-        {% set threshold = states('input_number.cloud_threshold') | float %}
-        {% set elev = state_attr('sun.sun', 'elevation') | float %}
-        {% set when_cloudy = states('input_number.dark_inside_cloudy') | float %}
-        {% set not_cloudy = states('input_number.dark_inside_not_cloudy') | float %}
-        {% set sun = states('sun.sun') %}
-        {{ sun == 'below_horizon' or (cover >= threshold and elev < when_cloudy) or (cover < threshold and elev < not_cloudy) }}
 
 - platform: ping
   host: 8.8.8.8
@@ -54,7 +49,6 @@
   after: '23:00'
   before: '08:00'
 
-- platform: huesensor
 - platform: apcupsd
 - platform: wyzesense
   device: auto

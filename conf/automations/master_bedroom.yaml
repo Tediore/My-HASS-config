@@ -11,7 +11,7 @@
   action:
   - service: script.good_morning
   - condition: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
     state: 'on'
   - service: script.lights_sunset
 

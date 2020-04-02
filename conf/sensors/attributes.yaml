@@ -1,13 +1,4 @@
 - platform: attributes
-  attribute: battery
-  unit_of_measurement: '%'
-  entities:
-  - sensor.dining_room_remote
-  - sensor.game_room_remote
-  - sensor.living_room_remote
-  - sensor.master_bedroom_remote
-
-- platform: attributes
   attribute: battery_level
   unit_of_measurement: '%'
   entities:
@@ -35,3 +26,12 @@
   - media_player.living_room_speaker
   - media_player.living_room_vizio
   - media_player.living_room_cast
+
+- platform: attributes
+  attribute: media_title
+  entities:
+  - media_player.portable_speaker
+  - media_player.bedroom_speaker
+  - media_player.hub
+  - media_player.kitchen_speaker
+  - media_player.living_room_speaker

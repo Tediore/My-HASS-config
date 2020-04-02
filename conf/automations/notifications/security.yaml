@@ -79,13 +79,14 @@
         priority: high
 
 
-- alias: Notify if alarm not armed when away
+- alias: Notify if alarm not armed when away #throttled
   initial_state: true
   trigger:
-  - platform: zone
+  - platform: state
     entity_id: device_tracker.pixel_xl
-    zone: zone.home
-    event: leave
+    from: 'home'
+    to: 'not_home'
+    for: '00:05:00'
   condition:
   - condition: state
     entity_id: alarm_control_panel.abode
@@ -93,6 +94,8 @@
   - condition: template
     value_template: "{{ not is_state('device_tracker.pixel_xl', 'home') }}"
   action:
+  - service: automation.turn_off
+    entity_id: automation.notify_if_alarm_not_armed_when_away
   - service: notify.mobile_app_pixel_xl
     data:
       title: "Alarm not armed"

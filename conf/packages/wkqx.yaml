@@ -1,0 +1,86 @@
+automation:
+- alias: WKQX playing
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.bedroom_speaker_media_title
+    - sensor.hub_media_title
+    - sensor.kitchen_speaker_media_title
+    - sensor.living_room_speaker_media_title
+    - sensor.portable_speaker_media_title
+    to: '101WKQX'
+  condition:
+  - condition: state
+    entity_id: input_boolean.wkqx
+    state: 'off'
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.wkqx
+
+- alias: Toggle song polling
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.wkqx
+    to: 'on'
+  - platform: state
+    entity_id:
+    - media_player.bedroom_speaker
+    - media_player.hub
+    - media_player.kitchen_speaker
+    - media_player.living_room_speaker
+    - media_player.portable_speaker
+    to: 'off'
+    for: '00:00:15'
+  action:
+  - service_template: >
+      {% if trigger.to_state.state == 'off' %} 
+        {% if is_state('input_boolean.wkqx', 'on') %}
+          homeassistant.turn_{{ states('input_boolean.music_moved') }}
+        {% else %}
+          homeassistant.turn_off
+        {% endif %}
+      {% else %}
+        homeassistant.turn_on
+      {% endif %}
+    data_template:
+      entity_id: >
+        {% if trigger.to_state.state == 'off' %} 
+          {% if is_state('input_boolean.wkqx', 'on') %}
+            input_boolean.wkqx, automation.poll_song_info, script.update_song_info
+          {% else %}
+            input_boolean.wkqx, automation.poll_song_info, script.update_song_info, input_boolean.music_moved
+          {% endif %}
+        {% else %}
+          input_boolean.wkqx, automation.poll_song_info, script.update_song_info
+        {% endif %}
+  - service: automation.turn_off
+    entity_id: automation.toggle_song_polling
+
+- alias: Poll song info
+  trigger:
+  - platform: time_pattern
+    seconds: '/30'
+  action:
+  - service: script.update_song_info
+
+
+script:
+  update_song_info:
+    sequence:
+    - service: shell_command.update_song
+    - service: homeassistant.update_entity
+      entity_id: sensor.song_info
+
+sensor:
+- platform: command_line
+  name: Song info
+  command: "cat /config/.other/song_info"
+  scan_interval: 30
+
+shell_command:
+  update_song: "python3 /config/.other/wkqx.py"
+
+input_boolean:
+  wkqx:

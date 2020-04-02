@@ -10,6 +10,10 @@ automation:
   - condition: state
     entity_id: alarm_control_panel.abode
     state: 'armed_away'
+  - condition: state
+    entity_id: device_tracker.pixel_xl
+    state: 'not_home'
+    for: '01:00:00'
   action:
   - service: alarm_control_panel.alarm_disarm
     entity_id: alarm_control_panel.abode_hk
@@ -46,6 +50,10 @@ automation:
     to: 'disarmed'
   action:
   - service_template: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'loc' }}"
+  - service: input_text.set_value
+    entity_id: input_text.arrival_time
+    data_template:
+      value: "{{ now() }}"
 
 
 - alias: Re-arm alarm in away mode
@@ -100,7 +108,10 @@ automation:
       entity_id: group.lights_all
       state: 'on'
     - condition: state
-      entity_id: binary_sensor.any_media_player
+      entity_id: binary_sensor.any_speaker
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.any_tv
       state: 'on'
   action:
   - service: script.away_mode
@@ -109,14 +120,17 @@ automation:
     entity_id: group.lights_all
     state: 'off'
   - condition: state
-    entity_id: binary_sensor.any_media_player
+    entity_id: binary_sensor.any_speaker
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.any_tv
     state: 'off'
   - service: script.notify_away
     data_template:
       title: Away mode activated (second attempt)
 
 
-- alias: Manage master bedroom lights night arrival
+- alias: Master bedroom lights night arrival
   initial_state: true
   trigger:
   - platform: state
@@ -127,8 +141,11 @@ automation:
     event_type: timer.finished
     event_data:
       entity_id: timer.master_bedroom_enter
+  condition:
+  - condition: template
+    value_template: "{{ (as_timestamp(now()) | float - as_timestamp(states('input_text.arrival_time')) | float) / 60 <= 2 }}"
   action:
-    service_template: "{{ 'timer.cancel' if trigger.platform == 'state' else 'light.turn_off' }}"
+  - service_template: "{{ 'timer.cancel' if trigger.platform == 'state' and is_state('timer.master_bedroom_enter', 'active') else 'light.turn_off' }}"
     data_template:
       entity_id: "{{ 'timer.master_bedroom_enter' if trigger.platform == 'state' else 'light.master_bedroom' }}"
 
@@ -150,7 +167,7 @@ script:
         entity_id: media_player.living_room_speaker
         volume_level: 0.5
     - condition: state
-      entity_id: input_boolean.christmas_mode
+      entity_id: input_boolean.christmas
       state: 'on'
     - service: switch.turn_off
       entity_id: switch.tuya_plug_2
@@ -242,24 +259,22 @@ script:
     - delay: '00:01:00'
     - service: switch.turn_off
       entity_id: switch.light_switch_1
-  
+
   
   arrival_night:
     sequence:
     - condition: state
-      entity_id: binary_sensor.dark_inside
+      entity_id: input_boolean.dark_inside
       state: 'on'
     - service_template: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas_mode', 'on') else 'normal' }}"
     - service: timer.start
       entity_id: timer.master_bedroom_enter
       data:
-        duration: '00:05:00'
+        duration: '00:02:00'
   
 
   lights_normal:
     sequence:
-    - service: timer.start
-      entity_id: timer.master_bedroom_enter
     - service: hue.hue_activate_scene
       data:
         group_name: Dining room
@@ -299,3 +314,34 @@ script:
       data:
         group_name: Living room
         scene_name: Read lamps
+
+
+  holiday_porch_light:
+    sequence:
+    - condition: template
+      value_template: "{{ is_state('input_boolean.valentines_day', 'on') or is_state('input_boolean.autism_awareness', 'on') or is_state('input_boolean.halloween', 'on') or is_state('input_boolean.christmas', 'on') }}"
+    - service: light.turn_on
+      entity_id: light.porch_light
+      data_template:
+        brightness_pct: 100
+        color_name: >
+          {% if is_state('input_boolean.valentines_day', 'on') %}
+            pink
+          {% elif is_state('input_boolean.autism_awareness', 'on') %}
+            blue
+          {% elif is_state('input_boolean.halloween', 'on') %}
+            orange
+          {% else %}
+            green
+          {% endif %}
+
+
+input_boolean:
+  sensor_tripped:
+  disarmed_loc:
+
+input_text:
+  arrival_time:
+
+timer:
+  master_bedroom_enter:

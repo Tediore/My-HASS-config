@@ -130,7 +130,7 @@ sensor:
   # Created to use HVAC action state attribute in the history stats sensors
     hvac_action:
       friendly_name: "HVAC action"
-      value_template: "{{ state_attr('climate.thermostat','hvac_action') }}"
+      value_template: "{{ state_attr('climate.thermostat', 'hvac_action') }}"
 
 
   # Used to display current total runtime in frontend

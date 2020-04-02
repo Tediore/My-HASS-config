@@ -22,22 +22,19 @@ automation:
   trigger:
   - platform: state
     entity_id: alarm_control_panel.abode
-    to: 'armed_home'
+    to: 
+    - 'armed_home'
+    - 'disarmed'
   - platform: time
     at: '22:00:00'
   condition:
   - condition: time
     after: '22:00:00'
     before: '05:00:00'
-  - condition: state
-    entity_id: alarm_control_panel.abode
-    state: 'armed_home'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: light.turn_on
-    data:
-      entity_id: light.porch_light
-      kelvin: 4000
-      brightness_pct: 50
+  - service: script.porch_light_security
 
 
 - alias: Toggle vacation mode
@@ -118,7 +115,7 @@ automation:
     entity_id: alarm_control_panel.abode
     state: armed_away
   - condition: state
-    entity_id: binary_sensor.dark_inside
+    entity_id: input_boolean.dark_inside
     state: 'on'
   action:
   - service: hue.hue_activate_scene
@@ -174,8 +171,15 @@ script:
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode
 
+  porch_light_security:
+    sequence:
+    - service: light.turn_on
+      entity_id: light.porch_light
+      data:
+        kelvin: 4000
+        brightness_pct: 50
+        transition: 0.4
+
 
 input_boolean:
-  sensor_tripped:
-  disarmed_loc:
   vacation_mode:

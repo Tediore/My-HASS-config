@@ -26,11 +26,11 @@ hacs: !include conf/.hacs.yaml
 history: !include settings/history.yaml
 http: !include settings/http.yaml
 hue: !include conf/.hue.yaml
-input_boolean: !include conf/input_boolean.yaml
-input_datetime: !include conf/input_datetime.yaml
-input_number: !include conf/input_number.yaml
-input_select: !include conf/input_select.yaml
-input_text: !include conf/input_text.yaml
+input_boolean: !include conf/helpers/input_boolean.yaml
+input_datetime: !include conf/helpers/input_datetime.yaml
+input_number: !include conf/helpers/input_number.yaml
+input_select: !include conf/helpers/input_select.yaml
+input_text: !include conf/helpers/input_text.yaml
 light: !include conf/light.yaml
 logbook:
 logger: !include settings/logger.yaml
@@ -50,6 +50,7 @@ tplink: !include conf/tplink.yaml
 tts: !include conf/.tts.yaml
 updater: !include settings/updater.yaml
 vizio: !include conf/vizio.yaml
+weather: !include conf/.weather.yaml
 zeroconf:
 zha: !include conf/.zha.yaml
 zone: !include settings/zone.yaml

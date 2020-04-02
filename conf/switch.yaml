@@ -12,3 +12,12 @@
       friendly_name: 'Soundbar'
       command_on: !secret soundbar_power
       command_off: !secret soundbar_power
+
+- platform: command_line
+  switches:
+    hue_motion_sensor_1:
+      command_on: !secret hue_motion_on
+      command_off: !secret hue_motion_off
+      command_state: !secret hue_motion_state
+      value_template: "{{ value_json.config.on }}"
+      friendly_name: Laundry room motion sensor status

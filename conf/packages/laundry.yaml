@@ -28,6 +28,10 @@ automation:
   - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
     data_template:
       entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
+  - condition: state
+    entity_id: media_player.living_room_vizio
+    state: 'on'
+  - service: script.laundry_light_strip_notify
 
 
 - alias: Record washer/dryer on/off
@@ -47,7 +51,7 @@ automation:
     entity_id: sensor.power_strip_outlet_2_power
     below: 50
   action:
-  - service_template: "input_boolean.turn_{{ 'on' if states(trigger.to_state.entity_id) | float > 250 else 'off' }}"
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
     data_template:
       entity_id: "input_boolean.{{ 'washer' if '1' in trigger.to_state.entity_id else 'dryer' }}"
 
@@ -111,19 +115,39 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.laundry_room_door
+    entity_id: 
+    - binary_sensor.laundry_room_door
+    - input_boolean.sleep_mode
     to: 'on'
   - platform: state
     entity_id: alarm_control_panel.abode
     to: 'armed_away'
-  - platform: state
-    entity_id: input_boolean.sleep_mode
-    to: 'on'
   action:
   - service: input_boolean.turn_off
     entity_id:
     - input_boolean.washer_reminder
     - input_boolean.dryer_reminder
+
+
+script:
+  laundry_light_strip_notify:
+    sequence:
+    - service: light.turn_on  
+      entity_id: light.strip_1
+    - service: light.turn_on  
+      entity_id: light.strip_1
+      data:
+        rgb_color: [255,0,0]
+        brightness_pct: 100
+        transition: 1
+    - delay: '00:00:01'
+    - service: light.turn_on  
+      entity_id: light.strip_1
+      data:
+        rgb_color: [0,0,255]
+        transition: 1
+    - service: light.turn_off
+      entity_id: light.strip_1
 
 
 input_boolean:
