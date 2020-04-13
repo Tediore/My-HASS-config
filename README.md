@@ -14,6 +14,6 @@ foo:
   - bar
   - bar
 ```
-The hyphen counts as an indent, so I find it redundant to use the second method. Others may disagree. Oh well, can't please everyone.
+The hyphen counts as an indent, so I find it redundant to use the second method. Others may disagree. Oh well, can't please anyone.
 
 I'll add more about my setup later. For now, it's Xbox time.
