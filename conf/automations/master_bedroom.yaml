@@ -29,4 +29,4 @@
     entity_id:
     - input_boolean.sleep_mode
     - input_boolean.andy_sleep
-    - switch.plug_1
+    - climate.bedroom_fan

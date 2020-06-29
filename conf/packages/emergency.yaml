@@ -2,18 +2,38 @@ automation:
 - alias: Notify water leaked detected or cleared
   initial_state: true
   trigger:
-    platform: state
+  - platform: state
     entity_id: 
     - binary_sensor.water_sensor_1
     - binary_sensor.water_sensor_2
     - binary_sensor.water_sensor_3
     - binary_sensor.water_sensor_4
-  condition:
-  - condition: template
-    value_template: "{{ trigger.to_state.state == 'on' or (trigger.from_state.state == 'on' and trigger.to_state.state == 'off') }}"
+    - binary_sensor.water_sensor_5
+    - binary_sensor.water_sensor_6
+    to: 'on'
+  - platform: state
+    entity_id: 
+    - binary_sensor.water_sensor_1
+    - binary_sensor.water_sensor_2
+    - binary_sensor.water_sensor_3
+    - binary_sensor.water_sensor_4
+    - binary_sensor.water_sensor_5
+    - binary_sensor.water_sensor_6
+    from: 'on'
+    to: 'off'
+    for: '00:00:05'
   action:
-  - service: notify.telegram
+  - service: notify.sms_matt
     data_template:
+      message: >
+        {% if trigger.to_state.state == 'on' %}
+          LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
+        {% else %}
+          {{ trigger.to_state.name }} cleared
+        {% endif %}
+  - service: notify.gotify_high
+    data_template:
+      title: "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
       message: >
         {% if trigger.to_state.state == 'on' %}
           LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
@@ -46,8 +66,22 @@ automation:
   - condition: template
     value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
   action:
-  - service: notify.telegram
+  - service: notify.sms_matt
     data_template:
+      message: >
+        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
+          {{ trigger.to_state.state.upper() }} DETECTED!
+        {% else %}
+          {{ trigger.from_state.state }} no longer detected.
+        {% endif %}
+  - service: notify.gotify_high
+    data_template:
+      title: >
+        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
+          {{ trigger.to_state.state.upper() }} DETECTED!
+        {% else %}
+          {{ trigger.from_state.state }} cleared.
+        {% endif %}
       message: >
         {% if trigger.to_state.state in ['Smoke', 'CO'] %}
           {{ trigger.to_state.state.upper() }} DETECTED!
@@ -85,22 +119,17 @@ automation:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id:
+    - light.master_bedroom
+    - light.living_room
     data:
-      group_name: Master bedroom
-      scene_name: Red
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Living room
-      scene_name: Red
+      color_name: red
+      brightness_pct: 100
   - service: hue.hue_activate_scene
     data:
       group_name: Dining room
-      scene_name: Dimmed
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Game room
-      scene_name: Red
+      scene_name: Read
   - service: switch.turn_on
     entity_id: switch.light_switch_1
 
@@ -114,25 +143,33 @@ automation:
     - binary_sensor.water_sensor_2
     - binary_sensor.water_sensor_3
     - binary_sensor.water_sensor_4
+    - binary_sensor.water_sensor_5
+    - binary_sensor.water_sensor_6
     to: 'on'
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Master bedroom
-      scene_name: Water
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Living room
-      scene_name: Water
   - service: light.turn_on
     entity_id:
     - light.master_bedroom
     - light.living_room
+    - light.dining_room
     data:
+      brightness_pct: 100
+      rgb_color: [0,0,255]
       flash: long
+
+
+- alias: Turn off HVAC when smoke detected
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.zcombo_1_status
+    to: 'Smoke'
+  action:
+  - service: climate.turn_off
+    entity_id: climate.thermostat
 
 
 sensor:

@@ -1,0 +1,77 @@
+automation:
+- alias: Toggle holiday modes
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '00:00:00'
+  - platform: homeassistant
+    event: start
+  condition:
+  - condition: template
+    value_template: >
+      {% set month = now().month %}
+      {% set day = now().day %}
+      {{ (month == 2 and day in [14, 15]) or (month in [1, 4, 11] and day == 1) or (month == 5 and day in [1, 4, 5]) or (month == 7 and day in [4, 5]) or (month == 10 and day == 24) or (month == 12 and day == 14) }}
+  action:
+    service_template: >
+      {% set month = now().month %}
+      {% set day = now().day %}
+        input_boolean.turn_{{ 'on' if (month == 2 and day == 14) or month in [4, 10, 12] or (month == 5 and day == 4) or (month == 7 and day == 4) else 'off' }}
+    data_template:
+      entity_id: >
+        {% set month = now().month %}
+        {% set day = now().day %}
+        {% if month == 2 %}
+          input_boolean.valentines_day
+        {% elif month == 5 and day in [4, 5] %}
+          input_boolean.andy_birthday
+        {% elif month in [4, 5] %}
+          input_boolean.autism_awareness
+        {% elif month == 7 %}
+          input_boolean.independence_day
+        {% elif month in [10, 11] %}
+          input_boolean.halloween
+        {% else %}
+          input_boolean.christmas
+        {% endif %}
+
+
+script:
+  holiday_porch_light:
+    sequence:
+    - condition: template
+      value_template: >
+        {{ 
+          is_state('input_boolean.valentines_day', 'on') or
+          is_state('input_boolean.autism_awareness', 'on') or
+          is_state('input_boolean.halloween', 'on') or
+          is_state('input_boolean.andy_birthday', 'on') or
+          is_state('input_boolean.independence_day', 'on') or
+          is_state('input_boolean.christmas', 'on')
+        }}
+    - service: light.turn_on
+      entity_id: light.porch_light
+      data_template:
+        brightness_pct: 100
+        transition: 0.4
+        color_name: >
+          {% if is_state('input_boolean.valentines_day', 'on') %}
+            pink
+          {% elif is_state('input_boolean.autism_awareness', 'on') %}
+            blue
+          {% elif is_state('input_boolean.halloween', 'on') %}
+            orange
+          {% elif is_state('input_boolean.andy_birthday', 'on') or is_state('input_boolean.independence_day', 'on') %}
+            red
+          {% else %}
+            green
+          {% endif %}
+
+
+input_boolean:
+  valentines_day:
+  andy_birthday:
+  independence_day:
+  autism_awareness:
+  halloween:
+  christmas:

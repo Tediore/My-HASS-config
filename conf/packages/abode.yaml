@@ -1,4 +1,33 @@
 automation:
+- alias: Alarm armed home reminder  # throttled - 10 minutes
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.lumi_motion_1
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: template
+    value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.alarm_armed_home_reminder', 'last_triggered'))) / 60 > 10 }}"
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'armed_home'
+  action:
+  - service: scene.create
+    data:
+      scene_id: before_alarm_reminder
+      snapshot_entities:
+      - light.buffet
+  - service: light.turn_on
+    entity_id: light.buffet
+    data:
+      color_name: blue
+      brightness_pct: 100
+  - delay: '00:00:10'
+  - service: scene.turn_on
+    entity_id: scene.before_alarm_reminder
+
+
 - alias: Notify when sensor unresponsive
   initial_state: true
   trigger:
@@ -35,6 +64,19 @@ automation:
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.porch_light_security
+
+
+- alias: Record previous alarm mode when unavailable
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 'unavailable'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.prev_alarm_mode
+    data_template:
+      value: "{{ trigger.from_state.state }}"
 
 
 - alias: Toggle vacation mode
@@ -105,7 +147,7 @@ automation:
     entity_id: all
 
 
-- alias: Turn lights on when alarm triggered
+- alias: Security system triggered
   initial_state: true
   trigger:
   - platform: event
@@ -118,22 +160,13 @@ automation:
     entity_id: input_boolean.dark_inside
     state: 'on'
   action:
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id:
+    - light.dining_room
+    - light.living_room
     data:
-      group_name: Living room
-      scene_name: Red
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Dining room
-      scene_name: Read
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Game room
-      scene_name: Red
-  - service: hue.hue_activate_scene
-    data:
-      group_name: Master bedroom
-      scene_name: Red
+      brightness_pct: 100
+      kelvin: 3000
 
 
 sensor:
@@ -157,7 +190,7 @@ sensor:
 
 - platform: rest
   resource: !secret abode_rest
-  name: Abode
+  name: Abode firmware version
   value_template: "{{ value_json['updates']['em_ver'] }}"
   scan_interval: 43200
 
@@ -170,6 +203,11 @@ script:
       state: 'disarmed'
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode
+    - delay: '00:00:10'
+    - condition: template
+      value_template: "{{ not is_state('alarm_control_panel.abode', 'armed_home') }}"
+    - service: alarm_control_panel.alarm_arm_home
+      entity_id: alarm_control_panel.abode_hk
 
   porch_light_security:
     sequence:
@@ -183,3 +221,6 @@ script:
 
 input_boolean:
   vacation_mode:
+
+input_text:
+  prev_alarm_mode:

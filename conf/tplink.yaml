@@ -1,7 +1,7 @@
 discovery: false
 switch:
-- host: 10.0.0.55
-- host: 10.0.0.60
-- host: 10.0.0.61
-- host: 10.0.0.99
-- host: 10.0.0.248
+- host: 10.0.0.78
+- host: 10.0.0.79
+- host: 10.0.0.80
+- host: 10.0.0.81
+- host: 10.0.0.82

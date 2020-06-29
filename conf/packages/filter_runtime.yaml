@@ -4,7 +4,7 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '00:00:01'
+    at: '00:00:30'
   action:
   - service: input_number.set_value
     entity_id: input_number.hvac_runtime
@@ -18,11 +18,12 @@ automation:
   trigger:
     platform: template
     value_template: "{{ states('sensor.furnace_filter_life') | float > states('input_number.replacement_threshold') | float }}"
+    for: '00:01:00'
   action:
     service: notify.mobile_app_pixel_xl
     data_template:
       title: "Change the furnace filter"
-      message: "Furnace filter has been used for {{ states('input_number.replacement_threshold') | int }} hours."
+      message: "Furnace filter has been used for {{ states('sensor.furnace_filter_life') | int }} hours."
 
 
 # Exclude from repo
@@ -32,6 +33,9 @@ automation:
   - platform: numeric_state
     entity_id: input_number.runtime_adjustment
     above: 0
+  - platform: numeric_state
+    entity_id: input_number.runtime_adjustment
+    below: 0
   action:
   - service: script.hvac_runtime_adjustment
 
@@ -155,13 +159,14 @@ sensor:
       friendly_name: "Furnace filter days remaining"
       value_template: >
         {% if (states('sensor.average_total_runtime_week') | int) == 0 %}
-          > 30
+          > 30 d
+        {% elif ((((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0)) < 0 %}
+          Change filter
         {% elif ((((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0)) > 30 %}
-          > 30
+          > 30 d
         {% else %}
-          {{ (((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0) }}
+          {{ (((states('input_number.replacement_threshold') | float) - (states('sensor.furnace_filter_life') | float)) / (states('sensor.average_total_runtime_week') | float)) | round(0) }} d
         {% endif %}
-      unit_of_measurement: 'd'
 
 
 script:
@@ -173,6 +178,7 @@ script:
       entity_id: input_text.furnace_filter
       data_template:
         value: '{{ now() }}'
+    - delay: '00:00:15'
     - service: input_number.set_value
       entity_id: input_number.hvac_runtime
       data_template:
@@ -230,7 +236,7 @@ input_number:
 # Exclude from repo
   runtime_adjustment:
     name: Runtime adjustment
-    min: 0
+    min: -500
     max: 500
     initial: 0
     mode: box

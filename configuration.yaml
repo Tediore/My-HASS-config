@@ -11,47 +11,51 @@ homeassistant:
   packages: !include_dir_named conf/packages/
   whitelist_external_dirs:
   - /config
+  external_url: !secret base_url
 apcupsd:
 automation: !include_dir_merge_list conf/automations/
 binary_sensor: !include conf/binary_sensor.yaml
-climate: !include conf/.climate.yaml
-cloudflare: !include conf/.cloudflare.yaml
+camera: !include conf_static/camera.yaml
+climate: !include conf_static/climate.yaml
+cloud:
 config:
-discovery: !include settings/discovery.yaml
-frontend: !include settings/frontend.yaml
-google: !include conf/.calendar.yaml
-google_assistant: !include conf/google.yaml
-group: !include settings/groups.yaml
-hacs: !include conf/.hacs.yaml
-history: !include settings/history.yaml
-http: !include settings/http.yaml
-hue: !include conf/.hue.yaml
+discovery: !include conf_settings/discovery.yaml
+frontend: !include conf_settings/frontend.yaml
+google: !include conf_static/calendar.yaml
+# google_assistant: !include conf/google_assistant.yaml
+group: !include conf_settings/groups.yaml
+hacs: !include conf_static/hacs.yaml
+history: !include conf_settings/history.yaml
+http: !include conf_settings/http.yaml
+hue: !include conf_static/hue.yaml
 input_boolean: !include conf/helpers/input_boolean.yaml
 input_datetime: !include conf/helpers/input_datetime.yaml
 input_number: !include conf/helpers/input_number.yaml
 input_select: !include conf/helpers/input_select.yaml
 input_text: !include conf/helpers/input_text.yaml
 light: !include conf/light.yaml
-logbook:
-logger: !include settings/logger.yaml
+logbook: !include conf_settings/logbook.yaml
+logger: !include conf_settings/logger.yaml
 mobile_app:
-notify: !include conf/.notify.yaml
-recorder: !include settings/recorder.yaml
-scene: !include conf/.scenes.yaml
+notify: !include conf_static/notify.yaml
+panel_custom: !include conf/panel_custom.yaml
+recorder: !include conf_settings/recorder.yaml
+scene: !include conf_static/scenes.yaml
 script: !include_dir_merge_named conf/scripts/
 sensor: !include_dir_merge_list conf/sensors/
+shell_command: !include conf/shell_command.yaml
+speedtestdotnet:
 ssdp:
+stream:
 sun:
 switch: !include conf/switch.yaml
 system_health:
-telegram_bot: !include conf/.telegram.yaml
 timer: !include conf/timer.yaml
 tplink: !include conf/tplink.yaml
-tts: !include conf/.tts.yaml
-updater: !include settings/updater.yaml
-vizio: !include conf/vizio.yaml
-weather: !include conf/.weather.yaml
+tts: !include conf_static/tts.yaml
+updater: !include conf_settings/updater.yaml
+weather: !include conf_static/weather.yaml
 zeroconf:
-zha: !include conf/.zha.yaml
-zone: !include settings/zone.yaml
-zwave: !include conf/.zwave.yaml
+zha: !include conf_static/zha.yaml
+zone: !include conf_settings/zone.yaml
+zwave: !include conf_static/zwave.yaml

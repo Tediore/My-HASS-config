@@ -11,6 +11,40 @@ automation:
     entity_id: input_boolean.hass_update
 
 
+- alias: Notify when beta available
+  initial_state: true
+  trigger:
+  - platform: template
+    value_template: "{{ states('sensor.latest_version').find('b') != -1 }}"
+  condition:
+  - condition: state
+    entity_id: input_boolean.notify_all_updates
+    state: 'off'
+  - condition: template
+    value_template: "{{ trigger.from_state.state.find('b') == -1 }}"
+  action:
+  - service: notify.gotify
+    data_template:
+      title: "Home Assistant beta is available!"
+      message: "{{ states('sensor.latest_version') }} is now available."
+
+
+- alias: Notify for all updates
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.latest_version
+  condition:
+  - condition: state
+    entity_id: input_boolean.notify_all_updates
+    state: 'on'
+  action:
+  - service: notify.gotify
+    data_template:
+      title: "Home Assistant update available!"
+      message: "{{ states('sensor.latest_version') }} is now available."
+
+
 sensor:
 - platform: version
   name: Latest version

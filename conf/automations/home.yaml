@@ -1,24 +1,24 @@
 - alias: Toggle dark inside boolean
   initial_state: true
   trigger:
-  - platform: template # True when dark inside
+  - platform: template  # True when dark inside
     value_template: >
       {% set elev = state_attr('sun.sun', 'elevation') | float %}
       {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
       {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
-      {{ states('sun.sun') == 'below_horizon' or (states('weather.kmdw') in ['overcast'] and elev < elev_cloudy) or (states('weather.kmdw') not in ['overcast'] and elev < elev_sunny) }}
-  - platform: template # True when not dark inside
+      {{ (states('weather.dark_sky') in ['overcast'] and elev < elev_cloudy) or (states('weather.dark_sky') not in ['overcast'] and elev < elev_sunny) }}
+  - platform: template  # True when not dark inside
     value_template: >
       {% set elev = state_attr('sun.sun', 'elevation') | float %}
       {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
       {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
-      {{ states('sun.sun') != 'below_horizon' and not (states('weather.kmdw') in ['overcast'] and elev < elev_cloudy) and not (states('weather.kmdw') not in ['overcast'] and elev < elev_sunny) }}
+      {{ not (states('weather.dark_sky') in ['overcast'] and elev < elev_cloudy) and not (states('weather.dark_sky') not in ['overcast'] and elev < elev_sunny) }}
   action:
     service_template: >
       {% set elev = state_attr('sun.sun', 'elevation') | float %}
       {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
       {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
-      input_boolean.turn_{{ 'on' if states('sun.sun') == 'below_horizon' or (states('weather.kmdw') in ['overcast'] and elev < elev_cloudy) or (states('weather.kmdw') not in ['overcast'] and elev < elev_sunny) else 'off' }}
+      input_boolean.turn_{{ 'on' if (states('weather.dark_sky') in ['overcast'] and elev < elev_cloudy) or (states('weather.dark_sky') not in ['overcast'] and elev < elev_sunny) else 'off' }}
     entity_id: input_boolean.dark_inside
 
 
@@ -27,25 +27,55 @@
   trigger:
   - platform: state
     entity_id: input_boolean.dark_inside
+  - platform: event
+    event_type: hue_event
+    event_data:
+      id: 'dining_room_remote'
+      event: 2002
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service_template: "script.lights_{{ 'sunset' if trigger.to_state.state == 'on' else 'sunrise' }}"
+  - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'event' or trigger.to_state.state == 'on' else 'sunrise' }}"
+
+
+- alias: Turn porch light off at sunrise
+  initial_state: true
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '-01:30:00'
+  action:
+  - service: light.turn_off
+    entity_id: light.porch_light
+
+
+- alias: Turn on holiday porch light
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sun.sun
+    to: 'below_horizon'
+    for: '00:20:00'
+  condition:
+    - condition: template
+      value_template: "{{ is_state('input_boolean.valentines_day', 'on') or is_state('input_boolean.autism_awareness', 'on') or is_state('input_boolean.halloween', 'on') or is_state('input_boolean.christmas', 'on') }}"
+  action:
+  - service: script.holiday_porch_light
 
 
 - alias: Turn porch light white when door opened
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.balcony_door_hk
+    entity_id: binary_sensor.balcony_door
     to: 'on'
   - platform: state
     entity_id: sun.sun
     to: 'below_horizon'
   condition:
   - condition: state
-    entity_id: binary_sensor.balcony_door_hk
+    entity_id: binary_sensor.balcony_door
     state: 'on'
   - condition: state
     entity_id: sun.sun
@@ -58,7 +88,7 @@
   action:
   - service: scene.create
     data:
-      scene_id: save_porch_light
+      scene_id: before_balcony_opened
       snapshot_entities:
       - light.porch_light
   - service: light.turn_on
@@ -66,36 +96,71 @@
     data:
       kelvin: 4000
       brightness_pct: 100
-      transition: 0.4
+      transition: 5
 
 
-- alias: Restore porch light state when door closed
+- alias: Restore porch light color when door closed
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.balcony_door_hk
+    entity_id: binary_sensor.balcony_door
+    from: 'on'
     to: 'off'
     for: '00:00:10'
   condition:
   - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: state
     entity_id: input_boolean.on_balcony
     state: 'off'
+  - condition: template
+    value_template: "{{ states('input_text.porch_light_xy_color') != None }}"
   action:
-  - scene: scene.save_porch_light
+  - service: scene.turn_on
+    entity_id: scene.before_balcony_opened
+    data:
+      transition: 2
+
+
+- alias: Toggle record when on balcony
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.porch_light
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
+  action:
+  - service_template: "homeassistant.turn_{{ trigger.to_state.state }}"
+    entity_id: 
+    - automation.record_when_on_balcony
+    - input_boolean.on_balcony_auto
+  - condition: template
+    value_template: "{{ trigger.to_state.state == 'off' }}"
+  - service: input_boolean.turn_off
+    entity_id:
+    - input_boolean.on_balcony_auto
+    - input_boolean.on_balcony_init0
+    - input_boolean.on_balcony_init1
+    - input_boolean.on_balcony_init2
+    - input_boolean.on_balcony
 
 
 - alias: Record when on balcony
-  initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.storm_door
   - platform: state
-    entity_id: binary_sensor.balcony_door_hk
+    entity_id: binary_sensor.balcony_door
     from: 'off'
     to: 'on'
     for: '00:00:01'
   - platform: state
-    entity_id: binary_sensor.balcony_door_hk
+    entity_id: binary_sensor.balcony_door
     from: 'on'
     to: 'off'
   - platform: state
@@ -109,8 +174,8 @@
     data_template:
       entity_id: >
         {% set tstate = trigger.to_state.state %}
-        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('_hk', '').replace('input_boolean.', '') %} 
-        {% set balcony = states('binary_sensor.balcony_door_hk') %}
+        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %} 
+        {% set balcony = states('binary_sensor.balcony_door') %}
         {% set storm = states('binary_sensor.storm_door') %}
         {% if entity == 'balcony' and tstate == 'on' and storm == 'off' %}
           input_boolean.on_balcony_init0
@@ -126,7 +191,7 @@
   - service: input_boolean.turn_off
     data_template:
       entity_id: >
-        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('_hk', '').replace('input_boolean.', '') %}
+        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %}
         {% set tstate = trigger.to_state.state %}
         {% if entity == 'on_balcony_init1' %}
           input_boolean.on_balcony_init0
@@ -138,39 +203,6 @@
           input_boolean.on_balcony
         {% else %}
           none
-        {% endif %}
-
-
-- alias: Toggle holiday modes
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '00:00:00'
-  - platform: homeassistant
-    event: start
-  condition:
-  - condition: template
-    value_template: >
-      {% set month = now().month %}
-      {% set day = now().day %}
-      {{ (month == 2 and day in [14, 15]) or (month in [1, 4, 5, 11] and day == 1) or (month == 10 and day == 24) or (month == 12 and day == 14) }}
-  action:
-    service_template: >
-      {% set month = now().month %}
-      {% set day = now().day %}
-        input_boolean.turn_{{ 'on' if (month == 2 and day == 14) or month in [4, 10, 12] else 'off' }}
-    data_template:
-      entity_id: >
-        {% set month = now().month %}
-        {% set day = now().day %}
-        {% if month == 2 %}
-          input_boolean.valentines_day
-        {% elif month in [4, 5] %}
-          input_boolean.autism_awareness
-        {% elif month in [10, 11] %}
-          input_boolean.halloween
-        {% else %}
-          input_boolean.christmas
         {% endif %}
 
 
@@ -196,21 +228,12 @@
     entity_id: switch.hue_motion_sensor_1
 
 
-- alias: Reenable throttled automations
+- alias: IFTTT webhook received
   initial_state: true
   trigger:
-  - platform: state
-    entity_id: automation.toggle_song_polling
-    to: 'off'
-    for: '00:00:10'
-  - platform: state
-    entity_id: 
-    - automation.suggest_opening_the_windows
-    - automation.notify_when_humidity_high
-    - automation.notify_if_alarm_not_armed_when_away
-    to: 'off'
-    for: '08:00:00'
+  - platform: event
+    event_type: ifttt_webhook_received
   action:
-  - service: automation.turn_on
+  - service_template: "{{ 'input_boolean.turn_off' if trigger.event.data.action == 'pts_ended' else 'script.turn_on' }}"
     data_template:
-      entity_id: "{{ trigger.to_state.entity_id }}"
+      entity_id: "{{ 'input_boolean' if trigger.event.data.action == 'pts_ended' else 'script' }}.tstat_peak_savings"

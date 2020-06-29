@@ -1,15 +1,112 @@
+- alias: Suggest opening the windows  # throttled - 8 hours
+  initial_state: true
+  trigger:
+    platform: template
+    value_template: "{{ (states('sensor.tstat_current_temp') | float - states('sensor.outside_temp') | float) > 9 }}"
+  condition:
+  - condition: template
+    value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.suggest_opening_the_windows', 'last_triggered'))) / 3600 > 8 }}"
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'cool'
+  - condition: numeric_state
+    entity_id: sensor.outside_dewpoint
+    below: 58
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  action:
+  - service: notify.gotify
+    data_template:
+      title: "Consider opening the windows"
+      message: "It's {{ states('sensor.tstat_current_temp') | float | round(0) | int }}° inside and only {{ states('sensor.outside_temp') | float | round(0) | int }}° outside."
+
+
+- alias: Notify when server CPU hot
+  initial_state: true
+  trigger:
+  - platform: template
+    value_template: "{{ ((states('sensor.core_0_temp') | int + states('sensor.core_1_temp') | int) / 2) > 80 }}"
+    for: '00:05:00'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: "Server CPU temperature elevated"
+      message: "CPU temperature has been above 80 C for more than five minutes."
+
+
+- alias: Notify when humidity rising quickly
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.dewpoint_inside
+    from: 'off'
+    to: 'on'
+    for: '00:20:00'
+  - platform: numeric_state
+    entity_id: sensor.dewpoint_inside
+    above: 55
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.dewpoint_inside
+    above: 55
+  - condition: state
+    entity_id: binary_sensor.dewpoint_inside
+    state: 'on'
+    for: '00:20:00'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  action:
+  - service: notify.gotify
+    data:
+      title: "Humidity rising quickly"
+      message: "The indoor dew point is rising rapidly."
+
+
 - alias: Notify when Home Assistant starts
   trigger:
     platform: homeassistant
     event: start
   action:
-  - service: script.server_online
+  - service: script.hass_online
   - wait_template: "{{ is_state('persistent_notification.config_entry_discovery', 'notifying') }}"
     timeout: "00:01:00"
-    continue_on_timeout: true
+    continue_on_timeout: false
   - service: persistent_notification.dismiss
     data:
       notification_id: config_entry_discovery
+
+
+- alias: Record coffeemaker on/off
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.coffeemaker_power
+    above: 500
+    for: '00:01:00'
+  - platform: numeric_state
+    entity_id: sensor.coffeemaker_power
+    below: 250
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
+    entity_id: input_boolean.coffeemaker
+
+
+- alias: Notify when coffee done
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.coffeemaker
+    from: 'on'
+    to: 'off'
+  action:
+  - service: notify.gotify
+    data:
+      title: "Coffee is ready"
+      message: "Enjoy!"
 
 
 - alias: Notify when issue with auto-backup
@@ -27,6 +124,32 @@
       message: Backup error. Check log for details.
 
 
+- alias: Notify COVID-19 Oak Forest
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.covid_19_confirmed_oak_forest
+  action:
+  - service: notify.gotify
+    data_template:
+      title: >
+        {% if trigger.to_state.state == 'unknown' %}
+          Problem with COVID-19 sensor
+        {% elif trigger.to_state.state == trigger.from_state.state %}
+          No increase in Oak Forest confirmed cases!
+        {% else %}
+          Oak Forest confirmed cases increased
+        {% endif %}
+      message: >
+        {% if trigger.to_state.state == 'unknown' %}
+          JSON format likely changed.
+        {% elif trigger.to_state.state == trigger.from_state.state %}
+          Confirmed cases are the same as yesterday ({{ states(trigger.to_state.entity_id) }}).
+        {% else %}
+          Cases increased from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}. Current ratio is {{ states('sensor.covid_19_ratio_oak_forest') | round(0) | int }}%.
+        {% endif %}
+
+
 - alias: Birthday reminder
   initial_state: true
   trigger:
@@ -35,13 +158,10 @@
     from: 'off'
     to: 'on'
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.gotify
     data_template:
       title: "{{ state_attr('calendar.birthdays', 'message') }} is today!"
       message: Don't forget to say happy birthday!
-      data:
-        ttl: 0
-        priority: high
 
 
 - alias: Dismiss discovery notification
@@ -54,3 +174,67 @@
     service: persistent_notification.dismiss
     data:
       notification_id: config_entry_discovery
+
+
+- alias: Notify when building closet opened/closed
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.building_5_closet
+  condition:
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: template
+    value_template: "{{ trigger.to_state.state in ['on', 'off'] }}"
+  action:
+  - service: notify.gotify_high
+    data_template:
+      message: "Door {{ 'opened' if trigger.to_state.state == 'on' else 'closed' }} at {{ as_timestamp(now()) | timestamp_custom('%-I:%M %p') }}"
+      title: "Building 5 closet door {{ 'opened' if trigger.to_state.state == 'on' else 'closed' }}"
+
+
+- alias: Notify if ipv6 address changes
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.server_ipv6_address
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != '' and trigger.from_state.state != '' }}"
+  action:
+  - service: notify.gotify
+    data:
+      title: Server IPv6 address changed
+      message: Check Home Assistant for details.
+  - service: persistent_notification.create
+    data_template:
+      title: Server IPv6 address changed
+      message: "IPv6 address is now {{ states('sensor.server_ipv6_address') }}."
+
+
+- alias: Record extended internet outage
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.internet
+    from: 
+    - 'on'
+    - 'off'
+    to: 
+    - 'off'
+    - 'on'
+    for: '00:00:40'
+  action:
+  - service_template: "input_boolean.turn_{{ trigger.to_state.state }}"
+    entity_id: input_boolean.internet
+
+
+- alias: Notify when internet out/restored
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.internet
+  action:
+  - service: notify.sms_matt
+    data_template:
+      message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."

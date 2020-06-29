@@ -7,9 +7,34 @@
     - sensor.living_room_cast_app_name
   condition:
   - condition: template
-    value_template: "{{ trigger.to_state.state not in ['', 'BOD Receiver PROD', 'SmartCast Home', 'unknown', '_UNKNOWN_APP'] }}"
+    value_template: "{{ trigger.to_state.state not in ['', 'BOD Receiver PROD', 'SmartCast Home', 'unknown', '_UNKNOWN_APP', 'Cast'] }}"
   action:
   - service: script.pre_media
+
+
+- alias: Turn sound bar on with TV
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+    from: 'off'
+    to: 'on'
+  action:
+  - service: script.soundbar_vol_up
+
+
+- alias: Set living room TV auto-brightness
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sun.sun
+    to:
+    - 'above_horizon'
+    - 'below_horizon'
+  action:
+  - service: shell_command.lr_tv_brightness_ctl
+    data_template:
+      level: "{{ 'High' if trigger.to_state.state == 'below_horizon' else 'Off' }}"
 
 
 - alias: Restore lights when TV turned off
@@ -19,9 +44,6 @@
     entity_id: media_player.living_room_vizio
     from: 'on'
     to: 'off'
-  - platform: state
-    entity_id: sensor.living_room_vizio_app_name
-    to: 'SmartCast Home'
   - platform: state
     entity_id: media_player.living_room_cast
     from:

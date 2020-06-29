@@ -18,19 +18,15 @@ automation:
   - service: input_boolean.turn_on
     entity_id: input_boolean.wkqx
 
-- alias: Toggle song polling
+
+- alias: Toggle WKQX song polling
   initial_state: true
   trigger:
   - platform: state
     entity_id: input_boolean.wkqx
     to: 'on'
   - platform: state
-    entity_id:
-    - media_player.bedroom_speaker
-    - media_player.hub
-    - media_player.kitchen_speaker
-    - media_player.living_room_speaker
-    - media_player.portable_speaker
+    entity_id: binary_sensor.any_speaker
     to: 'off'
     for: '00:00:15'
   action:
@@ -48,39 +44,38 @@ automation:
       entity_id: >
         {% if trigger.to_state.state == 'off' %} 
           {% if is_state('input_boolean.wkqx', 'on') %}
-            input_boolean.wkqx, automation.poll_song_info, script.update_song_info
+            input_boolean.wkqx, automation.poll_wkqx_song_info, script.update_wkqx_song
           {% else %}
-            input_boolean.wkqx, automation.poll_song_info, script.update_song_info, input_boolean.music_moved
+            input_boolean.wkqx, automation.poll_wkqx_song_info, script.update_wkqx_song, input_boolean.music_moved
           {% endif %}
         {% else %}
-          input_boolean.wkqx, automation.poll_song_info, script.update_song_info
+          input_boolean.wkqx, automation.poll_wkqx_song_info, script.update_wkqx_song
         {% endif %}
-  - service: automation.turn_off
-    entity_id: automation.toggle_song_polling
 
-- alias: Poll song info
+
+- alias: Poll WKQX song info
   trigger:
   - platform: time_pattern
     seconds: '/30'
   action:
-  - service: script.update_song_info
+  - service: script.update_wkqx_song
 
 
 script:
-  update_song_info:
+  update_wkqx_song:
     sequence:
-    - service: shell_command.update_song
+    - service: shell_command.update_wkqx_song
     - service: homeassistant.update_entity
-      entity_id: sensor.song_info
+      entity_id: sensor.wkqx_song
 
 sensor:
 - platform: command_line
-  name: Song info
+  name: WKQX song
   command: "cat /config/.other/song_info"
   scan_interval: 30
 
 shell_command:
-  update_song: "python3 /config/.other/wkqx.py"
+  update_wkqx_song: "python3 /config/.other/wkqx.py"
 
 input_boolean:
   wkqx:

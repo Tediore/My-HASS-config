@@ -3,9 +3,9 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '20:45:00'
+    at: &cool_sleep_workday_early '21:00:00'
   - platform: time
-    at: '21:15:00'
+    at: &cool_sleep_weekend_early '21:30:00'
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -18,10 +18,10 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: '20:45:00'
+      after: *cool_sleep_workday_early
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      after: '21:15:00'
+      after: *cool_sleep_weekend_early
       weekday: ['fri', 'sat']
   action:
   - service: script.cool_sleep
@@ -86,9 +86,9 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '21:00:00'
+    at: &cool_sleep_workday '21:00:00'
   - platform: time
-    at: '21:30:00'
+    at: &cool_sleep_weekend '21:30:00'
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -99,10 +99,10 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: '21:00:00'
+      after: *cool_sleep_workday
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      after: '21:30:00'
+      after: *cool_sleep_workday
       weekday: ['fri', 'sat']
   action:
   - service: notify.mobile_app_pixel_xl
@@ -143,6 +143,11 @@ automation:
     from: 'on'
     to: 'off'
   action:
+  - service: climate.set_temperature
+    entity_id: climate.thermostat
+    data_template:
+      temperature: "{{ 65 if is_state('input_text.tstat_prev_mode', 'heat') else 80 }}"
+  - delay: '00:00:01'
   - service: climate.set_hvac_mode
     entity_id: climate.thermostat
     data_template:
@@ -186,3 +191,21 @@ script:
         value: 'cool'
     - service: input_boolean.turn_on
       entity_id: input_boolean.tstat_sched_resume
+
+  tstat_peak_savings:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.tstat_peak_savings
+      state: 'off'
+    - wait_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'idle') }}"
+      timeout: '00:10:00'
+      continue_on_timeout: true
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.tstat_peak_savings
+    - wait_template: "{{ is_state('climate.thermostat', 'off') }}"
+      timeout: '00:00:10'
+      continue_on_timeout: false
+    - service: notify.gotify
+      data:
+        title: Peak time savings starting soon
+        message: Thermostat has been turned off.

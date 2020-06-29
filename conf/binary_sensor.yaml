@@ -3,46 +3,74 @@
     all_speakers:
       friendly_name: All speakers
       value_template: >
-        {% set bedroom = states('media_player.bedroom_speaker') %}
-        {% set living = states('media_player.living_room_speaker') %}
-        {% set kitchen = states('media_player.kitchen_speaker') %}
-        {% set hub = states('media_player.hub') %}
-        {{ (bedroom in ['playing', 'paused', 'idle'] and living in ['playing', 'paused', 'idle'] and kitchen in ['playing', 'paused', 'idle'] and hub in ['playing', 'paused', 'idle']) }}
+        {% set values = ['playing', 'paused', 'idle'] %}
+        {% set speakers = [
+          states('media_player.bedroom_speaker') in values,
+          states('media_player.living_room_speaker') in values,
+          states('media_player.kitchen_speaker') in values, 
+          states('media_player.hub') in values
+          ] %}
+        {{ speakers | sum == speakers | count }}
 
     front_speakers:
       friendly_name: Front speakers
       value_template: >
-        {% set kitchen = states('media_player.kitchen_speaker') %}
-        {% set hub = states('media_player.hub') %}
-        {{ kitchen in ['playing', 'paused', 'idle'] and hub in ['playing', 'paused', 'idle'] }}
+        {% set values = ['playing', 'paused', 'idle'] %}
+        {% set speakers = [
+          states('media_player.kitchen_speaker') in values, 
+          states('media_player.hub') in values
+          ] %}
+        {{ speakers | sum == speakers | count }}
 
     any_speaker:
       friendly_name: Any speaker
       value_template: >
-        {% set bedroom = states('media_player.bedroom_speaker') %}
-        {% set living = states('media_player.living_room_speaker') %}
-        {% set kitchen = states('media_player.kitchen_speaker') %}
-        {% set hub = states('media_player.hub') %}
-        {% set portable = states('media_player.portable_speaker') %}
-        {{ bedroom != 'off' or living != 'off' or kitchen != 'off' or hub != 'off' or portable != 'off' }}
+        {% set rejects = ['off', 'unavailable'] %}
+        {% set speakers = [
+          states('media_player.bedroom_speaker') not in rejects, 
+          states('media_player.living_room_speaker') not in rejects, 
+          states('media_player.kitchen_speaker') not in rejects,
+          states('media_player.hub') not in rejects,
+          states('media_player.portable_speaker') not in rejects
+          ] %}
+        {{ speakers | sum > 0 }}
 
     any_tv:
       friendly_name: Any TV
       value_template: >
-        {% set bedroom_tv = states('media_player.bedroom_vizio') %}
-        {% set living_tv = states('media_player.living_room_vizio') %}
-        {{ bedroom_tv != 'off' or living_tv != 'off' }}
+        {% set rejects = ['off', 'unavailable'] %}
+        {% set tvs = [
+          states('media_player.bedroom_vizio') not in rejects, 
+          states('media_player.living_room_vizio') not in rejects 
+          ] %}
+        {{ tvs | sum > 0 }}
 
     xbox:
       friendly_name: Xbox
       value_template: "{{ is_state('sensor.xbox_status', 'Available') }}"
 
 
+- platform: trend
+  sensors:
+    dewpoint_inside:
+      friendly_name: Indoor dewpoint trend
+      entity_id: sensor.dewpoint_inside
+      sample_duration: 1800
+      max_samples: 60
+      min_gradient: 0.005   # dew point increasing at least 3 degrees in a 10-minute period
+
+
 - platform: ping
+  name: Internet
   host: 8.8.8.8
   count: 4
-  name: Internet
   scan_interval: 20
+
+- platform: ping
+  name: Game room TV
+  host: 10.0.2.193
+  count: 2
+  scan_interval: 10
 
 - platform: tod
   name: Quiet hours
@@ -51,4 +79,4 @@
 
 - platform: apcupsd
 - platform: wyzesense
-  device: auto
+  device: /dev/wyzesense

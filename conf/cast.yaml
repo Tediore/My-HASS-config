@@ -1,8 +1,0 @@
-media_player:
-- host: 10.0.0.42  # Portable speaker
-- host: 10.0.0.47  # Bedroom TV (cast)
-- host: 10.0.0.50  # Living room TV (cast)
-- host: 10.0.0.168  # Kitchen speaker
-- host: 10.0.0.167  # Living room speaker
-- host: 10.0.0.169  # Hub
-- host: 10.0.0.170  # Bedroom speaker

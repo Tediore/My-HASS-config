@@ -7,6 +7,7 @@ automation:
     entity_id: 
     - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
+    - input_boolean.tstat_hold
     from: 'on'
     to: 'off'
   - platform: state
@@ -14,9 +15,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: '06:45:00' # Workday
+    at: &cool_home_workday '06:45:00'
   - platform: time
-    at: '07:30:00' # Weekend
+    at: &cool_home_weekend '07:15:00'
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -31,18 +32,18 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: '06:45:00'
+      after: *cool_home_workday
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      after: '07:30:00'
+      after: *cool_home_weekend
       weekday: ['sat', 'sun']
   - condition: or
     conditions:
     - condition: time
-      before: '21:00:00'
+      before: &cool_sleep_workday '21:15:00'
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      before: '21:30:00'
+      before: &cool_sleep_weekend '21:45:00'
       weekday: ['fri', 'sat']
   action:
   - service: script.cool_home
@@ -57,6 +58,7 @@ automation:
     entity_id: 
     - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
+    - input_boolean.tstat_hold
     from: 'on'
     to: 'off'
   - platform: state
@@ -64,9 +66,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: '21:00:00' # Work night
+    at: *cool_sleep_workday
   - platform: time
-    at: '21:30:00' # Weekend
+    at: *cool_sleep_weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -81,16 +83,16 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: '21:00:00'
+      after: *cool_sleep_workday
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      after: '21:30:00'
+      after: *cool_sleep_weekend
       weekday: ['fri', 'sat']
     - condition: time
-      before: '06:45:00'
+      before: *cool_home_workday
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      before: '07:30:00'
+      before: *cool_home_weekend
       weekday: ['sat', 'sun']
   action:
   - service: script.cool_sleep
@@ -106,6 +108,7 @@ automation:
     entity_id: 
     - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
+    - input_boolean.tstat_hold
     from: 'on'
     to: 'off'
   - platform: state
@@ -113,9 +116,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: '06:45:00' # Workday
+    at: &heat_home_workday '06:45:00'
   - platform: time
-    at: '07:30:00' # Weekend
+    at: &heat_home_weekend '07:30:00'
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -130,18 +133,18 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: '06:45:00'
+      after: *heat_home_workday
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      after: '07:30:00'
+      after: *heat_home_weekend
       weekday: ['sat', 'sun']
   - condition: or
     conditions:
     - condition: time
-      before: '21:00:00'
+      before: &heat_sleep_workday '21:00:00'
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      before: '21:30:00'
+      before: &heat_sleep_weekend '21:30:00'
       weekday: ['fri', 'sat']
   action:
   - service: script.heat_home
@@ -156,6 +159,7 @@ automation:
     entity_id: 
     - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
+    - input_boolean.tstat_hold
     from: 'on'
     to: 'off'
   - platform: state
@@ -163,9 +167,9 @@ automation:
   - platform: homeassistant
     event: start
   - platform: time
-    at: '21:00:00' # Work night
+    at: *heat_sleep_workday
   - platform: time
-    at: '21:30:00' # Weekend
+    at: *heat_sleep_weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -180,16 +184,16 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      after: '21:00:00'
+      after: *heat_sleep_workday
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      after: '21:30:00'
+      after: *heat_sleep_weekend
       weekday: ['fri', 'sat']
     - condition: time
-      before: '06:45:00'
+      before: *heat_home_workday
       weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     - condition: time
-      before: '07:30:00'
+      before: *heat_home_weekend
       weekday: ['sat', 'sun']
   action:
   - service: script.heat_sleep

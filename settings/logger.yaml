@@ -1,3 +1,0 @@
-default: info
-logs:
-  pychromecast.socket_client: error

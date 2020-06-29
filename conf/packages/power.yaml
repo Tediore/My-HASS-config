@@ -14,6 +14,9 @@ automation:
     data:
       title: "Server shutting down"
       message: "Power critical, shutdown imminent. See you later :("
+      data:
+        ttl: 0
+        priority: high
 
 
 - alias: Notify when power lost or restored
@@ -41,6 +44,9 @@ automation:
         {% else %}
           System was on battery for {{ states('sensor.power_outage_length') }}
         {% endif %}
+      data:
+        ttl: 0
+        priority: high
 
 
 sensor:

@@ -71,6 +71,24 @@ script:
         temperature: "{{ states('input_number.heat_away') | int }}"
         entity_id: climate.thermostat
 
+  tstat_fan_on:
+    sequence:
+    - service: climate.set_fan_mode
+      entity_id: climate.thermostat_cloud
+      data:
+        fan_mode: 'on'
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.tstat_fan
+
+  tstat_fan_auto:
+    sequence:
+    - service: climate.set_fan_mode
+      entity_id: climate.thermostat_cloud
+      data:
+        fan_mode: 'auto'
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.tstat_fan
+
 
 input_number:
   cool_home:
@@ -189,3 +207,19 @@ sensor:
       friendly_name: "Setpoint"
       value_template: "{{ state_attr('climate.thermostat','temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
+
+
+automation:
+- alias: Adjust sleep temp when Andy home/away
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: device_tracker.andy_phone
+    to: 
+    - 'not_home'
+    - 'home'
+  action:
+  - service: input_number.set_value
+    entity_id: input_number.cool_sleep
+    data_template:
+      value: "{{ 70 if trigger.to_state.state == 'home' else 71 }}"

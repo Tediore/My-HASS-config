@@ -2,6 +2,10 @@
   initial_state: true
   trigger:
   - platform: state
+    entity_id: sensor.hue_bridge
+    to: 'unavailable'
+    for: '00:00:45'
+  - platform: state
     entity_id:
     - binary_sensor.button_1
     - binary_sensor.button_2
@@ -9,20 +13,41 @@
     - binary_sensor.water_sensor_2
     - binary_sensor.water_sensor_3
     - binary_sensor.water_sensor_4
+    - binary_sensor.water_sensor_5
+    - binary_sensor.water_sensor_6
     - binary_sensor.lumi_motion_1
     - sensor.lumi_temp_1
     - sensor.lumi_temp_2
     - light.front_closet
     to: 'unavailable'
+    for: '00:00:10'
   - platform: state
-    entity_id:
-    - switch.washer_plug
-    - switch.tuya_plug_2
+    entity_id: 
+    - light.porch_light
     - switch.plug_1
     - switch.plug_2
     - switch.plug_3
     - switch.plug_4
     - switch.light_switch_1
+    - switch.coffeemaker_plug
+    - switch.tuya_plug_2
+    to: 'unavailable'
+    for: '00:10:00'
+  action:
+  - service: notify.mobile_app_pixel_xl
+    data_template:
+      title: "Device unavailable"
+      message: "{{ trigger.to_state.name }} is unavailable"
+      data:
+        ttl: 0
+        priority: high
+
+
+- alias: Notify when Hue light unreachable
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
     - light.andy
     - light.buffet
     - light.dresser
@@ -35,15 +60,14 @@
     - light.stand_lamp
     to: 'unavailable'
     for: '00:01:00'
-  - platform: state
-    entity_id: light.porch_light
-    to: 'unavailable'
-    for: '01:00:00'
+  condition:
+  - condition: template
+    value_template: "{{ not is_state('sensor.hue_bridge', 'unavailable') }}"
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:
-      title: "Device unavailable"
-      message: "{{ trigger.to_state.name }} is unavailable"
+      title: "Light unreachable"
+      message: "{{ trigger.to_state.name }} is unreachable"
       data:
         ttl: 0
         priority: high
@@ -63,6 +87,8 @@
     - sensor.water_sensor_2_battery
     - sensor.water_sensor_3_battery
     - sensor.water_sensor_4_battery
+    - sensor.water_sensor_5_battery
+    - sensor.water_sensor_6_battery
     - sensor.zcombo_1_battery_level
     - sensor.dining_room_remote_battery_level
     - sensor.game_room_remote_battery_level
@@ -93,29 +119,13 @@
         priority: high
 
 
-- alias: Controller battery warning
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.controller_battery
-    above: 10
-  action:
-  - service: notify.mobile_app_pixel_xl
-    data:
-      title: Controller batteries used for 10 hours
-      message: Might want to swap batteries soon.
-      data:
-        ttl: 0
-        priority: high
-
-
 - alias: Notify when printer ink is low
   initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: 
-    - sensor.printer_ink_black
-    - sensor.printer_ink_color
+    - sensor.hp_photosmart_d110_series_black_ink
+    - sensor.hp_photosmart_d110_series_unknown_ink
     below: 25
   action:
   - service: persistent_notification.create

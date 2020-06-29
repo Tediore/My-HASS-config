@@ -6,7 +6,7 @@
 
 ### REST sensors
 - platform: rest
-  resource: http://localhost:5557/device?ipaddr=10.0.0.49/status
+  resource: http://localhost:5557/device?ipaddr=10.0.0.65/status
   name: Xbox status
   value_template: !secret xbox_rest
   scan_interval: 5
@@ -22,19 +22,52 @@
   - modelid
   - swversion
   - apiversion
-  scan_interval: 600
-
+  scan_interval: 30
 
 ### Command line sensors
 - platform: command_line
-  name: CPU Temperature
-  command: "cat /sys/class/thermal/thermal_zone0/temp"
-  unit_of_measurement: "°F"
-  value_template: '{{ (((value | multiply(0.001)) | float * 9/5) + 32) | round(0) }}'
+  name: Core 0 temp
+  command: "cat /sys/class/hwmon/hwmon4/temp2_input"
+  value_template: "{{ (value | multiply(0.001)) | round(0) }}"
+
+- platform: command_line
+  name: Core 1 temp
+  command: "cat /sys/class/hwmon/hwmon4/temp4_input"
+  value_template: "{{ (value | multiply(0.001)) | round(0) }}"
 
 - platform: command_line
   name: Backup log
   command: "cat /config/.other/backup.log"
+  scan_interval: 3600
+
+- platform: command_line
+  name: SSD temperature # this one is to force Celcius in frontend, but will not have history graph
+  command: "cat /config/.other/ssd_temp"
+  value_template: "{{ value[value.find('°')-2:-2] }} °C"
+  # unit_of_measurement: "°C"
+  scan_interval: 49
+
+- platform: command_line
+  name: SSD temperature hist
+  command: "cat /config/.other/ssd_temp"
+  value_template: "{{ value[value.find('°')-2:-2] }}"
+  unit_of_measurement: "°C"
+  scan_interval: 49
+
+# - platform: command_line
+#   name: Last startup length
+#   command: "cat /config/home-assistant.log | grep 'Home Assistant initialized in'"
+#   value_template: "{{ value[value.find('in ')+3:-1] }}"
+#   unit_of_measurement: "s"
+
+- platform: command_line
+  name: Server ipv6 address
+  command: "cat /config/.other/ipv6"
+  scan_interval: 300
+
+- platform: command_line
+  name: Last backup
+  command: "cat /config/.other/last_backup"
   scan_interval: 3600
 
 - platform: apcupsd
@@ -62,12 +95,8 @@
       rel_hum: sensor.tstat_current_humidity
     dewpoint_outside:
       friendly_name: Outdoor dew point
-      temperature: sensor.outside_temp
-      rel_hum: sensor.outside_humidity
-
-- platform: google_wifi
-  name: Router
-  host: 10.0.0.1
+      temperature: sensor.outside_temp_dewpoint
+      rel_hum: sensor.outside_humidity_dewpoint
 
 - platform: time_date
   display_options:
@@ -76,4 +105,14 @@
   - date_time_iso
 
 - platform: uptime
-- platform: websocket_api
+
+- platform: darksky
+  api_key: !secret darksky_key
+  scan_interval: '00:03:00'
+  monitored_conditions:
+  - temperature
+  - apparent_temperature
+  - dew_point
+  - cloud_cover
+  - temperature_high
+  - temperature_low

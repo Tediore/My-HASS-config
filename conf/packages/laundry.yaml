@@ -21,7 +21,7 @@ automation:
     entity_id: input_boolean.sleep_mode
     state: 'off'
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.gotify
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"

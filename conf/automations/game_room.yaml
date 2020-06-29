@@ -3,8 +3,33 @@
   trigger:
   - platform: state
     entity_id: binary_sensor.xbox
+  - platform: state
+    entity_id: binary_sensor.game_room_tv
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+  - condition: template
+    value_template: "{{ (states('binary_sensor.xbox') == states('binary_sensor.game_room_tv')) or (trigger.to_state.entity_id == 'binary_sensor.game_room_tv' and trigger.to_state.state == 'off') }}"
   action:
   - service_template: "script.xbox_{{ trigger.to_state.state }}"
+
+
+- alias: Desktop turned on at night
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: switch.desktop
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: template
+    value_template: "{{ is_state('light.game_room', 'on') and state_attr('light.game_room', 'brightness') < 255 }}"
+  action:
+  - service: light.turn_on
+    entity_id: light.game_room
+    data:
+      brightness_pct: 100
+      transition: 10
 
 
 - alias: Turn game room lights on/off at sunset/sunrise
@@ -41,19 +66,19 @@
   - service: script.xbox_off
 
 
-- alias: Change lights based on Internet connectivity
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.internet
-  condition:
-  - condition: state
-    entity_id: light.game_room
-    state: 'on'
-  - condition: template
-    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
-  action:
-  - service: hue.hue_activate_scene
-    data_template:
-      group_name: Game room
-      scene_name: "{{ 'Legendary' if trigger.to_state.state == 'off' else 'Read' }}"
+# - alias: Change lights based on Internet connectivity
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.internet
+#   condition:
+#   - condition: state
+#     entity_id: light.game_room
+#     state: 'on'
+#   - condition: template
+#     value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+#   action:
+#   - service: hue.hue_activate_scene
+#     data_template:
+#       group_name: Game room
+#       scene_name: "{{ 'Legendary' if trigger.to_state.state == 'off' else 'Read' }}"

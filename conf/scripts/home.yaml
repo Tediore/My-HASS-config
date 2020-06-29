@@ -9,7 +9,7 @@ good_morning:
     entity_id:
     - input_boolean.sleep_mode
     - input_boolean.andy_sleep
-    - switch.plug_1
+    - climate.bedroom_fan
   - service: media_player.volume_mute
     entity_id: media_player.living_room_speaker
     data:
@@ -50,11 +50,11 @@ lights_sunset:
   sequence:
   - service: light.turn_on
     entity_id: light.dining_room
-    data:
+    data_template:
       kelvin: 3000
-      transition: 30
-      brightness_pct: 100
-  - delay: '00:00:30'
+      transition: 10
+      brightness_pct: "{{ 100 if is_state('media_player.living_room_vizio', 'off') else 50 }}"
+  - delay: '00:00:09'
   - service: switch.turn_on
     entity_id: switch.plug_2
   - condition: state
@@ -72,6 +72,12 @@ lights_sunrise:
   - delay: '00:00:30'
   - service: switch.turn_off
     entity_id: switch.plug_2
+  - service: input_boolean.turn_off
+    entity_id:
+    - input_boolean.on_balcony_init0
+    - input_boolean.on_balcony_init1
+    - input_boolean.on_balcony_init2
+    - input_boolean.on_balcony
   - condition: state
     entity_id: input_boolean.christmas_mode
     state: 'on'
@@ -136,7 +142,7 @@ gr_lights_on:
   - service: light.turn_on
     entity_id: light.game_room
     data:
-      kelvin: 3000
+      # kelvin: 3000
       transition: 5
       brightness_pct: 100
 
@@ -150,6 +156,12 @@ gr_lights_off:
 
 
 #########################
-### Balcony
+### Living room
 #########################
-
+cross_stitch_light:
+  sequence:
+  - service: light.turn_on
+    entity_id: light.right_lamp
+    data:
+      kelvin: 5000
+      brightness_pct: 100

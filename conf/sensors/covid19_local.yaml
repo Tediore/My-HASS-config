@@ -1,0 +1,119 @@
+- platform: command_line
+  name: Covid-19 tested Oak Forest
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['total_tested']['60452'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 confirmed Oak Forest
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['confirmed_cases']['60452'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 ratio Oak Forest
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['percent_confirmed']['60452'] | float * 100 }}"
+  unit_of_measurement: '%'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 tested Woodridge
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['total_tested']['60517'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 confirmed Woodridge
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['confirmed_cases']['60517'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 ratio Woodridge
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['percent_confirmed']['60517'] | float * 100 }}"
+  scan_interval: 3600
+  unit_of_measurement: '%'
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 tested 60477
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['total_tested']['60477'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 confirmed 60477
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['confirmed_cases']['60477'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 ratio 60477
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['percent_confirmed']['60477'] | float * 100 }}"
+  unit_of_measurement: '%'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 tested Villa Park
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['total_tested']['60181'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 confirmed Villa Park
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['confirmed_cases']['60181'] }}"
+  unit_of_measurement: 'people'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated
+
+- platform: command_line
+  name: Covid-19 ratio Villa Park
+  command: "cat /config/.other/covid_local.json"
+  value_template: "{{ value_json['percent_confirmed']['60181'] | float * 100 }}"
+  unit_of_measurement: '%'
+  scan_interval: 3600
+  json_attributes:
+  - attribution
+  - updated

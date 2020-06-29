@@ -6,65 +6,96 @@
     
     space_heater_runtime_today:
       friendly_name: "Space heater runtime today"
-      value_template: "{{ (states('sensor.space_heater_time_today') | float) | round(1) }}"
+      value_template: "{{ states('sensor.space_heater_time_today') | float | round(1) }}"
       unit_of_measurement: 'h'
     
     space_heater_runtime_yesterday:
       friendly_name: "Space heater runtime yesterday"
-      value_template: "{{ (states('sensor.space_heater_time_yesterday') | float) | round(1) }}"
+      value_template: "{{ states('sensor.space_heater_time_yesterday') | float | round(1) }}"
       unit_of_measurement: 'h'
     
     space_heater_runtime_week:
       friendly_name: "Space heater runtime last 7 days"
-      value_template: "{{ (states('sensor.space_heater_time_last_7_days') | float) | round(1) }}"
+      value_template: "{{ states('sensor.space_heater_time_last_7_days') | float | round(1) }}"
       unit_of_measurement: 'h'
     
     outside_temp:
       friendly_name: "Outside"
-      value_template: "{{ state_attr('weather.kmdw', 'temperature') | float('-') | round(0) }}"
+      value_template: "{{ state_attr('weather.dark_sky', 'temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
 
-    outside_humidity:
+    outside_temp_dewpoint:
       friendly_name: "Outside"
-      value_template: "{{ state_attr('weather.kmdw', 'humidity') | float('-') | round(0) }}"
+      value_template: "{{ 32 if is_state('weather.dark_sky', 'unavailable') else state_attr('weather.dark_sky', 'temperature') | round(0) }}"
+      unit_of_measurement: '°F'
+
+    outside_humidity_dewpoint:
+      friendly_name: "Outside"
+      value_template: "{{ 50 if is_state('weather.dark_sky', 'unavailable') else state_attr('weather.dark_sky', 'humidity') | round(0) }}"
       unit_of_measurement: '%'
     
-    outside_dewpoint:
+    dewpoint_outside_display:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dewpoint_outside') | float | round(0) }}"
+      value_template: "{{ '-' if is_state('weather.dark_sky', 'unavailable') else states('sensor.dewpoint_outside') | float | round(0) }}"
       unit_of_measurement: '°F'
 
-    inside_dewpoint:
+    dewpoint_inside_display:
       friendly_name: "Dew point"
       value_template: "{{ states('sensor.dewpoint_inside') | float | round(0) }}"
       unit_of_measurement: '°F'
     
     lumi_temp_1_calibrated:
       friendly_name: Lumi temp 1 calibrated
-      value_template: "{{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset')  | float) | round(1) }}"
+      value_template: >
+        {% if is_state('sensor.lumi_temp_1', 'unavailable') %}
+          {{ states('sensor.tstat_current_temp') }}
+        {% else %}
+          {{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset') | float) | round(1) }}
+        {% endif %}
       unit_of_measurement: '°F'
     
     lumi_temp_1_calibrated_display:
       friendly_name: Lumi temp 1 calibrated
-      value_template: "{{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset') | float) | round(0) }}"
-      unit_of_measurement: '°F'
+      value_template: >
+        {% if is_state('sensor.lumi_temp_1', 'unavailable') %}
+          -
+        {% else %}
+          {{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset') | float) | round(0) }} °F
+        {% endif %}
     
     lumi_temp_2_calibrated:
       friendly_name: Lumi temp 2 calibrated
-      value_template: "{{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(1) }}"
+      value_template: >
+        {% if is_state('sensor.lumi_temp_2', 'unavailable') %}
+          {{ states('sensor.tstat_current_temp') }}
+        {% else %}
+          {{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(1) }}
+        {% endif %}
       unit_of_measurement: '°F'
     
     lumi_temp_2_calibrated_display:
       friendly_name: Lumi temp 2 calibrated
-      value_template: "{{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(0) }}"
-      unit_of_measurement: '°F'
+      value_template: >
+        {% if is_state('sensor.lumi_temp_2', 'unavailable') %}
+          -
+        {% else %}
+          {{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(0) }} °F
+        {% endif %}
 
     avg_temp_master_bedroom:
       friendly_name: Master bedroom
       value_template: "{{ ((states('sensor.button_1_temp') | float + states('sensor.button_2_temp') | float) / 2) | round(0) }}"
       unit_of_measurement: '°F'
-    
-    internet:
-      friendly_name: Status
-      value_template: "{{ 'Online' if is_state('binary_sensor.internet', 'on') else 'LAN only' }}"
-      icon_template: "{{ 'mdi:server-network' if is_state('binary_sensor.internet', 'on') else 'mdi:server-network-off' }}"
+
+    cpu_temp:
+      friendly_name: CPU temperature
+      value_template: "{{ ((states('sensor.core_0_temp') | int + states('sensor.core_1_temp') | int) / 2) | int }} °C"
+
+    cell_modem_signal:
+      friendly_name: Cellular modem signal
+      value_template: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'SignalPercent') | int }}"
+      attribute_templates:
+        signal_strength: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'SignalStrength') | int }} dB"
+        bit_error_rate: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'BitErrorRate') }}"
+      device_class: signal_strength
+      unit_of_measurement: '%'
