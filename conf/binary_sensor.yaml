@@ -62,7 +62,7 @@
 
 - platform: ping
   name: Internet
-  host: 8.8.8.8
+  host: 1.1.1.1
   count: 4
   scan_interval: 20
 

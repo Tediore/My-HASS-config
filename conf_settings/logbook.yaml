@@ -1,0 +1,52 @@
+include:
+  entity_globs:
+  - binary_sensor.water*
+  entities:
+  - binary_sensor.all_speakers
+  - binary_sensor.any_speaker
+  - binary_sensor.any_tv
+  - binary_sensor.balcony_door
+  - binary_sensor.building_5_closet
+  - binary_sensor.front_closet
+  - binary_sensor.front_door
+  - binary_sensor.front_speakers
+  - binary_sensor.hvac_closet
+  - binary_sensor.laundry_room_door
+  - binary_sensor.storage
+  - binary_sensor.storm_door
+  - sensor.hvac_action
+  - sensor.space_heater_action
+  - sensor.ups_status
+  - sensor.router_status
+  - sensor.wkqx_song
+  - sensor.current_version
+  - sensor.internet
+  - sensor.power_status
+  - sensor.printer
+  - sensor.tstat_profile
+  - sensor.tstat_setpoint
+  - sensor.xbox_status
+  - sensor.zcombo_1_status
+  domains:
+  - alarm_control_panel
+  - automation
+  - climate
+  - device_tracker
+  - light
+  - media_player
+  - switch
+  - zwave
+exclude:
+  entities:
+  - automation.dismiss_discovery_notification
+  - automation.poll_power_strip
+  - automation.poll_wkqx_song_info
+  - automation.record_washer_dryer_on_off
+  - automation.master_bedroom_lights_night_arrival
+  - automation.set_speaker_volume_based_on_app
+  - automation.record_time_when_cycle_starts_ends
+  - automation.keep_power_strip_happy
+  - automation.toggle_power_strip_polling
+  - automation.toggle_vacation_mode
+  - automation.toggle_wkqx_song_polling
+  - automation.record_when_on_balcony

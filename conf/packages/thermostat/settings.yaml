@@ -177,7 +177,9 @@ sensor:
       value_template: >
         {% set setpoint = state_attr('climate.thermostat', 'temperature') | int %}
         {% set mode = states('climate.thermostat') %}
-        {% if is_state('input_boolean.tstat_smart', 'on') %}
+        {% if is_state('input_boolean.tstat_peak_savings', 'on') %}
+          PTS
+        {% elif is_state('input_boolean.tstat_smart', 'on') %}
           Smart
         {% elif (setpoint == states('input_number.heat_home') | int and mode == 'heat') or (setpoint == states('input_number.cool_home') | int and mode == 'cool') %}
           Home

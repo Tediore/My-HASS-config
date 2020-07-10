@@ -1,0 +1,18 @@
+- platform: generic_thermostat
+  name: Space heater
+  heater: switch.plug_4
+  target_sensor: sensor.lumi_temp_2_calibrated
+  min_temp: 65
+  max_temp: 71
+  cold_tolerance: 1
+  hot_tolerance: 1
+
+- platform: generic_thermostat
+  name: Bedroom fan
+  heater: switch.plug_1
+  ac_mode: true
+  target_sensor: sensor.lumi_temp_1_calibrated
+  min_temp: 63
+  max_temp: 75
+  cold_tolerance: 0
+  hot_tolerance: 1

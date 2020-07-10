@@ -217,6 +217,10 @@ script:
         kelvin: 4000
         brightness_pct: 50
         transition: 0.4
+    - service: input_text.set_value
+      entity_id: input_text.porch_light_color
+      data:
+        value: 'white'
 
 
 input_boolean:

@@ -26,19 +26,14 @@
 
 ### Command line sensors
 - platform: command_line
-  name: Core 0 temp
-  command: "cat /sys/class/hwmon/hwmon4/temp2_input"
-  value_template: "{{ (value | multiply(0.001)) | round(0) }}"
+  name: CPU temp # this one is to force Celcius in frontend, but will not have history graph
+  command: "cat /sys/class/thermal/thermal_zone9/temp"
+  value_template: "{{ (value | multiply(0.001)) | round(0) }} °C"
 
 - platform: command_line
-  name: Core 1 temp
-  command: "cat /sys/class/hwmon/hwmon4/temp4_input"
+  name: CPU temp hist
+  command: "cat /sys/class/thermal/thermal_zone9/temp"
   value_template: "{{ (value | multiply(0.001)) | round(0) }}"
-
-- platform: command_line
-  name: Backup log
-  command: "cat /config/.other/backup.log"
-  scan_interval: 3600
 
 - platform: command_line
   name: SSD temperature # this one is to force Celcius in frontend, but will not have history graph
@@ -53,6 +48,11 @@
   value_template: "{{ value[value.find('°')-2:-2] }}"
   unit_of_measurement: "°C"
   scan_interval: 49
+
+- platform: command_line
+  name: Backup log
+  command: "cat /config/.other/backup.log"
+  scan_interval: 3600
 
 # - platform: command_line
 #   name: Last startup length

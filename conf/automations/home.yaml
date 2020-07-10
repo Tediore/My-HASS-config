@@ -228,12 +228,14 @@
     entity_id: switch.hue_motion_sensor_1
 
 
-- alias: IFTTT webhook received
+- alias: Turn guest bath fan off after 60 minutes
   initial_state: true
   trigger:
-  - platform: event
-    event_type: ifttt_webhook_received
+  - platform: state
+    entity_id: switch.guest_bath_fan
+    from: 'off'
+    to: 'on'
+    for: '01:00:00'
   action:
-  - service_template: "{{ 'input_boolean.turn_off' if trigger.event.data.action == 'pts_ended' else 'script.turn_on' }}"
-    data_template:
-      entity_id: "{{ 'input_boolean' if trigger.event.data.action == 'pts_ended' else 'script' }}.tstat_peak_savings"
+  - service: switch.turn_off
+    entity_id: switch.guest_bath_fan

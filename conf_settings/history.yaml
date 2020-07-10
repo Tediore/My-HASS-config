@@ -1,0 +1,26 @@
+use_include_order: true
+include:
+  entities:
+  - alarm_control_panel.abode
+  - binary_sensor.front_door
+  - binary_sensor.balcony_door
+  - binary_sensor.storm_door
+  - binary_sensor.drawer
+  - binary_sensor.front_closet
+  - binary_sensor.wyze_motion_1
+  - binary_sensor.lumi_motion_1
+  - switch.light_switch_1
+  - light.front_closet
+  - light.dining_room
+  - light.living_room
+  - light.master_bedroom
+  - light.game_room
+  - light.laundry_room
+  - light.porch_light
+  - switch.plug_2
+  - switch.plug_3
+  - switch.plug_1
+  - media_player.living_room_vizio
+  - media_player.bedroom_vizio
+  - climate.thermostat
+  - binary_sensor.internet

@@ -87,10 +87,6 @@
       value_template: "{{ ((states('sensor.button_1_temp') | float + states('sensor.button_2_temp') | float) / 2) | round(0) }}"
       unit_of_measurement: '°F'
 
-    cpu_temp:
-      friendly_name: CPU temperature
-      value_template: "{{ ((states('sensor.core_0_temp') | int + states('sensor.core_1_temp') | int) / 2) | int }} °C"
-
     cell_modem_signal:
       friendly_name: Cellular modem signal
       value_template: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'SignalPercent') | int }}"

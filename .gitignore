@@ -1,6 +1,8 @@
 /*
 !configuration.yaml
 !conf/
+!conf_settings/
+!conf_static/
 !settings/
 !*.md
 

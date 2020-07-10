@@ -1,0 +1,99 @@
+# Remote to control porch light
+
+automation:
+- alias: Porch light remote
+  initial_state: true
+  trigger:
+  # First button: Toggle light
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'off'
+      device_ieee: !secret eco_remote_4_id
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'on'
+      device_ieee: !secret eco_remote_4_id
+  # Second button: Change light color
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'move_to_level'
+      device_ieee: !secret eco_remote_4_id
+  # Third button: Return to 4000K @ 50% brightness
+  - platform: event
+    event_type: zha_event
+    event_data:
+      command: 'move_to_color_temp'
+      device_ieee: !secret eco_remote_4_id
+  action:
+  - service_template: >
+      {% set command = trigger.event.data.command %}
+      {% if command in ['on', 'off'] %}
+        script.porch_light_{{ 'on' if is_state('light.porch_light', 'off') else 'off' }}
+      {% elif command == 'move_to_level' %}
+        script.porch_light_color
+      {% else %}
+        script.porch_light_security
+      {% endif %}
+
+- alias: Reset porch light input to white
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.porch_light
+    from: 'on'
+    to: 'off'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.porch_light_color
+    data:
+      value: 'white'
+
+
+input_text:
+  porch_light_color:
+
+
+script:
+  porch_light_on:
+    sequence:
+    - service: light.turn_on
+      entity_id: light.porch_light
+      data:
+        brightness_pct: 100
+        kelvin: 4000
+    - service: input_text.set_value
+      entity_id: input_text.porch_light_color
+      data:
+        value: 'white'
+
+  porch_light_off:
+    sequence:
+    - service: light.turn_off
+      entity_id: light.porch_light
+
+  porch_light_color:
+    sequence:
+    - service: light.turn_on
+      entity_id: light.porch_light
+      data_template:
+        transition: 0.5
+        brightness_pct: 100
+        color_name: &color >
+          {% set color = states('input_text.porch_light_color') %}
+          {% set dict = {
+            'white': 'red',
+            'red': 'orange',
+            'orange': 'green',
+            'green': 'cyan',
+            'cyan': 'blue',
+            'blue': 'darkslateblue',
+            'darkslateblue': 'white'
+          } %}
+          {{ dict[color] }}
+    - service: input_text.set_value
+      entity_id: input_text.porch_light_color
+      data_template:
+        value: *color

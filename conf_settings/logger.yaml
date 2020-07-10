@@ -1,0 +1,17 @@
+default: info
+logs:
+  # pychromecast: error
+  # zeroconf: error
+  homeassistant.components.automation: warning
+#   zeroconf: debug
+#   homeassistant.core: debug
+#   homeassistant.components.zha: debug
+#   bellows.zigbee.application: debug
+#   bellows.ezsp: debug
+#   zigpy: debug
+#   zigpy_cc: debug
+#   zigpy_deconz.zigbee.application: debug
+#   zigpy_deconz.api: debug
+#   zigpy_xbee.zigbee.application: debug
+#   zigpy_xbee.api: debug
+#   zigpy_zigate: debug

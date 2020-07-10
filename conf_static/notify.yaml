@@ -1,0 +1,29 @@
+- platform: rest
+  name: gotify
+  resource: !secret gotify_url
+  method: POST_JSON
+  headers:
+    X-Gotify-Key: !secret gotify_key
+  message_param_name: message
+  title_param_name: title
+  data:
+    priority: 5
+
+- platform: rest
+  name: gotify_high
+  resource: !secret gotify_url
+  method: POST_JSON
+  headers:
+    X-Gotify-Key: !secret gotify_key
+  message_param_name: message
+  title_param_name: title
+  data:
+    priority: 10
+
+- platform: sms
+  name: sms_matt
+  recipient: !secret phone_matt
+
+- platform: sms
+  name: sms_andy
+  recipient: !secret phone_andy

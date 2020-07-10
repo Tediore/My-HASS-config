@@ -1,7 +1,15 @@
 - name: panel-redirect
   url_path: redirect-server-ctl
-  sidebar_title: Server controls
+  sidebar_title: Server Controls
   sidebar_icon: mdi:server-network
   module_url: /local/panel-redirect.js
   config:
     target: /config/server_control
+
+- name: panel-redirect
+  url_path: redirect-zha
+  sidebar_title: Zigbee Settings
+  sidebar_icon: mdi:zigbee
+  module_url: /local/panel-redirect.js
+  config:
+    target: /config/zha/dashboard?config_entry=446066c16d9f435d886d227f7cd4d7b6

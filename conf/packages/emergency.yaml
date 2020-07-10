@@ -3,7 +3,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: 
+    entity_id: &water_sensors
     - binary_sensor.water_sensor_1
     - binary_sensor.water_sensor_2
     - binary_sensor.water_sensor_3
@@ -12,20 +12,14 @@ automation:
     - binary_sensor.water_sensor_6
     to: 'on'
   - platform: state
-    entity_id: 
-    - binary_sensor.water_sensor_1
-    - binary_sensor.water_sensor_2
-    - binary_sensor.water_sensor_3
-    - binary_sensor.water_sensor_4
-    - binary_sensor.water_sensor_5
-    - binary_sensor.water_sensor_6
+    entity_id: *water_sensors
     from: 'on'
     to: 'off'
     for: '00:00:05'
   action:
   - service: notify.sms_matt
     data_template:
-      message: >
+      message: &leak_message >
         {% if trigger.to_state.state == 'on' %}
           LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
         {% else %}
@@ -33,22 +27,12 @@ automation:
         {% endif %}
   - service: notify.gotify_high
     data_template:
-      title: "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
-      message: >
-        {% if trigger.to_state.state == 'on' %}
-          LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
-        {% else %}
-          {{ trigger.to_state.name }} cleared
-        {% endif %}
+      title: &leak_title "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
+      message: *leak_message
   - service: notify.mobile_app_pixel_xl
     data_template:
-      title: "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
-      message: >
-        {% if trigger.to_state.state == 'on' %}
-          LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
-        {% else %}
-          {{ trigger.to_state.name }} cleared
-        {% endif %}
+      title: *leak_title
+      message: *leak_message
       data:
         ttl: 0
         priority: high
@@ -68,7 +52,7 @@ automation:
   action:
   - service: notify.sms_matt
     data_template:
-      message: >
+      message: &smoke_message >
         {% if trigger.to_state.state in ['Smoke', 'CO'] %}
           {{ trigger.to_state.state.upper() }} DETECTED!
         {% else %}
@@ -76,32 +60,17 @@ automation:
         {% endif %}
   - service: notify.gotify_high
     data_template:
-      title: >
+      title: &smoke_title >
         {% if trigger.to_state.state in ['Smoke', 'CO'] %}
           {{ trigger.to_state.state.upper() }} DETECTED!
         {% else %}
           {{ trigger.from_state.state }} cleared.
         {% endif %}
-      message: >
-        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
-          {{ trigger.to_state.state.upper() }} DETECTED!
-        {% else %}
-          {{ trigger.from_state.state }} no longer detected.
-        {% endif %}
+      message: *smoke_message
   - service: notify.mobile_app_pixel_xl
     data_template:
-      title: >
-        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
-          {{ trigger.to_state.state.upper() }} DETECTED!
-        {% else %}
-          {{ trigger.from_state.state }} cleared.
-        {% endif %}
-      message: >
-        {% if trigger.to_state.state in ['Smoke', 'CO'] %}
-          {{ trigger.to_state.state.upper() }} DETECTED!
-        {% else %}
-          {{ trigger.from_state.state }} no longer detected.
-        {% endif %}
+      title: *smoke_title
+      message: *smoke_message
       data:
         ttl: 0
         priority: high
@@ -138,13 +107,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id:
-    - binary_sensor.water_sensor_1
-    - binary_sensor.water_sensor_2
-    - binary_sensor.water_sensor_3
-    - binary_sensor.water_sensor_4
-    - binary_sensor.water_sensor_5
-    - binary_sensor.water_sensor_6
+    entity_id: *water_sensors
     to: 'on'
   condition:
   - condition: template
