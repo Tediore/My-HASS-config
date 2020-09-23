@@ -4,7 +4,9 @@
   trigger:
   - platform: state
     entity_id:
+    - light.buffet
     - light.dining_room
+    - light.game_room_closet
     - light.living_room
     - light.master_bedroom
     - light.game_room
@@ -12,7 +14,7 @@
     from: 'off'
     to: 'on'
   - platform: state
-    entity_id: switch.light_switch_1
+    entity_id: switch.entrance_light
     from: 'off'
     to: 'on'
     for: '00:00:45'
@@ -20,6 +22,9 @@
   - condition: state
     entity_id: alarm_control_panel.abode
     state: armed_away
+  - condition: state
+    entity_id: input_boolean.vacation_mode
+    state: 'off'
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:
@@ -27,7 +32,7 @@
       message: >
         {% set entity = trigger.to_state.entity_id %}
         {% set name = trigger.to_state.name %}
-        {% if entity == 'switch.light_switch_1' %}
+        {% if entity == 'switch.entrance_light' %}
           {{ name }} has been turned on.
         {% else %}
           {{ name }} lights have been turned on.
@@ -87,7 +92,7 @@
   initial_state: true
   trigger:
   - platform: state
-    entity_id: device_tracker.pixel_xl
+    entity_id: device_tracker.pixel_xl_unifi
     from: 'home'
     to: 'not_home'
     for: '00:05:00'
@@ -98,7 +103,7 @@
     entity_id: alarm_control_panel.abode
     state: 'disarmed'
   - condition: template
-    value_template: "{{ not is_state('device_tracker.pixel_xl', 'home') }}"
+    value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   action:
   - service: notify.mobile_app_pixel_xl
     data:
@@ -126,7 +131,7 @@
     entity_id: alarm_control_panel.abode
     state: armed_away
   - condition: template
-    value_template: "{{ not is_state('device_tracker.pixel_xl', 'home') }}"
+    value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:

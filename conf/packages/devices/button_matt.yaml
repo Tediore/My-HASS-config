@@ -1,22 +1,23 @@
 automation:
 - alias: Matt button
   initial_state: true
+  mode: parallel
   trigger:
   - platform: event
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: !secret button_1_id
+      device_ieee: !secret button_matt_id
   - platform: event
     event_type: zha_event
     event_data:
       command: button_double
-      device_ieee: !secret button_1_id
+      device_ieee: !secret button_matt_id
   - platform: event
     event_type: zha_event
     event_data:
       command: button_hold
-      device_ieee: !secret button_1_id
+      device_ieee: !secret button_matt_id
   action:
     service_template: >
       {% set command = trigger.event.data.command %}
@@ -47,10 +48,11 @@ automation:
       entity_id: group.lights_interior
       state: 'on'
     - condition: state
-      entity_id: switch.plug_2
+      entity_id: switch.cabinet_lighting
       state: 'on'
   action:
-  - service: script.good_night_no_noise
+  - service: script.turn_on
+    entity_id: script.good_night_no_noise
 
 
 - alias: Repeat white noise in sleep mode
@@ -92,7 +94,8 @@ automation:
       entity_id: input_boolean.andy_sleep
       state: 'on'
   action:
-  - service: script.stop_white_noise
+  - service: script.turn_on
+    entity_id: script.stop_white_noise
 
 
 - alias: Reset volume after extra sleep
@@ -135,18 +138,27 @@ script:
   good_night:
     alias: Good night
     sequence:
-    - service: script.white_noise_bedroom
-    - service: homeassistant.turn_off
-      entity_id: 
-      - group.lights_interior
-      - input_boolean.washer
-      - input_boolean.dryer
-    - service: script.media_players_off
-    - service: script.sleep_switches
-    - service: script.porch_light_security
     - service: input_boolean.turn_on
       data_template:
         entity_id: "input_boolean.{{ 'extra_sleep' if 6 <= now().hour < 18 else 'sleep_mode' }}"
+    - service: script.turn_on
+      entity_id: script.white_noise_bedroom
+    - service: homeassistant.turn_off
+      entity_id: 
+      - light.master_bedroom_night_light
+      - group.lights_interior
+      - input_boolean.washer
+      - input_boolean.dryer
+    - service: script.turn_on
+      entity_id: 
+      - script.media_players_off
+      - script.sleep_switches
+      - script.porch_light_security
+    - service: climate.turn_on
+      entity_id: climate.bedroom_fan
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
     - service: script.alarm_arm_home
 
   good_night_no_noise:
@@ -155,9 +167,12 @@ script:
     - service: homeassistant.turn_off
       entity_id: 
       - group.lights_interior
-      - switch.tuya_plug_2
+      - switch.christmas_tree
       - media_player.living_room_vizio
-    - service: script.sleep_switches
+    - service: script.turn_on
+      entity_id: script.sleep_switches
+    - service: climate.turn_on
+      entity_id: climate.bedroom_fan
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
     - service: alarm_control_panel.alarm_arm_home
@@ -202,14 +217,13 @@ script:
 
   stop_white_noise:
     sequence:
-    - service: script.volume_transition_to_zero_foo
-    - wait_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.10 }}"
+    - service: script.turn_on
+      entity_id: script.volume_transition_to_zero
+    - wait_template: "{{ is_state('script.volume_transition_to_zero', 'off') }}"
       timeout: '00:01:00'
       continue_on_timeout: true
     - service: homeassistant.turn_off
       entity_id: 
-      - script.volume_transition_to_zero_foo
-      - script.volume_transition_to_zero_bar
       - media_player.bedroom_speaker
       - input_boolean.white_noise
     - service: media_player.volume_mute
@@ -224,6 +238,19 @@ script:
       entity_id: media_player.bedroom_speaker
       data:
         is_volume_muted: false
+
+  volume_transition_to_zero:
+    sequence:
+      repeat:
+        sequence:
+        - service: media_player.volume_set
+          entity_id: media_player.bedroom_speaker
+          data_template:
+            volume_level: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float - 0.01 }}"
+        - delay: '0.25'
+        until:
+        - condition: template
+          value_template: "{{ state_attr('media_player.bedroom_speaker', 'volume_level') | float < 0.10 }}"
 
   media_players_off:
     sequence:
@@ -240,16 +267,16 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id: 
-      - switch.plug_2
-      - switch.plug_4
+      - switch.cabinet_lighting
+      - switch.space_heater
+      - switch.air_freshener
+      - light.hall_bath_night_light
       - climate.space_heater
-    - service: climate.turn_on
-      entity_id: climate.bedroom_fan
     - condition: state
       entity_id: input_boolean.christmas_mode
       state: 'on'
     - service: light.turn_off
-      entity_id: switch.tuya_plug_2
+      entity_id: switch.christmas_tree
 
   toggle_bedroom_fan:
     sequence:
@@ -258,7 +285,8 @@ script:
   
   early_departure:
     sequence:
-    - service: script.stop_white_noise
+    - service: script.turn_on
+      entity_id: script.stop_white_noise
     - service: input_boolean.turn_off
       entity_id:
       - input_boolean.sleep_mode
@@ -267,13 +295,13 @@ script:
       entity_id: 
       - light.master_bedroom
       - light.living_room_lamps
-      - light.dining_room
+      - light.buffet
       data:
         transition: 30
         kelvin: 3000
-        brightness_pct: 50
+        brightness_pct: 33
     - service: switch.turn_on
-      entity_id: switch.plug_2    
+      entity_id: switch.cabinet_lighting    
 
 
 input_number:

@@ -1,39 +1,8 @@
-- platform: broadlink
-  host: 10.0.0.51
-  mac: !secret broadlink_mac
-  type: rm_mini
-  friendly_name: 'IR blaster'
-  switches:
-    living_room_fan:
-      friendly_name: 'Living room fan'
-      command_on: !secret living_room_fan_power
-      command_off: !secret living_room_fan_power
-    soundbar:
-      friendly_name: 'Soundbar'
-      command_on: !secret soundbar_power
-      command_off: !secret soundbar_power
-
 - platform: command_line
   switches:
-    hue_motion_sensor_1:
+    laundry_room_motion_sensor:
       command_on: !secret hue_motion_on
       command_off: !secret hue_motion_off
       command_state: !secret hue_motion_state
       value_template: "{{ value_json.config.on }}"
       friendly_name: Laundry room motion sensor status
-
-- platform: wake_on_lan
-  mac: !secret desktop_mac
-  name: Desktop
-  host: '10.0.0.44'
-  scan_interval: 10
-
-- platform: template
-  switches:
-    bedroom_fan:
-      friendly_name: Bedroom fan
-      value_template: "{{ is_state('switch.plug_1', 'on') }}"
-      turn_on:
-        service: script.toggle_bedroom_fan
-      turn_off:
-        service: script.toggle_bedroom_fan

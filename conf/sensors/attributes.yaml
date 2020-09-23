@@ -1,19 +1,10 @@
 - platform: attributes
-  attribute: battery_level
-  unit_of_measurement: '%'
-  entities:
-  - binary_sensor.motion_sensor_motion
-  - binary_sensor.wyze_motion_1
-  - binary_sensor.front_closet
-  - binary_sensor.storm_door
-
-- platform: attributes
   attribute: battery_low
   entities:
-  - binary_sensor.drawer
+  - binary_sensor.storage_cloud
   - binary_sensor.keypad
-  - binary_sensor.front_door
-  - binary_sensor.balcony_door
+  - binary_sensor.front_door_cloud
+  - binary_sensor.balcony_door_cloud
   - camera.motion_camera
 
 - platform: attributes

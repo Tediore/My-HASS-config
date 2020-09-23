@@ -1,15 +1,16 @@
+- platform: mqtt
+  state_topic: !secret covid_sensor_1_topic
+  json_attributes_topic: !secret covid_sensor_1_attr
+  unique_id: !secret covid_sensor_1_id
+
 - platform: systemmonitor
   resources:
   - type: memory_use
   - type: memory_use_percent
   - type: processor_use
-
-### REST sensors
-- platform: rest
-  resource: http://localhost:5557/device?ipaddr=10.0.0.65/status
-  name: Xbox status
-  value_template: !secret xbox_rest
-  scan_interval: 5
+  - type: load_1m
+  - type: load_5m
+  - type: load_15m
 
 - platform: rest
   resource: !secret hue_rest
@@ -24,7 +25,6 @@
   - apiversion
   scan_interval: 30
 
-### Command line sensors
 - platform: command_line
   name: CPU temp # this one is to force Celcius in frontend, but will not have history graph
   command: "cat /sys/class/thermal/thermal_zone9/temp"
@@ -36,29 +36,9 @@
   value_template: "{{ (value | multiply(0.001)) | round(0) }}"
 
 - platform: command_line
-  name: SSD temperature # this one is to force Celcius in frontend, but will not have history graph
-  command: "cat /config/.other/ssd_temp"
-  value_template: "{{ value[value.find('°')-2:-2] }} °C"
-  # unit_of_measurement: "°C"
-  scan_interval: 49
-
-- platform: command_line
-  name: SSD temperature hist
-  command: "cat /config/.other/ssd_temp"
-  value_template: "{{ value[value.find('°')-2:-2] }}"
-  unit_of_measurement: "°C"
-  scan_interval: 49
-
-- platform: command_line
   name: Backup log
   command: "cat /config/.other/backup.log"
   scan_interval: 3600
-
-# - platform: command_line
-#   name: Last startup length
-#   command: "cat /config/home-assistant.log | grep 'Home Assistant initialized in'"
-#   value_template: "{{ value[value.find('in ')+3:-1] }}"
-#   unit_of_measurement: "s"
 
 - platform: command_line
   name: Server ipv6 address
@@ -69,23 +49,6 @@
   name: Last backup
   command: "cat /config/.other/last_backup"
   scan_interval: 3600
-
-- platform: apcupsd
-  resources:
-  - apc
-  - date
-  - version
-  - upsmode
-  - starttime
-  - model
-  - status
-  - linev
-  - loadpct
-  - bcharge
-  - timeleft
-  - mbattchg
-  - mintimel
-  - maxtime
 
 - platform: dewpoint
   sensors:
@@ -116,3 +79,7 @@
   - cloud_cover
   - temperature_high
   - temperature_low
+
+- platform: mqtt
+  name: SSD temp
+  state_topic: "ssd_temp/temp"

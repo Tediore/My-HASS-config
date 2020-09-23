@@ -1,9 +1,0 @@
-- platform: generic
-  name: Living room camera
-  username: !secret lr_cam_user
-  password: !secret lr_cam_pass
-  authentication: basic
-  still_image_url: !secret lr_cam_image
-  stream_source: !secret lr_cam_stream
-  verify_ssl: false
-  scan_interval: 5

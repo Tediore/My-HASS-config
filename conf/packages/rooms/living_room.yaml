@@ -1,0 +1,185 @@
+automation:
+- alias: Toggle LR camera auto night mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to:
+    - 'armed_home'
+    - 'armed_away'
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+  action:
+  - service_template: "switch.turn_{{ 'off' if trigger.to_state.state == 'on' else 'on' }}"
+    entity_id: switch.lr_camera_night_mode_auto
+
+
+- alias: Manage LR camera night mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sun.sun
+    to: 
+    - 'above_horizon'
+    - 'below_horizon'
+  condition:
+  - condition: state
+    entity_id: switch.lr_camera_night_mode_auto
+    state: 'off'
+  action:
+  - service_template: "switch.turn_{{ 'on' if 'below' in trigger.to_state.state else 'off' }}"
+    entity_id: switch.lr_camera_night_mode
+
+
+- alias: Toggle air freshener
+  initial_state: true
+  trigger:
+  - platform: time_pattern
+    hours: '/2'
+  condition:
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: state
+    entity_id: 
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: switch.toggle
+    entity_id: switch.air_freshener
+
+
+- alias: Transition living room lights to warm
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.dark_inside
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: 
+    - input_boolean.dark_inside
+    - light.left_lamp
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.left_sconce_hk
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.living_room
+        data:
+          kelvin: 3000
+          brightness_pct: 100
+          transition: 10
+    - conditions:
+      - condition: state
+        entity_id: light.left_lamp_hk
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.living_room_lamps
+        data:
+          kelvin: 3000
+          brightness_pct: 100
+          transition: 10
+
+
+shell_command:
+  lr_tv_brightness_ctl: !secret lr_tv_brightness_ctl
+
+
+script:
+  pre_media:
+    alias: Turn lights off when TV turned on
+    sequence:
+    - condition: state
+      entity_id: input_boolean.dark_inside
+      state: 'on'
+    - service: light.turn_on
+      entity_id: light.dining_room
+      data:
+        kelvin: 3000
+        transition: 2
+        brightness_pct: 50
+    - service: script.turn_on
+      entity_id: script.christmas_tree_off
+    - condition: state
+      entity_id: light.living_room_lamps
+      state: 'on'
+    - service: light.turn_off
+      entity_id: light.living_room
+      data:
+        transition: 2
+
+  post_media:
+    alias: Turn lights back on when TV turned off
+    sequence:
+    - service: light.turn_on
+      entity_id: 
+      - light.living_room_lamps
+      - light.dining_room
+      data:
+        kelvin: 3000
+        transition: 3
+        brightness_pct: 100
+    - condition: state
+      entity_id: input_boolean.christmas_mode
+      state: 'on'
+    - service: switch.turn_on
+      entity_id: switch.christmas_tree
+
+  christmas_tree_off:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.christmas_mode
+      state: 'on'
+    - service: switch.turn_off
+      entity_id: switch.christmas_tree
+
+
+  cross_stitch_light:
+    sequence:
+    - service: light.turn_on
+      entity_id: light.right_lamp
+      data:
+        kelvin: 5000
+        brightness_pct: 100
+
+
+switch:
+- platform: template
+  switches:
+    living_room_fan:
+      turn_on: &fan_power
+      - service: remote.send_command
+        data:
+          command: power
+          device: honeywell fan
+          entity_id: remote.living_room
+      turn_off: *fan_power
+
+
+light:
+- platform: group
+  name: Living room lamps
+  entities:
+  - light.left_lamp
+  - light.right_lamp
+
+
+camera:
+- platform: generic
+  name: Living room camera
+  username: !secret lr_cam_user
+  password: !secret lr_cam_pass
+  authentication: basic
+  still_image_url: !secret lr_cam_image
+  stream_source: !secret lr_cam_stream
+  verify_ssl: false

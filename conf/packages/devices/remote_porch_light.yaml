@@ -1,8 +1,7 @@
-# Remote to control porch light
-
 automation:
 - alias: Porch light remote
   initial_state: true
+  mode: parallel
   trigger:
   # First button: Toggle light
   - platform: event

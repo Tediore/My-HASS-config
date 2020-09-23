@@ -3,7 +3,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: device_tracker.pixel_xl
+    entity_id: device_tracker.pixel_xl_unifi
     from: 'not_home'
     to: 'home'
   condition:
@@ -21,7 +21,8 @@ automation:
   trigger:
   - entity_id: 
     - binary_sensor.front_door
-    - binary_sensor.lumi_motion_1
+    - binary_sensor.front_door_cloud
+    - binary_sensor.entrance_motion
     platform: state
     from: 'off'
     to: 'on'
@@ -29,17 +30,17 @@ automation:
   - condition: template
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.turn_entrance_light_on_upon_entrance', 'last_triggered'))) > 60 }}"
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: 'armed_away'
   action:
   - service: homeassistant.turn_on
     entity_id: 
     - input_boolean.sensor_tripped
-    - switch.light_switch_1
+    - switch.entrance_light
   - service: camera.record
     data_template:
       entity_id: camera.living_room_camera
-      filename: "/config/recordings/{{ now().strftime('%m%d%Y-%H%M%S') }}.mp4"
+      filename: "/media/recordings/{{ now().strftime('%m%d%Y-%H%M%S') }}.mp4"
       duration: 60
       lookback: 10
 
@@ -49,10 +50,15 @@ automation:
   trigger:
   - entity_id: alarm_control_panel.abode
     platform: state
-    from: 'armed_away'
     to: 'disarmed'
+  condition:
+  - condition: state
+    entity_id: input_text.abode
+    state: 'armed_away'
   action:
-  - service_template: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'loc' }}"
+  - service: script.turn_on
+    data_template:
+      entity_id: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'loc' }}"
   - service: input_text.set_value
     entity_id: input_text.arrival_time
     data_template:
@@ -78,14 +84,18 @@ automation:
   - platform: state
     entity_id: alarm_control_panel.abode
     to: 'armed_away'
+    for: '00:00:45'
   action:
-  - service: script.away_mode
+  - service: script.turn_on
+    entity_id: script.away_mode
   - delay: '00:00:05'
   - condition: or
     conditions:
     - condition: state
       entity_id: sensor.tstat_profile
-      state: 'Away'
+      state: 
+      - 'Away'
+      - 'Hold'
     - condition: state
       entity_id: climate.thermostat
       state: 'off'
@@ -103,7 +113,7 @@ automation:
   - platform: state
     entity_id: alarm_control_panel.abode
     to: 'armed_away'
-    for: '00:00:15'
+    for: '00:01:00'
   condition:
   - condition: or
     conditions:
@@ -117,7 +127,8 @@ automation:
       entity_id: binary_sensor.any_tv
       state: 'on'
   action:
-  - service: script.away_mode
+  - service: script.turn_on
+    entity_id: script.away_mode
   - delay: '00:00:05'
   - condition: state
     entity_id: group.lights_all
@@ -137,7 +148,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.wyze_motion_1
+    entity_id: binary_sensor.master_bedroom_motion
     from: 'off'
     to: 'on'
   - platform: event
@@ -151,6 +162,23 @@ automation:
   - service_template: "{{ 'timer.cancel' if trigger.platform == 'state' and is_state('timer.master_bedroom_enter', 'active') else 'light.turn_off' }}"
     data_template:
       entity_id: "{{ 'timer.master_bedroom_enter' if trigger.platform == 'state' else 'light.master_bedroom' }}"
+
+
+- alias: Record alarm mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to: 
+    - 'disarmed'
+    - 'armed_home'
+    - 'armed_away'
+    for: '00:00:10'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.abode
+    data_template:
+      value: "{{ trigger.to_state.state }}"
 
 
 script:
@@ -169,7 +197,7 @@ script:
       entity_id: input_boolean.christmas
       state: 'on'
     - service: switch.turn_off
-      entity_id: switch.tuya_plug_2
+      entity_id: switch.christmas_tree
 
 
   notify_away:
@@ -182,8 +210,8 @@ script:
           {% set tstat = states('climate.thermostat') %}
           {% if tstat == 'off' %}
             Lights are off, thermostat is off.
-          {% elif profile == 'Away' %}
-            Lights are off, thermostat is set to away.
+          {% elif profile in ['Away', 'Hold'] %}
+            Lights are off, thermostat is set to {{ profile.lower() }}.
           {% else %}
             Uhh... this shouldn't be possible.
           {% endif %}
@@ -196,9 +224,11 @@ script:
     sequence:
     - service: input_boolean.turn_off
       entity_id: input_boolean.sensor_tripped
-    - service: script.entrance_light_on
-    - service: script.tstat_smart_resume_cool
-    - service: script.arrival_night
+    - service: script.turn_on
+      entity_id:
+      - script.entrance_light_on
+      - script.tstat_smart_resume_cool
+      - script.arrival_night
   
   
   disarmed_loc:
@@ -206,17 +236,20 @@ script:
     - service: input_boolean.turn_on
       entity_id: input_boolean.disarmed_loc
     - service: switch.turn_on
-      entity_id: switch.light_switch_1
-    - wait_template: "{{ is_state('binary_sensor.front_door', 'on') or is_state('binary_sensor.front_door_hk', 'on') or is_state('binary_sensor.lumi_motion_1', 'on') }}"
+      entity_id: switch.entrance_light
+    - wait_template: "{{ is_state('binary_sensor.front_door', 'on') or is_state('binary_sensor.front_door_hk', 'on') or is_state('binary_sensor.entrance_motion', 'on') }}"
       timeout: '00:10:00'
       continue_on_timeout: false
-    - service: script.entrance_light_on
+    - service: script.turn_on
+      entity_id: script.entrance_light_on
     - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
       timeout: '00:10:00'
       continue_on_timeout: false
-    - service: script.toggle_sensor_tripped
-    - service: script.tstat_smart_resume_cool
-    - service: script.arrival_night
+    - service: script.turn_on
+      entity_id: 
+      - script.toggle_sensor_tripped
+      - script.tstat_smart_resume_cool
+      - script.arrival_night
 
 
   toggle_sensor_tripped:
@@ -232,10 +265,10 @@ script:
   entrance_light_on:
     sequence:
     - service: switch.turn_on
-      entity_id: switch.light_switch_1
+      entity_id: switch.entrance_light
     - delay: '00:01:00'
     - service: switch.turn_off
-      entity_id: switch.light_switch_1
+      entity_id: switch.entrance_light
 
   
   arrival_night:
@@ -254,7 +287,7 @@ script:
     sequence:
     - service: hue.hue_activate_scene
       data:
-        group_name: Dining room
+        group_name: Buffet
         scene_name: Read
     - service: hue.hue_activate_scene
       data:
@@ -265,18 +298,30 @@ script:
         group_name: Master bedroom
         scene_name: Read
     - service: switch.turn_on
-      entity_id: switch.plug_2
+      entity_id: switch.cabinet_lighting
+    - service: light.turn_on
+      entity_id:
+      - light.hall_bath_night_light
+      - light.master_bedroom_night_light
+      data:
+        brightness_pct: 100
 
 
   lights_christmas:
     sequence:
     - service: switch.turn_on
       entity_id: 
-      - switch.tuya_plug_2
-      - switch.plug_2
+      - switch.christmas_tree
+      - switch.cabinet_lighting
+    - service: light.turn_on
+      entity_id:
+      - light.hall_bath_night_light
+      - light.master_bedroom_night_light
+      data:
+        brightness_pct: 100
     - service: hue.hue_activate_scene
       data:
-        group_name: Dining room
+        group_name: Buffet
         scene_name: Read
     - service: hue.hue_activate_scene
       data:
@@ -287,10 +332,12 @@ script:
         group_name: Master bedroom
         scene_name: Read
     - delay: '00:01:00'
-    - service: hue.hue_activate_scene
+    - service: light.turn_on
+      entity_id: light.living_room_lamps
       data:
-        group_name: Living room
-        scene_name: Read lamps
+        brightness: 100
+        kelvin: 3000
+        transition: 10
 
 
 input_boolean:
@@ -299,6 +346,7 @@ input_boolean:
 
 input_text:
   arrival_time:
+  abode:
 
 timer:
   master_bedroom_enter:

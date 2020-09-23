@@ -1,0 +1,89 @@
+- alias: SMS commands
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: event
+    event_type: sms.incoming_sms
+  condition:
+  - condition: template
+    value_template: !secret cmd_phone
+  action:
+  - choose: 
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.event.data.text == 'Ping' }}"
+      sequence:
+      - service: notify.sms_matt
+        data:
+          message: "Pong!"
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.event.data.text == 'Help' }}"
+      sequence:
+      - service: notify.sms_matt
+        data_template:
+          message: >
+            Command list:{{'\n'}}Ping: Test if server is up.{{'\n'}}Status: Receive summary of home status.{{'\n'}}Arm: Arm alarm in away mode.{{'\n'}}Lights off: Turn all lights off.
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.event.data.text == 'Status' }}"
+      sequence:
+      - service: notify.sms_matt
+        data_template:
+          message: >
+            Alarm: {{ states('sensor.alarm_mode') + '\n' }}Thermostat: {{ states('sensor.tstat_profile') + '\n' }}{{ 'All lights are off.' if is_state('group.lights_all', 'off') else 'The following lights are on: '}}{% for light in expand('group.lights_all') if light.state == 'on' -%}
+            {{ light.attributes.friendly_name.lower() }}
+            {%- if not loop.last %}{{ ', ' }} 
+            {%- endif %}
+            {%- endfor %}
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.event.data.text == 'Lights off' }}"
+      sequence:
+      - service: homeassistant.turn_off
+        entity_id: group.lights_interior
+      - wait_template: "{{ is_state('group.lights_interior', 'off') }}"
+        timeout: '00:00:10'
+        continue_on_timeout: true
+      - service: notify.sms_matt
+        data_template:
+          message: "{{ 'Lights have been turned off.' if is_state('group.lights_interior', 'off') else 'Command timed out.' }}"
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.event.data.text == 'Arm' }}"
+      sequence:
+      - service: alarm_control_panel.alarm_arm_away
+        entity_id: alarm_control_panel.abode
+      - service: notify.sms_matt
+        data:
+          message: "Arming alarm in away mode."
+      - wait_template: "{{ is_state('alarm_control_panel.abode', 'armed_away') }}"
+        timeout: '00:01:00'
+        continue_on_timeout: true
+      - service: notify.sms_matt
+        data_template:
+          message: "{{ 'Alarm has been armed in away mode.' if is_state('alarm_control_panel.abode', 'armed_away') else 'Command timed out.' }}"
+    default:
+    - service: notify.sms_matt
+      data_template:
+        message: "Command \"{{ trigger.event.data.text }}\" not found."
+
+
+- alias: Log incoming SMS
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: event
+    event_type: sms.incoming_sms
+  condition:
+  - condition: template
+    value_template: !secret not_phone
+  action:
+  - service: system_log.write
+    data_template:
+      message: "SMS received from {{ trigger.event.data.phone }}: {{ trigger.event.data.text }}"
+      level: warning
+      logger: sms.received_sms
+  - service: notify.received_sms
+    data_template:
+      message: "{{ trigger.event.data.phone }}: {{ trigger.event.data.text }}"

@@ -1,5 +1,5 @@
 automation:
-- alias: Turn cooling off for PTS
+- alias: Manage cooling for PTS
   initial_state: true
   trigger:
   - platform: event
@@ -8,12 +8,28 @@ automation:
   - condition: template
     value_template: "{{ trigger.event.data.action in ['pts_precool', 'pts_started', 'pts_ended'] }}"
   action:
-  - service_template: >
+    service_template: >
       {% set alarm = states('alarm_control_panel.abode') %}
       {% set event = trigger.event.data.action %}
       {{ 'script.turn_on' if event == 'pts_started' or (event == 'pts_precool' and alarm == 'armed_away') else 'input_boolean.turn_off' }}
     data_template:
       entity_id: "{{ 'input_boolean' if trigger.event.data.action == 'pts_ended' else 'script' }}.tstat_peak_savings"
+
+
+- alias: Turn cooling off - peak time savings
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.tstat_peak_savings
+    from: 'off'
+    to: 'on'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.tstat_prev_mode
+    data_template:
+      value: "{{ 'cool' if is_state('climate.thermostat', 'cool') else 'off' }}"
+  - service: climate.turn_off
+    entity_id: climate.thermostat
 
 
 - alias: Start sleep mode cool early if running
@@ -41,7 +57,8 @@ automation:
       after: *cool_sleep_weekend_early
       weekday: ['fri', 'sat']
   action:
-  - service: script.cool_sleep
+  - service: script.turn_on
+    entity_id: script.cool_sleep
   - service: input_boolean.turn_on
     entity_id: input_boolean.tstat_smart
 
@@ -59,7 +76,8 @@ automation:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: script.good_morning
+  - service: script.turn_on
+    entity_id: script.good_morning
   - condition: template
     value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
   - condition: state
@@ -172,22 +190,6 @@ automation:
   - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_sched_resume
-
-
-- alias: Turn cooling off - peak time savings
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.tstat_peak_savings
-    from: 'off'
-    to: 'on'
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.tstat_prev_mode
-    data_template:
-      value: "{{ 'cool' if is_state('climate.thermostat', 'cool') else 'off' }}"
-  - service: climate.turn_off
-    entity_id: climate.thermostat
 
 
 script:

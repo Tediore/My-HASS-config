@@ -7,32 +7,38 @@
     for: '00:00:45'
   - platform: state
     entity_id:
-    - binary_sensor.button_1
-    - binary_sensor.button_2
-    - binary_sensor.water_sensor_1
-    - binary_sensor.water_sensor_2
-    - binary_sensor.water_sensor_3
-    - binary_sensor.water_sensor_4
-    - binary_sensor.water_sensor_5
-    - binary_sensor.water_sensor_6
-    - binary_sensor.lumi_motion_1
-    - sensor.lumi_temp_1
-    - sensor.lumi_temp_2
+    - binary_sensor.button_matt
+    - binary_sensor.button_andy
+    - binary_sensor.laundry_room_leak
+    - binary_sensor.kitchen_leak
+    - binary_sensor.hall_bath_toilet_leak
+    - binary_sensor.master_bath_toilet_leak
+    - binary_sensor.hall_bath_sink_leak
+    - binary_sensor.master_bath_sink_leak
+    - binary_sensor.entrance_motion
+    - sensor.kitchen_light_sensor
+    - sensor.game_room_light_sensor
+    - sensor.master_bedroom_temp
+    - sensor.game_room_temp
+    - switch.air_freshener
+    - switch.master_bedroom_fan_plug
+    - switch.cabinet_lighting
+    - switch.bias_lighting
     - light.front_closet
     to: 'unavailable'
     for: '00:00:10'
   - platform: state
     entity_id: 
     - light.porch_light
-    - switch.plug_1
-    - switch.plug_2
-    - switch.plug_3
-    - switch.plug_4
-    - switch.light_switch_1
-    - switch.coffeemaker_plug
-    - switch.tuya_plug_2
+    - switch.entrance_light
+    - binary_sensor.coffeemaker_status
+    - light.dining_room
+    - light.game_room_closet
     to: 'unavailable'
     for: '00:10:00'
+  - platform: numeric_state
+    entity_id: !secret cell_modem
+    above: -1
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:
@@ -78,26 +84,35 @@
   trigger:
   - platform: numeric_state
     entity_id:
-    - sensor.button_1_battery
-    - sensor.button_2_battery
-    - sensor.lumi_weather_1_battery
-    - sensor.lumi_weather_2_battery
-    - sensor.lumi_motion_1_battery
-    - sensor.water_sensor_1_battery
-    - sensor.water_sensor_2_battery
-    - sensor.water_sensor_3_battery
-    - sensor.water_sensor_4_battery
-    - sensor.water_sensor_5_battery
-    - sensor.water_sensor_6_battery
-    - sensor.zcombo_1_battery_level
+    - sensor.button_matt_battery
+    - sensor.button_andy_battery
     - sensor.dining_room_remote_battery_level
+    - sensor.eco_remote_1_battery
+    - sensor.front_closet_battery
     - sensor.game_room_remote_battery_level
+    - sensor.hvac_closet_battery
+    - sensor.laundry_room_door_battery
+    - sensor.kitchen_light_sensor_battery
+    - sensor.master_bedroom_curtains_battery
+    - sensor.game_room_light_sensor_battery
+    - sensor.living_room_fan_remote_battery
     - sensor.living_room_remote_battery_level
+    - sensor.living_room_window_left_battery
+    - sensor.living_room_window_right_battery
+    - sensor.entrance_motion_battery
+    - sensor.master_bedroom_temp_battery
+    - sensor.game_room_temp_battery
     - sensor.master_bedroom_remote_battery_level
-    - sensor.motion_sensor_motion_battery_level
-    - sensor.wyze_motion_1_battery_level
-    - sensor.front_closet_battery_level
-    - sensor.storm_door_battery_level
+    - sensor.porch_light_remote_battery
+    - sensor.storm_door_battery
+    - sensor.laundry_room_leak_battery
+    - sensor.kitchen_leak_battery
+    - sensor.hall_bath_toilet_leak_battery
+    - sensor.master_bath_toilet_leak_battery
+    - sensor.hall_bath_sink_leak_battery
+    - sensor.master_bath_sink_leak_battery
+    - sensor.master_bedroom_motion_battery
+    - sensor.smoke_alarm_battery
     below: 21
     for: '01:00:00'
   - platform: state
@@ -119,19 +134,19 @@
         priority: high
 
 
-- alias: Notify when printer ink is low
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: 
-    - sensor.hp_photosmart_d110_series_black_ink
-    - sensor.hp_photosmart_d110_series_unknown_ink
-    below: 25
-  action:
-  - service: persistent_notification.create
-    data_template:
-      title: "{{ trigger.to_state.name }} low"
-      message: "{{ trigger.to_state.name }} is at {{ states(trigger.entity_id) }}%."
+# - alias: Notify when printer ink is low
+#   initial_state: true
+#   trigger:
+#   - platform: numeric_state
+#     entity_id: 
+#     - sensor.hp_photosmart_d110_series_black_ink
+#     - sensor.hp_photosmart_d110_series_unknown_ink
+#     below: 25
+#   action:
+#   - service: persistent_notification.create
+#     data_template:
+#       title: "{{ trigger.to_state.name }} low"
+#       message: "{{ trigger.to_state.name }} is at {{ states(trigger.entity_id) }}%."
 
 
 - alias: Notify when Hue bridge is ready to update
@@ -152,17 +167,17 @@
   initial_state: true
   trigger:
   - platform: state
-    entity_id: switch.plug_4
+    entity_id: switch.space_heater
     to: 'on'
   condition:
   - condition: state
     entity_id: alarm_control_panel.abode
-    state: armed_away
+    state: 'armed_away'
   action:
   - service: homeassistant.turn_off
     entity_id:
     - climate.space_heater
-    - switch.plug_4
+    - switch.space_heater
   - service: notify.mobile_app_pixel_xl
     data:
       title: "Space heater warning"

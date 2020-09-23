@@ -1,8 +1,7 @@
-# On game room table
-
 automation:
 - alias: Game room table remote
   initial_state: true
+  mode: parallel
   trigger:
   # First button: Turn lights off (except game room)
   - platform: event
@@ -47,14 +46,31 @@ script:
     - service: light.turn_off
       entity_id:
       - light.living_room
-      - light.dining_room
+      - light.buffet
 
   other_lights_on:
     sequence:
+    - condition: template
+      value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    - condition: state
+      entity_id: input_boolean.dark_inside
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.andy_sleep
+      state: 'off'
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'off'
+    - condition: state
+      entity_id: media_player.living_room_vizio
+      state: 'off'
+    - condition: state
+      entity_id: input_boolean.other_lights_off
+      state: 'on'
     - service: input_boolean.turn_off
       entity_id: input_boolean.other_lights_off
     - service: light.turn_on
-      entity_id: light.dining_room
+      entity_id: light.buffet
       data:
         kelvin: 3000
         brightness_pct: 100

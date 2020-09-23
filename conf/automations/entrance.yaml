@@ -14,16 +14,16 @@
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: switch.turn_on
-    entity_id: switch.light_switch_1
+    entity_id: switch.entrance_light
 
 
 - alias: Turn entrance light on/off before work
   initial_state: true
   trigger:
   - platform: time
-    at: '07:25:00'
-  - platform: time
-    at: '07:45:00'
+    at: 
+    - '07:25:00'
+    - '07:45:00'
   condition:
   - condition: template
     value_template: "{{ is_state_attr('calendar.work', 'message', 'Work') and as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%-d') }}"
@@ -31,7 +31,7 @@
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "switch.turn_{{ 'on' if as_timestamp(now()) | timestamp_custom('%M') == '25' else 'off' }}"
-    entity_id: switch.light_switch_1
+    entity_id: switch.entrance_light
 
 
 - alias: Turn entrance light on before rehearsal
@@ -44,14 +44,18 @@
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: switch.turn_on
-    entity_id: switch.light_switch_1
+    entity_id: switch.entrance_light
 
 
 - alias: Turn front closet light on/off
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id: binary_sensor.front_closet
+    to:
+    - 'on'
+    - 'off'
   action:
   - service: light.turn_on
     entity_id: light.front_closet
@@ -59,7 +63,7 @@
       brightness_pct: >
         {% set hour = now().hour | int %}
         {% if trigger.to_state.state == 'on' %}
-          {{ 75 if 7 >= hour >= 21 else 100 }}
+          {{ 100 if 6 < hour < 21 else 66 }}
         {% else %}
           0
         {% endif %}
@@ -79,4 +83,21 @@
     state: 'off'
   action:
   - service: light.turn_off
-    entity_id: light.front_closet
+    entity_id: 
+    - light.front_closet
+    - light.strip_1
+
+
+- alias: Turn off entrance light with dining room light
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.dining_room
+    to: 'on'
+  condition:
+  - condition: state  
+    entity_id: switch.entrance_light
+    state: 'on'
+  action:
+  - service: switch.turn_off
+    entity_id: switch.entrance_light

@@ -1,15 +1,17 @@
 automation:
 - alias: Notify water leaked detected or cleared
   initial_state: true
+  mode: parallel
+  max: 100
   trigger:
   - platform: state
     entity_id: &water_sensors
-    - binary_sensor.water_sensor_1
-    - binary_sensor.water_sensor_2
-    - binary_sensor.water_sensor_3
-    - binary_sensor.water_sensor_4
-    - binary_sensor.water_sensor_5
-    - binary_sensor.water_sensor_6
+    - binary_sensor.laundry_room_leak
+    - binary_sensor.kitchen_leak
+    - binary_sensor.hall_bath_toilet_leak
+    - binary_sensor.hall_bath_sink_leak
+    - binary_sensor.master_bath_toilet_leak
+    - binary_sensor.master_bath_sink_leak
     to: 'on'
   - platform: state
     entity_id: *water_sensors
@@ -40,13 +42,14 @@ automation:
 
 - alias: Notify smoke or CO
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
-    entity_id: sensor.zcombo_1_status
+    entity_id: sensor.smoke_alarm_status
   condition:
   - condition: state
     entity_id: alarm_control_panel.abode
-    state: armed_away
+    state: 'armed_away'
   - condition: template
     value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
   action:
@@ -78,9 +81,10 @@ automation:
 
 - alias: Turn on lights when smoke or CO detected
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
-    entity_id: sensor.zcombo_1_status
+    entity_id: sensor.smoke_alarm_status
     to: 
     - 'Smoke'
     - 'CO'
@@ -97,14 +101,15 @@ automation:
       brightness_pct: 100
   - service: hue.hue_activate_scene
     data:
-      group_name: Dining room
+      group_name: Buffet
       scene_name: Read
   - service: switch.turn_on
-    entity_id: switch.light_switch_1
+    entity_id: switch.entrance_light
 
 
 - alias: Turn lights on when leak detected
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id: *water_sensors
@@ -128,7 +133,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.zcombo_1_status
+    entity_id: sensor.smoke_alarm_status
     to: 'Smoke'
   action:
   - service: climate.turn_off
@@ -138,11 +143,11 @@ automation:
 sensor:
 - platform: template
   sensors:
-    zcombo_1_status:
-      friendly_name: Smoke alarm 1 status
+    smoke_alarm_status:
+      friendly_name: Smoke alarm status
       value_template: >
-        {% set alarm = states('sensor.zcombo_1_alarm_type') | float %}
-        {% set level = states('sensor.zcombo_1_alarm_level') | float %}
+        {% set alarm = states('sensor.smoke_alarm_alarm_type') | float %}
+        {% set level = states('sensor.smoke_alarm_alarm_level') | float %}
         {% if alarm == 13 and level == 255 %}
           OK
         {% elif alarm == 1 and level == 255 %}
@@ -155,8 +160,8 @@ sensor:
           Unknown
         {% endif %}
       icon_template: >
-        {% set alarm = states('sensor.zcombo_1_alarm_type') | float %}
-        {% set level = states('sensor.zcombo_1_alarm_level') | float %}
+        {% set alarm = states('sensor.smoke_alarm_alarm_type') | float %}
+        {% set level = states('sensor.smoke_alarm_alarm_level') | float %}
         {% if alarm == 13 and level == 255 %}
           mdi:smoke-detector
         {% elif alarm == 1 and level == 255 %}

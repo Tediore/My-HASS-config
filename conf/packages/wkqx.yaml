@@ -1,6 +1,7 @@
 automation:
 - alias: WKQX playing
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id:

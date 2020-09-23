@@ -21,6 +21,8 @@ automation:
     entity_id: input_boolean.notify_all_updates
     state: 'off'
   - condition: template
+    value_template: "{{ trigger.from_state.state != 'unknown' }}"
+  - condition: template
     value_template: "{{ trigger.from_state.state.find('b') == -1 }}"
   action:
   - service: notify.gotify
@@ -38,6 +40,8 @@ automation:
   - condition: state
     entity_id: input_boolean.notify_all_updates
     state: 'on'
+  - condition: template
+    value_template: "{{ trigger.from_state.state != 'unknown' }}"
   action:
   - service: notify.gotify
     data_template:
@@ -86,3 +90,4 @@ sensor:
 
 input_boolean:
   hass_update:
+  notify_all_updates:

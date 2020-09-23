@@ -1,0 +1,94 @@
+- alias: Weather outside
+  initial_state: true
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: sensor.outside_home_thermometer_temp
+  action:
+  - service: input_select.select_option
+    entity_id: input_select.temperature
+    data_template:
+      option: >
+        {% set temp = trigger.to_state.state | float %}
+        {% if temp < 17 %}
+          Cold
+        {% elif temp < 27 %}
+          Warm
+        {% else %}
+          Hot
+        {% endif %}
+
+
+- alias: Brighten/dim lights with motion
+  initial_state: true
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.lumi
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: light.turn_on
+    entity_id: light.landing_light_level_light_color_on_off
+    data_template:
+      brightness: "{{ 200 if trigger.to_state.state == 'on' else 50 }}"
+
+
+- alias: Media player state lighting
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.media_player
+    to: 
+    - 'playing'
+    - 'paused'
+    - 'idle'
+    - 'off'
+  action:
+  - service: scene.turn_on
+    data_template:
+      entity_id: >
+        {% set state = trigger.to_state.state %}
+        {% set scene = {
+          'playing': 'movie_time_lighting',
+          'paused': 'living_room_dim',
+          'idle': 'living_room_relaxed',
+          'off': 'living_room_off'
+        } %}
+        scene.{{ scene[state] }}
+
+
+- alias: Sync office lights - on
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - light.sw_1_level
+    - light.sw_2_level
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'off' }}"
+  action:
+  - service: light.turn_on
+    entity_id: light.office_lights
+    data_template:
+      brightness: "{{ trigger.to_state.attributes.brightness }}"
+
+- alias: Sync office lights - off
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - light.sw_1_level
+    - light.sw_2_level
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: light.office_lights
+    state: 'on'
+  action:
+  - service: light.turn_off
+    entity_id: light.office_lights

@@ -1,5 +1,19 @@
-- platform: group
-  name: Living room lamps
-  entities:
-  - light.left_lamp
-  - light.right_lamp
+- platform: mqtt
+  name: Dining room
+  state_topic: "stat/dining_room_light/POWER1"
+  command_topic: "cmnd/dining_room_light/EVENT"
+  availability_topic: "tele/dining_room_light/LWT"
+  payload_on: "ON"
+  payload_off: "OFF"
+  payload_available: "Online"
+  payload_not_available: "Offline"
+
+- platform: mqtt
+  name: Game room closet
+  state_topic: "stat/game_room_closet_light/POWER1"
+  command_topic: "cmnd/game_room_closet_light/EVENT"
+  availability_topic: "tele/game_room_closet_light/LWT"
+  payload_on: "ON"
+  payload_off: "OFF"
+  payload_available: "Online"
+  payload_not_available: "Offline"

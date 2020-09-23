@@ -4,8 +4,14 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '00:00:30'
+    at: '00:00:01'
   action:
+  - service: homeassistant.update_entity
+    entity_id:
+    - sensor.cooling_time_today
+    - sensor.heating_time_today
+    - sensor.cooling_time_yesterday
+    - sensor.heating_time_yesterday
   - service: input_number.set_value
     entity_id: input_number.hvac_runtime
     data_template:
@@ -13,14 +19,17 @@ automation:
 
 
 # Exclude from repo
-- alias: Notify when furnace filter needs replacement
+- alias: Notify when furnace filter needs replacement  # throttled - 8 hours
   initial_state: true
   trigger:
-    platform: template
+  - platform: template
     value_template: "{{ states('sensor.furnace_filter_life') | float > states('input_number.replacement_threshold') | float }}"
     for: '00:01:00'
+  condition:
+  - condition: template
+    value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.notify_when_furnace_filter_needs_replacement', 'last_triggered'))) / 3600 > 8 }}"
   action:
-    service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_pixel_xl
     data_template:
       title: "Change the furnace filter"
       message: "Furnace filter has been used for {{ states('sensor.furnace_filter_life') | int }} hours."
@@ -178,7 +187,10 @@ script:
       entity_id: input_text.furnace_filter
       data_template:
         value: '{{ now() }}'
-    - delay: '00:00:15'
+    - service: homeassistant.update_entity
+      entity_id:
+      - sensor.cooling_before_last_filter_change
+      - sensor.heating_before_last_filter_change
     - service: input_number.set_value
       entity_id: input_number.hvac_runtime
       data_template:
@@ -228,7 +240,7 @@ input_number:
   replacement_threshold:
     name: Threshold
     min: 100
-    max: 250
+    max: 400
     step: 25
     mode: slider
     unit_of_measurement: 'h'

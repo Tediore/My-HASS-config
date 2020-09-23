@@ -1,5 +1,6 @@
-- alias: Turn off lights with TV
+- alias: Turn off lights and speakers when TV turned on
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id:
@@ -7,12 +8,18 @@
     - sensor.living_room_cast_app_name
   condition:
   - condition: template
-    value_template: "{{ trigger.to_state.state not in ['', 'BOD Receiver PROD', 'SmartCast Home', 'unknown', '_UNKNOWN_APP', 'Cast'] }}"
+    value_template: "{{ ['', 'BOD Receiver PROD', 'SmartCast Home', 'unknown', '_UNKNOWN_APP', 'Cast'] not in trigger.to_state.state }}"
   action:
-  - service: script.pre_media
+  - service: script.turn_on
+    entity_id: script.pre_media
+  - condition: template
+    value_template: "{{ is_state('binary_sensor.all_speakers', 'on') or not is_state('media_player.front_speakers', 'off') }}"
+  - service: media_player.turn_off
+    data_template:
+      entity_id: "media_player.{{ 'living_room_speaker' if is_state('binary_sensor.all_speakers', 'on') else 'front_speakers' }}"
 
 
-- alias: Turn sound bar on with TV
+- alias: Turn soundbar on with TV
   initial_state: true
   trigger:
   - platform: state
@@ -20,7 +27,11 @@
     from: 'off'
     to: 'on'
   action:
-  - service: script.soundbar_vol_up
+  - service: remote.send_command
+    entity_id: remote.living_room
+    data:
+      device: soundbar
+      command: volume up
 
 
 - alias: Set living room TV auto-brightness
@@ -31,6 +42,7 @@
     to:
     - 'above_horizon'
     - 'below_horizon'
+    for: '00:30:00'
   action:
   - service: shell_command.lr_tv_brightness_ctl
     data_template:
@@ -56,18 +68,16 @@
     entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: state
-    entity_id: light.living_room
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.sleep_mode
+    entity_id: 
+    - light.living_room
+    - input_boolean.andy_sleep
+    - input_boolean.sleep_mode
     state: 'off'
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service: script.post_media
+  - service: script.turn_on
+    entity_id: script.post_media
 
 
 - alias: Boost TV volume when furnace on
@@ -87,7 +97,13 @@
   - condition: template
     value_template: "{{ not is_state_attr('media_player.living_room_vizio', 'app_name', 'SmartCast Home') }}"
   action:
-  - service_template: "script.tv_vol_up_{{ trigger.to_state.state[:4] }}"
+  - service: remote.send_command
+    entity_id: remote.living_room
+    data_template:
+      device: soundbar
+      command: volume up
+      num_repeats: "{{ 3 if trigger.to_state.state == 'heating' else 5 }}"
+      delay_secs: 0.5
 
 
 - alias: Lower TV volume when furnace off
@@ -112,4 +128,30 @@
     entity_id: media_player.living_room_vizio
     state: 'on'
   action:
-  - service_template: "script.tv_vol_dn_{{ trigger.from_state.state[:4] }}"
+  - service: remote.send_command
+    entity_id: remote.living_room
+    data_template:
+      device: soundbar
+      command: volume down
+      num_repeats: "{{ 3 if trigger.from_state.state == 'heating' else 5 }}"
+      delay_secs: 0.5
+
+
+- alias: Lower TV volume when TV turned off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: template
+    value_template: "{{ states('sensor.hvac_action') in ['cooling', 'heating'] }}"
+  action:
+  - service: remote.send_command
+    entity_id: remote.living_room
+    data_template:
+      device: soundbar
+      command: volume down
+      num_repeats: "{{ 3 if is_state('sensor.hvac_action', 'heating') else 5 }}"
+      delay_secs: 0.5

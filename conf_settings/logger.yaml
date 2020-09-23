@@ -1,8 +1,10 @@
 default: info
 logs:
-  # pychromecast: error
-  # zeroconf: error
-  homeassistant.components.automation: warning
+  homeassistant.components.google_assistant.http: fatal
+  custom_components.zha_map.neighbour: error
+  zigpy.zcl: error
+  custom_components.dewpoint.sensor: fatal
+  zeroconf: error
 #   zeroconf: debug
 #   homeassistant.core: debug
 #   homeassistant.components.zha: debug

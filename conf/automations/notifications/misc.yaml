@@ -13,7 +13,7 @@
     entity_id: sensor.outside_dewpoint
     below: 58
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
@@ -80,35 +80,6 @@
       notification_id: config_entry_discovery
 
 
-- alias: Record coffeemaker on/off
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.coffeemaker_power
-    above: 500
-    for: '00:01:00'
-  - platform: numeric_state
-    entity_id: sensor.coffeemaker_power
-    below: 250
-  action:
-  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
-    entity_id: input_boolean.coffeemaker
-
-
-- alias: Notify when coffee done
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.coffeemaker
-    from: 'on'
-    to: 'off'
-  action:
-  - service: notify.gotify
-    data:
-      title: "Coffee is ready"
-      message: "Enjoy!"
-
-
 - alias: Notify when issue with auto-backup
   initial_state: true
   trigger:
@@ -124,29 +95,26 @@
       message: Backup error. Check log for details.
 
 
-- alias: Notify COVID-19 Oak Forest
+- alias: COVID-19 increase notification
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.covid_19_confirmed_oak_forest
+    entity_id: !secret covid_sensor_1
+    attribute: last_updated
   action:
   - service: notify.gotify
     data_template:
       title: >
-        {% if trigger.to_state.state == 'unknown' %}
-          Problem with COVID-19 sensor
-        {% elif trigger.to_state.state == trigger.from_state.state %}
-          No increase in Oak Forest confirmed cases!
+        {% if trigger.to_state.state == trigger.from_state.state %}
+          No increase in {{ trigger.to_state.name }} confirmed cases!
         {% else %}
-          Oak Forest confirmed cases increased
+          {{ trigger.to_state.name }} confirmed cases increased
         {% endif %}
       message: >
-        {% if trigger.to_state.state == 'unknown' %}
-          JSON format likely changed.
-        {% elif trigger.to_state.state == trigger.from_state.state %}
+        {% if trigger.to_state.state == trigger.from_state.state %}
           Confirmed cases are the same as yesterday ({{ states(trigger.to_state.entity_id) }}).
         {% else %}
-          Cases increased from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}. Current ratio is {{ states('sensor.covid_19_ratio_oak_forest') | round(0) | int }}%.
+          Increased from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}. Current ratio: {{ state_attr(trigger.to_state.entity_id, 'pct_confirmed') | round(0) | int }}%.
         {% endif %}
 
 
@@ -176,23 +144,6 @@
       notification_id: config_entry_discovery
 
 
-- alias: Notify when building closet opened/closed
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.building_5_closet
-  condition:
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
-  - condition: template
-    value_template: "{{ trigger.to_state.state in ['on', 'off'] }}"
-  action:
-  - service: notify.gotify_high
-    data_template:
-      message: "Door {{ 'opened' if trigger.to_state.state == 'on' else 'closed' }} at {{ as_timestamp(now()) | timestamp_custom('%-I:%M %p') }}"
-      title: "Building 5 closet door {{ 'opened' if trigger.to_state.state == 'on' else 'closed' }}"
-
-
 - alias: Notify if ipv6 address changes
   initial_state: true
   trigger:
@@ -204,15 +155,15 @@
   action:
   - service: notify.gotify
     data:
-      title: Server IPv6 address changed
-      message: Check Home Assistant for details.
+      title: "Server IPv6 address changed"
+      message: "Check Home Assistant for details."
   - service: persistent_notification.create
     data_template:
-      title: Server IPv6 address changed
+      title: "Server IPv6 address changed"
       message: "IPv6 address is now {{ states('sensor.server_ipv6_address') }}."
 
 
-- alias: Record extended internet outage
+- alias: Record internet outage
   initial_state: true
   trigger:
   - platform: state

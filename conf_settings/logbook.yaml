@@ -16,7 +16,7 @@ include:
   - binary_sensor.storm_door
   - sensor.hvac_action
   - sensor.space_heater_action
-  - sensor.ups_status
+  - sensor.server_ups_status
   - sensor.router_status
   - sensor.wkqx_song
   - sensor.current_version
@@ -26,7 +26,7 @@ include:
   - sensor.tstat_profile
   - sensor.tstat_setpoint
   - sensor.xbox_status
-  - sensor.zcombo_1_status
+  - sensor.smoke_alarm_status
   domains:
   - alarm_control_panel
   - automation

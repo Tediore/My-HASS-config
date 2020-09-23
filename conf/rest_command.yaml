@@ -1,0 +1,14 @@
+hue_activate_scene:
+  url: &url !secret hue_api_groups
+  method: put
+  payload: '{"scene": "{{ scene_id }}"}'
+
+hue_light_on:
+  url: *url
+  method: put
+  payload: '{"on": true}'
+
+hue_light_off:
+  url: *url
+  method: put
+  payload: '{"on": false}'

@@ -1,17 +1,18 @@
-### See button 1 package for related scripts
+### See Matt's button package for related scripts
 automation:
 - alias: Andy button
   initial_state: true
+  mode: parallel
   trigger:
   - platform: event
     event_type: zha_event
     event_data:
       command: button_single
-      device_ieee: !secret button_2_id
+      device_ieee: !secret button_andy_id
   action:
     service_template: >
       {% if is_state('input_boolean.andy_sleep', 'off') %}
-        script.good_night{{ '_andy' if is_state('device_tracker.pixel_xl', 'home') else '' }}
+        script.good_night{{ '_andy' if is_state('device_tracker.pixel_xl_unifi', 'home') else '' }}
       {% else %}
         script.toggle_bedroom_fan
       {% endif %}
@@ -20,21 +21,31 @@ automation:
 script:
   good_night_andy:
     sequence:
-    - service: homeassistant.turn_off
-      entity_id:
-      - light.master_bedroom
-      - media_player.bedroom_vizio
-    - service: script.white_noise_bedroom
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep
+    - service: homeassistant.turn_off
+      entity_id:
+      - light.master_bedroom_night_light
+      - light.master_bedroom
+      - media_player.bedroom_vizio
+      - switch.air_freshener
+    - service: script.turn_on
+      entity_id: 
+      - script.white_noise_bedroom
+      - script.porch_light_security
+    - service: light.turn_on
+      entity_id: light.hall_bath_night_light
+      data:
+        brightness_pct: 50
     - condition: state
       entity_id: light.game_room
       state: 'on'
-    - service: script.porch_light_security
-    - service: light.turn_off
+    - service: homeassistant.turn_off
       entity_id: 
       - light.living_room
       - light.dining_room
+      - light.buffet
+      - switch.cabinet_lighting
 
 input_boolean:
   andy_sleep:

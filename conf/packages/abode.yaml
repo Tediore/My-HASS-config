@@ -1,10 +1,23 @@
 automation:
+- alias: Auto-arm alarm home
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '00:00:00'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state: 'disarmed'
+  action:
+  - service: alarm_control_panel.alarm_arm_home
+    entity_id: alarm_control_panel.abode
+
+
 - alias: Alarm armed home reminder  # throttled - 10 minutes
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.lumi_motion_1
-    from: 'off'
+    entity_id: binary_sensor.entrance_motion
     to: 'on'
   condition:
   - condition: template
@@ -33,10 +46,10 @@ automation:
   trigger:
   - platform: template
     value_template: >
-      {% set front = state_attr('binary_sensor.front_door', 'no_response') %}
-      {% set balcony = state_attr('binary_sensor.balcony_door', 'no_response') %}
-      {% set drawer = state_attr('binary_sensor.drawer', 'no_response') %}
-      {% set keypad = state_attr('binary_sensor.keypad', 'no_response') %}
+      {% set front = state_attr('binary_sensor.front_door_cloud', 'no_response') %}
+      {% set balcony = state_attr('binary_sensor.balcony_door_cloud', 'no_response') %}
+      {% set drawer = state_attr('binary_sensor.drawer_cloud', 'no_response') %}
+      {% set keypad = state_attr('binary_sensor.keypad_cloud', 'no_response') %}
       {% set camera = state_attr('camera.motion_camera', 'no_response') %}
       {{ front == true or balcony == true or drawer == true or keypad == true or camera == true }}
   action:
@@ -46,7 +59,7 @@ automation:
       message: "{{ trigger.to_state.name }} sensor is not responding"
 
 
-- alias: Turn porch light on when armed home
+- alias: Turn porch light on at night
   initial_state: true
   trigger:
   - platform: state
@@ -61,7 +74,7 @@ automation:
     after: '22:00:00'
     before: '05:00:00'
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] or is_state('input_boolean.vacation_mode', 'on') }}"
   action:
   - service: script.porch_light_security
 
@@ -70,7 +83,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: alarm_control_panel.abode_cloud
     to: 'unavailable'
   action:
   - service: input_text.set_value
@@ -106,45 +119,50 @@ automation:
     state: 'on'
   action:
   - delay:
-      seconds: "{{ range(0,600) | random | int }}"
-  - service: hue.hue_activate_scene
+      seconds: "{{ range(30,600) | random | int }}"
+  - service: light.turn_on
+    entity_id:
+    - light.buffet
+    - light.living_room
     data:
-      group_name: Living room
-      scene_name: Read
-  - service: hue.hue_activate_scene
+      kelvin: 3000
+      brightness_pct: 100
+  - service: switch.turn_on
+    entity_id: switch.cabinet_lighting
+  - delay:
+      seconds: "{{ range(900,1800) | random | int }}"
+  - service: light.turn_on
+    entity_id: light.game_room
     data:
-      group_name: Dining room
-      scene_name: Read
-
-
-- alias: Vacation mode photo
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '22:00:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.vacation_mode
-    state: 'on'
-  action:
-  - service: abode.capture_image
-    entity_id: camera.motion_camera
+      kelvin: 3000
+      brightness_pct: 100
+  - delay:
+      seconds: "{{ range(1800,2400) | random | int }}"
+  - service: light.turn_off
+    entity_id: 
+    - light.game_room
+    - light.living_room
+  - service: light.turn_on
+    entity_id: light.master_bedroom
+    data:
+      kelvin: 3000
+      brightness_pct: 100
 
 
 - alias: Vacation mode lights off
   initial_state: true
   trigger:
   - platform: time
-    at: '22:45:00'
+    at: '23:45:00'
   condition:
   - condition: state
     entity_id: input_boolean.vacation_mode
     state: 'on'
   action:
   - delay:
-      seconds: "{{ range(0,600) | random | int }}" 
-  - service: light.turn_off
-    entity_id: all
+      seconds: "{{ range(30,600) | random | int }}" 
+  - service: homeassistant.turn_off
+    entity_id: group.lights_interior
 
 
 - alias: Security system triggered
@@ -162,11 +180,12 @@ automation:
   action:
   - service: light.turn_on
     entity_id:
-    - light.dining_room
+    - light.buffet
     - light.living_room
     data:
       brightness_pct: 100
       kelvin: 3000
+      transition: 5
 
 
 sensor:
@@ -207,10 +226,13 @@ script:
     - condition: template
       value_template: "{{ not is_state('alarm_control_panel.abode', 'armed_home') }}"
     - service: alarm_control_panel.alarm_arm_home
-      entity_id: alarm_control_panel.abode_hk
+      entity_id: alarm_control_panel.abode_cloud
 
   porch_light_security:
     sequence:
+    - condition: state
+      entity_id: input_boolean.extra_sleep
+      state: 'off'
     - service: light.turn_on
       entity_id: light.porch_light
       data:

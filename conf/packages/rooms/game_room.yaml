@@ -1,0 +1,355 @@
+automation:
+- alias: Xbox turned on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.abode
+      state: 'armed_away'
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
+  action:
+  - service_template: "script.xbox_{{ trigger.to_state.state }}"
+
+
+- alias: Transition game room lights to warm
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - binary_sensor.desktop
+    - input_boolean.dark_inside
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: 
+    - input_boolean.dark_inside
+    - light.dresser_hk
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.game_room
+    data:
+      kelvin: 3000
+      brightness_pct: 100
+      transition: 10
+
+
+- alias: Manage game room lights during day
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.game_room_light_sensor
+    below: &below 20
+    for: '00:05:00'
+  - platform: numeric_state
+    entity_id: sensor.game_room_light_sensor
+    above: &above 50
+    for: '00:05:00'
+  - platform: state
+    entity_id: binary_sensor.desktop
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state:
+    - 'armed_home'
+    - 'disarmed'
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'off'
+  - condition: state
+    entity_id: binary_sensor.desktop
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.game_room_light_sensor
+        below: *below
+      sequence:
+      - service: light.turn_on
+        entity_id: light.game_room
+        data:
+          kelvin: 5000
+          brightness_pct: 100
+          transition: 10
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.game_room_light_sensor
+        above: *above
+      sequence:
+      - service: light.turn_off
+        entity_id: light.game_room
+        data:
+          transition: 10
+
+
+- alias: Turn game room lights on/off at sunset/sunrise
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.dark_inside
+  condition:
+  - condition: state
+    entity_id: binary_sensor.xbox
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.sleep_mode
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service_template: "script.gr_lights_{{ trigger.to_state.state }}"
+
+
+# - alias: Game room dimmer off press
+#   initial_state: true
+#   trigger:
+#   - platform: device
+#     device_id: a95207ebf43311ea974eefdd9eb75b7f
+#     domain: homekit_controller
+#     type: button4
+#     subtype: single_press
+#   action:
+#   - choose:
+#     - conditions:
+#       - condition: state
+#         entity_id: binary_sensor.xbox
+#         state: 'on'
+#       sequence:
+#       - service: script.turn_on
+#         entity_id: script.xbox_off
+#     - conditions:
+#       - condition: state
+#         entity_id: climate.game_room_fan
+#         state: 'on'
+#       sequence:
+#       - service: climate.turn_off
+#         entity_id: climate.game_room_fan
+#     - conditions:
+#       - condition: state
+#         entity_id: fan.game_room
+#         state: 'on'
+#       sequence:
+#       - service: fan.turn_off
+#         entity_id: fan.game_room
+
+
+- alias: Turn game room fan off sleep mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.tstat_profile
+    to: 'Sleep'
+  condition:
+  - condition: state
+    entity_id: fan.game_room
+    state: 'on'
+  action:
+  - service: fan.turn_off
+    entity_id: fan.game_room
+
+
+- alias: Turn game room closet light on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - binary_sensor.storage
+    - binary_sensor.storage_cloud
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - condition: template
+    value_template: "{{ as_timestamp(now()) - as_timestamp(state_attr('automation.turn_game_room_closet_light_on_off', 'last_triggered')) > 1 }}"
+  action:
+  - service_template: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.game_room_closet
+
+
+- alias: Store game room temp
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.game_room_temp
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
+  action:
+  - service: input_number.set_value
+    entity_id: input_number.game_room_temp
+    data_template:
+      value: "{{ (states('sensor.game_room_temp') | float + states('input_number.weather_2_offset') | float) | round(0) }}"
+
+
+script:
+  xbox_on:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'off'
+    - condition: template
+      value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    - service: switch.turn_on
+      entity_id: switch.bias_lighting
+    - service: media_player.turn_off
+      entity_id:
+      - media_player.all_speakers
+      - media_player.portable_speaker
+    - service: script.turn_on
+      entity_id: script.gr_lights_on
+    - condition: template
+      value_template: "{{ states('climate.thermostat') in ['heat', 'cool'] }}"
+    - service: homeassistant.turn_on
+      data_template:
+        entity_id: "{{ 'climate.game_room_fan' if is_state('climate.thermostat', 'cool') else 'climate.space_heater' }}"
+  
+  xbox_off:
+    sequence:
+    - service: homeassistant.turn_off
+      entity_id: 
+      - switch.bias_lighting
+      - climate.space_heater
+    - service: script.turn_on
+      entity_id: script.other_lights_on
+    - condition: state
+      entity_id: climate.game_room
+      state: 'on'
+    - service: climate.turn_off
+      entity_id: climate.game_room_fan
+  
+  gr_lights_on:
+    alias: Game room lights on
+    sequence:
+    - condition: state
+      entity_id: input_boolean.dark_inside
+      state: 'on'
+    - service: light.turn_on
+      entity_id: light.game_room
+      data:
+        kelvin: 3000
+        transition: 5
+        brightness_pct: 100
+  
+  gr_lights_off:
+    alias: Game room lights off
+    sequence:
+    - service: light.turn_off
+      entity_id: light.game_room
+      data:
+        transition: 30
+
+  gr_fan_on:
+    sequence:
+    - condition: state
+      entity_id: fan.game_room
+      state: 'off'
+    - service: switch.turn_off
+      entity_id: switch.game_room_fan_plug  # resets game room fan to speed 1
+    - delay: '00:00:01'
+    - service: switch.turn_on
+      entity_id: switch.game_room_fan_plug
+    - delay: '00:00:01'
+    - service: fan.turn_on
+      entity_id: fan.game_room
+
+
+climate:
+- platform: generic_thermostat
+  name: Space heater
+  heater: switch.space_heater
+  target_sensor: sensor.game_room_temp_calibrated
+  min_temp: 65
+  max_temp: 71
+  cold_tolerance: 1
+  hot_tolerance: 1
+
+- platform: generic_thermostat
+  name: Game room fan
+  ac_mode: true
+  heater: switch.game_room_fan
+  target_sensor: sensor.game_room_temp_calibrated
+  min_temp: 70
+  max_temp: 78
+  cold_tolerance: 1
+  hot_tolerance: 1
+
+
+switch:
+- platform: template
+  switches:
+    game_room_fan: # need for generic thermostat
+      friendly_name: Game room fan
+      value_template: "{{ is_state('fan.game_room', 'on') }}"
+      turn_on:
+        service: script.turn_on
+        entity_id: script.gr_fan_on
+      turn_off:
+        service: fan.turn_off
+        entity_id: fan.game_room
+
+
+fan:
+- platform: template
+  fans:
+    game_room:
+      friendly_name: Game room fan
+      value_template: "{{ 'on' if states('sensor.game_room_fan_power') | float > 10 else 'off' }}"
+      turn_on: &power
+        service: remote.send_command
+        entity_id: remote.game_room
+        data:
+          device: honeywell fan
+          command: power
+      turn_off: *power
+      # speed_template: >
+      #   {% set power = states('sensor.game_room_fan_power') | float %}
+      #   {% if power > 31.9 %}
+      #     5
+      #   {% elif power > 28.9 %}
+      #     4
+      #   {% elif power > 25.9 %}
+      #     3
+      #   {% elif power > 22.9 %}
+      #     2
+      #   {% elif power > 19.9 %}
+      #     1
+      #   {% else %}
+      #     off
+      #   {% endif %}
+      # set_speed:
+      #   service: remote.send_command
+      #   entity_id: remote.game_room
+      #   data:
+      #     device: honeywell fan
+      #     command: speed
+      # speeds:
+      # - 'off'
+      # - '1'
+      # - '2'
+      # - '3'
+      # - '4'
+      # - '5'
+
+
+input_number:
+  game_room_temp:
+    name: Game room temp
+    icon: mdi:home-outline
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: '°F'
+    mode: box

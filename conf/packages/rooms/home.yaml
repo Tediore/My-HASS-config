@@ -1,3 +1,4 @@
+automation:
 - alias: Toggle dark inside boolean
   initial_state: true
   trigger:
@@ -22,21 +23,47 @@
     entity_id: input_boolean.dark_inside
 
 
+- alias: Turn on sunset lights - light level
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.kitchen_light_sensor
+    below: &threshold 10
+    for: '00:01:00'
+  - platform: time
+    at: '15:30:00'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state:
+    - 'disarmed'
+    - 'armed_home'
+  - condition: time
+    after: '15:30:00'
+    before: '21:30:00'
+  - condition: numeric_state
+    entity_id: sensor.kitchen_light_sensor
+    below: *threshold
+  action:
+  - service: script.turn_on
+    entity_id: script.lights_sunset
+
+
 - alias: Turn lights on/off at sunset/sunrise if home
   initial_state: true
   trigger:
   - platform: state
     entity_id: input_boolean.dark_inside
-  - platform: event
-    event_type: hue_event
-    event_data:
-      id: 'dining_room_remote'
-      event: 2002
+  # - platform: device
+  #   device_id: a94d198af43311ea8fdaf191421aab1e
+  #   domain: homekit_controller
+  #   type: button2
+  #   subtype: single_press
   condition:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'event' or trigger.to_state.state == 'on' else 'sunrise' }}"
+  - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
 
 
 - alias: Turn porch light off at sunrise
@@ -48,20 +75,11 @@
   action:
   - service: light.turn_off
     entity_id: light.porch_light
-
-
-- alias: Turn on holiday porch light
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sun.sun
-    to: 'below_horizon'
-    for: '00:20:00'
-  condition:
-    - condition: template
-      value_template: "{{ is_state('input_boolean.valentines_day', 'on') or is_state('input_boolean.autism_awareness', 'on') or is_state('input_boolean.halloween', 'on') or is_state('input_boolean.christmas', 'on') }}"
-  action:
-  - service: script.holiday_porch_light
+  - condition: state
+    entity_id: input_boolean.christmas
+    state: 'on'
+  - service: switch.turn_off
+    entity_id: switch.christmas_lights
 
 
 - alias: Turn porch light white when door opened
@@ -123,94 +141,15 @@
       transition: 2
 
 
-- alias: Toggle record when on balcony
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.porch_light
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-  - condition: template
-    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
-  action:
-  - service_template: "homeassistant.turn_{{ trigger.to_state.state }}"
-    entity_id: 
-    - automation.record_when_on_balcony
-    - input_boolean.on_balcony_auto
-  - condition: template
-    value_template: "{{ trigger.to_state.state == 'off' }}"
-  - service: input_boolean.turn_off
-    entity_id:
-    - input_boolean.on_balcony_auto
-    - input_boolean.on_balcony_init0
-    - input_boolean.on_balcony_init1
-    - input_boolean.on_balcony_init2
-    - input_boolean.on_balcony
-
-
-- alias: Record when on balcony
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.storm_door
-  - platform: state
-    entity_id: binary_sensor.balcony_door
-    from: 'off'
-    to: 'on'
-    for: '00:00:01'
-  - platform: state
-    entity_id: binary_sensor.balcony_door
-    from: 'on'
-    to: 'off'
-  - platform: state
-    entity_id:
-    - input_boolean.on_balcony_init1
-    - input_boolean.on_balcony_init2
-    - input_boolean.on_balcony
-    to: 'on'
-  action:
-  - service: input_boolean.turn_on
-    data_template:
-      entity_id: >
-        {% set tstate = trigger.to_state.state %}
-        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %} 
-        {% set balcony = states('binary_sensor.balcony_door') %}
-        {% set storm = states('binary_sensor.storm_door') %}
-        {% if entity == 'balcony' and tstate == 'on' and storm == 'off' %}
-          input_boolean.on_balcony_init0
-        {% elif entity == 'storm' and tstate == 'on' and is_state('input_boolean.on_balcony_init0', 'on') %}
-          input_boolean.on_balcony_init1
-        {% elif entity == 'balcony' and tstate == 'off' and is_state('input_boolean.on_balcony_init1', 'on') %}
-          input_boolean.on_balcony_init2
-        {% elif entity == 'storm' and tstate == 'off' and is_state('input_boolean.on_balcony_init2', 'on') %}
-          input_boolean.on_balcony
-        {% else %}
-          none
-        {% endif %}
-  - service: input_boolean.turn_off
-    data_template:
-      entity_id: >
-        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %}
-        {% set tstate = trigger.to_state.state %}
-        {% if entity == 'on_balcony_init1' %}
-          input_boolean.on_balcony_init0
-        {% elif entity == 'on_balcony_init2' %}
-          input_boolean.on_balcony_init1
-        {% elif entity == 'on_balcony' %}
-          input_boolean.on_balcony_init2
-        {% elif entity == 'balcony' and tstate == 'on' and is_state('input_boolean.on_balcony', 'on') %}
-          input_boolean.on_balcony
-        {% else %}
-          none
-        {% endif %}
-
-
 - alias: HVAC closet door opened/closed
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id: binary_sensor.hvac_closet
+    to:
+    - 'on'
+    - 'off'
   condition:
   - condition: state
     entity_id: input_boolean.sleep_mode
@@ -225,17 +164,71 @@
       brightness_pct: "{{ 100 if trigger.to_state.state == 'on' else 0 }}"
       kelvin: 4000
   - service_template: "switch.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
-    entity_id: switch.hue_motion_sensor_1
+    entity_id: switch.laundry_room_motion_sensor
 
 
-- alias: Turn guest bath fan off after 60 minutes
+- alias: Toggle buffet light with dining room lights
   initial_state: true
   trigger:
   - platform: state
-    entity_id: switch.guest_bath_fan
-    from: 'off'
-    to: 'on'
-    for: '01:00:00'
+    entity_id: light.dining_room
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
   action:
-  - service: switch.turn_off
-    entity_id: switch.guest_bath_fan
+  - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
+    entity_id: light.buffet
+
+
+input_boolean:
+  dark_inside:
+
+
+script:
+  lights_sunset:
+    sequence:
+    - service: switch.turn_on
+      entity_id: switch.cabinet_lighting
+    - wait_template: "{{ is_state('light.dining_room', 'off') }}"
+      timeout: '08:00:00'
+      continue_on_timeout: false
+    - service: light.turn_on
+      entity_id: light.buffet
+      data_template:
+        kelvin: 3000
+        transition: 10
+        brightness_pct: "{{ 100 if is_state('media_player.living_room_vizio', 'off') else 50 }}"
+    - delay: '00:00:09'
+    - service: light.turn_on
+      entity_id: light.hall_bath_night_light
+      data:
+        brightness_pct: 100
+    - condition: state
+      entity_id: input_boolean.christmas_mode
+      state: 'on'
+    - service: switch.turn_on
+      entity_id: switch.christmas_tree
+  
+  lights_sunrise:
+    sequence:
+    - service: light.turn_off
+      entity_id: 
+      - light.buffet
+      - light.hall_bath_night_light
+      data:
+        transition: 30
+    - delay: '00:00:30'
+    - service: switch.turn_off
+      entity_id: switch.cabinet_lighting
+    - service: input_boolean.turn_off
+      entity_id:
+      - input_boolean.on_balcony_init0
+      - input_boolean.on_balcony_init1
+      - input_boolean.on_balcony_init2
+      - input_boolean.on_balcony
+    - condition: state
+      entity_id: input_boolean.christmas_mode
+      state: 'on'
+    - service: switch.turn_off
+      entity_id: switch.christmas_tree

@@ -1,6 +1,7 @@
 automation:
 - alias: Notify when washer/dryer done
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id: 
@@ -16,7 +17,7 @@ automation:
     for: '00:30:00'
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
@@ -36,6 +37,7 @@ automation:
 
 - alias: Record washer/dryer on/off
   initial_state: true
+  mode: parallel
   trigger:
   - platform: numeric_state
     entity_id: sensor.power_strip_outlet_1_power
@@ -54,61 +56,6 @@ automation:
   - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
     data_template:
       entity_id: "input_boolean.{{ 'washer' if '1' in trigger.to_state.entity_id else 'dryer' }}"
-
-
-- alias: Toggle power strip polling
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.laundry_room_door
-  - platform: state
-    entity_id: input_boolean.sleep_mode
-  - platform: state
-    entity_id: alarm_control_panel.abode
-  action:
-    service_template: >
-      {% set door = states('binary_sensor.laundry_room_door') %}
-      {% set sleep = states('input_boolean.sleep_mode') %}
-      {% set alarm = states('alarm_control_panel.abode') %}
-      {% if door == 'on' or sleep == 'on' or alarm == 'armed_away' %}
-        automation.turn_off
-      {% elif door == 'off' and sleep == 'off' and alarm in ['armed_home', 'disarmed'] %}
-        automation.turn_on
-      {% else %}
-        automation.turn_off
-      {% endif %}
-    entity_id: automation.poll_power_strip
-
-
-- alias: Poll power strip
-  trigger:
-  - platform: time_pattern
-    seconds: '/15'
-  action:
-  - service: zwave.refresh_entity
-    data:
-      entity_id: sensor.power_strip_outlet_1_power
-  - service: zwave.refresh_entity
-    data:
-      entity_id: sensor.power_strip_outlet_2_power
-
-
-- alias: Keep power strip happy
-  initial_state: true
-  trigger:
-  - platform: time_pattern
-    hours: '/3'
-  condition:
-  - condition: state
-    entity_id: automation.poll_power_strip
-    state: 'off'
-  action:
-  - service: zwave.refresh_entity
-    data:
-      entity_id: sensor.power_strip_outlet_1_power
-  - service: zwave.refresh_entity
-    data:
-      entity_id: sensor.power_strip_outlet_2_power
 
 
 - alias: Reset laundry reminder booleans

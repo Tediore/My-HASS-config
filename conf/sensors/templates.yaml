@@ -44,47 +44,47 @@
       value_template: "{{ states('sensor.dewpoint_inside') | float | round(0) }}"
       unit_of_measurement: '°F'
     
-    lumi_temp_1_calibrated:
-      friendly_name: Lumi temp 1 calibrated
+    master_bedroom_temp_calibrated:
+      friendly_name: Master bedroom temp calibrated
       value_template: >
-        {% if is_state('sensor.lumi_temp_1', 'unavailable') %}
+        {% if is_state('sensor.master_bedroom_temp', 'unavailable') %}
           {{ states('sensor.tstat_current_temp') }}
         {% else %}
-          {{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset') | float) | round(1) }}
+          {{ (states('sensor.master_bedroom_temp') | float + states('input_number.weather_1_offset') | float) | round(1) }}
         {% endif %}
       unit_of_measurement: '°F'
     
-    lumi_temp_1_calibrated_display:
-      friendly_name: Lumi temp 1 calibrated
+    master_bedroom_temp_calibrated_display:
+      friendly_name: Master bedroom temp calibrated
       value_template: >
-        {% if is_state('sensor.lumi_temp_1', 'unavailable') %}
+        {% if is_state('sensor.master_bedroom_temp', 'unavailable') %}
           -
         {% else %}
-          {{ (states('sensor.lumi_temp_1') | float + states('input_number.weather_1_offset') | float) | round(0) }} °F
+          {{ (states('sensor.master_bedroom_temp') | float + states('input_number.weather_1_offset') | float) | round(0) }} °F
         {% endif %}
     
-    lumi_temp_2_calibrated:
-      friendly_name: Lumi temp 2 calibrated
+    game_room_temp_calibrated:
+      friendly_name: Game room temp calibrated
       value_template: >
-        {% if is_state('sensor.lumi_temp_2', 'unavailable') %}
-          {{ states('sensor.tstat_current_temp') }}
+        {% if is_state('sensor.game_room_temp', 'unavailable') %}
+          {{ states('input_number.game_room_temp') }}
         {% else %}
-          {{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(1) }}
+          {{ (states('sensor.game_room_temp') | float + states('input_number.weather_2_offset') | float) | round(1) }}
         {% endif %}
       unit_of_measurement: '°F'
     
-    lumi_temp_2_calibrated_display:
-      friendly_name: Lumi temp 2 calibrated
+    game_room_temp_calibrated_display:
+      friendly_name: Game room temp calibrated
       value_template: >
-        {% if is_state('sensor.lumi_temp_2', 'unavailable') %}
-          -
+        {% if is_state('sensor.game_room_temp', 'unavailable') %}
+          {{ states('input_number.game_room_temp') }}
         {% else %}
-          {{ (states('sensor.lumi_temp_2') | float + states('input_number.weather_2_offset') | float) | round(0) }} °F
+          {{ (states('sensor.game_room_temp') | float + states('input_number.weather_2_offset') | float) | round(0) }} °F
         {% endif %}
 
     avg_temp_master_bedroom:
       friendly_name: Master bedroom
-      value_template: "{{ ((states('sensor.button_1_temp') | float + states('sensor.button_2_temp') | float) / 2) | round(0) }}"
+      value_template: "{{ ((states('sensor.button_matt_temp') | float + states('sensor.button_andy_temp') | float) / 2) | round(0) }}"
       unit_of_measurement: '°F'
 
     cell_modem_signal:
@@ -95,3 +95,7 @@
         bit_error_rate: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'BitErrorRate') }}"
       device_class: signal_strength
       unit_of_measurement: '%'
+
+    ssd_temp_disp:
+      friendly_name: SSD temp
+      value_template: "{{ states('sensor.ssd_temp') }} °C"

@@ -27,3 +27,12 @@
 - platform: sms
   name: sms_andy
   recipient: !secret phone_andy
+
+- platform: sms
+  name: sms_usps
+  recipient: 28777
+
+- platform: file
+  name: Received SMS
+  filename: sms_inbox
+  timestamp: true

@@ -1,7 +1,10 @@
 lights_interior:
   name: Interior lights
   entities:
-  - switch.light_switch_1
+  - switch.entrance_light
+  - switch.cabinet_lighting
+  - light.game_room_closet
+  - light.buffet
   - light.master_bedroom
   - light.living_room
   - light.dining_room
@@ -11,18 +14,21 @@ lights_interior:
 lights_all:
   name: All lights
   entities:
-  - switch.light_switch_1
-  - light.porch_light
+  - switch.entrance_light
+  - switch.cabinet_lighting
+  - light.game_room_closet
+  - light.buffet
   - light.master_bedroom
   - light.living_room
   - light.dining_room
   - light.game_room
   - light.laundry_room
+  - light.porch_light
 
 plugs:
   name: Smart plugs
   entities:
-  - switch.plug_1
-  - switch.plug_2
-  - switch.plug_3
-  - switch.plug_4
+  - switch.master_bedroom_fan_plug
+  - switch.cabinet_lighting
+  - switch.bias_lighting
+  - switch.air_freshener

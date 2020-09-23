@@ -1,0 +1,56 @@
+automation:
+- alias: Record coffeemaker on/off
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.coffeemaker_power
+    above: 500
+    for: '00:01:00'
+  - platform: numeric_state
+    entity_id: sensor.coffeemaker_power
+    below: 250
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
+    entity_id: input_boolean.coffeemaker
+
+
+- alias: Notify when coffee done
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.coffeemaker
+    from: 'on'
+    to: 'off'
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.coffee_ready
+  - service: notify.gotify
+    data:
+      title: "Coffee is ready"
+      message: "Enjoy!"
+  - service: light.turn_on
+    entity_id: light.coffeemaker_blue_led
+    data:
+      effect: 'Throb'
+
+
+- alias: Stop coffeemaker LED notification
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.coffee_ready
+    to: 'on'
+    for: '00:30:00'
+  action:
+  - service: light.turn_on
+    entity_id: light.coffeemaker_blue_led
+    data:
+      effect: None
+      brightness_pct: 100
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.coffee_ready
+
+
+input_boolean:
+  coffeemaker:
+  coffee_ready:

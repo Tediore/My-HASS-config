@@ -48,43 +48,14 @@ hass_online:
         "How many times are you gonna do that today?"
         ] | random }}
 
-reload_input_boolean:
-  alias: Input boolean
-  sequence:
-  - service: input_boolean.reload
 
-reload_input_number:
-  alias: Input number
+learn_fan_commands:
   sequence:
-  - service: input_number.reload
-
-reload_input_text:
-  alias: Input text
-  sequence:
-  - service: input_text.reload
-
-reload_input_select:
-  alias: Input select
-  sequence:
-  - service: input_select.reload
-
-reload_input_datetime:
-  alias: Input datetime
-  sequence:
-  - service: input_datetime.reload
-
-reload_helpers:
-  alias: All
-  sequence:
-  - service: script.reload_input_boolean
-  - service: script.reload_input_number
-  - service: script.reload_input_text
-  - service: script.reload_input_select
-  - service: script.reload_input_datetime
-
-wake_laptop:
-  sequence:
-  - service: wake_on_lan.send_magic_packet
+  - service: remote.learn_command
     data:
-      mac: !secret desktop_mac
-      broadcast_address: 10.0.0.255
+      entity_id: remote.game_room
+      device: honeywell fan
+      command:
+      - power
+      - speed
+      - timer

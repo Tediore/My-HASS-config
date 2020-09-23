@@ -1,11 +1,9 @@
-# On game room desk
-# Some related scripts in eco_remote_1 package
-
 automation:
 - alias: Game room desk remote
   initial_state: true
+  mode: parallel
   trigger:
-  # First button: Turn desktop on
+  # First button: Turn portable speaker off
   - platform: event
     event_type: zha_event
     event_data:
@@ -32,7 +30,7 @@ automation:
   - service_template: >
       {% set command = trigger.event.data.command %}
       {% if command in ['on', 'off'] %}
-        script.wake_laptop
+        script.turn_off_portable_speaker
       {% elif command == 'move_to_color_temp' %}
         script.move_music_{{ 'all' if is_state('media_player.portable_speaker', 'playing') else 'portable' }}
       {% else %}
@@ -41,9 +39,22 @@ automation:
 
 
 script:
+  turn_off_portable_speaker:
+    sequence:
+    - service: media_player.turn_off
+      entity_id: media_player.portable_speaker
+
   toggle_mute_portable_speaker:
     sequence:
-    - service: media_player.volume_mute
-      entity_id: media_player.portable_speaker
-      data_template:
-        is_volume_muted: "{{ false if state_attr('media_player.portable_speaker', 'is_volume_muted') else true }}"
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: "{{ is_state_attr('media_player.portable_speaker', 'app_name', 'Google Play Music') }}"
+        sequence:
+        - service: media_player.media_play_pause
+          entity_id: media_player.portable_speaker
+      default:
+      - service: media_player.volume_mute
+        entity_id: media_player.portable_speaker
+        data_template:
+          is_volume_muted: "{{ false if state_attr('media_player.portable_speaker', 'is_volume_muted') else true }}"

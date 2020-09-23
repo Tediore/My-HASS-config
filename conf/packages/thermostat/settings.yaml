@@ -177,7 +177,9 @@ sensor:
       value_template: >
         {% set setpoint = state_attr('climate.thermostat', 'temperature') | int %}
         {% set mode = states('climate.thermostat') %}
-        {% if is_state('input_boolean.tstat_peak_savings', 'on') %}
+        {% if is_state('input_boolean.tstat_hold', 'on') %}
+          Hold
+        {% elif is_state('input_boolean.tstat_peak_savings', 'on') %}
           PTS
         {% elif is_state('input_boolean.tstat_smart', 'on') %}
           Smart
@@ -224,4 +226,4 @@ automation:
   - service: input_number.set_value
     entity_id: input_number.cool_sleep
     data_template:
-      value: "{{ 70 if trigger.to_state.state == 'home' else 71 }}"
+      value: "{{ 69 if trigger.to_state.state == 'home' else 71 }}"
