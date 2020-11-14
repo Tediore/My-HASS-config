@@ -1,8 +1,8 @@
 lights_interior:
   name: Interior lights
   entities:
-  - switch.entrance_light
-  - switch.cabinet_lighting
+  - light.entrance
+  - light.kitchen_cabinets
   - light.game_room_closet
   - light.buffet
   - light.master_bedroom
@@ -10,12 +10,14 @@ lights_interior:
   - light.dining_room
   - light.game_room
   - light.laundry_room
+  - light.master_bedroom_night_light
+  - light.hall_bath_night_light
 
 lights_all:
   name: All lights
   entities:
-  - switch.entrance_light
-  - switch.cabinet_lighting
+  - light.entrance
+  - light.kitchen_cabinets
   - light.game_room_closet
   - light.buffet
   - light.master_bedroom
@@ -24,11 +26,20 @@ lights_all:
   - light.game_room
   - light.laundry_room
   - light.porch_light
+  - light.master_bedroom_night_light
+  - light.hall_bath_night_light
 
 plugs:
   name: Smart plugs
   entities:
   - switch.master_bedroom_fan_plug
-  - switch.cabinet_lighting
-  - switch.bias_lighting
+  - light.kitchen_cabinets
+  - switch.game_room_bias_lighting
   - switch.air_freshener
+
+speakers:
+  entities:
+  - media_player.kitchen_speaker
+  - media_player.hub
+  - media_player.living_room_speaker
+  - media_player.bedroom_speaker

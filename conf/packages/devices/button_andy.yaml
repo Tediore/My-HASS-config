@@ -4,17 +4,21 @@ automation:
   initial_state: true
   mode: parallel
   trigger:
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: button_single
-      device_ieee: !secret button_andy_id
+  - platform: state
+    entity_id: sensor.button_andy
+    to: 
+    - 'single'
+    - 'hold'
   action:
     service_template: >
-      {% if is_state('input_boolean.andy_sleep', 'off') %}
-        script.good_night{{ '_andy' if is_state('device_tracker.pixel_xl_unifi', 'home') else '' }}
+      {% if trigger.to_state.state == 'single' %}
+        {% if is_state('input_boolean.andy_sleep', 'off') %}
+          script.good_night{{ '_andy' if is_state('device_tracker.pixel_xl_unifi', 'home') else '' }}
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
       {% else %}
-        script.toggle_bedroom_fan
+        script.button_andy_test
       {% endif %}
 
 
@@ -45,7 +49,16 @@ script:
       - light.living_room
       - light.dining_room
       - light.buffet
-      - switch.cabinet_lighting
+    - service: light.turn_on
+      entity_id: light.kitchen_cabinets
+      data:
+        brightness_pct: 25
+
+  button_andy_test:
+    sequence:
+    - service: notify.gotify
+      data:
+        message: "Andy's button is working."
 
 input_boolean:
   andy_sleep:

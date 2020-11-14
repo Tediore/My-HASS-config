@@ -3,10 +3,19 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '06:50:00'
+    at: '06:30:00'
   condition:
-  - condition: template
-    value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
+  - condition: or
+    conditions:
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: device_tracker.andy_phone
+        state: 'home'
+      - condition: template
+        value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
+    - condition: template
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
@@ -31,13 +40,13 @@ automation:
     - condition: template  # workday
       value_template: >
         {{ 
-          ((as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d')) 
+          ((as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')) 
           and as_timestamp(now()) | timestamp_custom('%M') | int < 15)
         }}
     - condition: template  # day off
       value_template: >
         {{ 
-          ((as_timestamp(now()) | timestamp_custom('%d') != as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d')) 
+          ((as_timestamp(now()) | timestamp_custom('%d') != as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')) 
           and as_timestamp(now()) | timestamp_custom('%M') | int > 10)
         }}
   action:
@@ -45,7 +54,7 @@ automation:
     entity_id:
     - input_boolean.sleep_mode
     - input_boolean.andy_sleep
-    - climate.bedroom_fan
+    - climate.master_bedroom_fan
   - service: switch.turn_on
     entity_id: switch.air_freshener
 
@@ -68,28 +77,27 @@ automation:
     entity_id: light.master_bedroom
 
 
-- alias: Turn night light on/off with lights
+- alias: Turn master bedroom night light on with lights
   initial_state: true
   mode: parallel
   trigger:
   - platform: state
     entity_id: light.matt_hk
-    to:
-    - 'on'
-    - 'off'
+    to: 'off'
   - platform: state
     entity_id: input_boolean.dark_inside
     to: 'on'
     for: '00:30:00'
   condition:
   - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+    for: '00:30:00'
+  - condition: state
     entity_id: alarm_control_panel.abode
     state:
     - 'armed_home'
     - 'disarmed'
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
   - condition: state
     entity_id:
     - input_boolean.sleep_mode
@@ -98,8 +106,31 @@ automation:
   action:
   - service: light.turn_on
     entity_id: light.master_bedroom_night_light
-    data_template:
-      brightness_pct: "{{ 100 if trigger.to_state.state == 'off' or trigger.to_state.domain == 'input_boolean' else 0 }}"
+    data:
+      brightness_pct: 100
+
+
+- alias: Turn master bedroom night light off with lights
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: light.matt_hk
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.abode
+    state:
+    - 'armed_home'
+    - 'disarmed'
+  - condition: state
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: light.turn_off
+    entity_id: light.master_bedroom_night_light
 
 
 - alias: Transition master bedroom lights to warm
@@ -119,7 +150,7 @@ automation:
     data:
       kelvin: 3000
       brightness_pct: 100
-      transition: 10
+      transition: 20
 
 
 script:
@@ -145,7 +176,7 @@ script:
       data:
         is_volume_muted: false
     - condition: state
-      entity_id: input_boolean.christmas_mode
+      entity_id: input_boolean.christmas
       state: 'on'
     - service: switch.turn_on
       entity_id: switch.christmas_tree
@@ -155,14 +186,15 @@ script:
     - service: light.turn_on
       entity_id: light.master_bedroom
       data:
-        brightness_pct: 1
-        kelvin: 3000
-    - delay: '00:00:30'
+        brightness: 1
+        kelvin: 2000
+    - delay: '00:02:00'
     - service: light.turn_on
       entity_id: light.master_bedroom
       data:
-        transition: 90
+        transition: 180
         brightness_pct: 100
+        kelvin: 3000
 
 
 switch:
@@ -179,7 +211,7 @@ switch:
 
 climate:
 - platform: generic_thermostat
-  name: Bedroom fan
+  name: Master bedroom fan
   heater: switch.master_bedroom_fan_plug
   ac_mode: true
   target_sensor: sensor.master_bedroom_temp_calibrated

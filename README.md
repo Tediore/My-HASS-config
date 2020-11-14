@@ -8,27 +8,28 @@ I currently have the following devices connected to Home Assistant:
 - Philips Hue
 - Ecobee thermostat (local control via Homekit Controller)
 - Google Home speakers
-- Abode security system
-- Zigbee/Z-wave dongle (model HUSBZB-1)
+- Abode security system (local control via Homekit Controller)
+- Zigbee/Z-wave adapter (model HUSBZB-1, currently only using the Z-wave radio)
+    - Power strip with energy monitoring (Monoprice)
+    - Smoke alarm (First Alert)
+- ZZH! Zigbee adapter
+    - Ecolink contact sensors
+    - Ikea Tradfri outlets
     - Water leak sensors (SmartThings)
     - Temp/humidity sensors (Aqara)
     - Buttons (SmartThings)
     - Light strip (Sengled)
-    - Power strip with energy monitoring (Monoprice)
-    - Smoke alarm (First Alert)
+    - Four-button remotes (Leedarson)
 - APC UPS
-- Xbox One via Xbox REST server
 - GSM modem for SMS notifications (Huawei E3531)
 - Wyze camera (with the custom Dafang firmware)
 - Wyze sense contact sensors and motion sensors
+- A bunch of Tasmota smart plugs/switches
+- Tasmota IR blasters
 - Unifi access point
-- TP-Link smart plugs
 - HP Printer (via IPP)
 - Vizio TVs
-- A few ESPHome smart plugs
 - A single LIFX lamp
-
-The only device I have connected to Home Assistant that can't be controlled locally is my Abode security system (though, once the HomeKit firmware is finalized for it, I'll be able to control that locally).
 
 Some of my favorite automations include:
 - Adjusting my Google Home speakers' volume depending on which app is casting to them (since streaming radio is noticeably quieter than casting music from Google Play Music or Spotify)

@@ -1,5 +1,0 @@
-database_path: /config/zigbee.db
-zigpy_config:
-  ota:
-    ikea_provider: true
-    ledvance_provider: true

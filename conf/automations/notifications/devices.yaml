@@ -16,21 +16,21 @@
     - binary_sensor.hall_bath_sink_leak
     - binary_sensor.master_bath_sink_leak
     - binary_sensor.entrance_motion
-    - sensor.kitchen_light_sensor
-    - sensor.game_room_light_sensor
+    - sensor.kitchen_light_level
+    - sensor.game_room_light_level
     - sensor.master_bedroom_temp
     - sensor.game_room_temp
     - switch.air_freshener
     - switch.master_bedroom_fan_plug
-    - switch.cabinet_lighting
-    - switch.bias_lighting
+    - light.kitchen_cabinets
+    - switch.game_room_bias_lighting
     - light.front_closet
     to: 'unavailable'
     for: '00:00:10'
   - platform: state
     entity_id: 
     - light.porch_light
-    - switch.entrance_light
+    - light.entrance
     - binary_sensor.coffeemaker_status
     - light.dining_room
     - light.game_room_closet
@@ -65,7 +65,7 @@
     - light.right_sconce
     - light.stand_lamp
     to: 'unavailable'
-    for: '00:01:00'
+    for: '00:10:00'
   condition:
   - condition: template
     value_template: "{{ not is_state('sensor.hue_bridge', 'unavailable') }}"
@@ -92,9 +92,9 @@
     - sensor.game_room_remote_battery_level
     - sensor.hvac_closet_battery
     - sensor.laundry_room_door_battery
-    - sensor.kitchen_light_sensor_battery
+    - sensor.kitchen_light_level_battery
     - sensor.master_bedroom_curtains_battery
-    - sensor.game_room_light_sensor_battery
+    - sensor.game_room_light_level_battery
     - sensor.living_room_fan_remote_battery
     - sensor.living_room_remote_battery_level
     - sensor.living_room_window_left_battery
@@ -115,20 +115,26 @@
     - sensor.smoke_alarm_battery
     below: 21
     for: '01:00:00'
-  - platform: state
+  - platform: numeric_state
     entity_id:
-    - sensor.drawer_battery_low
-    - sensor.keypad_battery_low
-    - sensor.front_door_battery_low
-    - sensor.balcony_door_battery_low
-    - sensor.motion_camera_battery_low
-    to: 'True'
-    for: '01:00:00'
+    - binary_sensor.living_room_window_left
+    - binary_sensor.living_room_window_right
+    - binary_sensor.game_room_closet_door
+    - binary_sensor.front_closet_door
+    - binary_sensor.master_bedroom_window_right
+    - binary_sensor.kitchen_window_left
+    - binary_sensor.master_bedroom_motion
+    - binary_sensor.hall_bath_motion
+    below: 85
+    for: '00:01:00'
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != '' }}"
   action:
   - service: notify.mobile_app_pixel_xl
     data_template:
-      title: "Device battery low"
-      message: "{{ trigger.to_state.name }} battery is low."
+      title: "Device battery low {{ ' - URGENT!' if trigger.to_state | float > 30 else '' }}"
+      message: "{{ trigger.to_state.name }} battery is low{{ '.' if trigger.to_state | float < 21 else ' - CHANGE IMMEDIATELY!' }}"
       data:
         ttl: 0
         priority: high

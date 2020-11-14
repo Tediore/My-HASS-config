@@ -50,11 +50,8 @@ sun:
 switch: !include conf/switch.yaml
 system_health:
 timer: !include conf_pkg/timer.yaml
-tplink: !include conf/tplink.yaml
 tts: !include conf/tts.yaml
 updater: !include conf_settings/updater.yaml
 weather: !include conf/weather.yaml
 zeroconf:
-zha: !include conf_static/zha.yaml
-zha_map:
 zone: !include conf/zone.yaml

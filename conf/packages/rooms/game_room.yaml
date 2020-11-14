@@ -40,7 +40,7 @@ automation:
     data:
       kelvin: 3000
       brightness_pct: 100
-      transition: 10
+      transition: 20
 
 
 - alias: Manage game room lights during day
@@ -48,11 +48,11 @@ automation:
   mode: parallel
   trigger:
   - platform: numeric_state
-    entity_id: sensor.game_room_light_sensor
+    entity_id: sensor.game_room_light_level
     below: &below 20
     for: '00:05:00'
   - platform: numeric_state
-    entity_id: sensor.game_room_light_sensor
+    entity_id: sensor.game_room_light_level
     above: &above 50
     for: '00:05:00'
   - platform: state
@@ -74,7 +74,7 @@ automation:
   - choose:
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.game_room_light_sensor
+        entity_id: sensor.game_room_light_level
         below: *below
       sequence:
       - service: light.turn_on
@@ -85,7 +85,7 @@ automation:
           transition: 10
     - conditions:
       - condition: numeric_state
-        entity_id: sensor.game_room_light_sensor
+        entity_id: sensor.game_room_light_level
         above: *above
       sequence:
       - service: light.turn_off
@@ -112,37 +112,37 @@ automation:
   - service_template: "script.gr_lights_{{ trigger.to_state.state }}"
 
 
-# - alias: Game room dimmer off press
-#   initial_state: true
-#   trigger:
-#   - platform: device
-#     device_id: a95207ebf43311ea974eefdd9eb75b7f
-#     domain: homekit_controller
-#     type: button4
-#     subtype: single_press
-#   action:
-#   - choose:
-#     - conditions:
-#       - condition: state
-#         entity_id: binary_sensor.xbox
-#         state: 'on'
-#       sequence:
-#       - service: script.turn_on
-#         entity_id: script.xbox_off
-#     - conditions:
-#       - condition: state
-#         entity_id: climate.game_room_fan
-#         state: 'on'
-#       sequence:
-#       - service: climate.turn_off
-#         entity_id: climate.game_room_fan
-#     - conditions:
-#       - condition: state
-#         entity_id: fan.game_room
-#         state: 'on'
-#       sequence:
-#       - service: fan.turn_off
-#         entity_id: fan.game_room
+- alias: Game room dimmer off press
+  initial_state: true
+  trigger:
+  - platform: device
+    device_id: 55b3148007f211ebbe759fa8f183002a
+    domain: homekit_controller
+    type: button4
+    subtype: single_press
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.xbox
+        state: 'on'
+      sequence:
+      - service: script.turn_on
+        entity_id: script.xbox_off
+    - conditions:
+      - condition: state
+        entity_id: climate.game_room_fan
+        state: 'on'
+      sequence:
+      - service: climate.turn_off
+        entity_id: climate.game_room_fan
+    - conditions:
+      - condition: state
+        entity_id: fan.game_room
+        state: 'on'
+      sequence:
+      - service: fan.turn_off
+        entity_id: fan.game_room
 
 
 - alias: Turn game room fan off sleep mode
@@ -164,34 +164,19 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: 
-    - binary_sensor.storage
-    - binary_sensor.storage_cloud
-    to:
-    - 'on'
-    - 'off'
+    entity_id: &entity_id binary_sensor.game_room_closet_door
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: *entity_id
+    from: 'on'
+    to: 'off'
   condition:
   - condition: template
-    value_template: "{{ as_timestamp(now()) - as_timestamp(state_attr('automation.turn_game_room_closet_light_on_off', 'last_triggered')) > 1 }}"
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
   action:
   - service_template: "light.turn_{{ trigger.to_state.state }}"
     entity_id: light.game_room_closet
-
-
-- alias: Store game room temp
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: state
-    entity_id: sensor.game_room_temp
-  condition:
-  - condition: template
-    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
-  action:
-  - service: input_number.set_value
-    entity_id: input_number.game_room_temp
-    data_template:
-      value: "{{ (states('sensor.game_room_temp') | float + states('input_number.weather_2_offset') | float) | round(0) }}"
 
 
 script:
@@ -203,7 +188,7 @@ script:
     - condition: template
       value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
     - service: switch.turn_on
-      entity_id: switch.bias_lighting
+      entity_id: switch.game_room_bias_lighting
     - service: media_player.turn_off
       entity_id:
       - media_player.all_speakers
@@ -220,7 +205,7 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id: 
-      - switch.bias_lighting
+      - switch.game_room_bias_lighting
       - climate.space_heater
     - service: script.turn_on
       entity_id: script.other_lights_on
@@ -258,10 +243,10 @@ script:
       state: 'off'
     - service: switch.turn_off
       entity_id: switch.game_room_fan_plug  # resets game room fan to speed 1
-    - delay: '00:00:01'
+    - delay: 1
     - service: switch.turn_on
       entity_id: switch.game_room_fan_plug
-    - delay: '00:00:01'
+    - delay: 1
     - service: fan.turn_on
       entity_id: fan.game_room
 
@@ -308,40 +293,10 @@ fan:
       friendly_name: Game room fan
       value_template: "{{ 'on' if states('sensor.game_room_fan_power') | float > 10 else 'off' }}"
       turn_on: &power
-        service: remote.send_command
-        entity_id: remote.game_room
+        service: script.ir_fan_power
         data:
-          device: honeywell fan
-          command: power
+          blaster: game_room_ir
       turn_off: *power
-      # speed_template: >
-      #   {% set power = states('sensor.game_room_fan_power') | float %}
-      #   {% if power > 31.9 %}
-      #     5
-      #   {% elif power > 28.9 %}
-      #     4
-      #   {% elif power > 25.9 %}
-      #     3
-      #   {% elif power > 22.9 %}
-      #     2
-      #   {% elif power > 19.9 %}
-      #     1
-      #   {% else %}
-      #     off
-      #   {% endif %}
-      # set_speed:
-      #   service: remote.send_command
-      #   entity_id: remote.game_room
-      #   data:
-      #     device: honeywell fan
-      #     command: speed
-      # speeds:
-      # - 'off'
-      # - '1'
-      # - '2'
-      # - '3'
-      # - '4'
-      # - '5'
 
 
 input_number:

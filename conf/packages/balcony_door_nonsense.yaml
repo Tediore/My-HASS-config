@@ -1,100 +1,138 @@
 automation:
-- alias: Toggle record when on balcony
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.porch_light
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-  - condition: template
-    value_template: "{{ trigger.to_state.state != 'unavailable' and trigger.to_state.state != trigger.from_state.state }}"
-  action:
-  - service_template: "homeassistant.turn_{{ trigger.to_state.state }}"
-    entity_id: automation.record_when_on_balcony
-  - condition: template
-    value_template: "{{ trigger.to_state.state == 'off' }}"
-  - service: input_boolean.turn_off
-    entity_id:
-    - input_boolean.on_balcony_init0
-    - input_boolean.on_balcony_init1
-    - input_boolean.on_balcony_init2
-    - input_boolean.on_balcony
+# - alias: Toggle record when on balcony
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: light.porch_light
+#   condition:
+#   - condition: state
+#     entity_id: sun.sun
+#     state: 'below_horizon'
+#   - condition: template
+#     value_template: "{{ trigger.to_state.state != 'unavailable' and trigger.to_state.state != trigger.from_state.state }}"
+#   action:
+#   - service_template: "homeassistant.turn_{{ trigger.to_state.state }}"
+#     entity_id: automation.record_when_on_balcony
+#   - condition: template
+#     value_template: "{{ trigger.to_state.state == 'off' }}"
+#   - service: input_boolean.turn_off
+#     entity_id:
+#     - input_boolean.on_balcony_init0
+#     - input_boolean.on_balcony_init1
+#     - input_boolean.on_balcony_init2
+#     - input_boolean.on_balcony
 
 
 - alias: Record when on balcony
-  mode: parallel
+  initial_state: true
   trigger:
-  - platform: state
-    entity_id: binary_sensor.storm_door
   - platform: state
     entity_id: binary_sensor.balcony_door
     from: 'off'
     to: 'on'
-    for: '00:00:01'
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - condition: state
+    entity_id: input_boolean.on_balcony
+    state: 'off'
+  action:
+  - wait_template: "{{ is_state('binary_sensor.balcony_motion', 'on') }}"
+    timeout: '00:00:30'
+    continue_on_timeout: false
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.on_balcony
+
+
+- alias: Clear when on balcony
+  initial_state: true
+  trigger:
   - platform: state
     entity_id: binary_sensor.balcony_door
     from: 'on'
     to: 'off'
-  - platform: state
-    entity_id:
-    - input_boolean.on_balcony_init1
-    - input_boolean.on_balcony_init2
-    - input_boolean.on_balcony
-    to: 'on'
-  action:
-  - service: input_boolean.turn_on
-    data_template:
-      entity_id: >
-        {% set tostate = trigger.to_state.state %}
-        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %} 
-        {% set balcony = states('binary_sensor.balcony_door') %}
-        {% set storm = states('binary_sensor.storm_door') %}
-        {% if entity == 'balcony' and tostate == 'on' and storm == 'off' %}
-          input_boolean.on_balcony_init0
-        {% elif entity == 'storm' and tostate == 'on' and is_state('input_boolean.on_balcony_init0', 'on') %}
-          input_boolean.on_balcony_init1
-        {% elif entity == 'balcony' and tostate == 'off' and is_state('input_boolean.on_balcony_init1', 'on') %}
-          input_boolean.on_balcony_init2
-        {% elif entity == 'storm' and tostate == 'off' and is_state('input_boolean.on_balcony_init2', 'on') %}
-          input_boolean.on_balcony
-        {% else %}
-          none
-        {% endif %}
-  - service: input_boolean.turn_off
-    data_template:
-      entity_id: >
-        {% set tstate = trigger.to_state.state %}
-        {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %}
-        {% if entity == 'on_balcony_init1' %}
-          input_boolean.on_balcony_init0
-        {% elif entity == 'on_balcony_init2' %}
-          input_boolean.on_balcony_init1
-        {% elif entity == 'on_balcony' %}
-          input_boolean.on_balcony_init2
-        {% elif entity == 'balcony' and tstate == 'on' and is_state('input_boolean.on_balcony', 'on') %}
-          input_boolean.on_balcony
-        {% else %}
-          none
-        {% endif %}
-
-
-- alias: Turn off stale balcony bools
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: state
-    entity_id:
-    - input_boolean.on_balcony_init0
-    - input_boolean.on_balcony_init1
-    - input_boolean.on_balcony_init2
-    to: 'on'
-    for: '00:00:30'
+  condition:
+  - condition: state
+    entity_id: input_boolean.on_balcony
+    state: 'on'
   action:
   - service: input_boolean.turn_off
-    data_template:
-      entity_id: "{{ trigger.to_state.entity_id }}"
+    entity_id: input_boolean.on_balcony
+  
+
+# - alias: Record when on balcony
+#   mode: parallel
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.storm_door
+#   - platform: state
+#     entity_id: binary_sensor.balcony_door
+#     from: 'off'
+#     to: 'on'
+#     for: '00:00:01'
+#   - platform: state
+#     entity_id: binary_sensor.balcony_door
+#     from: 'on'
+#     to: 'off'
+#   - platform: state
+#     entity_id:
+#     - input_boolean.on_balcony_init1
+#     - input_boolean.on_balcony_init2
+#     - input_boolean.on_balcony
+#     to: 'on'
+#   action:
+#   - service: input_boolean.turn_on
+#     data_template:
+#       entity_id: >
+#         {% set tostate = trigger.to_state.state %}
+#         {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %} 
+#         {% set balcony = states('binary_sensor.balcony_door') %}
+#         {% set storm = states('binary_sensor.storm_door') %}
+#         {% if entity == 'balcony' and tostate == 'on' and storm == 'off' %}
+#           input_boolean.on_balcony_init0
+#         {% elif entity == 'storm' and tostate == 'on' and is_state('input_boolean.on_balcony_init0', 'on') %}
+#           input_boolean.on_balcony_init1
+#         {% elif entity == 'balcony' and tostate == 'off' and is_state('input_boolean.on_balcony_init1', 'on') %}
+#           input_boolean.on_balcony_init2
+#         {% elif entity == 'storm' and tostate == 'off' and is_state('input_boolean.on_balcony_init2', 'on') %}
+#           input_boolean.on_balcony
+#         {% else %}
+#           none
+#         {% endif %}
+#   - service: input_boolean.turn_off
+#     data_template:
+#       entity_id: >
+#         {% set tstate = trigger.to_state.state %}
+#         {% set entity = trigger.to_state.entity_id.replace('binary_sensor.', '').replace('_door', '').replace('', '').replace('input_boolean.', '') %}
+#         {% if entity == 'on_balcony_init1' %}
+#           input_boolean.on_balcony_init0
+#         {% elif entity == 'on_balcony_init2' %}
+#           input_boolean.on_balcony_init1
+#         {% elif entity == 'on_balcony' %}
+#           input_boolean.on_balcony_init2
+#         {% elif entity == 'balcony' and tstate == 'on' and is_state('input_boolean.on_balcony', 'on') %}
+#           input_boolean.on_balcony
+#         {% else %}
+#           none
+#         {% endif %}
+
+
+# - alias: Turn off stale balcony bools
+#   initial_state: true
+#   mode: parallel
+#   trigger:
+#   - platform: state
+#     entity_id:
+#     - input_boolean.on_balcony_init0
+#     - input_boolean.on_balcony_init1
+#     - input_boolean.on_balcony_init2
+#     to: 'on'
+#     for: '00:00:30'
+#   action:
+#   - service: input_boolean.turn_off
+#     data_template:
+#       entity_id: "{{ trigger.to_state.entity_id }}"
 
 
 input_boolean:

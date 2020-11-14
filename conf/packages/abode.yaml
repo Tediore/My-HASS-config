@@ -127,8 +127,8 @@ automation:
     data:
       kelvin: 3000
       brightness_pct: 100
-  - service: switch.turn_on
-    entity_id: switch.cabinet_lighting
+  - service: light.turn_on
+    entity_id: light.kitchen_cabinets
   - delay:
       seconds: "{{ range(900,1800) | random | int }}"
   - service: light.turn_on

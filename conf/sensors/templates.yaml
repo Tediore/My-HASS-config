@@ -50,7 +50,7 @@
         {% if is_state('sensor.master_bedroom_temp', 'unavailable') %}
           {{ states('sensor.tstat_current_temp') }}
         {% else %}
-          {{ (states('sensor.master_bedroom_temp') | float + states('input_number.weather_1_offset') | float) | round(1) }}
+          {{ (states('sensor.master_bedroom_temp') | float + states('input_number.master_bedroom_temp_offset') | float) | round(1) }}
         {% endif %}
       unit_of_measurement: '°F'
     
@@ -60,7 +60,7 @@
         {% if is_state('sensor.master_bedroom_temp', 'unavailable') %}
           -
         {% else %}
-          {{ (states('sensor.master_bedroom_temp') | float + states('input_number.weather_1_offset') | float) | round(0) }} °F
+          {{ (states('sensor.master_bedroom_temp') | float + states('input_number.master_bedroom_temp_offset') | float) | round(0) }} °F
         {% endif %}
     
     game_room_temp_calibrated:
@@ -69,7 +69,7 @@
         {% if is_state('sensor.game_room_temp', 'unavailable') %}
           {{ states('input_number.game_room_temp') }}
         {% else %}
-          {{ (states('sensor.game_room_temp') | float + states('input_number.weather_2_offset') | float) | round(1) }}
+          {{ (states('sensor.game_room_temp') | float + states('input_number.game_room_temp_offset') | float) | round(1) }}
         {% endif %}
       unit_of_measurement: '°F'
     
@@ -79,7 +79,7 @@
         {% if is_state('sensor.game_room_temp', 'unavailable') %}
           {{ states('input_number.game_room_temp') }}
         {% else %}
-          {{ (states('sensor.game_room_temp') | float + states('input_number.weather_2_offset') | float) | round(0) }} °F
+          {{ (states('sensor.game_room_temp') | float + states('input_number.game_room_temp_offset') | float) | round(0) }} °F
         {% endif %}
 
     avg_temp_master_bedroom:

@@ -92,3 +92,89 @@
   action:
   - service: light.turn_off
     entity_id: light.office_lights
+
+
+- alias: Toggle button press boolean
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: event
+    event_type: EVENT_TYPE # replace with the button press event type
+    event_data:
+      key: value # replace with button press event data for button down
+  - platform: event
+    event_type: EVENT_TYPE # replace with the button press event type
+    event_data:
+      key: value # replace with button press event data for button up
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.event.data.KEY == 'button_down' else 'off' }}" # replace KEY with whatever the event data key is
+    entity_id: input_boolean.button_press
+
+
+- alias: Dim lights while button held
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.button_press
+    from: 'off'
+    to: 'on'
+  action:
+    repeat:
+      sequence:
+      - service: light.turn_on
+        entity_id: light.whatever
+        data:
+          brightness_step_pct: -2
+      - delay: 0.25
+      until:
+      - condition: or
+        - condition: state
+          entity_id: input_boolean.button_press
+          state: 'off'
+        - condition: template
+          value_template: "{{ state_attr('light.whatever', 'brightness') | int < 6 }}"
+
+
+- alias: Record last motion sensor activated
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.one
+    - binary_sensor.two
+    - binary_sensor.three
+    to: 'on'
+  action:
+  - service: input_text.set_value
+    data_template:
+      entity_id: input_text.last_motion
+      value: "{{ trigger.to_state.friendly_name }}"
+
+
+script:
+  lights_on_off:
+    sequence:
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: light.obyvacka_svetlo
+          state: 'off'
+        sequence:
+        - service: light.turn_on
+          entity_id: light.obyvacka_svetlo
+        - entity_id: script.script1
+          service: script.turn_on
+        - entity_id: script.script2
+          service: script.turn_off
+      - conditions:
+        - condition: state
+          entity_id: light.obyvacka_svetlo
+          state: 'on'
+        sequence:
+        - service: light.turn_off
+          entity_id: light.obyvacka_svetlo
+        - entity_id: script.script1
+          service: script.turn_off
+        - entity_id: script.script2
+          service: script.turn_off

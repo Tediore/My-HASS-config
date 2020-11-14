@@ -1,3 +1,4 @@
+automation:
 - alias: Set speaker volume based on app
   initial_state: true
   mode: parallel
@@ -9,6 +10,14 @@
     - sensor.hub_app_name
     - sensor.kitchen_speaker_app_name
     - sensor.living_room_speaker_app_name
+  - platform: state
+    entity_id:
+    - input_boolean.portable_speaker
+    - input_boolean.bedroom_speaker
+    - input_boolean.hub
+    - input_boolean.kitchen_speaker
+    - input_boolean.living_room_speaker
+    to: 'off'
   condition:
   - condition: template
     value_template: "{{ trigger.to_state.state != '' }}"
@@ -19,8 +28,8 @@
     data_template:
       entity_id: "media_player.{{ trigger.to_state.name.lower().replace(' ','_') }}"
       volume_level: >
-        {% set app = trigger.to_state.state %}
-        {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
+        {% set app = trigger.to_state.state if trigger.to_state.domain == 'sensor' else states(trigger.to_state.entity_id.replace('input_boolean','sensor') + '_app_name') %}
+        {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('input_boolean','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
         {% if app in ['iHeartRadio', 'Default Media Receiver'] %}
           {% if speaker in ['portable'] %}
             0.42
@@ -151,3 +160,73 @@
         {% else %}
           {{ 0.42 if states('sensor.portable_speaker_app_name') in ['Default Media Receiver', 'iHeartRadio'] else 0.3 }}
         {% endif %}
+
+
+- alias: Lower speaker volume when receiving a call
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.pixel_xl_phone_state
+    from: 'idle'
+    to: 'ringing'
+  - platform: state
+    entity_id: sensor.pixel_xl_phone_state
+    from: 
+    - 'ringing'
+    - 'offhook'
+    to: 'idle'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.any_speaker
+    state: 'on'
+  action:
+  - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state == 'ringing' else 'off' }}"
+    data:
+      entity_id: >
+        {%- for speaker in states.media_player if is_state(speaker.entity_id, 'playing') and speaker.object_id != 'all_speakers' -%}
+        {{ speaker.entity_id.replace('media_player', 'input_boolean') }}{% if not loop.last %}, {% endif %}
+        {%- endfor -%}
+  - condition: template
+    value_template: "{{ trigger.to_state.state == 'ringing' }}"
+  - service: media_player.volume_set
+    data:
+      entity_id: >
+        {%- for speaker in states.media_player if is_state(speaker.entity_id, 'playing') -%}
+        {{ speaker.entity_id }}{% if not loop.last %}, {% endif %}
+        {%- endfor -%}
+      volume_level: 0.2
+
+
+- alias: Mute/unmute speakers when in call
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.pixel_xl_phone_state
+    from: 
+    - 'idle'
+    - 'ringing'
+    to: 'offhook'
+  - platform: state
+    entity_id: sensor.pixel_xl_phone_state
+    from: 'offhook'
+    to: 'idle'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.any_speaker
+    state: 'on'
+  action:
+  - service: media_player.volume_mute
+    data:
+      entity_id: >
+        {%- for speaker in states.media_player if is_state(speaker.entity_id, 'playing') and speaker.object_id != 'all_speakers' -%}
+        {{ speaker.entity_id }}{% if not loop.last %}, {% endif %}
+        {%- endfor -%}
+      is_volume_muted: "{{ true if trigger.to_state.state == 'offhook' else false }}"
+
+
+input_boolean:
+  kitchen_speaker:
+  hub:
+  portable_speaker:
+  living_room_speaker:
+  bedroom_speaker:

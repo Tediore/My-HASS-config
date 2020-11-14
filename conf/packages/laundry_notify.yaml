@@ -17,9 +17,11 @@ automation:
     for: '00:30:00'
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   - condition: state
-    entity_id: input_boolean.sleep_mode
+    entity_id: 
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
     state: 'off'
   action:
   - service: notify.gotify
@@ -29,10 +31,9 @@ automation:
   - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
     data_template:
       entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
-  - condition: state
-    entity_id: media_player.living_room_vizio
-    state: 'on'
-  - service: script.laundry_light_strip_notify
+  - service: script.laundry_light_notify
+    data:
+      color_name: "{{ 'blue' if trigger.to_state.name == 'Washer' else 'orange' }}"
 
 
 - alias: Record washer/dryer on/off
@@ -40,22 +41,22 @@ automation:
   mode: parallel
   trigger:
   - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_1_power
+    entity_id: sensor.washer_power
     above: 550
   - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_1_power
+    entity_id: sensor.washer_power
     below: 1.5
   - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_2_power
+    entity_id: sensor.dryer_power
     above: 250
     for: '00:05:00'
   - platform: numeric_state
-    entity_id: sensor.power_strip_outlet_2_power
+    entity_id: sensor.dryer_power
     below: 50
   action:
   - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
     data_template:
-      entity_id: "input_boolean.{{ 'washer' if '1' in trigger.to_state.entity_id else 'dryer' }}"
+      entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','') }}"
 
 
 - alias: Reset laundry reminder booleans
@@ -77,24 +78,24 @@ automation:
 
 
 script:
-  laundry_light_strip_notify:
+  laundry_light_notify:
     sequence:
-    - service: light.turn_on  
-      entity_id: light.strip_1
-    - service: light.turn_on  
-      entity_id: light.strip_1
+    - service: scene.create
       data:
-        rgb_color: [255,0,0]
-        brightness_pct: 100
-        transition: 1
-    - delay: '00:00:01'
-    - service: light.turn_on  
-      entity_id: light.strip_1
+        scene_id: before_laundry_notify
+        snapshot_entities:
+        - light.living_room_sconces
+    - service: light.turn_on
+      entity_id: light.living_room_sconces
+      data_template:
+        color_name: "{{ color_name }}"
+    - delay: 1.5
+    - service: light.turn_on
+      entity_id: light.living_room_sconces
       data:
-        rgb_color: [0,0,255]
-        transition: 1
-    - service: light.turn_off
-      entity_id: light.strip_1
+        flash: short
+    - delay: 2
+    - scene: scene.before_laundry_notify
 
 
 input_boolean:

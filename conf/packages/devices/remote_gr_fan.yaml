@@ -3,38 +3,23 @@ automation:
   initial_state: true
   mode: parallel
   trigger:
-  # First button: Turn fan on
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'off'
-      device_ieee: !secret eco_remote_3_id
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'on'
-      device_ieee: !secret eco_remote_3_id
-  # Third button: Change fan speed
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'move_to_color_temp'
-      device_ieee: !secret eco_remote_3_id
+  - platform: mqtt
+    topic: zigbee2mqtt/Game room fan remote/click
+    # first button: turn fan on
+    # third button: change fan speed
   action:
   - choose:
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.command in ['on', 'off'] }}"
+        value_template: "{{ trigger.payload == 'power' }}"
       sequence:
       - service_template: "{{ 'fan.turn_on' if is_state('climate.game_room_fan', 'off') else 'climate.turn_off' }}"
         data_template:
           entity_id: "{{ 'fan.game_room' if is_state('climate.game_room_fan', 'off') else 'climate.game_room_fan' }}"
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.command == 'move_to_color_temp' }}"
+        value_template: "{{ trigger.payload == 'colortemp' }}"
       sequence:
-      - service: remote.send_command
-        entity_id: remote.game_room
+      - service: script.ir_fan_speed
         data:
-          device: honeywell fan
-          command: speed
+          blaster: game_room_ir

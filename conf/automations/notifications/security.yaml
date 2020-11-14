@@ -14,7 +14,7 @@
     from: 'off'
     to: 'on'
   - platform: state
-    entity_id: switch.entrance_light
+    entity_id: light.entrance
     from: 'off'
     to: 'on'
     for: '00:00:45'
@@ -32,7 +32,7 @@
       message: >
         {% set entity = trigger.to_state.entity_id %}
         {% set name = trigger.to_state.name %}
-        {% if entity == 'switch.entrance_light' %}
+        {% if entity == 'light.entrance' %}
           {{ name }} has been turned on.
         {% else %}
           {{ name }} lights have been turned on.

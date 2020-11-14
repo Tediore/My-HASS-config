@@ -64,3 +64,18 @@
   name: Quiet hours
   after: '23:00'
   before: '08:00'
+
+
+- platform: mqtt
+  name: Balcony motion
+  device_class: motion
+  state_topic: tele/rf_bridge/RESULT
+  value_template: "{{ value_json.RfReceived.Data }}"
+  payload_on: '98050A'
+  off_delay: 285
+  # unique_id: balcony_motion_sensor
+  # device:
+  #   identifiers: P819
+  #   manufacturer: KERUI
+  #   model: P819
+  #   name: Motion sensor

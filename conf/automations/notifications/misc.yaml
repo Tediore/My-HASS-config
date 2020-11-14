@@ -100,7 +100,6 @@
   trigger:
   - platform: state
     entity_id: !secret covid_sensor_1
-    attribute: last_updated
   action:
   - service: notify.gotify
     data_template:

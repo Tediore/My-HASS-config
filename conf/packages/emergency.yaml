@@ -99,12 +99,13 @@ automation:
     data:
       color_name: red
       brightness_pct: 100
-  - service: hue.hue_activate_scene
+  - service: light.turn_on
+    entity_id: light.buffet
     data:
-      group_name: Buffet
-      scene_name: Read
-  - service: switch.turn_on
-    entity_id: switch.entrance_light
+      brightness_pct: 100
+      kelvin: 3000
+  - service: light.turn_on
+    entity_id: light.entrance
 
 
 - alias: Turn lights on when leak detected
@@ -118,14 +119,27 @@ automation:
   - condition: template
     value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Living room
+      scene_name: Water
+  - service: hue.hue_activate_scene
+    data:
+      group_name: Master bedroom
+      scene_name: Water
+  - service: light.turn_on
+    entity_id: light.buffet
+    data:
+      color_name: blue
+  - delay: '00:00:01'
   - service: light.turn_on
     entity_id:
+    - light.buffet
     - light.master_bedroom
     - light.living_room
-    - light.dining_room
     data:
       brightness_pct: 100
-      rgb_color: [0,0,255]
+      color_name: blue
       flash: long
 
 

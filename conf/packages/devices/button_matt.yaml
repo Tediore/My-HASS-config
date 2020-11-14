@@ -3,35 +3,28 @@ automation:
   initial_state: true
   mode: parallel
   trigger:
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: button_single
-      device_ieee: !secret button_matt_id
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: button_double
-      device_ieee: !secret button_matt_id
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: button_hold
-      device_ieee: !secret button_matt_id
+  - platform: state
+    entity_id: sensor.button_matt
+    to:
+    - 'single'
+    - 'double'
+    - 'hold'
   action:
-    service_template: >
-      {% set command = trigger.event.data.command %}
-      {% if command == 'button_single' %}
-        {% if is_state('input_boolean.sleep_mode', 'off') %}
-          script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+  - service: script.turn_on
+    data_template:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command == 'single' %}
+          {% if is_state('input_boolean.sleep_mode', 'off') %}
+            script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+          {% else %}
+            script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
+          {% endif %}
+        {% elif command == 'double' %}
+          script.toggle_bedroom_fan
         {% else %}
-          script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
+          script.early_departure
         {% endif %}
-      {% elif command == 'button_double' %}
-        script.toggle_bedroom_fan
-      {% else %}
-        script.early_departure
-      {% endif %}
 
 
 - alias: Lights off backup attempt
@@ -48,7 +41,7 @@ automation:
       entity_id: group.lights_interior
       state: 'on'
     - condition: state
-      entity_id: switch.cabinet_lighting
+      entity_id: light.kitchen_cabinets
       state: 'on'
   action:
   - service: script.turn_on
@@ -155,7 +148,7 @@ script:
       - script.sleep_switches
       - script.porch_light_security
     - service: climate.turn_on
-      entity_id: climate.bedroom_fan
+      entity_id: climate.master_bedroom_fan
     - condition: state
       entity_id: input_boolean.sleep_mode
       state: 'on'
@@ -172,7 +165,7 @@ script:
     - service: script.turn_on
       entity_id: script.sleep_switches
     - service: climate.turn_on
-      entity_id: climate.bedroom_fan
+      entity_id: climate.master_bedroom_fan
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
     - service: alarm_control_panel.alarm_arm_home
@@ -267,21 +260,34 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id: 
-      - switch.cabinet_lighting
+      - light.kitchen_cabinets
+      - climate.space_heater
       - switch.space_heater
       - switch.air_freshener
       - light.hall_bath_night_light
-      - climate.space_heater
-    - condition: state
-      entity_id: input_boolean.christmas_mode
-      state: 'on'
-    - service: light.turn_off
-      entity_id: switch.christmas_tree
+      - switch.christmas_tree
+      - switch.christmas_lights
 
   toggle_bedroom_fan:
     sequence:
-    - service_template: "climate.turn_{{ 'off' if not is_state('climate.bedroom_fan', 'off') else 'on' }}"
-      entity_id: climate.bedroom_fan
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: switch.master_bedroom_fan_plug
+          state: 'on'
+        sequence:
+        - service: climate.turn_off
+          entity_id: climate.master_bedroom_fan
+      - conditions:
+        - condition: state
+          entity_id: switch.master_bedroom_fan_plug
+          state: 'off'
+        sequence:
+        - service: climate.turn_off
+          entity_id: climate.master_bedroom_fan
+        - delay: 1
+        - service: switch.turn_on
+          entity_id: switch.master_bedroom_fan_plug
   
   early_departure:
     sequence:
@@ -300,8 +306,12 @@ script:
         transition: 30
         kelvin: 3000
         brightness_pct: 33
-    - service: switch.turn_on
-      entity_id: switch.cabinet_lighting    
+    - service: light.turn_on
+      entity_id: light.kitchen_cabinets
+      data:
+        brightness_pct: 66
+    - service: alarm_control_panel.alarm_disarm
+      entity_id: alarm_control_panel.abode
 
 
 input_number:

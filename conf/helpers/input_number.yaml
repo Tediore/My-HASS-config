@@ -1,13 +1,11 @@
-weather_1_offset:
-  name: Lumi weather 1
+master_bedroom_temp_offset:
   min: -3
   max: 3
   step: 0.5
   unit_of_measurement: '°F'
   mode: slider
 
-weather_2_offset:
-  name: Lumi weather 2
+game_room_temp_offset:
   min: -3
   max: 3
   step: 0.5
@@ -15,7 +13,6 @@ weather_2_offset:
   mode: slider
 
 low_battery:
-  name: Low battery
   min: 0
   max: 40
   step: 5

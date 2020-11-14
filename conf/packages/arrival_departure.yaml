@@ -3,7 +3,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: device_tracker.pixel_xl_unifi
+    entity_id: device_tracker.pixel_xl
     from: 'not_home'
     to: 'home'
   condition:
@@ -36,7 +36,7 @@ automation:
   - service: homeassistant.turn_on
     entity_id: 
     - input_boolean.sensor_tripped
-    - switch.entrance_light
+    - light.entrance
   - service: camera.record
     data_template:
       entity_id: camera.living_room_camera
@@ -59,10 +59,10 @@ automation:
   - service: script.turn_on
     data_template:
       entity_id: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'loc' }}"
-  - service: input_text.set_value
-    entity_id: input_text.arrival_time
-    data_template:
-      value: "{{ now() }}"
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.arrival
+  - service: switch.turn_off
+    entity_id: switch.dafang_h264_rtsp_server
 
 
 - alias: Re-arm alarm in away mode
@@ -156,12 +156,33 @@ automation:
     event_data:
       entity_id: timer.master_bedroom_enter
   condition:
-  - condition: template
-    value_template: "{{ (as_timestamp(now()) | float - as_timestamp(states('input_text.arrival_time')) | float) / 60 <= 2 }}"
+  - condition: state
+    entity_id: input_boolean.arrival
+    state: 'on'
   action:
-  - service_template: "{{ 'timer.cancel' if trigger.platform == 'state' and is_state('timer.master_bedroom_enter', 'active') else 'light.turn_off' }}"
+  - service_template: "{{ 'timer.cancel' if trigger.platform == 'state' else 'light.turn_off' }}"
     data_template:
       entity_id: "{{ 'timer.master_bedroom_enter' if trigger.platform == 'state' else 'light.master_bedroom' }}"
+
+
+- alias: Turn off arrival boolean
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.master_bedroom_enter
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_motion
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.arrival
+    state: 'on'
+  action:
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.arrival
 
 
 - alias: Record alarm mode
@@ -191,13 +212,15 @@ script:
       - group.plugs
       - group.lights_all
       - climate.space_heater
+      - switch.christmas_tree
     - service: media_player.turn_off
       entity_id: all
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
+    - service: switch.turn_on
+      entity_id: switch.dafang_h264_rtsp_server
+    - condition: template
+      value_template: "{{ now().month in [11, 12] }}"
     - service: switch.turn_off
-      entity_id: switch.christmas_tree
+      entity_id: switch.christmas_lights
 
 
   notify_away:
@@ -235,8 +258,8 @@ script:
     sequence:
     - service: input_boolean.turn_on
       entity_id: input_boolean.disarmed_loc
-    - service: switch.turn_on
-      entity_id: switch.entrance_light
+    - service: light.turn_on
+      entity_id: light.entrance
     - wait_template: "{{ is_state('binary_sensor.front_door', 'on') or is_state('binary_sensor.front_door_hk', 'on') or is_state('binary_sensor.entrance_motion', 'on') }}"
       timeout: '00:10:00'
       continue_on_timeout: false
@@ -264,11 +287,11 @@ script:
 
   entrance_light_on:
     sequence:
-    - service: switch.turn_on
-      entity_id: switch.entrance_light
+    - service: light.turn_on
+      entity_id: light.entrance
     - delay: '00:01:00'
-    - service: switch.turn_off
-      entity_id: switch.entrance_light
+    - service: light.turn_off
+      entity_id: light.entrance
 
   
   arrival_night:
@@ -276,19 +299,26 @@ script:
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'
-    - service_template: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas_mode', 'on') else 'normal' }}"
+    - service: script.turn_on
+      data:
+        entity_id: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas', 'on') else 'normal' }}"
     - service: timer.start
       entity_id: timer.master_bedroom_enter
       data:
-        duration: '00:02:00'
+        duration: 180
+    - condition: template
+      value_template: "{{ now().month in [11, 12] }}"
+    - service: switch.turn_on
+      entity_id: switch.christmas_lights
   
 
   lights_normal:
     sequence:
-    - service: hue.hue_activate_scene
+    - service: light.turn_on
+      entity_id: light.buffet
       data:
-        group_name: Buffet
-        scene_name: Read
+        brightness_pct: 100
+        kelvin: 3000
     - service: hue.hue_activate_scene
       data:
         group_name: Living room
@@ -297,10 +327,9 @@ script:
       data:
         group_name: Master bedroom
         scene_name: Read
-    - service: switch.turn_on
-      entity_id: switch.cabinet_lighting
     - service: light.turn_on
       entity_id:
+      - light.kitchen_cabinets
       - light.hall_bath_night_light
       - light.master_bedroom_night_light
       data:
@@ -312,25 +341,25 @@ script:
     - service: switch.turn_on
       entity_id: 
       - switch.christmas_tree
-      - switch.cabinet_lighting
+      - switch.christmas_lights
     - service: light.turn_on
       entity_id:
-      - light.hall_bath_night_light
+      - light.buffet
+      - light.kitchen_cabinets
       - light.master_bedroom_night_light
       data:
         brightness_pct: 100
-    - service: hue.hue_activate_scene
-      data:
-        group_name: Buffet
-        scene_name: Read
-    - service: hue.hue_activate_scene
-      data:
-        group_name: Living room
-        scene_name: Christmas
+        kelvin: 3000
     - service: hue.hue_activate_scene
       data:
         group_name: Master bedroom
         scene_name: Read
+    - condition: template
+      value_template: "{{ now().month == 12 }}"
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Living room
+        scene_name: Christmas
     - delay: '00:01:00'
     - service: light.turn_on
       entity_id: light.living_room_lamps
@@ -341,11 +370,11 @@ script:
 
 
 input_boolean:
+  arrival:
   sensor_tripped:
   disarmed_loc:
 
 input_text:
-  arrival_time:
   abode:
 
 timer:

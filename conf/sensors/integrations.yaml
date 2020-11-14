@@ -1,7 +1,7 @@
-- platform: mqtt
-  state_topic: !secret covid_sensor_1_topic
-  json_attributes_topic: !secret covid_sensor_1_attr
-  unique_id: !secret covid_sensor_1_id
+# - platform: mqtt
+#   state_topic: !secret covid_sensor_1_topic
+#   json_attributes_topic: !secret covid_sensor_1_attr
+#   unique_id: !secret covid_sensor_1_id
 
 - platform: systemmonitor
   resources:

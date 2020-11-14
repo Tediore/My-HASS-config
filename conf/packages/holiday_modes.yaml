@@ -12,16 +12,15 @@ automation:
       {% set month = now().month %}
       {% set day = now().day %}
       {{ (month == 2 and day in [14, 15]) 
-        or (month in [1, 4, 11] and day == 1) 
+        or (month in [1, 4, 10, 11] and day == 1) 
         or (month == 5 and day in [1, 4, 5]) 
         or (month == 7 and day in [4, 5]) 
-        or (month == 10 and day == 24) 
         or (month == 12 and day == 1) }}
   action:
     service_template: >
       {% set month = now().month %}
       {% set day = now().day %}
-        input_boolean.turn_{{ 'on' if (day == 14) or month in [4, 10, 12] or (day == 4) else 'off' }}
+        input_boolean.turn_{{ 'on' if day in [4, 14] or month in [4, 10, 12] else 'off' }}
     data_template:
       entity_id: >
         {% set month = now().month %}
@@ -40,13 +39,14 @@ automation:
           input_boolean.christmas
         {% endif %}
 
+
 - alias: Turn on holiday porch light
   initial_state: true
   trigger:
   - platform: state
     entity_id: sun.sun
     to: 'below_horizon'
-    for: '00:20:00'
+    for: '00:30:00'
   condition:
   - condition: template
     value_template: >
@@ -62,9 +62,28 @@ automation:
   - service: script.holiday_porch_light
 
 
+- alias: Turn on balcony Christmas lights
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sun.sun
+    to: 'below_horizon'
+    for: '00:30:00'
+  condition:
+  - condition: template
+    value_template: "{{ now().month in [11, 12] }}"
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: switch.turn_on
+    entity_id: switch.christmas_lights
+
+
 script:
   holiday_porch_light:
     sequence:
+    - condition: template
+      value_template: "{{ (is_state('input_boolean.christmas', 'on') and now().month == 12) or is_state('input_boolean.christmas', 'off') }}"
     - service: light.turn_on
       entity_id: light.porch_light
       data_template:
@@ -82,11 +101,6 @@ script:
           {% else %}
             green
           {% endif %}
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: switch.turn_on
-      entity_id: switch.christmas_lights
 
 
 input_boolean:

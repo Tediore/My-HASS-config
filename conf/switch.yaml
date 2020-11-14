@@ -1,8 +1,23 @@
-- platform: command_line
-  switches:
-    laundry_room_motion_sensor:
-      command_on: !secret hue_motion_on
-      command_off: !secret hue_motion_off
-      command_state: !secret hue_motion_state
-      value_template: "{{ value_json.config.on }}"
-      friendly_name: Laundry room motion sensor status
+- platform: rest
+  name: Laundry room motion sensor
+  resource: !secret hue_motion
+  state_resource: !secret hue_motion_state
+  method: put
+  body_on: '{"on":true}'
+  body_off: '{"on":false}'
+  is_on_template: "{{ value_json.config.on == true }}"
+
+- platform: rest
+  name: Hue dark inside
+  resource: !secret hue_dark_inside
+  state_resource: !secret hue_dark_inside_state
+  method: put
+  body_on: '{"flag":true}'
+  body_off: '{"flag":false}'
+  is_on_template: "{{ value_json.state.flag == true }}"
+
+- platform: mqtt
+  name: Christmas lights
+  command_topic: 'cmnd/rf_bridge/Backlog'
+  payload_on: 'RfKey1 6'
+  payload_off: 'RfKey2 6'

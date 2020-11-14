@@ -9,7 +9,7 @@ include:
   - binary_sensor.front_closet
   - binary_sensor.master_bedroom_motion
   - binary_sensor.entrance_motion
-  - switch.entrance_light
+  - light.entrance
   - light.front_closet
   - light.dining_room
   - light.living_room
@@ -17,8 +17,8 @@ include:
   - light.game_room
   - light.laundry_room
   - light.porch_light
-  - switch.cabinet_lighting
-  - switch.bias_lighting
+  - light.kitchen_cabinets
+  - switch.game_room_bias_lighting
   - switch.master_bedroom_fan_plug
   - media_player.living_room_vizio
   - media_player.bedroom_vizio

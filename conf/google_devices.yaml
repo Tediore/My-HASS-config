@@ -37,7 +37,7 @@ script.alarm_arm_home:
 script.cross_stitch_light:
   expose: true
   room: Other devices
-switch.entrance_light:
+light.entrance:
   expose: true
   room: Other devices
 switch.bedroom_fan:
@@ -55,9 +55,9 @@ switch.christmas_lights:
 switch.outdoor_outlet_2:
   expose: true
   room: Other devices
-switch.cabinet_lighting:
+light.kitchen_cabinets:
   expose: true
   room: Kitchen
-switch.bias_lighting:
+switch.game_room_bias_lighting:
   expose: true
   room: Game room

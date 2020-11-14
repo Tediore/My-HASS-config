@@ -1,37 +1,221 @@
 automation:
-- alias: Toggle LR camera auto night mode
+- alias: Turn off lights and speakers when TV turned on
   initial_state: true
+  mode: single
   trigger:
   - platform: state
     entity_id: media_player.living_room_vizio
-  - platform: state
-    entity_id: alarm_control_panel.abode
-    to:
-    - 'armed_home'
-    - 'armed_away'
-  condition:
-  - condition: template
-    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+    from: 'off'
+    to: 'on'
+  - platform: mqtt
+    topic: &ir_topic 'tele/living_room_ir/RESULT'
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
+  - platform: mqtt
+    topic: *ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
   action:
-  - service_template: "switch.turn_{{ 'off' if trigger.to_state.state == 'on' else 'on' }}"
-    entity_id: switch.lr_camera_night_mode_auto
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.platform == 'state' }}"
+      sequence:
+      - wait_template: "{{ states('sensor.living_room_vizio_app_name') != '' }}"
+        timeout: '00:00:10'
+        continue_on_timeout: true
+      - condition: template
+        value_template: "{{ states('sensor.living_room_vizio_app_name') not in ['unknown', '_UNKNOWN_APP'] }}"
+      - condition: template
+        value_template: "{{ state_attr('media_player.living_room_cast', 'app_name') != None and state_attr('media_player.living_room_cast', 'app_name')[:3] != 'BOD' }}"
+      - service: script.turn_on
+        entity_id: script.pre_media
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.platform == 'mqtt' }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.pre_media
 
 
-- alias: Manage LR camera night mode
+- alias: Turn soundbar on with TV
+  initial_state: true
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+    from: 'off'
+    to: 'on'
+  - platform: mqtt
+    topic: *ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
+  - platform: mqtt
+    topic: *ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
+  action:
+  - service: script.turn_on
+    entity_id: script.ir_soundbar_vol_up
+  - delay: 20
+
+
+- alias: Set living room TV auto-brightness
   initial_state: true
   trigger:
   - platform: state
     entity_id: sun.sun
-    to: 
+    to:
     - 'above_horizon'
     - 'below_horizon'
+    for: '00:30:00'
+  action:
+  - service: vizio.update_setting
+    data:
+      entity_id: media_player.living_room_vizio
+      setting_type: picture
+      setting_name: auto_brightness_control
+      new_value: "{{ 'High' if trigger.to_state.state == 'below_horizon' else 'Off' }}"
+
+
+- alias: Restore lights when TV turned off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+    from: 'on'
+    to: 'off'
+  - platform: state
+    entity_id: media_player.living_room_cast
+    from:
+    - 'playing'
+    - 'paused'
+    - 'idle'
+    to: 'off'
   condition:
   - condition: state
-    entity_id: switch.lr_camera_night_mode_auto
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: 
+    - light.living_room
+    - input_boolean.andy_sleep
+    - input_boolean.sleep_mode
     state: 'off'
+  - condition: template
+    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
   action:
-  - service_template: "switch.turn_{{ 'on' if 'below' in trigger.to_state.state else 'off' }}"
-    entity_id: switch.lr_camera_night_mode
+  - service: script.turn_on
+    entity_id: script.post_media
+
+
+- alias: Turn lights on/off with TV IR
+  initial_state: true
+  trigger:
+  - platform: mqtt
+    topic: *ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF10EF","DataLSB":"0x04FB08F7","Repeat":0}}'
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: template
+    value_template: "{{ not is_state('media_player.living_room_vizio', 'unavailable') }}"
+  action:
+  - service: script.turn_on
+    data_template:
+      entity_id: "script.{{ 'pre_media' if is_state('media_player.living_room_vizio', 'off') else 'post_media' }}"
+
+
+- alias: Turn off living room TV bias lighting
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+    from: 'on'
+    to: 'off'
+  action:
+  - service: light.turn_off
+    entity_id: light.living_room_bias_lighting
+
+
+- alias: Boost TV volume when furnace on
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.hvac_action
+    to: 'cooling'
+  - platform: state
+    entity_id: sensor.hvac_action
+    to: 'heating'
+    for: '00:01:00'
+  condition:
+  - condition: state
+    entity_id: media_player.living_room_vizio
+    state: 'on'
+  - condition: template
+    value_template: "{{ not is_state_attr('media_player.living_room_vizio', 'app_name', 'SmartCast Home') }}"
+  action:
+  - repeat:
+      count: "{{ 3 if trigger.to_state.state == 'heating' else 5 }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.ir_soundbar_vol_up
+      - delay: 0.5
+
+
+- alias: Lower TV volume when furnace off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.hvac_action
+    from: 'cooling'
+    to:
+    - 'idle'
+    - 'off'
+    for: '00:00:52'
+  - platform: state
+    entity_id: sensor.hvac_action
+    from: 'heating'
+    to:
+    - 'idle'
+    - 'off'
+    for: '00:02:00'
+  condition:
+  - condition: state
+    entity_id: media_player.living_room_vizio
+    state: 'on'
+  action:
+  - repeat: &soundbar_vol_dn
+      count: "{{ 3 if trigger.to_state.state == 'heating' else 5 }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.ir_soundbar_vol_dn
+      - delay: 0.5
+
+
+- alias: Lower TV volume when TV turned off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_vizio
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: template
+    value_template: "{{ states('sensor.hvac_action') in ['cooling', 'heating'] }}"
+  action:
+  - repeat: *soundbar_vol_dn
+
+
+- alias: Toggle LR camera auto night mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.abode
+    to:
+    - 'disarmed'
+    - 'armed_away'
+  action:
+  - service_template: "switch.turn_{{ 'off' if trigger.to_state.state == 'disarmed' else 'on' }}"
+    data:
+      entity_id: "{{ 'switch.lr_camera_night_mode_auto, switch.lr_camera_night_mode' if trigger.to_state.state == 'disarmed' else 'switch.lr_camera_night_mode_auto' }}"
 
 
 - alias: Toggle air freshener
@@ -91,25 +275,33 @@ automation:
           transition: 10
 
 
-shell_command:
-  lr_tv_brightness_ctl: !secret lr_tv_brightness_ctl
-
-
 script:
   pre_media:
-    alias: Turn lights off when TV turned on
+    alias: Turn stuff off when TV turned on
     sequence:
+    - service: homeassistant.turn_off
+      data_template:
+        entity_id: group.speakers
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'
     - service: light.turn_on
-      entity_id: light.dining_room
+      entity_id: light.buffet
       data:
         kelvin: 3000
         transition: 2
         brightness_pct: 50
+    - service: light.turn_on
+      entity_id: light.kitchen_cabinets
+      data:
+        brightness_pct: 66
     - service: script.turn_on
-      entity_id: script.christmas_tree_off
+      entity_id: script.christmas_lights_off
+    - service: light.turn_on
+      entity_id: light.living_room_bias_lighting
+      data:
+        kelvin: 6500
+        brightness_pct: 100
     - condition: state
       entity_id: light.living_room_lamps
       state: 'on'
@@ -124,24 +316,35 @@ script:
     - service: light.turn_on
       entity_id: 
       - light.living_room_lamps
-      - light.dining_room
+      - light.buffet
       data:
         kelvin: 3000
         transition: 3
-        brightness_pct: 100
-    - condition: state
-      entity_id: input_boolean.christmas_mode
-      state: 'on'
-    - service: switch.turn_on
-      entity_id: switch.christmas_tree
+        brightness_pct: "{{ 100 if 6 < now().hour < 21 else 66 }}"
+    - service: script.turn_on
+      entity_id: script.christmas_lights_on
+    - service: light.turn_off
+      entity_id: light.living_room_bias_lighting
 
-  christmas_tree_off:
+  christmas_lights_on:
     sequence:
     - condition: state
-      entity_id: input_boolean.christmas_mode
+      entity_id: input_boolean.christmas
+      state: 'on'
+    - service: switch.turn_on
+      entity_id: 
+      - switch.christmas_lights
+      - switch.christmas_tree
+
+  christmas_lights_off:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.christmas
       state: 'on'
     - service: switch.turn_off
-      entity_id: switch.christmas_tree
+      entity_id: 
+      - switch.christmas_lights
+      - switch.christmas_tree
 
 
   cross_stitch_light:
@@ -158,20 +361,10 @@ switch:
   switches:
     living_room_fan:
       turn_on: &fan_power
-      - service: remote.send_command
+      - service: script.ir_fan_power
         data:
-          command: power
-          device: honeywell fan
-          entity_id: remote.living_room
+          blaster: living_room_ir
       turn_off: *fan_power
-
-
-light:
-- platform: group
-  name: Living room lamps
-  entities:
-  - light.left_lamp
-  - light.right_lamp
 
 
 camera:

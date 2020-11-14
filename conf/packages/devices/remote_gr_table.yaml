@@ -3,36 +3,15 @@ automation:
   initial_state: true
   mode: parallel
   trigger:
-  # First button: Turn lights off (except game room)
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'off'
-      device_ieee: !secret eco_remote_1_id
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'on'
-      device_ieee: !secret eco_remote_1_id
-  # Second button: Turn other lights back on
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'move_to_level'
-      device_ieee: !secret eco_remote_1_id
-  # Third button: Reset controller battery tracker
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'move_to_color_temp'
-      device_ieee: !secret eco_remote_1_id
+  - platform: mqtt
+    topic: zigbee2mqtt/Game room table remote/click
+    # first button: turn lights off except game room
+    # second button: turn other lights back on
   action:
   - service_template: >
-      {% set command = trigger.event.data.command %}
-      {% if command in ['on', 'off'] %}
+      {% set command = trigger.payload %}
+      {% if command == 'power' %}
         script.other_lights_off
-      {% elif command == 'move_to_color_temp' %}
-        script.controller_battery_changed
       {% else %}
         script.other_lights_on
       {% endif %}

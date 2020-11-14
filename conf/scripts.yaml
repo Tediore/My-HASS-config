@@ -48,14 +48,30 @@ hass_online:
         "How many times are you gonna do that today?"
         ] | random }}
 
-
-learn_fan_commands:
+ir_fan_power:
   sequence:
-  - service: remote.learn_command
-    data:
-      entity_id: remote.game_room
-      device: honeywell fan
-      command:
-      - power
-      - speed
-      - timer
+  - service: mqtt.publish
+    data_template:
+      topic: &ir_topic "cmnd/{{ blaster }}/irsend"
+      payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0xD81"}'
+
+ir_fan_speed:
+  sequence:
+  - service: mqtt.publish
+    data_template:
+      topic: *ir_topic
+      payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0xD88"}'
+
+ir_soundbar_vol_up:
+  sequence:
+  - service: mqtt.publish
+    data_template:
+      topic: &lr_ir_topic "cmnd/living_room_ir/irsend"
+      payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FF827D"}'
+
+ir_soundbar_vol_dn:
+  sequence:
+  - service: mqtt.publish
+    data_template:
+      topic: *lr_ir_topic
+      payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FFA25D"}'

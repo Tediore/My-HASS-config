@@ -3,35 +3,17 @@ automation:
   initial_state: true
   mode: parallel
   trigger:
-  # First button: Turn portable speaker off
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'off'
-      device_ieee: !secret eco_remote_2_id
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'on'
-      device_ieee: !secret eco_remote_2_id
-  # Second button: Mute/unmute portable speaker
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'move_to_level'
-      device_ieee: !secret eco_remote_2_id
-  # Third button: Move music between all speakers and portable speaker
-  - platform: event
-    event_type: zha_event
-    event_data:
-      command: 'move_to_color_temp'
-      device_ieee: !secret eco_remote_2_id
+  - platform: mqtt
+    topic: zigbee2mqtt/Game room desk remote/click
+    # first button: turn speaker off
+    # second button: toggle speaker mute
+    # third button: move music
   action:
   - service_template: >
-      {% set command = trigger.event.data.command %}
-      {% if command in ['on', 'off'] %}
+      {% set command = trigger.payload %}
+      {% if command == 'power' %}
         script.turn_off_portable_speaker
-      {% elif command == 'move_to_color_temp' %}
+      {% elif command == 'colortemp' %}
         script.move_music_{{ 'all' if is_state('media_player.portable_speaker', 'playing') else 'portable' }}
       {% else %}
         script.toggle_mute_portable_speaker
