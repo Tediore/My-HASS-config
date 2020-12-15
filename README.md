@@ -10,7 +10,7 @@ I currently have the following devices connected to Home Assistant:
 - Google Home speakers
 - Abode security system (local control via Homekit Controller)
 - Zigbee/Z-wave adapter (model HUSBZB-1, currently only using the Z-wave radio)
-    - MonopricepPower strip with energy monitoring
+    - Monopricep power strip with energy monitoring
     - First Alert smoke alarm (ZCOMBO)
 - ZZH! Zigbee adapter
     - Ecolink contact sensors
