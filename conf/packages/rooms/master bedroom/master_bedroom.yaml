@@ -1,62 +1,4 @@
 automation:
-- alias: Good morning - workday
-  initial_state: true
-  trigger:
-  - platform: time
-    at: input_datetime.lights_wakeup
-  condition:
-  - condition: or
-    conditions:
-    - condition: template
-      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
-    - condition: template
-      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
-  - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: script.turn_on
-    entity_id: script.good_morning
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-  - service: script.lights_sunset
-
-
-- alias: Turn fan off in morning
-  initial_state: true
-  trigger:
-  - platform: time
-    at: 
-    - '07:00:00'
-    - '07:15:00'
-  condition:
-  - condition: or
-    conditions:
-    - condition: template  # workday
-      value_template: >
-        {{ 
-          ((as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')) 
-          and as_timestamp(now()) | timestamp_custom('%M') | int < 15)
-        }}
-    - condition: template  # day off
-      value_template: >
-        {{ 
-          ((as_timestamp(now()) | timestamp_custom('%d') != as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')) 
-          and as_timestamp(now()) | timestamp_custom('%M') | int > 10)
-        }}
-  action:
-  - service: homeassistant.turn_off
-    entity_id:
-    - input_boolean.sleep_mode
-    - input_boolean.andy_sleep
-    - climate.master_bedroom_fan
-  - service: switch.turn_on
-    entity_id: switch.air_freshener
-
-
 - alias: Turn bedroom lights off when curtains opened during day
   initial_state: true
   trigger:
@@ -226,55 +168,6 @@ automation:
     entity_id: light.mini_christmas_tree
 
 
-script:
-  good_morning:
-    alias: Workday wakeup routine
-    sequence:
-    - service: script.turn_on
-      entity_id: script.lights_wakeup
-    - service: homeassistant.turn_off
-      entity_id:
-      - input_boolean.sleep_mode
-      - input_boolean.andy_sleep
-    - service: media_player.volume_mute
-      entity_id: media_player.living_room_speaker
-      data:
-        is_volume_muted: true
-    - service: media_player.volume_set
-      data:
-        entity_id: media_player.bedroom_speaker
-        volume_level: 0.4
-    - service: media_player.volume_mute
-      entity_id: media_player.living_room_speaker
-      data:
-        is_volume_muted: false
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: light.turn_on
-      entity_id: 
-      - light.christmas_tree
-      - light.mini_christmas_tree
-  
-  lights_wakeup:
-    sequence:
-    - service: light.turn_on
-      entity_id: light.master_bedroom
-      data:
-        brightness: 1
-        kelvin: 2000
-    - delay: '00:02:00'
-    - condition: state
-      entity_id: light.master_bedroom
-      state: 'on'
-    - service: light.turn_on
-      entity_id: light.master_bedroom
-      data:
-        transition: 180
-        brightness_pct: 100
-        kelvin: 3000
-
-
 switch:
 - platform: template
   switches:
@@ -298,10 +191,6 @@ climate:
   cold_tolerance: 0
   hot_tolerance: 1
 
+
 input_boolean:
   master_bedroom_closet:
-
-input_datetime:
-  lights_wakeup:
-    has_time: true
-    has_date: false

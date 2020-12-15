@@ -59,7 +59,7 @@ automation:
       entity_id: climate.thermostat
       state: 'off'
   - condition: state
-    entity_id: group.lights_interior
+    entity_id: group.lights_all
     state: 'off'
   - service: script.notify_away
     data_template:
@@ -156,7 +156,9 @@ script:
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
-      entity_id: script.window_notify
+      entity_id:
+      - script.window_notify
+      - script.christmas_lights_off
 
 
   notify_away:
@@ -238,6 +240,7 @@ script:
       - light.mini_christmas_tree
       - light.portable_mini_christmas_tree
       - switch.christmas_lights_plug_1
+      - light.star_lights
     - service: light.turn_on
       entity_id:
       - light.buffet

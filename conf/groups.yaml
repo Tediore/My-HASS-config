@@ -15,17 +15,24 @@ lights_interior:
   - light.laundry_room
   - light.master_bedroom_night_light
   - light.hall_bath_night_light
-  - light.christmas_tree
-  - light.mini_christmas_tree
-  - light.portable_mini_christmas_tree
+
 
 lights_all:
   name: All lights
   entities:
   - group.lights_interior
   - light.porch
+
+
+lights_christmas:
+  name: Christmas lights
+  entities:
   - switch.christmas_lights_plug_1
   - switch.christmas_lights_plug_2
+  - light.christmas_tree
+  - light.mini_christmas_tree
+  - light.portable_mini_christmas_tree
+  - light.star_lights
 
 plugs:
   name: Smart plugs
