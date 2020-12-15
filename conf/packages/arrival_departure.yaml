@@ -1,21 +1,4 @@
 automation:
-- alias: Disarm alarm - location
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: device_tracker.pixel_xl
-    from: 'not_home'
-    to: 'home'
-  condition:
-  - condition: state
-    entity_id: alarm_control_panel.abode
-    state: 'armed_away'
-    for: '01:00:00'
-  action:
-  - service: alarm_control_panel.alarm_disarm
-    entity_id: alarm_control_panel.abode
-
-
 - alias: Turn entrance light on upon entrance
   initial_state: true
   trigger:
@@ -32,59 +15,35 @@ automation:
   - condition: state
     entity_id: input_text.abode
     state: 'armed_away'
+    for: '00:00:30'
   action:
-  - service: homeassistant.turn_on
-    entity_id: 
-    - input_boolean.sensor_tripped
-    - light.entrance
-  - service: camera.record
-    data_template:
-      entity_id: camera.living_room_camera
-      filename: "/media/recordings/{{ now().strftime('%m%d%Y-%H%M%S') }}.mp4"
-      duration: 60
-      lookback: 10
+  - service: light.turn_on
+    entity_id: light.entrance
 
 
 - alias: Alarm disarmed from away
   initial_state: true
   trigger:
-  - entity_id: alarm_control_panel.abode
-    platform: state
-    to: 'disarmed'
-  condition:
-  - condition: state
-    entity_id: input_text.abode
-    state: 'armed_away'
-  action:
-  - service: script.turn_on
-    data_template:
-      entity_id: "script.disarmed_{{ 'keypad' if is_state('input_boolean.sensor_tripped', 'on') else 'loc' }}"
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.arrival
-  - service: switch.turn_off
-    entity_id: switch.dafang_h264_rtsp_server
-
-
-- alias: Re-arm alarm in away mode
-  initial_state: true
-  trigger:
   - platform: state
-    entity_id: input_boolean.disarmed_loc
-    from: 'off'
-    to: 'on'
-    for: '00:10:00'
+    entity_id: input_text.abode
+    from: 'armed_away'
+    to: 'disarmed'
   action:
-  - service: alarm_control_panel.alarm_arm_away
-    entity_id: alarm_control_panel.abode
+  - service: homeassistant.turn_on
+    entity_id:
+    - script.entrance_light_on
+    - script.tstat_smart_resume_cool
+    - script.arrival_night
+    - input_boolean.arrival
 
 
 - alias: Activate away mode when armed away
   initial_state: true
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     to: 'armed_away'
-    for: '00:00:45'
+    for: '00:00:35'
   action:
   - service: script.turn_on
     entity_id: script.away_mode
@@ -111,7 +70,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     to: 'armed_away'
     for: '00:01:00'
   condition:
@@ -185,42 +144,19 @@ automation:
     entity_id: input_boolean.arrival
 
 
-- alias: Record alarm mode
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: alarm_control_panel.abode
-    to: 
-    - 'disarmed'
-    - 'armed_home'
-    - 'armed_away'
-    for: '00:00:10'
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.abode
-    data_template:
-      value: "{{ trigger.to_state.state }}"
-
-
 script:
   away_mode:
     sequence:
     - service: homeassistant.turn_off
       entity_id:
-      - input_boolean.disarmed_loc
-      - input_boolean.sensor_tripped
+      - input_boolean.christmas_porch_light_loop
       - group.plugs
       - group.lights_all
       - climate.space_heater
-      - switch.christmas_tree
     - service: media_player.turn_off
       entity_id: all
-    - service: switch.turn_on
-      entity_id: switch.dafang_h264_rtsp_server
-    - condition: template
-      value_template: "{{ now().month in [11, 12] }}"
-    - service: switch.turn_off
-      entity_id: switch.christmas_lights
+    - service: script.turn_on
+      entity_id: script.window_notify
 
 
   notify_away:
@@ -243,48 +179,6 @@ script:
           priority: high
   
   
-  disarmed_keypad:
-    sequence:
-    - service: input_boolean.turn_off
-      entity_id: input_boolean.sensor_tripped
-    - service: script.turn_on
-      entity_id:
-      - script.entrance_light_on
-      - script.tstat_smart_resume_cool
-      - script.arrival_night
-  
-  
-  disarmed_loc:
-    sequence:
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.disarmed_loc
-    - service: light.turn_on
-      entity_id: light.entrance
-    - wait_template: "{{ is_state('binary_sensor.front_door', 'on') or is_state('binary_sensor.front_door_hk', 'on') or is_state('binary_sensor.entrance_motion', 'on') }}"
-      timeout: '00:10:00'
-      continue_on_timeout: false
-    - service: script.turn_on
-      entity_id: script.entrance_light_on
-    - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
-      timeout: '00:10:00'
-      continue_on_timeout: false
-    - service: script.turn_on
-      entity_id: 
-      - script.toggle_sensor_tripped
-      - script.tstat_smart_resume_cool
-      - script.arrival_night
-
-
-  toggle_sensor_tripped:
-    sequence:
-    - service: input_boolean.turn_off
-      entity_id: input_boolean.disarmed_loc
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.sensor_tripped
-    - service: input_boolean.turn_off
-      entity_id: input_boolean.sensor_tripped
-
-
   entrance_light_on:
     sequence:
     - service: light.turn_on
@@ -309,7 +203,7 @@ script:
     - condition: template
       value_template: "{{ now().month in [11, 12] }}"
     - service: switch.turn_on
-      entity_id: switch.christmas_lights
+      entity_id: switch.christmas_lights_plug_1
   
 
   lights_normal:
@@ -338,10 +232,12 @@ script:
 
   lights_christmas:
     sequence:
-    - service: switch.turn_on
+    - service: homeassistant.turn_on
       entity_id: 
-      - switch.christmas_tree
-      - switch.christmas_lights
+      - light.christmas_tree
+      - light.mini_christmas_tree
+      - light.portable_mini_christmas_tree
+      - switch.christmas_lights_plug_1
     - service: light.turn_on
       entity_id:
       - light.buffet
@@ -354,28 +250,47 @@ script:
       data:
         group_name: Master bedroom
         scene_name: Read
-    - condition: template
-      value_template: "{{ now().month == 12 }}"
     - service: hue.hue_activate_scene
       data:
         group_name: Living room
         scene_name: Christmas
+    - service: light.turn_on
+      entity_id: light.porch
+      data:
+        brightness_pct: 100
+        rgb_color: [0,255,0]
+    - service: automation.turn_on
+      entity_id: automation.christmas_porch_light_loop
     - delay: '00:01:00'
     - service: light.turn_on
       entity_id: light.living_room_lamps
       data:
-        brightness: 100
+        brightness_pct: 100
         kelvin: 3000
         transition: 10
+    - service: light.turn_off
+      entity_id: light.living_room_sconces
+      data:
+        transition: 10
 
+  window_notify:
+    sequence:
+    - condition: state
+      entity_id: group.windows
+      state: 'on'
+    - service: notify.mobile_app_pixel_xl
+      data:
+        title: The following windows are open
+        message: >
+          {% for window in expand('group.windows') if window.state == 'off' -%}
+          {{ window.name }}{% if not loop.last %}, {% endif %}
+          {%- endfor %}
+        data:
+          ttl: 0
+          priority: high
 
 input_boolean:
   arrival:
-  sensor_tripped:
-  disarmed_loc:
-
-input_text:
-  abode:
 
 timer:
   master_bedroom_enter:

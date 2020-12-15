@@ -48,7 +48,7 @@ automation:
     entity_id: sensor.smoke_alarm_status
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: 'armed_away'
   - condition: template
     value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
@@ -90,7 +90,7 @@ automation:
     - 'CO'
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: light.turn_on
     entity_id:
@@ -117,7 +117,7 @@ automation:
     to: 'on'
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: hue.hue_activate_scene
     data:

@@ -29,9 +29,9 @@ script:
       entity_id: input_boolean.andy_sleep
     - service: homeassistant.turn_off
       entity_id:
-      - light.master_bedroom_night_light
       - light.master_bedroom
-      - media_player.bedroom_vizio
+      - light.master_bedroom_night_light
+      - media_player.bedroom_tv
       - switch.air_freshener
     - service: script.turn_on
       entity_id: 

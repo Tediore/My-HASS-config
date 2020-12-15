@@ -6,34 +6,31 @@ lights_interior:
   - light.game_room_closet
   - light.buffet
   - light.master_bedroom
+  - light.master_bedroom_closet
+  - light.kitchen_cabinets
   - light.living_room
   - light.dining_room
   - light.game_room
+  - light.game_room_closet
   - light.laundry_room
   - light.master_bedroom_night_light
   - light.hall_bath_night_light
+  - light.christmas_tree
+  - light.mini_christmas_tree
+  - light.portable_mini_christmas_tree
 
 lights_all:
   name: All lights
   entities:
-  - light.entrance
-  - light.kitchen_cabinets
-  - light.game_room_closet
-  - light.buffet
-  - light.master_bedroom
-  - light.living_room
-  - light.dining_room
-  - light.game_room
-  - light.laundry_room
-  - light.porch_light
-  - light.master_bedroom_night_light
-  - light.hall_bath_night_light
+  - group.lights_interior
+  - light.porch
+  - switch.christmas_lights_plug_1
+  - switch.christmas_lights_plug_2
 
 plugs:
   name: Smart plugs
   entities:
   - switch.master_bedroom_fan_plug
-  - light.kitchen_cabinets
   - switch.game_room_bias_lighting
   - switch.air_freshener
 
@@ -43,3 +40,11 @@ speakers:
   - media_player.hub
   - media_player.living_room_speaker
   - media_player.bedroom_speaker
+
+windows:
+  entities:
+  - binary_sensor.living_room_window_right
+  - binary_sensor.living_room_window_left
+  - binary_sensor.game_room_window_left
+  - binary_sensor.kitchen_window_left
+  - binary_sensor.master_bedroom_window_right

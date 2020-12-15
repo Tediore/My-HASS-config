@@ -4,8 +4,11 @@ automation:
   initial_state: true
   trigger:
   - platform: state
+    entity_id: input_text.abode
+    from: 'armed_away'
+    to: 'disarmed'
+  - platform: state
     entity_id: 
-    - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
     - input_boolean.tstat_hold
     from: 'on'
@@ -28,7 +31,7 @@ automation:
   - condition: template
     value_template: "{{ not is_state('sensor.tstat_profile', 'Home') }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   - condition: or
     conditions:
     - condition: time
@@ -56,8 +59,11 @@ automation:
   initial_state: true
   trigger:
   - platform: state
+    entity_id: input_text.abode
+    from: 'armed_away'
+    to: 'disarmed'
+  - platform: state
     entity_id: 
-    - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
     - input_boolean.tstat_hold
     from: 'on'
@@ -80,7 +86,7 @@ automation:
   - condition: template
     value_template: "{{ not is_state('sensor.tstat_profile', 'Sleep') }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   - condition: or
     conditions:
     - condition: time
@@ -107,8 +113,11 @@ automation:
   initial_state: true
   trigger:
   - platform: state
+    entity_id: input_text.abode
+    from: 'armed_away'
+    to: 'disarmed'
+  - platform: state
     entity_id: 
-    - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
     - input_boolean.tstat_hold
     from: 'on'
@@ -131,7 +140,7 @@ automation:
   - condition: template
     value_template: "{{ not is_state('sensor.tstat_profile', 'Home') }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   - condition: or
     conditions:
     - condition: time
@@ -159,8 +168,11 @@ automation:
   initial_state: true
   trigger:
   - platform: state
+    entity_id: input_text.abode
+    from: 'armed_away'
+    to: 'disarmed'
+  - platform: state
     entity_id: 
-    - input_boolean.sensor_tripped
     - input_boolean.tstat_sched_resume
     - input_boolean.tstat_hold
     from: 'on'
@@ -183,7 +195,7 @@ automation:
   - condition: template
     value_template: "{{ not is_state('sensor.tstat_profile', 'Sleep') }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   - condition: or
     conditions:
     - condition: time
@@ -210,10 +222,10 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     to: 'armed_away'
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     to: 'armed_away'
     for: '00:00:30'
   condition:

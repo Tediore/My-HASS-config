@@ -2,27 +2,34 @@ automation:
 - alias: Toggle dark inside boolean
   initial_state: true
   trigger:
-  - platform: template  # True when dark inside
-    value_template: >
-      {% set elev = state_attr('sun.sun', 'elevation') | float %}
-      {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
-      {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
-      {{ (states('weather.dark_sky') in ['overcast'] and elev < elev_cloudy) or (states('weather.dark_sky') not in ['overcast'] and elev < elev_sunny) }}
-  - platform: template  # True when not dark inside
-    value_template: >
-      {% set elev = state_attr('sun.sun', 'elevation') | float %}
-      {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
-      {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
-      {{ not (states('weather.dark_sky') in ['overcast'] and elev < elev_cloudy) and not (states('weather.dark_sky') not in ['overcast'] and elev < elev_sunny) }}
+  - platform: state
+    entity_id: sun.sun
+    to:
+    - 'below_horizon'
+    - 'above_horizon'
+    for: '00:20:00'
   action:
-    service_template: >
-      {% set elev = state_attr('sun.sun', 'elevation') | float %}
-      {% set elev_cloudy = states('input_number.dark_inside_cloudy') | float %}
-      {% set elev_sunny = states('input_number.dark_inside_not_cloudy') | float %}
-      homeassistant.turn_{{ 'on' if (states('weather.dark_sky') in ['overcast'] and elev < elev_cloudy) or (states('weather.dark_sky') not in ['overcast'] and elev < elev_sunny) else 'off' }}
+  - service: "homeassistant.turn_{{ 'on' if trigger.to_state.state == 'below_horizon' else 'off' }}" 
     entity_id:
     - input_boolean.dark_inside
     - switch.hue_dark_inside
+
+
+- alias: Set brightness preset on switches
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '21:00:00'
+  - platform: sun
+    event: sunrise
+  - platform: homeassistant
+    event: start
+  action:
+  - wait_template: "{{ is_state('binary_sensor.game_room_closet', 'off') or is_state('binary_sensor.storage', 'off') }}"
+  - service: script.brightness_preset
+    data:
+      device: game_room_closet_light
+      brightness_pct: "{{ 100 if 5 < now().hour < 21 else 50 }}"
 
 
 - alias: Turn on sunset lights - light level
@@ -34,9 +41,16 @@ automation:
     for: '00:01:00'
   - platform: time
     at: '15:30:00'
+  - platform: state
+    entity_id: input_text.abode
+    from: 'armed_away'
+    to: 'disarmed'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_boolean.dark_inside
+    state: 'off'
+  - condition: state
+    entity_id: input_text.abode
     state:
     - 'disarmed'
     - 'armed_home'
@@ -47,8 +61,8 @@ automation:
     entity_id: sensor.kitchen_light_level
     below: *threshold
   action:
-  - service: script.turn_on
-    entity_id: script.lights_sunset
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.dark_inside
 
 
 - alias: Dim cabinet and buffet lights at night
@@ -98,84 +112,9 @@ automation:
     subtype: single_press
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
-
-
-- alias: Turn porch light off at sunrise
-  initial_state: true
-  trigger:
-  - platform: sun
-    event: sunrise
-    offset: '-01:30:00'
-  action:
-  - service: light.turn_off
-    entity_id: light.porch_light
-  - condition: state
-    entity_id: input_boolean.christmas
-    state: 'on'
-  - service: switch.turn_off
-    entity_id: switch.christmas_lights
-
-
-- alias: Turn porch light white when door opened
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.balcony_door
-    to: 'on'
-  - platform: state
-    entity_id: sun.sun
-    to: 'below_horizon'
-  condition:
-  - condition: state
-    entity_id: binary_sensor.balcony_door
-    state: 'on'
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-  - condition: state
-    entity_id: input_boolean.on_balcony
-    state: 'off'
-  - condition: template
-    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
-  action:
-  - service: scene.create
-    data:
-      scene_id: before_balcony_opened
-      snapshot_entities:
-      - light.porch_light
-  - service: light.turn_on
-    entity_id: light.porch_light
-    data:
-      kelvin: 4000
-      brightness_pct: 100
-      transition: 5
-
-
-- alias: Restore porch light color when door closed
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.balcony_door
-    from: 'on'
-    to: 'off'
-    for: '00:00:10'
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-  - condition: state
-    entity_id: input_boolean.on_balcony
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('input_text.porch_light_xy_color') != None }}"
-  action:
-  - service: scene.turn_on
-    entity_id: scene.before_balcony_opened
-    data:
-      transition: 2
 
 
 - alias: HVAC closet door opened/closed
@@ -214,68 +153,27 @@ automation:
     entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
     entity_id: light.buffet
 
 
-- alias: Turn on/off hall bath night light with motion
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.hall_bath_motion
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: binary_sensor.hall_bath_motion
-    from: 'on'
-    to: 'off'
-    for: '00:10:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: light.turn_on
-    entity_id: light.hall_bath_night_light
-    data:
-      brightness_pct: "{{ 100 if trigger.to_state.state == 'on' else 34 }}"
-
-
-- alias: Turn porch light on/off with motion
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.balcony_motion
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-    for: '00:30:00'
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.balcony_door
-      state: 'on'
-  action:
-  - service: scene.create
-    data:
-      scene_id: before_porch_light
-      snapshot_entities:
-      - light.porch_light
-  - service: light.turn_on
-    entity_id: light.porch_light
-    data:
-      brightness_pct: 100
-      kelvin: 4000
-  - wait_template: "{{ is_state('binary_sensor.balcony_motion', 'off') }}"
-    timeout: '00:05:00'
-    continue_on_timeout: true
-  - scene: scene.before_porch_light
+# - alias: Turn portable Christmas tree on with motion
+#   initial_state: true
+#   mode: single
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.entrance_motion
+#     to: 'on'
+#   condition:
+#   - "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.turn_portable_christmas_tree_on_with_motion', 'last_triggered'))) / 3600 > 0.15 }}"
+#   action:
+#   - service: light.turn_on
+#     entity_id: light.portable_mini_christmas_tree
+#   - delay: '00:01:00'
+#   - service: light.turn_off
+#     entity_id: light.portable_mini_christmas_tree
 
 
 input_boolean:
@@ -290,13 +188,15 @@ script:
       - script.wait_dining_room_lights_off
       - script.christmas_tree_on
     - service: light.turn_on
-      entity_id: light.kitchen_cabinets
+      entity_id: 
+      - light.kitchen_cabinets
+      - light.portable_mini_christmas_tree
       data:
         brightness_pct: 100
-    - service: light.turn_on
-      entity_id: light.hall_bath_night_light
-      data:
-        brightness_pct: 34
+    # - service: light.turn_on
+    #   entity_id: light.hall_bath_night_light
+    #   data:
+    #     brightness_pct: 34
     - condition: state
       entity_id: media_player.living_room_vizio
       state: 'on'
@@ -327,8 +227,10 @@ script:
     - condition: state
       entity_id: input_boolean.christmas
       state: 'on'
-    - service: switch.turn_off
-      entity_id: switch.christmas_tree
+    - service: light.turn_off
+      entity_id: 
+      - light.christmas_tree
+      - light.mini_christmas_tree
 
   wait_dining_room_lights_off:
     sequence:
@@ -347,5 +249,12 @@ script:
     - condition: state
       entity_id: input_boolean.christmas
       state: 'on'
-    - service: switch.turn_on
-      entity_id: switch.christmas_tree
+    - service: light.turn_on
+      entity_id: light.christmas_tree
+
+  brightness_preset:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: "cmnd/{{ device }}/dimmer"
+        payload: "{{ brightness_pct }}"

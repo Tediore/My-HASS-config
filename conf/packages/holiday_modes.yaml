@@ -50,16 +50,31 @@ automation:
   condition:
   - condition: template
     value_template: >
-        {{ 
-          is_state('input_boolean.valentines_day', 'on') or
-          is_state('input_boolean.autism_awareness', 'on') or
-          is_state('input_boolean.halloween', 'on') or
-          is_state('input_boolean.andy_birthday', 'on') or
-          is_state('input_boolean.independence_day', 'on') or
-          is_state('input_boolean.christmas', 'on')
-        }}
+      {{ 
+        is_state('input_boolean.valentines_day', 'on') or
+        is_state('input_boolean.autism_awareness', 'on') or
+        is_state('input_boolean.halloween', 'on') or
+        is_state('input_boolean.andy_birthday', 'on') or
+        is_state('input_boolean.independence_day', 'on') or
+        (is_state('input_boolean.christmas', 'on') and now().month == 12)
+      }}
   action:
-  - service: script.holiday_porch_light
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.christmas
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_on 
+        entity_id: input_boolean.christmas_porch_light_loop
+      - service: light.turn_on
+        entity_id: light.porch
+        data:
+          brightness_pct: 100
+          transition: 0.4
+          rgb_color: [0,255,0]
+    default:
+    - service: script.holiday_porch_light
 
 
 - alias: Turn on balcony Christmas lights
@@ -69,23 +84,49 @@ automation:
     entity_id: sun.sun
     to: 'below_horizon'
     for: '00:30:00'
+  - platform: homeassistant
+    event: start
   condition:
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
   - condition: template
     value_template: "{{ now().month in [11, 12] }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: switch.turn_on
-    entity_id: switch.christmas_lights
+    entity_id: switch.christmas_lights_plug_1
+
+
+- alias: Christmas porch light loop
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.christmas_porch_light_loop
+    to: 'on'
+  - platform: template
+    value_template: "{{ state_attr('light.porch', 'rgb_color')[0] == 255 }}"
+    for: '00:30:00'
+  - platform: template
+    value_template: "{{ state_attr('light.porch', 'rgb_color')[1] == 255 }}"
+    for: '00:30:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.christmas_porch_light_loop
+    state: 'on'
+  action:
+  - service: mqtt.publish
+    data:
+      topic: "cmnd/porch_light/backlog"
+      payload: "speed 5; {{ 'color1 1' if state_attr('light.porch', 'rgb_color')[1] == 255 else 'color1 2' }}; speed 1"
 
 
 script:
   holiday_porch_light:
     sequence:
-    - condition: template
-      value_template: "{{ (is_state('input_boolean.christmas', 'on') and now().month == 12) or is_state('input_boolean.christmas', 'off') }}"
     - service: light.turn_on
-      entity_id: light.porch_light
+      entity_id: light.porch
       data_template:
         brightness_pct: 100
         transition: 0.4
@@ -110,3 +151,4 @@ input_boolean:
   autism_awareness:
   halloween:
   christmas:
+  christmas_porch_light_loop:

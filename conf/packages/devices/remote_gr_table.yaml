@@ -30,7 +30,7 @@ script:
   other_lights_on:
     sequence:
     - condition: template
-      value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+      value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'

@@ -6,39 +6,45 @@ automation:
     at: '00:00:00'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: 'disarmed'
   action:
-  - service: alarm_control_panel.alarm_arm_home
-    entity_id: alarm_control_panel.abode
+  - service: script.turn_on
+    entity_id: script.alarm_arm_home
 
 
-- alias: Alarm armed home reminder  # throttled - 10 minutes
+- alias: Change entrance light LED with alarm mode
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_text.abode
+    to:
+    - 'armed_home'
+    - 'armed_away'
+    - 'disarmed'
+  action:
+  - service: light.turn_on
+    entity_id: light.entrance_led # red and green only
+    data:
+      color_temp: "{{ 500 if trigger.to_state.state == 'disarmed' else 153 }}" # 153 is red, 500 is green
+      brightness_pct: "{{ 40 if trigger.to_state.state == 'disarmed' else 100 }}"
+
+
+- alias: Alarm armed home reminder
   initial_state: true
   trigger:
   - platform: state
     entity_id: binary_sensor.entrance_motion
     to: 'on'
   condition:
-  - condition: template
-    value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.alarm_armed_home_reminder', 'last_triggered'))) / 60 > 10 }}"
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: 'armed_home'
   action:
-  - service: scene.create
+  - service: mqtt.publish
     data:
-      scene_id: before_alarm_reminder
-      snapshot_entities:
-      - light.buffet
-  - service: light.turn_on
-    entity_id: light.buffet
-    data:
-      color_name: blue
-      brightness_pct: 100
-  - delay: '00:00:10'
-  - service: scene.turn_on
-    entity_id: scene.before_alarm_reminder
+      topic: 'cmnd/entrance_light/Backlog'
+      payload: 'dimmer 0; sleep 1; dimmer 100; sleep 1; dimmer 0; sleep 1; dimmer 100; sleep 1; dimmer 0; sleep 1; dimmer 100'
 
 
 - alias: Notify when sensor unresponsive
@@ -59,52 +65,19 @@ automation:
       message: "{{ trigger.to_state.name }} sensor is not responding"
 
 
-- alias: Turn porch light on at night
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: alarm_control_panel.abode
-    to: 
-    - 'armed_home'
-    - 'disarmed'
-  - platform: time
-    at: '22:00:00'
-  condition:
-  - condition: time
-    after: '22:00:00'
-    before: '05:00:00'
-  - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] or is_state('input_boolean.vacation_mode', 'on') }}"
-  action:
-  - service: script.porch_light_security
-
-
-- alias: Record previous alarm mode when unavailable
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: alarm_control_panel.abode_cloud
-    to: 'unavailable'
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.prev_alarm_mode
-    data_template:
-      value: "{{ trigger.from_state.state }}"
-
-
 - alias: Toggle vacation mode
   initial_state: true
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     to: 'armed_away'
     for: '24:00:00'
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     from: 'armed_away'
     to: 'disarmed'
   action:
-  - service_template: "input_boolean.turn_{{ 'on' if is_state('alarm_control_panel.abode', 'armed_away') else 'off' }}"
+  - service_template: "input_boolean.turn_{{ 'on' if is_state('input_text.abode', 'armed_away') else 'off' }}"
     entity_id: input_boolean.vacation_mode
 
 
@@ -172,8 +145,8 @@ automation:
     event_type: abode_alarm
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
-    state: armed_away
+    entity_id: input_text.abode
+    state: 'armed_away'
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
@@ -188,14 +161,34 @@ automation:
       transition: 5
 
 
+- alias: Record alarm mode with cloud fallback
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - alarm_control_panel.abode
+    - alarm_control_panel.abode_cloud
+    to: 
+    - 'disarmed'
+    - 'armed_home'
+    - 'armed_away'
+  condition:
+  - "{{ trigger.to_state.state in ['disarmed', 'armed_home', 'armed_away'] }}"
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.abode
+    data_template:
+      value: "{{ trigger.to_state.state }}"
+
+
 sensor:
 - platform: template
   sensors:
     alarm_mode:
-      friendly_name: "Alarm mode"
-      value_template: "{{ states('alarm_control_panel.abode').capitalize().replace('_',' ') }}"
+      friendly_name: "Abode"
+      value_template: "{{ states('input_text.abode').capitalize().replace('_',' ') }}"
       icon_template: >
-        {% set alarm = states('alarm_control_panel.abode') %}
+        {% set alarm = states('input_text.abode') %}
         {% if alarm == 'armed_home' %}
           mdi:home-lock
         {% elif alarm == 'armed_away' %}
@@ -217,36 +210,28 @@ sensor:
 script:
   alarm_arm_home:
     sequence:
-    - condition: state
-      entity_id: alarm_control_panel.abode
-      state: 'disarmed'
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode
     - delay: '00:00:10'
     - condition: template
-      value_template: "{{ not is_state('alarm_control_panel.abode', 'armed_home') }}"
+      value_template: "{{ not is_state('input_text.abode', 'armed_home') }}"
     - service: alarm_control_panel.alarm_arm_home
       entity_id: alarm_control_panel.abode_cloud
 
-  porch_light_security:
+  alarm_arm_away:
     sequence:
-    - condition: state
-      entity_id: input_boolean.extra_sleep
-      state: 'off'
-    - service: light.turn_on
-      entity_id: light.porch_light
-      data:
-        kelvin: 4000
-        brightness_pct: 50
-        transition: 0.4
-    - service: input_text.set_value
-      entity_id: input_text.porch_light_color
-      data:
-        value: 'white'
+    - service: alarm_control_panel.alarm_arm_away
+      entity_id: alarm_control_panel.abode
+    - delay: '00:00:10'
+    - condition: template
+      value_template: "{{ not is_state('input_text.abode', 'armed_home') }}"
+    - service: alarm_control_panel.alarm_arm_away
+      entity_id: alarm_control_panel.abode_cloud
 
 
 input_boolean:
   vacation_mode:
 
 input_text:
-  prev_alarm_mode:
+  abode:
+    name: Abode

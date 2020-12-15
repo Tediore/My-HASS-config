@@ -31,18 +31,18 @@ automation:
         {% set app = trigger.to_state.state if trigger.to_state.domain == 'sensor' else states(trigger.to_state.entity_id.replace('input_boolean','sensor') + '_app_name') %}
         {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('input_boolean','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
         {% if app in ['iHeartRadio', 'Default Media Receiver'] %}
-          {% if speaker in ['portable'] %}
-            0.42
-          {% elif speaker in ['bedroom', 'kitchen', 'living room'] %}
+          {% if speaker in ['bedroom', 'kitchen', 'living room'] %}
             0.4
+          {% elif speaker in ['portable'] %}
+            0.42
           {% elif speaker in ['hub'] %}
             0.5
           {% else %}
             0.4
           {% endif %}
-        {% elif app in ['Google Play Music', 'Spotify'] %}
+        {% elif app in ['Google Play Music', 'Spotify', 'YouTube Music'] %}
           {% if speaker in ['bedroom', 'kitchen', 'living room'] %}
-            0.26
+            0.36
           {% elif speaker in ['portable'] %}
             0.24
           {% elif speaker in ['hub'] %}

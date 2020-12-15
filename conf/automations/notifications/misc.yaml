@@ -13,7 +13,7 @@
     entity_id: sensor.outside_dewpoint
     below: 58
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
@@ -28,13 +28,13 @@
   initial_state: true
   trigger:
   - platform: template
-    value_template: "{{ ((states('sensor.core_0_temp') | int + states('sensor.core_1_temp') | int) / 2) > 80 }}"
+    value_template: "{{ states('sensor.server_cpu_temp') | int > 80 }}"
     for: '00:05:00'
   action:
   - service: notify.gotify_high
     data:
       title: "Server CPU temperature elevated"
-      message: "CPU temperature has been above 80 C for more than five minutes."
+      message: "CPU temperature has been above 80 °C for more than five minutes."
 
 
 - alias: Notify when humidity rising quickly
@@ -143,7 +143,7 @@
       notification_id: config_entry_discovery
 
 
-- alias: Notify if ipv6 address changes
+- alias: Notify if IPv6 address changes
   initial_state: true
   trigger:
   - platform: state
@@ -188,3 +188,39 @@
   - service: notify.sms_matt
     data_template:
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
+
+
+# - alias: Notify when building door opened/closed
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.building_5_closet
+#     to:
+#     - 'off'
+#     - 'on'
+#   action:
+#   - service: notify.gotify
+#     data:
+#       title: "Building 5 closet door"
+#       message: "Building 5 closet door {{ 'opened' if trigger.to_state.state == 'on' else 'closed' }}"
+
+
+- alias: Log RF received
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: mqtt
+    topic: tele/rf_bridge/RESULT
+  action:
+  - service: system_log.write
+    data_template:
+      message: >
+        {% set payload = trigger.payload | from_json %}
+        {{ "RF data received: 0x" + payload.RfReceived.Data }}
+      level: info
+      logger: sms.received_sms
+  - service: notify.rf_received
+    data_template:
+      message: >
+        {% set payload = trigger.payload | from_json %}
+        {{ "RF data received: 0x" + payload.RfReceived.Data }}

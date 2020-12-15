@@ -16,8 +16,8 @@
   body_off: '{"flag":false}'
   is_on_template: "{{ value_json.state.flag == true }}"
 
-- platform: mqtt
-  name: Christmas lights
-  command_topic: 'cmnd/rf_bridge/Backlog'
-  payload_on: 'RfKey1 6'
-  payload_off: 'RfKey2 6'
+# - platform: mqtt
+#   name: Christmas lights
+#   command_topic: 'cmnd/rf_bridge/Backlog'
+#   payload_on: 'RfKey1 6'
+#   payload_off: 'RfKey2 6'

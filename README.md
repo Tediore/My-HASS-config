@@ -1,8 +1,8 @@
 # My Home Assistant configuration
 
-Currently running a Home Assistant Container install on a mini PC with a dual-core Celeron N3060 (1.6 GHz up to 2.5 GHz) and 4GB of RAM. Runs great and is more than enough for my needs.
+Currently running a Home Assistant Container install on an ASUS laptop with an i7-2630QM (quad-core 2.0 GHz up to 2.9 GHz) and 8GB of RAM.
 
-The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_static` contains configs that I won't need to update often (such as `zha` and `zwave`). 
+The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_static` contains configs that I won't need to update often. 
 
 I currently have the following devices connected to Home Assistant:
 - Philips Hue
@@ -10,26 +10,29 @@ I currently have the following devices connected to Home Assistant:
 - Google Home speakers
 - Abode security system (local control via Homekit Controller)
 - Zigbee/Z-wave adapter (model HUSBZB-1, currently only using the Z-wave radio)
-    - Power strip with energy monitoring (Monoprice)
-    - Smoke alarm (First Alert)
+    - MonopricepPower strip with energy monitoring
+    - First Alert smoke alarm (ZCOMBO)
 - ZZH! Zigbee adapter
     - Ecolink contact sensors
     - Ikea Tradfri outlets
-    - Water leak sensors (SmartThings)
-    - Temp/humidity sensors (Aqara)
-    - Buttons (SmartThings)
-    - Light strip (Sengled)
-    - Four-button remotes (Leedarson)
+    - Linkind outlets
+    - Linkind buttons
+    - SmartThings buttons
+    - SmartThings water leak sensors
+    - Aqara temp/humidity sensors
+    - Sengled light strip
+    - Leedarson four-button remotes
 - APC UPS
 - GSM modem for SMS notifications (Huawei E3531)
 - Wyze camera (with the custom Dafang firmware)
 - Wyze sense contact sensors and motion sensors
 - A bunch of Tasmota smart plugs/switches
-- Tasmota IR blasters
+- IR blasters flashed with Tasmota
+- Sonoff RF bridge flashed with Tasmota and Portisch firmware
 - Unifi access point
-- HP Printer (via IPP)
 - Vizio TVs
-- A single LIFX lamp
+- Roku TV
+- A single Tasmota light bulb
 
 Some of my favorite automations include:
 - Adjusting my Google Home speakers' volume depending on which app is casting to them (since streaming radio is noticeably quieter than casting music from Google Play Music or Spotify)

@@ -3,7 +3,7 @@ automation:
 #   initial_state: true
 #   trigger:
 #   - platform: state
-#     entity_id: light.porch_light
+#     entity_id: light.porch
 #   condition:
 #   - condition: state
 #     entity_id: sun.sun

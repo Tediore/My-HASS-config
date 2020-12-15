@@ -17,7 +17,7 @@ automation:
     for: '00:30:00'
   condition:
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   - condition: state
     entity_id: 
     - input_boolean.sleep_mode
@@ -68,7 +68,7 @@ automation:
     - input_boolean.sleep_mode
     to: 'on'
   - platform: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     to: 'armed_away'
   action:
   - service: input_boolean.turn_off

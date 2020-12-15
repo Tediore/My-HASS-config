@@ -10,7 +10,7 @@ automation:
   - condition: not
     conditions:
     - condition: state
-      entity_id: alarm_control_panel.abode
+      entity_id: input_text.abode
       state: 'armed_away'
     - condition: state
       entity_id: input_boolean.sleep_mode
@@ -60,7 +60,7 @@ automation:
     to: 'on'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state:
     - 'armed_home'
     - 'disarmed'
@@ -107,7 +107,7 @@ automation:
     entity_id: input_boolean.sleep_mode
     state: 'off'
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "script.gr_lights_{{ trigger.to_state.state }}"
 
@@ -143,6 +143,11 @@ automation:
       sequence:
       - service: fan.turn_off
         entity_id: fan.game_room
+    default:
+    - service: climate.turn_off
+      entity_id: climate.space_heater
+  - service: light.turn_off
+    entity_id: light.game_room_closet
 
 
 - alias: Turn game room fan off sleep mode
@@ -164,7 +169,9 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: &entity_id binary_sensor.game_room_closet_door
+    entity_id: &entity_id
+    - binary_sensor.game_room_closet_door
+    - binary_sensor.storage
     from: 'off'
     to: 'on'
   - platform: state
@@ -172,11 +179,41 @@ automation:
     from: 'on'
     to: 'off'
   condition:
-  - condition: template
-    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+  - "{{ trigger.to_state.state != trigger.from_state.state }}"
   action:
-  - service_template: "light.turn_{{ trigger.to_state.state }}"
+  - service: "light.turn_{{ trigger.to_state.state }}"
     entity_id: light.game_room_closet
+
+
+- alias: Turn game room closet light on/off with motion
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.game_room_closet_motion
+    from: 'on'
+    to: 'off'
+    for: &no_motion_time '00:15:00'
+  - platform: state
+    entity_id: binary_sensor.game_room_closet_motion
+    from: 'off'
+    to: 'on'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      - condition: state
+        entity_id: binary_sensor.game_room_closet_door
+        state: 'on'
+        for: *no_motion_time
+      sequence: &sequence
+      - service: "light.turn_{{ trigger.to_state.state }}"
+        entity_id: light.game_room_closet
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: light.game_room_closet
+        state: 'off'
+      sequence: *sequence
 
 
 script:
@@ -186,7 +223,7 @@ script:
       entity_id: input_boolean.sleep_mode
       state: 'off'
     - condition: template
-      value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+      value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
     - service: switch.turn_on
       entity_id: switch.game_room_bias_lighting
     - service: media_player.turn_off

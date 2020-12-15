@@ -3,6 +3,11 @@
 #   json_attributes_topic: !secret covid_sensor_1_attr
 #   unique_id: !secret covid_sensor_1_id
 
+#- platform: mqtt
+#  state_topic: tracking/ebay
+#  name: Smart plug order
+#  value_template: "{{ value_json.status }}"
+
 - platform: systemmonitor
   resources:
   - type: memory_use
@@ -25,30 +30,15 @@
   - apiversion
   scan_interval: 30
 
-- platform: command_line
-  name: CPU temp # this one is to force Celcius in frontend, but will not have history graph
-  command: "cat /sys/class/thermal/thermal_zone9/temp"
-  value_template: "{{ (value | multiply(0.001)) | round(0) }} °C"
+# - platform: command_line
+#   name: CPU temp # this one is to force Celcius in frontend, but will not have history graph
+#   command: "cat /sys/class/thermal/thermal_zone9/temp"
+#   value_template: "{{ (value | multiply(0.001)) | round(0) }} °C"
 
-- platform: command_line
-  name: CPU temp hist
-  command: "cat /sys/class/thermal/thermal_zone9/temp"
-  value_template: "{{ (value | multiply(0.001)) | round(0) }}"
-
-- platform: command_line
-  name: Backup log
-  command: "cat /config/.other/backup.log"
-  scan_interval: 3600
-
-- platform: command_line
-  name: Server ipv6 address
-  command: "cat /config/.other/ipv6"
-  scan_interval: 300
-
-- platform: command_line
-  name: Last backup
-  command: "cat /config/.other/last_backup"
-  scan_interval: 3600
+# - platform: command_line
+#   name: CPU temp hist
+#   command: "cat /sys/class/thermal/thermal_zone9/temp"
+#   value_template: "{{ (value | multiply(0.001)) | round(0) }}"
 
 - platform: dewpoint
   sensors:
@@ -83,3 +73,32 @@
 - platform: mqtt
   name: SSD temp
   state_topic: "ssd_temp/temp"
+
+- platform: mqtt
+  name: Server battery
+  state_topic: &server_battery_topic "battery2mqtt/server/BAT0"
+  value_template: "{{ value_json.capacity }}"
+  unit_of_measurement: '%'
+  device_class: battery
+  json_attributes_topic: *server_battery_topic
+
+- platform: mqtt
+  name: Mouse battery
+  state_topic: &mouse_battery_topic "battery2mqtt/mouse/hid-34:88:5d:93:15:6b-battery"
+  value_template: "{{ value_json.capacity }}"
+  unit_of_measurement: '%'
+  device_class: battery
+  json_attributes_topic: *mouse_battery_topic
+
+- platform: mqtt
+  name: Server CPU temp
+  state_topic: "temp2mqtt/server/cpu_temp"
+  value_template: "{{ value_json.cpu_temp }}"
+  unit_of_measurement: 'C'
+  device_class: temperature
+
+- platform: mqtt
+  name: Server fan speed
+  state_topic: "temp2mqtt/server/cpu_temp"
+  value_template: "{{ value_json.fan_speed }}"
+  unit_of_measurement: 'RPM'

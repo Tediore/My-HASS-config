@@ -200,7 +200,7 @@ sensor:
 ### History stats - other
 - platform: history_stats
   name: Home today
-  entity_id: alarm_control_panel.abode
+  entity_id: input_text.abode
   state: 'armed_home'
   type: time
   start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
@@ -208,7 +208,7 @@ sensor:
 
 - platform: history_stats
   name: Standby today
-  entity_id: alarm_control_panel.abode
+  entity_id: input_text.abode
   state: 'disarmed'
   type: time
   start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
@@ -216,7 +216,7 @@ sensor:
 
 - platform: history_stats
   name: Time away yesterday
-  entity_id: alarm_control_panel.abode
+  entity_id: input_text.abode
   state: 'armed_away'
   type: time
   duration:

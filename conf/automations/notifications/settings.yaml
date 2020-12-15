@@ -11,7 +11,7 @@
       {% elif action in ['lights_off'] %}
         homeassistant.turn_off
       {% elif action == 'alarm_arm_away' %}
-        alarm_control_panel.alarm_arm_away
+        script.turn_on
       {% else %}
         switch.turn_off
       {% endif %}
@@ -19,7 +19,7 @@
       entity_id: >
         {% set action = trigger.event.data.action %}
         {% if action == 'alarm_arm_away' %}
-          alarm_control_panel.abode
+          script.alarm_arm_away
         {% elif action == 'heat_reenable' %}
           script.heat_sleep
         {% elif action == 'lights_off' %}

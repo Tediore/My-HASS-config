@@ -1,0 +1,69 @@
+automation:
+- alias: Turn Andy's desk light on/off with button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.button_andy_desk
+    to:
+    - 'on'
+    - 'off'
+    - 'brightness_move_down'
+    - 'brightness_move_up'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      sequence:
+      - service: light.toggle
+        entity_id: light.andy_desk
+        data:
+          brightness_pct: 100
+          kelvin: "{{ 3000 if is_state('input_boolean.dark_inside', 'on') else 5000 }}"
+    - conditions:
+      - "{{ 'move' in trigger.to_state.state }}"
+      sequence:
+      - service: media_player.volume_mute
+        entity_id: media_player.portable_speaker
+        data:
+          is_volume_muted: "{{ true if is_state_attr('media_player.portable_speaker', 'is_volume_muted', false) else false }}"
+
+
+- alias: Turn right lamp on cross stitch mode with button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.living_room_lamp_button
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: light.toggle
+    entity_id: light.right_lamp
+    data:
+      kelvin: 3000
+
+
+- alias: Turn game room lights on/off with button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.button_matt_desk
+    to:
+    - 'on'
+    - 'off'
+    # - 'brightness_move_down'
+    # - 'brightness_move_up'
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.game_room
+        state: 'on'
+      sequence:
+      - service: light.turn_off
+        entity_id: light.game_room
+    default:
+    - service: hue.hue_activate_scene
+      data:
+        group_name: Game room
+        scene_name: "{{ 'Daylight' if is_state('input_boolean.dark_inside', 'off') else 'Read' }}"

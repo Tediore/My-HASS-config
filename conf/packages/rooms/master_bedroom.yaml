@@ -3,27 +3,25 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '06:30:00'
+    at: input_datetime.lights_wakeup
   condition:
   - condition: or
     conditions:
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: device_tracker.andy_phone
-        state: 'home'
-      - condition: template
-        value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
+    - condition: template
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
     - condition: template
       value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.turn_on
     entity_id: script.good_morning
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
   - service: script.lights_sunset
 
 
@@ -64,7 +62,8 @@ automation:
   trigger:
   - platform: state
     entity_id: binary_sensor.master_bedroom_curtains
-    to: 'on'
+    from: 'on'
+    to: 'off'
   condition:
   - condition: state
     entity_id: light.master_bedroom
@@ -75,6 +74,55 @@ automation:
   action:
   - service: light.turn_off
     entity_id: light.master_bedroom
+
+
+- alias: Turn master bedroom closet light on/off with motion
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_closet_motion
+    to: 
+    - 'on'
+    - 'off'
+  - platform: state
+    entity_id: light.master_bedroom_closet
+    from: 'on'
+    to: 'off'
+  condition:
+  - "{{ trigger.to_state.domain == 'light' or (trigger.to_state.domain == 'binary_sensor' and trigger.to_state.state != states('light.master_bedroom_closet')) }}"
+  - "{{ trigger.to_state.state != states('input_boolean.master_bedroom_closet') }}"
+  - condition: state
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: "input_boolean.turn_{{ trigger.to_state.state }}"
+    entity_id: input_boolean.master_bedroom_closet
+  - service: "light.turn_{{ states('input_boolean.master_bedroom_closet') }}"
+    entity_id: light.master_bedroom_closet
+  - condition: template
+    value_template: "{{ trigger.to_state.state == 'on' }}"
+  - service: light.turn_on
+    entity_id: light.master_bedroom_closet_led
+    data:
+      brightness_pct: 100
+      color_temp: 500
+
+
+- alias: Turn master bedroom closet light off with remote
+  initial_state: true
+  trigger:
+  - platform: device
+    device_id: 55b3b74407f211eba837e390742b5002
+    domain: homekit_controller
+    type: button4
+    subtype: single_press
+  action:
+  - service: light.turn_off
+    entity_id: 
+    - light.master_bedroom_closet
+    - light.mini_christmas_tree
 
 
 - alias: Turn master bedroom night light on with lights
@@ -92,9 +140,8 @@ automation:
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
-    for: '00:30:00'
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state:
     - 'armed_home'
     - 'disarmed'
@@ -119,7 +166,7 @@ automation:
     to: 'on'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state:
     - 'armed_home'
     - 'disarmed'
@@ -131,6 +178,8 @@ automation:
   action:
   - service: light.turn_off
     entity_id: light.master_bedroom_night_light
+  - service: light.turn_on
+    entity_id: light.mini_christmas_tree
 
 
 - alias: Transition master bedroom lights to warm
@@ -151,6 +200,30 @@ automation:
       kelvin: 3000
       brightness_pct: 100
       transition: 20
+
+
+- alias: Turn mini Christmas tree on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_motion
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.master_bedroom_motion
+    to: 'off'
+    for: '00:05:00'
+  - platform: device
+    device_id: 55b3b74407f211eba837e390742b5002
+    domain: homekit_controller
+    type: button1
+    subtype: single_press
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  action:
+  - service: "light.turn_{{ 'on' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'off' }}"
+    entity_id: light.mini_christmas_tree
 
 
 script:
@@ -178,8 +251,10 @@ script:
     - condition: state
       entity_id: input_boolean.christmas
       state: 'on'
-    - service: switch.turn_on
-      entity_id: switch.christmas_tree
+    - service: light.turn_on
+      entity_id: 
+      - light.christmas_tree
+      - light.mini_christmas_tree
   
   lights_wakeup:
     sequence:
@@ -189,6 +264,9 @@ script:
         brightness: 1
         kelvin: 2000
     - delay: '00:02:00'
+    - condition: state
+      entity_id: light.master_bedroom
+      state: 'on'
     - service: light.turn_on
       entity_id: light.master_bedroom
       data:
@@ -219,3 +297,11 @@ climate:
   max_temp: 75
   cold_tolerance: 0
   hot_tolerance: 1
+
+input_boolean:
+  master_bedroom_closet:
+
+input_datetime:
+  lights_wakeup:
+    has_time: true
+    has_date: false

@@ -20,7 +20,7 @@
     for: '00:00:45'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: armed_away
   - condition: state
     entity_id: input_boolean.vacation_mode
@@ -54,7 +54,7 @@
     to: 'off'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: armed_away
     for: '00:01:00'
   action:
@@ -67,25 +67,25 @@
 
 
 ### Other
-- alias: Notify if disarmed signal not received
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.sensor_tripped
-    to: 'on'
-    for: '00:00:45'
-  action:
-  - service: notify.mobile_app_pixel_xl
-    data:
-      title: "Possible crash and smash attempt!"
-      message: "Disarmed signal not received within 45 seconds of entry!"
-      data:
-        ttl: 0
-        priority: high
-  - service: notify.sms_matt
-    data:
-      title: "Possible crash and smash attempt!"
-      message: "Disarmed signal not received within 45 seconds of entry!"
+# - alias: Notify if disarmed signal not received
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: input_boolean.sensor_tripped
+#     to: 'on'
+#     for: '00:00:45'
+#   action:
+#   - service: notify.mobile_app_pixel_xl
+#     data:
+#       title: "Possible crash and smash attempt!"
+#       message: "Disarmed signal not received within 45 seconds of entry!"
+#       data:
+#         ttl: 0
+#         priority: high
+#   - service: notify.sms_matt
+#     data:
+#       title: "Possible crash and smash attempt!"
+#       message: "Disarmed signal not received within 45 seconds of entry!"
 
 
 - alias: Notify if alarm not armed when away  # throttled - 8 hours
@@ -100,7 +100,7 @@
   - condition: template
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.notify_if_alarm_not_armed_when_away', 'last_triggered'))) / 3600 > 8 }}"
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: 'disarmed'
   - condition: template
     value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
@@ -128,7 +128,7 @@
     to: 'on'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: armed_away
   - condition: template
     value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"

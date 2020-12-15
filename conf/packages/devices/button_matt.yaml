@@ -142,6 +142,8 @@ script:
       - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
+      - input_boolean.christmas_porch_light_loop
+      - automation.christmas_porch_light_loop
     - service: script.turn_on
       entity_id: 
       - script.media_players_off
@@ -160,7 +162,10 @@ script:
     - service: homeassistant.turn_off
       entity_id: 
       - group.lights_interior
-      - switch.christmas_tree
+      - light.christmas_tree
+      - light.mini_christmas_tree
+      - input_boolean.christmas_porch_light_loop
+      - automation.christmas_porch_light_loop
       - media_player.living_room_vizio
     - service: script.turn_on
       entity_id: script.sleep_switches
@@ -168,8 +173,8 @@ script:
       entity_id: climate.master_bedroom_fan
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
-    - service: alarm_control_panel.alarm_arm_home
-      entity_id: alarm_control_panel.abode
+    - service: script.turn_on
+      entity_id: script.alarm_arm_home
 
   white_noise_bedroom:
     alias: Play white noise on bedroom speaker
@@ -249,7 +254,7 @@ script:
     sequence:
     - service: media_player.turn_off
       entity_id:
-      - media_player.bedroom_vizio
+      - media_player.bedroom_tv
       - media_player.living_room_vizio
       - media_player.living_room_speaker
       - media_player.portable_speaker
@@ -260,13 +265,9 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id: 
-      - light.kitchen_cabinets
       - climate.space_heater
       - switch.space_heater
       - switch.air_freshener
-      - light.hall_bath_night_light
-      - switch.christmas_tree
-      - switch.christmas_lights
 
   toggle_bedroom_fan:
     sequence:

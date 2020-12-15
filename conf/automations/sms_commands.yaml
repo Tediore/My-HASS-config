@@ -52,17 +52,17 @@
       - condition: template
         value_template: "{{ trigger.event.data.text == 'Arm' }}"
       sequence:
-      - service: alarm_control_panel.alarm_arm_away
-        entity_id: alarm_control_panel.abode
+      - service: script.turn_on
+        entity_id: script.alarm_arm_away
       - service: notify.sms_matt
         data:
           message: "Arming alarm in away mode."
-      - wait_template: "{{ is_state('alarm_control_panel.abode', 'armed_away') }}"
+      - wait_template: "{{ is_state('input_text.abode', 'armed_away') }}"
         timeout: '00:01:00'
         continue_on_timeout: true
       - service: notify.sms_matt
         data_template:
-          message: "{{ 'Alarm has been armed in away mode.' if is_state('alarm_control_panel.abode', 'armed_away') else 'Command timed out.' }}"
+          message: "{{ 'Alarm has been armed in away mode.' if is_state('input_text.abode', 'armed_away') else 'Command timed out.' }}"
     default:
     - service: notify.sms_matt
       data_template:

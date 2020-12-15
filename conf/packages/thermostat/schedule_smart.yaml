@@ -9,7 +9,7 @@ automation:
     value_template: "{{ trigger.event.data.action in ['pts_precool', 'pts_started', 'pts_ended'] }}"
   action:
     service_template: >
-      {% set alarm = states('alarm_control_panel.abode') %}
+      {% set alarm = states('input_text.abode') %}
       {% set event = trigger.event.data.action %}
       {{ 'script.turn_on' if event == 'pts_started' or (event == 'pts_precool' and alarm == 'armed_away') else 'input_boolean.turn_off' }}
     data_template:
@@ -74,7 +74,7 @@ automation:
   - condition: template
     value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
   - condition: template
-    value_template: "{{ states('alarm_control_panel.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.turn_on
     entity_id: script.good_morning
@@ -110,6 +110,45 @@ automation:
   - condition: numeric_state
     entity_id: sensor.outside_temp
     above: 55
+  action:
+  - service: climate.turn_off
+    entity_id: climate.thermostat
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.tstat_smart
+
+
+- alias: Turn heat off when windows opened
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.living_room_window_right
+    - binary_sensor.living_room_window_left
+    - binary_sensor.game_room_window_left
+    - binary_sensor.kitchen_window_left
+    - binary_sensor.master_bedroom_window_right
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: sensor.hvac_action
+    to: 'heating'
+    for: '00:05:00'
+  condition:
+  - condition: state
+    entity_id: group.windows
+    state: 'on'
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'heat'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sensor.hvac_action
+      state: 'idle'
+    - condition: state
+      entity_id: sensor.hvac_action
+      state: 'heating'
+      for: '00:05:00'
   action:
   - service: climate.turn_off
     entity_id: climate.thermostat

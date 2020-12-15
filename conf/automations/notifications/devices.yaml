@@ -29,7 +29,7 @@
     for: '00:00:10'
   - platform: state
     entity_id: 
-    - light.porch_light
+    - light.porch
     - light.entrance
     - binary_sensor.coffeemaker_status
     - light.dining_room
@@ -117,14 +117,17 @@
     for: '01:00:00'
   - platform: numeric_state
     entity_id:
-    - binary_sensor.living_room_window_left
-    - binary_sensor.living_room_window_right
-    - binary_sensor.game_room_closet_door
-    - binary_sensor.front_closet_door
-    - binary_sensor.master_bedroom_window_right
-    - binary_sensor.kitchen_window_left
-    - binary_sensor.master_bedroom_motion
-    - binary_sensor.hall_bath_motion
+    - binary_sensor.entrance_motion_battery
+    - binary_sensor.front_closet_door_battery
+    - binary_sensor.game_room_closet_door_battery
+    - binary_sensor.game_room_closet_motion_battery
+    - binary_sensor.hall_bath_motion_battery
+    - binary_sensor.kitchen_window_left_battery
+    - binary_sensor.living_room_window_left_battery
+    - binary_sensor.living_room_window_right_battery
+    - binary_sensor.master_bedroom_closet_motion_battery
+    - binary_sensor.master_bedroom_motion_battery
+    - binary_sensor.master_bedroom_window_right_battery
     below: 85
     for: '00:01:00'
   condition:
@@ -134,7 +137,7 @@
   - service: notify.mobile_app_pixel_xl
     data_template:
       title: "Device battery low {{ ' - URGENT!' if trigger.to_state | float > 30 else '' }}"
-      message: "{{ trigger.to_state.name }} battery is low{{ '.' if trigger.to_state | float < 21 else ' - CHANGE IMMEDIATELY!' }}"
+      message: "{{ trigger.to_state.name }} battery is low{{ '.' if trigger.to_state | float < 21 else ' - change ASAP' }}"
       data:
         ttl: 0
         priority: high
@@ -177,7 +180,7 @@
     to: 'on'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.abode
+    entity_id: input_text.abode
     state: 'armed_away'
   action:
   - service: homeassistant.turn_off

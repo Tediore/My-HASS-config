@@ -40,14 +40,14 @@
       value_template: >
         {% set rejects = ['off', 'unavailable'] %}
         {% set tvs = [
-          states('media_player.bedroom_vizio') not in rejects, 
+          states('media_player.bedroom_tv') not in rejects, 
           states('media_player.living_room_vizio') not in rejects 
           ] %}
         {{ tvs | sum > 0 }}
 
-    xbox:
-      friendly_name: Xbox
-      value_template: "{{ states('sensor.server_ups_load') | int > 30 }}"
+    # xbox:
+    #   friendly_name: Xbox
+    #   value_template: "{{ states('sensor.server_ups_load') | int > 30 }}"
 
 
 - platform: trend
@@ -65,17 +65,25 @@
   after: '23:00'
   before: '08:00'
 
+- platform: mqtt
+  name: Xbox
+  device_class: connectivity
+  state_topic: xbox/status
+  payload_on: 'Available'
+  payload_off: 'Unavailable'
 
 - platform: mqtt
   name: Balcony motion
   device_class: motion
   state_topic: tele/rf_bridge/RESULT
   value_template: "{{ value_json.RfReceived.Data }}"
-  payload_on: '98050A'
-  off_delay: 285
-  # unique_id: balcony_motion_sensor
-  # device:
-  #   identifiers: P819
-  #   manufacturer: KERUI
-  #   model: P819
-  #   name: Motion sensor
+  payload_on: '90418A'
+  off_delay: 290
+
+- platform: mqtt
+  name: Game room closet door RF
+  device_class: door
+  state_topic: tele/rf_bridge/RESULT
+  value_template: "{{ value_json.RfReceived.Data }}"
+  payload_on: 'E7BF0A'
+  payload_off: 'E7BF0E'

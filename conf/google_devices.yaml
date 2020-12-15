@@ -10,12 +10,18 @@ light.buffet:
 light.dining_room:
   expose: true
   room: Dining room
+light.entrance:
+  expose: true
+  room: Other devices
 light.front_closet:
   expose: true
   room: Other devices
 light.game_room:
   expose: true
   room: Game room
+light.kitchen_cabinets:
+  expose: true
+  room: Kitchen
 light.laundry_room_2:
   expose: true
   room: Laundry room
@@ -28,7 +34,7 @@ light.living_room_lamps:
 light.master_bedroom:
   expose: true
   room: Master bedroom
-light.porch_light:
+light.porch:
   expose: true
   room: Other devices
 script.alarm_arm_home:
@@ -37,27 +43,25 @@ script.alarm_arm_home:
 script.cross_stitch_light:
   expose: true
   room: Other devices
-light.entrance:
-  expose: true
-  room: Other devices
 switch.bedroom_fan:
   expose: true
   room: Master bedroom
+switch.christmas_lights_plug_1:
+  name: Christmas lights
+  expose: true
+  room: Other devices
+light.christmas_tree:
+  expose: true
+  room: Other devices
+light.mini_christmas_tree:
+  expose: true
+  room: Other devices
 switch.hall_bath_fan:
   expose: true
   room: Hall bath
 switch.living_room_fan:
   expose: true
   room: Living room
-switch.christmas_lights:
-  expose: true
-  room: Other devices
-switch.outdoor_outlet_2:
-  expose: true
-  room: Other devices
-light.kitchen_cabinets:
-  expose: true
-  room: Kitchen
 switch.game_room_bias_lighting:
   expose: true
   room: Game room
