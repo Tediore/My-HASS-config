@@ -19,24 +19,24 @@
       value_template: "{{ states('sensor.space_heater_time_last_7_days') | float | round(1) }}"
       unit_of_measurement: 'h'
     
-    outside_temp:
+    outside_temp_darksky:
       friendly_name: "Outside"
       value_template: "{{ state_attr('weather.dark_sky', 'temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
 
-    outside_temp_dewpoint:
+    outside_temp_display:
       friendly_name: "Outside"
-      value_template: "{{ 32 if is_state('weather.dark_sky', 'unavailable') else state_attr('weather.dark_sky', 'temperature') | round(0) }}"
+      value_template: "{{ states('sensor.outside_temp') | round(0) | int }}"
       unit_of_measurement: '°F'
 
-    outside_humidity_dewpoint:
+    outside_humidity_darksky:
       friendly_name: "Outside"
       value_template: "{{ 50 if is_state('weather.dark_sky', 'unavailable') else state_attr('weather.dark_sky', 'humidity') | round(0) }}"
       unit_of_measurement: '%'
     
     dewpoint_outside_display:
       friendly_name: "Dew point"
-      value_template: "{{ '-' if is_state('weather.dark_sky', 'unavailable') else states('sensor.dewpoint_outside') | float | round(0) }}"
+      value_template: "{{ states('sensor.dewpoint_outside') | float | round(0) }}"
       unit_of_measurement: '°F'
 
     dewpoint_inside_display:

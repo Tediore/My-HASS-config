@@ -5,7 +5,7 @@ automation:
   - entity_id: 
     - binary_sensor.front_door
     - binary_sensor.front_door_cloud
-    - binary_sensor.entrance_motion
+    - binary_sensor.front_door_zb
     platform: state
     from: 'off'
     to: 'on'
@@ -163,7 +163,7 @@ script:
 
   notify_away:
     sequence:
-    - service: notify.mobile_app_pixel_xl
+    - service: notify.mobile_app_matt_phone
       data_template:
         title: "{{ title }}"
         message: >
@@ -204,15 +204,19 @@ script:
         duration: 180
     - condition: template
       value_template: "{{ now().month in [11, 12] }}"
-    - service: switch.turn_on
-      entity_id: switch.christmas_lights_plug_1
+    - service: light.turn_on
+      entity_id: light.christmas_lights
   
 
   lights_normal:
     sequence:
     - service: light.turn_on
-      entity_id: light.buffet
+      entity_id: 
+      - light.buffet
+      - light.kitchen_cabinets
+      - light.hall_bath_night_light
       data:
+        transition: 1
         brightness_pct: 100
         kelvin: 3000
     - service: hue.hue_activate_scene
@@ -223,13 +227,6 @@ script:
       data:
         group_name: Master bedroom
         scene_name: Read
-    - service: light.turn_on
-      entity_id:
-      - light.kitchen_cabinets
-      - light.hall_bath_night_light
-      - light.master_bedroom_night_light
-      data:
-        brightness_pct: 100
 
 
   lights_christmas:
@@ -239,14 +236,14 @@ script:
       - light.christmas_tree
       - light.mini_christmas_tree
       - light.portable_mini_christmas_tree
-      - switch.christmas_lights_plug_1
+      - light.christmas_lights
       - light.star_lights
     - service: light.turn_on
       entity_id:
       - light.buffet
       - light.kitchen_cabinets
-      - light.master_bedroom_night_light
       data:
+        transition: 1
         brightness_pct: 100
         kelvin: 3000
     - service: hue.hue_activate_scene
@@ -257,13 +254,13 @@ script:
       data:
         group_name: Living room
         scene_name: Christmas
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.christmas_porch_light_loop
     - service: light.turn_on
       entity_id: light.porch
       data:
         brightness_pct: 100
         rgb_color: [0,255,0]
-    - service: automation.turn_on
-      entity_id: automation.christmas_porch_light_loop
     - delay: '00:01:00'
     - service: light.turn_on
       entity_id: light.living_room_lamps
@@ -281,7 +278,7 @@ script:
     - condition: state
       entity_id: group.windows
       state: 'on'
-    - service: notify.mobile_app_pixel_xl
+    - service: notify.mobile_app_matt_phone
       data:
         title: The following windows are open
         message: >

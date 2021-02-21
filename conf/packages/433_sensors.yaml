@@ -1,0 +1,47 @@
+sensor:
+- platform: mqtt
+  name: Fridge temp
+  state_topic: &fridge_topic "rtl_433/32/event"
+  value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
+  device_class: temperature
+  json_attributes_topic: *fridge_topic
+  unit_of_measurement: '°F'
+
+- platform: mqtt
+  name: Freezer temp
+  state_topic: &freezer_topic "rtl_433/72/event"
+  value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
+  device_class: temperature
+  json_attributes_topic: *freezer_topic
+  unit_of_measurement: '°F'
+
+- platform: mqtt
+  name: Outside temp
+  state_topic: &outdoor_temp_topic "rtl_433/5801/event"
+  value_template: "{{ '{:.1f}'.format(((value_json.temperature_C | float * 9/5) + 32) + states('input_number.outside_temp_calib') | int) }}"
+  device_class: temperature
+  json_attributes_topic: *outdoor_temp_topic
+  unit_of_measurement: '°F'
+
+- platform: mqtt
+  name: Outside humidity
+  state_topic: &outdoor_hum_topic "rtl_433/5801/event"
+  value_template: "{{ '{:.1f}'.format(value_json.humidity | int * (states('input_number.outside_hum_calib') | float)) }}"
+  device_class: temperature
+  json_attributes_topic: *outdoor_hum_topic
+  unit_of_measurement: '%'
+
+
+input_number:
+  outside_temp_calib:
+    min: -20
+    max: 20
+    step: 1
+    unit_of_measurement: '°F'
+    mode: slider
+
+  outside_hum_calib:
+    min: -20
+    max: 40
+    step: 0.01
+    mode: box

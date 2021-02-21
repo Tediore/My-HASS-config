@@ -59,7 +59,7 @@ automation:
       {% set camera = state_attr('camera.motion_camera', 'no_response') %}
       {{ front == true or balcony == true or drawer == true or keypad == true or camera == true }}
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: "Sensor unresponsive"
       message: "{{ trigger.to_state.name }} sensor is not responding"
@@ -102,6 +102,8 @@ automation:
       brightness_pct: 100
   - service: light.turn_on
     entity_id: light.kitchen_cabinets
+    data:
+      transition: 1
   - delay:
       seconds: "{{ range(900,1800) | random | int }}"
   - service: light.turn_on
@@ -200,12 +202,27 @@ sensor:
         {% endif %}
     
 
-- platform: rest
-  resource: !secret abode_rest
-  name: Abode firmware version
-  value_template: "{{ value_json['updates']['em_ver'] }}"
-  scan_interval: 43200
+# switch:
+# - platform: rest
+#   name: Arm alarm home
+#   resource: !secret alarm_arm_url
+#   state_resource: !secret alarm_status_url
+#   is_on_template: "{{ value_json.updates.mode_a1 == 'Home Arm 1' }}"
+#   method: post
+#   body_on: 'area=1&mode=2'
+#   body_off: &disarm 'area=1&mode=0'
+#   headers:
+#     Authorization: !secret alarm_auth
 
+# - platform: rest
+#   name: Arm disarm
+#   resource: !secret alarm_arm_url
+#   state_resource: !secret alarm_status_url
+#   is_on_template: "{{ value_json.updates.mode_a1 == 'Disarm' }}"
+#   method: post
+#   body_on: 'area=1&mode=0'
+#   headers:
+#     Authorization: !secret alarm_auth
 
 script:
   alarm_arm_home:
@@ -226,6 +243,16 @@ script:
     - condition: template
       value_template: "{{ not is_state('input_text.abode', 'armed_home') }}"
     - service: alarm_control_panel.alarm_arm_away
+      entity_id: alarm_control_panel.abode_cloud
+
+  alarm_disarm:
+    sequence:
+    - service: alarm_control_panel.alarm_disarm
+      entity_id: alarm_control_panel.abode
+    - delay: '00:00:10'
+    - condition: template
+      value_template: "{{ not is_state('input_text.abode', 'disarmed') }}"
+    - service: alarm_control_panel.alarm_disarm
       entity_id: alarm_control_panel.abode_cloud
 
 

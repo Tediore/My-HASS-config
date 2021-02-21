@@ -52,6 +52,7 @@ system_health:
 timer: !include conf_pkg/timer.yaml
 tts: !include conf/tts.yaml
 updater: !include conf_settings/updater.yaml
+wake_on_lan:
 weather: !include conf/weather.yaml
 zeroconf:
 zone: !include conf/zone.yaml

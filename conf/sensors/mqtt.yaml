@@ -1,0 +1,32 @@
+- platform: mqtt
+  name: SSD temp
+  state_topic: "ssd_temp/temp"
+
+- platform: mqtt
+  name: Server battery
+  state_topic: &server_battery_topic "battery2mqtt/server/BAT0"
+  value_template: "{{ value_json.capacity }}"
+  unit_of_measurement: '%'
+  device_class: battery
+  json_attributes_topic: *server_battery_topic
+
+- platform: mqtt
+  name: Mouse battery
+  state_topic: &mouse_battery_topic "battery2mqtt/mouse/hid-34:88:5d:93:15:6b-battery"
+  value_template: "{{ value_json.capacity }}"
+  unit_of_measurement: '%'
+  device_class: battery
+  json_attributes_topic: *mouse_battery_topic
+
+- platform: mqtt
+  name: Server CPU temp
+  state_topic: "temp2mqtt/server/cpu_temp"
+  value_template: "{{ value_json.cpu_temp }}"
+  unit_of_measurement: 'C'
+  device_class: temperature
+
+- platform: mqtt
+  name: Server fan speed
+  state_topic: "temp2mqtt/server/cpu_temp"
+  value_template: "{{ value_json.fan_speed }}"
+  unit_of_measurement: 'RPM'

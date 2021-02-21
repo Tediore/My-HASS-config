@@ -45,38 +45,19 @@ automation:
       entity_id: >
         {% if trigger.to_state.state == 'off' %} 
           {% if is_state('input_boolean.wkqx', 'on') %}
-            input_boolean.wkqx, automation.poll_wkqx_song_info, script.update_wkqx_song
+            input_boolean.wkqx
           {% else %}
-            input_boolean.wkqx, automation.poll_wkqx_song_info, script.update_wkqx_song, input_boolean.music_moved
+            input_boolean.wkqx, input_boolean.music_moved
           {% endif %}
         {% else %}
-          input_boolean.wkqx, automation.poll_wkqx_song_info, script.update_wkqx_song
+          input_boolean.wkqx
         {% endif %}
 
 
-- alias: Poll WKQX song info
-  trigger:
-  - platform: time_pattern
-    seconds: '/30'
-  action:
-  - service: script.update_wkqx_song
-
-
-script:
-  update_wkqx_song:
-    sequence:
-    - service: shell_command.update_wkqx_song
-    - service: homeassistant.update_entity
-      entity_id: sensor.wkqx_song
-
 sensor:
-- platform: command_line
+- platform: mqtt
   name: WKQX song
-  command: "cat /config/.other/song_info"
-  scan_interval: 30
-
-shell_command:
-  update_wkqx_song: "python3 /config/.other/wkqx.py"
+  state_topic: "wkqx/now_playing"
 
 input_boolean:
   wkqx:

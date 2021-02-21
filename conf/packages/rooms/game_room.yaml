@@ -43,57 +43,6 @@ automation:
       transition: 20
 
 
-- alias: Manage game room lights during day
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.game_room_light_level
-    below: &below 20
-    for: '00:05:00'
-  - platform: numeric_state
-    entity_id: sensor.game_room_light_level
-    above: &above 50
-    for: '00:05:00'
-  - platform: state
-    entity_id: binary_sensor.desktop
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_text.abode
-    state:
-    - 'armed_home'
-    - 'disarmed'
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'off'
-  - condition: state
-    entity_id: binary_sensor.desktop
-    state: 'on'
-  action:
-  - choose:
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.game_room_light_level
-        below: *below
-      sequence:
-      - service: light.turn_on
-        entity_id: light.game_room
-        data:
-          kelvin: 5000
-          brightness_pct: 100
-          transition: 10
-    - conditions:
-      - condition: numeric_state
-        entity_id: sensor.game_room_light_level
-        above: *above
-      sequence:
-      - service: light.turn_off
-        entity_id: light.game_room
-        data:
-          transition: 10
-
-
 - alias: Turn game room lights on/off at sunset/sunrise
   initial_state: true
   trigger:
@@ -167,6 +116,7 @@ automation:
 
 - alias: Turn game room closet light on/off
   initial_state: true
+  max_exceeded: silent
   trigger:
   - platform: state
     entity_id: &entity_id
@@ -192,11 +142,15 @@ automation:
     entity_id: binary_sensor.game_room_closet_motion
     from: 'on'
     to: 'off'
-    for: &no_motion_time '00:15:00'
+    for: &no_motion_time '00:05:00'
   - platform: state
     entity_id: binary_sensor.game_room_closet_motion
     from: 'off'
     to: 'on'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.game_room_closet_door
+    state: 'on'
   action:
   - choose:
     - conditions:

@@ -31,7 +31,7 @@ automation:
     data_template:
       title: &leak_title "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
       message: *leak_message
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: *leak_title
       message: *leak_message
@@ -70,7 +70,7 @@ automation:
           {{ trigger.from_state.state }} cleared.
         {% endif %}
       message: *smoke_message
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: *smoke_title
       message: *smoke_message

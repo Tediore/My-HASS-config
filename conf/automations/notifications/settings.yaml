@@ -21,7 +21,7 @@
         {% if action == 'alarm_arm_away' %}
           script.alarm_arm_away
         {% elif action == 'heat_reenable' %}
-          script.heat_sleep
+          script.tstat_heat_sleep
         {% elif action == 'lights_off' %}
           group.lights_interior
         {% else %}

@@ -1,11 +1,9 @@
 default: info
 logs:
   homeassistant.components.google_assistant.http: fatal
-  custom_components.zha_map.neighbour: error
-  zigpy.zcl: error
   custom_components.dewpoint.sensor: fatal
   zeroconf: error
   libav.tcp: critical
-  homeassistant.components.stream.worker: critical
+  homeassistant.components.sms.sensor: critical
 #   zeroconf: debug
 #   homeassistant.core: debug

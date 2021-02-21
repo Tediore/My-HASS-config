@@ -1,5 +1,5 @@
 automation:
-- alias: Turn Andy's desk light on/off with button
+- alias: Andy's desk button
   initial_state: true
   trigger:
   - platform: state
@@ -28,7 +28,49 @@ automation:
           is_volume_muted: "{{ true if is_state_attr('media_player.portable_speaker', 'is_volume_muted', false) else false }}"
 
 
-- alias: Turn right lamp on cross stitch mode with button
+- alias: Matt's desk button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.button_matt_desk
+    to:
+    - 'on'
+    - 'off'
+    - 'brightness_move_down'
+    - 'brightness_move_up'
+  action:
+  - choose:
+    - conditions:
+      - "{{ 'brightness' not in trigger.to_state.state }}"
+      - condition: state
+        entity_id: light.dresser_hk
+        state: 'on'
+      sequence:
+      - service: light.turn_off
+        entity_id: light.game_room
+    - conditions:
+      - "{{ 'brightness' not in trigger.to_state.state }}"
+      - condition: state
+        entity_id: light.dresser_hk
+        state: 'off'
+      sequence:
+      - service: hue.hue_activate_scene
+        data:
+          group_name: Game room
+          scene_name: "{{ 'Daylight' if is_state('input_boolean.dark_inside', 'off') else 'Read' }}"
+    default:
+    - service: light.turn_on
+      entity_id: light.matt_desk
+      data:
+        brightness_pct: >
+          {% if is_state('light.matt_desk', 'off') %}
+            50
+          {% else %}
+            {{ 100 if state_attr('light.matt_desk', 'brightness') | int < 129 else 0 }}
+          {% endif %}
+
+
+- alias: Cross stitch button
   initial_state: true
   trigger:
   - platform: state
@@ -37,33 +79,80 @@ automation:
     - 'on'
     - 'off'
   action:
-  - service: light.toggle
+  - service: light.turn_on
     entity_id: light.right_lamp
     data:
+      brightness_pct: "{{ 0 if is_state('light.right_lamp', 'on') else 100 }}"
       kelvin: 3000
 
 
-- alias: Turn game room lights on/off with button
+- alias: Game room fan/heater button
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
-    entity_id: sensor.button_matt_desk
+    entity_id: sensor.game_room_fan_button_action
     to:
     - 'on'
     - 'off'
-    # - 'brightness_move_down'
-    # - 'brightness_move_up'
+    - 'brightness_move_down'
+    - 'brightness_move_up'
   action:
   - choose:
-    - conditions:
+    - conditions: # turn game room fan on
+      - condition: template
+        value_template: "{{ 'brightness' not in trigger.to_state.state }}"
       - condition: state
-        entity_id: light.game_room
-        state: 'on'
+        entity_id: climate.thermostat
+        state:
+        - 'cool'
+        - 'off'
+      sequence: 
+      - service_template: "{{ 'fan.turn_on' if is_state('climate.game_room_fan', 'off') else 'climate.turn_off' }}"
+        data_template:
+          entity_id: "{{ 'fan.game_room' if is_state('climate.game_room_fan', 'off') else 'climate.game_room_fan' }}"
+    - conditions: # turn space heater on without generic thermostat
+      - condition: template
+        value_template: "{{ 'brightness' in trigger.to_state.state }}"
+      - condition: state
+        entity_id: climate.thermostat
+        state: 'heat'
+      sequence: 
+      - service_template: switch.toggle
+        entity_id: switch.space_heater
+    - conditions: # change fan speed
+      - condition: template
+        value_template: "{{ 'brightness' in trigger.to_state.state }}"
+      - condition: state
+        entity_id: climate.thermostat
+        state:
+        - 'cool'
+        - 'off'
+      sequence: 
+      - service: script.ir_fan_speed
+        data:
+          blaster: game_room_ir
+    - conditions:  # turn space heater on with generic thermostat
+      - condition: template
+        value_template: "{{ 'brightness' not in trigger.to_state.state }}"
+      - condition: state
+        entity_id: climate.thermostat
+        state: 'heat'
       sequence:
-      - service: light.turn_off
-        entity_id: light.game_room
-    default:
-    - service: hue.hue_activate_scene
-      data:
-        group_name: Game room
-        scene_name: "{{ 'Daylight' if is_state('input_boolean.dark_inside', 'off') else 'Read' }}"
+      - service_template: "climate.turn_{{ 'on' if is_state('climate.space_heater', 'off') else 'off' }}"
+        entity_id: climate.space_heater
+
+
+- alias: Sunset lights button  # in case alarm system isn't syncing properly
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.sunset_lights_button_action
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.abode
+    data:
+      value: 'disarmed'

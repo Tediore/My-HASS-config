@@ -53,7 +53,6 @@ sensor:
 - platform: version
   name: Latest version
   beta: true
-  image: raspberrypi3
   source: docker
 
 - platform: version
@@ -67,6 +66,8 @@ sensor:
       value_template: >
         {% set current = states('sensor.current_version') %}
         {% set latest = states('sensor.latest_version') %}
+        {% set current_int = current[:9].replace('.','') | int %}
+        {% set latest_int = latest[:9].replace('.','') | int %}
         {% if current.find('b') != -1 and latest.find('b') != -1 %}
           {% if latest[latest.find('b') + 1] | float > current[current.find('b') + 1] | float %}
             {{ latest }} is available, and you are running {{ current }}.
@@ -74,13 +75,19 @@ sensor:
             Newest
           {% endif %}
         {% elif current.find('b') == -1 and latest.find('b') != -1 %}
-          {% if latest[2:7] | float > current[2:] | float %}
+          {% if latest_int | float > current_int %}
+            {{ latest }} is available, and you are running {{ current }}.
+          {% else %}
+            Newest
+          {% endif %}
+        {% elif current.find('b') != -1 and latest.find('b') == -1 %}
+          {% if latest_int | float > current_int %}
             {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest
           {% endif %}
         {% else %}
-          {% if latest[2:] | float > current[2:] | float %}
+          {% if latest_int > current_int %}
             {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest

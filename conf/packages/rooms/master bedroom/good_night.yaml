@@ -50,16 +50,19 @@ script:
     sequence:
     - service: input_boolean.turn_on
       data_template:
-        entity_id: "input_boolean.{{ 'extra_sleep' if 6 <= now().hour < 18 else 'sleep_mode' }}"
+        entity_id: 
+        - "input_boolean.{{ 'extra_sleep' if 6 <= now().hour < 18 else 'sleep_mode' }}"
+        - input_boolean.andy_sleep
     - service: script.turn_on
       entity_id: script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id: 
-      - light.master_bedroom_night_light
+      - light.dining_room_night_light
       - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
       - input_boolean.christmas_porch_light_loop
+      - switch.candle_warmer
     - service: script.turn_on
       entity_id: 
       - script.media_players_off
@@ -68,6 +71,10 @@ script:
       - script.christmas_lights_off
     - service: climate.turn_on
       entity_id: climate.master_bedroom_fan
+    - service: light.turn_on
+      entity_id: light.master_bath_night_light
+      data:
+        brightness_pct: 10
     - condition: state
       entity_id: input_boolean.sleep_mode
       state: 'on'
@@ -81,7 +88,6 @@ script:
       entity_id: 
       - group.lights_interior
       - input_boolean.christmas_porch_light_loop
-      - automation.christmas_porch_light_loop
       - media_player.living_room_vizio
     - service: script.turn_on
       entity_id: 
@@ -102,30 +108,39 @@ script:
     - service: homeassistant.turn_off
       entity_id:
       - light.master_bedroom
-      - light.master_bedroom_night_light
       - media_player.bedroom_tv
+      - light.dining_room
+      - light.buffet
       - switch.air_freshener
-      - light.mini_christmas_tree
+      - light.tea_lights
+      - group.lights_christmas
+      - switch.candle_warmer
+    - service: light.turn_on
+      entity_id: light.master_bath_night_light
+      data:
+        brightness_pct: 10
+    - service: light.turn_on
+      entity_id: light.hall_bath_night_light
+      data:
+        brightness_pct: 50
     - service: script.turn_on
       entity_id: 
       - script.white_noise_bedroom
       - script.porch_light_security
     - service: light.turn_on
-      entity_id: light.hall_bath_night_light
+      entity_id: light.kitchen_cabinets
       data:
-        brightness_pct: 50
+        brightness_pct: "{{ 30 if is_state('binary_sensor.kitchen_motion', 'on') else 10 }}"
+        transition: 5
+    - service: light.turn_on
+      entity_id: light.dining_room_night_light
+      data:
+        brightness_pct: 100
     - condition: state
       entity_id: light.game_room
       state: 'on'
     - service: homeassistant.turn_off
-      entity_id: 
-      - light.living_room
-      - light.dining_room
-      - light.buffet
-    - service: light.turn_on
-      entity_id: light.kitchen_cabinets
-      data:
-        brightness_pct: 25
+      entity_id: light.living_room
 
 
   white_noise_bedroom:
@@ -185,14 +200,6 @@ script:
       - climate.space_heater
       - switch.space_heater
       - switch.air_freshener
-
-
-  christmas_lights_off:
-    sequence:
-    - condition: template
-      value_template: "{{ now().month in [11, 12] }}"
-    - service: homeassistant.turn_off
-      entity_id: group.lights_christmas
 
 
 input_number:

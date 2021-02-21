@@ -1,0 +1,4 @@
+instances:
+- host: 10.0.0.35
+  port: 8123
+  access_token: !secret ha_remote_token

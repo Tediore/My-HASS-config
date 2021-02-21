@@ -1,5 +1,5 @@
 script:
-  cool_home:
+  tstat_cool_home:
     alias: Cool - home
     sequence:
     - service: climate.set_hvac_mode
@@ -8,10 +8,10 @@ script:
         entity_id: climate.thermostat
     - service: climate.set_temperature
       data_template:
-        temperature: "{{ states('input_number.cool_home') | int }}"
+        temperature: "{{ states('input_number.tstat_cool_home') | int }}"
         entity_id: climate.thermostat
   
-  cool_sleep:
+  tstat_cool_sleep:
     alias: Cool - sleep
     sequence:
     - service: climate.set_hvac_mode
@@ -20,10 +20,10 @@ script:
         entity_id: climate.thermostat
     - service: climate.set_temperature
       data_template:
-        temperature: "{{ states('input_number.cool_sleep') | int }}"
+        temperature: "{{ states('input_number.tstat_cool_sleep') | int }}"
         entity_id: climate.thermostat
   
-  cool_away:
+  tstat_cool_away:
     alias: Cool - away
     sequence:
     - service: climate.set_hvac_mode
@@ -32,10 +32,10 @@ script:
         entity_id: climate.thermostat
     - service: climate.set_temperature
       data_template:
-        temperature: "{{ states('input_number.cool_away') | int }}"
+        temperature: "{{ states('input_number.tstat_cool_away') | int }}"
         entity_id: climate.thermostat
 
-  heat_home:
+  tstat_heat_home:
     alias: Heat - home
     sequence:
     - service: climate.set_hvac_mode
@@ -44,10 +44,10 @@ script:
         entity_id: climate.thermostat
     - service: climate.set_temperature
       data_template:
-        temperature: "{{ states('input_number.heat_home') | int }}"
+        temperature: "{{ states('input_number.tstat_heat_home') | int }}"
         entity_id: climate.thermostat
 
-  heat_sleep:
+  tstat_heat_sleep:
     alias: Heat - sleep
     sequence:
     - service: climate.set_hvac_mode
@@ -56,10 +56,10 @@ script:
         entity_id: climate.thermostat
     - service: climate.set_temperature
       data_template:
-        temperature: "{{ states('input_number.heat_sleep') | int }}"
+        temperature: "{{ states('input_number.tstat_heat_sleep') | int }}"
         entity_id: climate.thermostat
 
-  heat_away:
+  tstat_heat_away:
     alias: Heat - away
     sequence:
     - service: climate.set_hvac_mode
@@ -68,30 +68,12 @@ script:
         entity_id: climate.thermostat
     - service: climate.set_temperature
       data_template:
-        temperature: "{{ states('input_number.heat_away') | int }}"
+        temperature: "{{ states('input_number.tstat_heat_away') | int }}"
         entity_id: climate.thermostat
-
-  tstat_fan_on:
-    sequence:
-    - service: climate.set_fan_mode
-      entity_id: climate.thermostat_cloud
-      data:
-        fan_mode: 'on'
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.tstat_fan
-
-  tstat_fan_auto:
-    sequence:
-    - service: climate.set_fan_mode
-      entity_id: climate.thermostat_cloud
-      data:
-        fan_mode: 'auto'
-    - service: input_boolean.turn_off
-      entity_id: input_boolean.tstat_fan
 
 
 input_number:
-  cool_home:
+  tstat_cool_home:
     name: Home
     icon: mdi:home-outline
     min: 70
@@ -100,7 +82,7 @@ input_number:
     unit_of_measurement: '°F'
     mode: slider
   
-  cool_sleep:
+  tstat_cool_sleep:
     name: Sleep
     icon: mdi:sleep
     min: 68
@@ -109,7 +91,7 @@ input_number:
     unit_of_measurement: '°F'
     mode: slider
   
-  cool_away:
+  tstat_cool_away:
     name: Away
     icon: mdi:account-arrow-right
     min: 78
@@ -118,7 +100,7 @@ input_number:
     unit_of_measurement: '°F'
     mode: slider
   
-  heat_home:
+  tstat_heat_home:
     name: Home
     icon: mdi:home-outline
     min: 66
@@ -127,7 +109,7 @@ input_number:
     unit_of_measurement: '°F'
     mode: slider
   
-  heat_sleep:
+  tstat_heat_sleep:
     name: Sleep
     icon: mdi:sleep
     min: 65
@@ -136,7 +118,7 @@ input_number:
     unit_of_measurement: '°F'
     mode: slider
   
-  heat_away:
+  tstat_heat_away:
     name: Away
     icon: mdi:account-arrow-right
     min: 63
@@ -144,6 +126,19 @@ input_number:
     step: 1
     unit_of_measurement: '°F'
     mode: slider
+
+
+input_datetime:
+  tstat_cool_home_workday: &tstat_times
+    has_date: false
+    has_time: true
+  tstat_cool_home_weekend: *tstat_times
+  tstat_heat_home_workday: *tstat_times
+  tstat_heat_home_weekend: *tstat_times
+  tstat_cool_sleep_workday: *tstat_times
+  tstat_cool_sleep_weekend: *tstat_times
+  tstat_heat_sleep_workday: *tstat_times
+  tstat_heat_sleep_weekend: *tstat_times
 
 
 input_boolean:
@@ -183,11 +178,11 @@ sensor:
           PTS
         {% elif is_state('input_boolean.tstat_smart', 'on') %}
           Smart
-        {% elif (setpoint == states('input_number.heat_home') | int and mode == 'heat') or (setpoint == states('input_number.cool_home') | int and mode == 'cool') %}
+        {% elif (setpoint == states('input_number.tstat_heat_home') | int and mode == 'heat') or (setpoint == states('input_number.tstat_cool_home') | int and mode == 'cool') %}
           Home
-        {% elif (setpoint == states('input_number.heat_sleep') | int and mode == 'heat') or (setpoint == states('input_number.cool_sleep') | int and mode == 'cool') %}
+        {% elif (setpoint == states('input_number.tstat_heat_sleep') | int and mode == 'heat') or (setpoint == states('input_number.tstat_cool_sleep') | int and mode == 'cool') %}
           Sleep
-        {% elif (setpoint == states('input_number.heat_away') | int and mode == 'heat') or (setpoint == states('input_number.cool_away') | int and mode == 'cool') %}
+        {% elif (setpoint == states('input_number.tstat_heat_away') | int and mode == 'heat') or (setpoint == states('input_number.tstat_cool_away') | int and mode == 'cool') %}
           Away
         {% elif is_state('sensor.tstat_setpoint', '-') %}
           -
@@ -224,6 +219,6 @@ automation:
     - 'home'
   action:
   - service: input_number.set_value
-    entity_id: input_number.cool_sleep
+    entity_id: input_number.tstat_cool_sleep
     data_template:
       value: "{{ 69 if trigger.to_state.state == 'home' else 71 }}"

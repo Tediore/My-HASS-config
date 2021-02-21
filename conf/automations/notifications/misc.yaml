@@ -190,21 +190,6 @@
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
 
 
-# - alias: Notify when building door opened/closed
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.building_5_closet
-#     to:
-#     - 'off'
-#     - 'on'
-#   action:
-#   - service: notify.gotify
-#     data:
-#       title: "Building 5 closet door"
-#       message: "Building 5 closet door {{ 'opened' if trigger.to_state.state == 'on' else 'closed' }}"
-
-
 - alias: Log RF received
   initial_state: true
   mode: parallel

@@ -1,4 +1,3 @@
-### Notify when lights on/off when away
 - alias: Notify lights on when away
   initial_state: true
   trigger:
@@ -26,7 +25,7 @@
     entity_id: input_boolean.vacation_mode
     state: 'off'
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: Lights have been turned on
       message: >
@@ -58,34 +57,12 @@
     state: armed_away
     for: '00:01:00'
   action:
-    service: notify.mobile_app_pixel_xl
+    service: notify.mobile_app_matt_phone
     data:
       message: "Lights have been turned off."
       data:
         ttl: 0
         priority: high
-
-
-### Other
-# - alias: Notify if disarmed signal not received
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: input_boolean.sensor_tripped
-#     to: 'on'
-#     for: '00:00:45'
-#   action:
-#   - service: notify.mobile_app_pixel_xl
-#     data:
-#       title: "Possible crash and smash attempt!"
-#       message: "Disarmed signal not received within 45 seconds of entry!"
-#       data:
-#         ttl: 0
-#         priority: high
-#   - service: notify.sms_matt
-#     data:
-#       title: "Possible crash and smash attempt!"
-#       message: "Disarmed signal not received within 45 seconds of entry!"
 
 
 - alias: Notify if alarm not armed when away  # throttled - 8 hours
@@ -105,7 +82,7 @@
   - condition: template
     value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data:
       title: "Alarm not armed"
       message: "You're away and the alarm is disarmed. Arm in away mode?"
@@ -130,10 +107,11 @@
   - condition: state
     entity_id: input_text.abode
     state: armed_away
+    for: '00:00:30'
   - condition: template
     value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: "{{ trigger.to_state.name }} opened"
       message: >

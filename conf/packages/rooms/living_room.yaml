@@ -8,10 +8,16 @@ automation:
     from: 'off'
     to: 'on'
   - platform: mqtt
-    topic: &ir_topic 'tele/living_room_ir/RESULT'
+    topic: &lr_ir_topic 'tele/living_room_ir/RESULT'
     payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
   - platform: mqtt
-    topic: *ir_topic
+    topic: *lr_ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
+  - platform: mqtt
+    topic: &entertainment_ctr_topic 'tele/living_room_ir/RESULT'
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
+  - platform: mqtt
+    topic: *entertainment_ctr_topic
     payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
   action:
   - choose:
@@ -50,15 +56,58 @@ automation:
     from: 'off'
     to: 'on'
   - platform: mqtt
-    topic: *ir_topic
+    topic: *lr_ir_topic
     payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
   - platform: mqtt
-    topic: *ir_topic
+    topic: *lr_ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
+  - platform: mqtt
+    topic: *entertainment_ctr_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
+  - platform: mqtt
+    topic: *entertainment_ctr_topic
     payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
   action:
   - service: script.turn_on
     entity_id: script.ir_soundbar_vol_up
   - delay: 20
+
+
+- alias: Turn thermostat off when working out
+  initial_state: true
+  trigger:
+  - platform: template
+    value_template: "{{ state_attr('media_player.living_room_vizio', 'app_name') != None and state_attr('media_player.living_room_cast', 'app_name')[:3] == 'BOD' }}"
+  condition:
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'heat'
+  action:
+  - service: climate.turn_off
+    entity_id: climate.thermostat
+  - service: homeassistant.turn_on
+    entity_id: 
+    - input_boolean.workout
+    - switch.living_room_fan
+
+
+- alias: Resume thermostat schedule after working out
+  initial_state: true
+  trigger:
+  - platform: template
+    value_template: "{{ state_attr('media_player.living_room_cast', 'app_name') == None }}"
+  condition:
+  - condition: state
+    entity_id: input_boolean.workout
+    state: 'on'
+  action:
+  - service: homeassistant.turn_off
+    entity_id:
+    - switch.living_room_fan
+    - input_boolean.workout
+  - delay: '00:05:00'
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.tstat_sched_resume
 
 
 - alias: Set living room TV auto-brightness
@@ -112,9 +161,13 @@ automation:
 
 - alias: Turn lights on/off with TV IR
   initial_state: true
+  mode: single
   trigger:
   - platform: mqtt
-    topic: *ir_topic
+    topic: *lr_ir_topic
+    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF10EF","DataLSB":"0x04FB08F7","Repeat":0}}'
+  - platform: mqtt
+    topic: *entertainment_ctr_topic
     payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF10EF","DataLSB":"0x04FB08F7","Repeat":0}}'
   condition:
   - condition: state
@@ -123,6 +176,8 @@ automation:
   - condition: template
     value_template: "{{ not is_state('media_player.living_room_vizio', 'unavailable') }}"
   action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.lr_tv_ir
   - service: script.turn_on
     data_template:
       entity_id: "script.{{ 'pre_media' if is_state('media_player.living_room_vizio', 'off') else 'post_media' }}"
@@ -209,20 +264,6 @@ automation:
   - repeat: *soundbar_vol_dn
 
 
-# - alias: Toggle LR camera auto night mode
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: input_text.abode
-#     to:
-#     - 'disarmed'
-#     - 'armed_away'
-#   action:
-#   - service_template: "switch.turn_{{ 'off' if trigger.to_state.state == 'disarmed' else 'on' }}"
-#     data:
-#       entity_id: "{{ 'switch.lr_camera_night_mode_auto, switch.lr_camera_night_mode' if trigger.to_state.state == 'disarmed' else 'switch.lr_camera_night_mode_auto' }}"
-
-
 - alias: Toggle air freshener
   initial_state: true
   trigger:
@@ -286,8 +327,11 @@ script:
     sequence:
     - service: homeassistant.turn_off
       entity_id:
-      - group.speakers
-      - light.dining_room
+      - media_player.living_room_speaker
+      - media_player.bedroom_speaker
+      - media_player.kitchen_speaker
+      - media_player.hub
+      - input_boolean.lr_tv_ir
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'
@@ -300,7 +344,8 @@ script:
     - service: light.turn_on
       entity_id: light.kitchen_cabinets
       data:
-        brightness_pct: 66
+        brightness_pct: "{{ 50 if is_state('input_boolean.kitchen_cabinet_light_ctl', 'on') else 25 }}"
+        transition: 5
     - service: script.turn_on
       entity_id: script.christmas_lights_off
     - service: light.turn_on
@@ -320,38 +365,17 @@ script:
     alias: Turn lights back on when TV turned off
     sequence:
     - service: light.turn_on
-      entity_id: 
-      - light.living_room_lamps
-      - light.buffet
       data:
+        entity_id: "{{ 'light.living_room_lamps, light.buffet' if is_state('light.living_room', 'off') else 'light.buffet' }}"
         kelvin: 3000
         transition: 3
-        brightness_pct: "{{ 100 if 6 < now().hour < 21 else 66 }}"
+        brightness_pct: "{{ 100 if 6 < now().hour < 21 else 50 }}"
     - service: script.turn_on
       entity_id: script.christmas_lights_on
     - service: light.turn_off
       entity_id: light.living_room_bias_lighting
-
-  christmas_lights_on:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: homeassistant.turn_on
-      entity_id: 
-      - switch.christmas_lights_plug_1
-      - light.christmas_tree
-
-  christmas_lights_off:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: homeassistant.turn_off
-      entity_id: 
-      - switch.christmas_lights_plug_1
-      - light.christmas_tree
-
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.lr_tv_ir
 
   cross_stitch_light:
     sequence:
@@ -369,16 +393,10 @@ switch:
       turn_on: &fan_power
       - service: script.ir_fan_power
         data:
-          blaster: living_room_ir
+          blaster: entertainment_center_ir
       turn_off: *fan_power
 
 
-# camera:
-# - platform: generic
-#   name: Living room camera
-#   username: !secret lr_cam_user
-#   password: !secret lr_cam_pass
-#   authentication: basic
-#   still_image_url: !secret lr_cam_image
-#   stream_source: !secret lr_cam_stream
-#   verify_ssl: false
+input_boolean:
+  lr_tv_ir:
+  workout:

@@ -13,8 +13,6 @@ automation:
   - condition: time
     after: '22:00:00'
     before: '05:00:00'
-  - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] or is_state('input_boolean.vacation_mode', 'on') }}"
   action:
   - service: input_boolean.turn_off
     entity_id: input_boolean.christmas_porch_light_loop
@@ -33,8 +31,8 @@ automation:
   - condition: state
     entity_id: input_boolean.christmas
     state: 'on'
-  - service: switch.turn_off
-    entity_id: switch.christmas_lights_plug_1
+  - service: light.turn_off
+    entity_id: light.christmas_lights
 
 
 - alias: Turn porch light white when door opened
@@ -137,7 +135,8 @@ script:
     - service: light.turn_on
       entity_id: light.porch
       data:
-        white_value: 128
+        brightness_pct: 50
+        kelvin: 3700
     - service: input_text.set_value
       entity_id: input_text.porch_light_color
       data:

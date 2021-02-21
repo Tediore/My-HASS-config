@@ -46,7 +46,7 @@ script.cross_stitch_light:
 switch.bedroom_fan:
   expose: true
   room: Master bedroom
-switch.christmas_lights_plug_1:
+light.christmas_lights:
   name: Christmas lights
   expose: true
   room: Other devices
@@ -56,9 +56,9 @@ light.christmas_tree:
 light.mini_christmas_tree:
   expose: true
   room: Other devices
-switch.hall_bath_fan:
+switch.candle_warmer:
   expose: true
-  room: Hall bath
+  room: Other devices
 switch.living_room_fan:
   expose: true
   room: Living room

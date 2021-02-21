@@ -14,13 +14,13 @@ automation:
     from: 'on'
     to: 'off'
   - platform: state
-    entity_id: input_number.cool_home
+    entity_id: input_number.tstat_cool_home
   - platform: homeassistant
     event: start
   - platform: time
     at: 
-    - &cool_home_workday '06:45:00'
-    - &cool_home_weekend '07:15:00'
+    - &cool_home_workday input_datetime.tstat_cool_home_workday
+    - &cool_home_weekend input_datetime.tstat_cool_home_weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -43,14 +43,14 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      before: &cool_sleep_workday '21:15:00'
+      before: &cool_sleep_workday input_datetime.tstat_cool_sleep_workday
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      before: &cool_sleep_weekend '21:45:00'
+      before: &cool_sleep_weekend input_datetime.tstat_cool_sleep_weekend
       weekday: ['fri', 'sat']
   action:
   - service: script.turn_on
-    entity_id: script.cool_home
+    entity_id: script.tstat_cool_home
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart
 
@@ -69,7 +69,7 @@ automation:
     from: 'on'
     to: 'off'
   - platform: state
-    entity_id: input_number.cool_sleep
+    entity_id: input_number.tstat_cool_sleep
   - platform: homeassistant
     event: start
   - platform: time
@@ -103,7 +103,7 @@ automation:
       weekday: ['sat', 'sun']
   action:
   - service: script.turn_on
-    entity_id: script.cool_sleep
+    entity_id: script.tstat_cool_sleep
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart
 
@@ -123,13 +123,13 @@ automation:
     from: 'on'
     to: 'off'
   - platform: state
-    entity_id: input_number.heat_home
+    entity_id: input_number.tstat_heat_home
   - platform: homeassistant
     event: start
   - platform: time
     at: 
-    - &heat_home_workday '06:45:00'
-    - &heat_home_weekend '07:30:00'
+    - &heat_home_workday input_datetime.tstat_heat_home_workday
+    - &heat_home_weekend input_datetime.tstat_heat_home_weekend
   condition:
   - condition: state
     entity_id: climate.thermostat
@@ -152,14 +152,14 @@ automation:
   - condition: or
     conditions:
     - condition: time
-      before: &heat_sleep_workday '21:00:00'
+      before: &heat_sleep_workday input_datetime.tstat_heat_sleep_workday
       weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
     - condition: time
-      before: &heat_sleep_weekend '21:30:00'
+      before: &heat_sleep_weekend input_datetime.tstat_heat_sleep_weekend
       weekday: ['fri', 'sat']
   action:
   - service: script.turn_on
-    entity_id: script.heat_home
+    entity_id: script.tstat_heat_home
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart
 
@@ -178,7 +178,7 @@ automation:
     from: 'on'
     to: 'off'
   - platform: state
-    entity_id: input_number.heat_sleep
+    entity_id: input_number.tstat_heat_sleep
   - platform: homeassistant
     event: start
   - platform: time
@@ -212,7 +212,7 @@ automation:
       weekday: ['sat', 'sun']
   action:
   - service: script.turn_on
-    entity_id: script.heat_sleep
+    entity_id: script.tstat_heat_sleep
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart
 
@@ -237,6 +237,6 @@ automation:
   action:
   - service: script.turn_on
     data_template: 
-      entity_id: "script.{{ states('climate.thermostat') }}_away"
+      entity_id: "script.tstat_{{ states('climate.thermostat') }}_away"
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart

@@ -74,29 +74,10 @@ automation:
     data_template:
       brightness_pct: >
         {% if trigger.to_state.state == 'on' %}
-          {{ 100 if is_state('input_boolean.dark_inside', 'off') else 66 }}
+          {{ 100 if is_state('input_boolean.dark_inside', 'off') else 50 }}
         {% else %}
           0
         {% endif %}
-      kelvin: "{{ 5000 if is_state('input_boolean.dark_inside', 'off') else 3000 }}"
-
-
-- alias: Turn off front closet light after power outage
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.front_closet
-    to: 'on'
-    for: '00:00:01'
-  condition:
-  - condition: state
-    entity_id: binary_sensor.front_closet_door
-    state: 'off'
-  action:
-  - service: light.turn_off
-    entity_id: 
-    - light.front_closet
-    - light.living_room_bias_lighting
 
 
 - alias: Turn off entrance light with dining room light

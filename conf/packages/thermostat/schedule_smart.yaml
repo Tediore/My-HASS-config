@@ -58,7 +58,7 @@ automation:
       weekday: ['fri', 'sat']
   action:
   - service: script.turn_on
-    entity_id: script.cool_sleep
+    entity_id: script.tstat_cool_sleep
   - service: input_boolean.turn_on
     entity_id: input_boolean.tstat_smart
 
@@ -96,7 +96,7 @@ automation:
     above: 55
     for: '02:00:00'
   - platform: template
-    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.heat_home') | float }}"
+    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
     for: '02:00:00'
   condition:
   - condition: state
@@ -106,49 +106,10 @@ automation:
     entity_id: input_boolean.tstat_hold
     state: 'off'
   - condition: template
-    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.heat_home') | float }}"
+    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
   - condition: numeric_state
     entity_id: sensor.outside_temp
     above: 55
-  action:
-  - service: climate.turn_off
-    entity_id: climate.thermostat
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.tstat_smart
-
-
-- alias: Turn heat off when windows opened
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.living_room_window_right
-    - binary_sensor.living_room_window_left
-    - binary_sensor.game_room_window_left
-    - binary_sensor.kitchen_window_left
-    - binary_sensor.master_bedroom_window_right
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: sensor.hvac_action
-    to: 'heating'
-    for: '00:05:00'
-  condition:
-  - condition: state
-    entity_id: group.windows
-    state: 'on'
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'heat'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: sensor.hvac_action
-      state: 'idle'
-    - condition: state
-      entity_id: sensor.hvac_action
-      state: 'heating'
-      for: '00:05:00'
   action:
   - service: climate.turn_off
     entity_id: climate.thermostat
@@ -179,7 +140,7 @@ automation:
       after: *cool_sleep_workday
       weekday: ['fri', 'sat']
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: "Turn heat back on in sleep mode?"
       message: "It's currently {{ states('sensor.outside_temp') | float | round(0) }}° outside."

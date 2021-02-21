@@ -3,10 +3,10 @@ automation:
   initial_state: true
   trigger:
   - platform: numeric_state
-    entity_id: sensor.coffeemaker_power
+    entity_id: &coffeemaker sensor.coffeemaker_power
     above: 1000
   - platform: numeric_state
-    entity_id: sensor.coffeemaker_power
+    entity_id: *coffeemaker
     below: 10
     for: '00:00:10'
   condition:
@@ -38,7 +38,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.coffeemaker_power
+    entity_id: *coffeemaker
     to: '0'
     for: '00:01:00'
   condition:
@@ -48,8 +48,38 @@ automation:
   action:
   - service: input_boolean.turn_off
     entity_id: input_boolean.coffee_notify
+
+
+- alias: Notify when dishwasher on/off
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: &dishwasher sensor.dishwasher_power
+    above: 1000
+  - platform: numeric_state
+    entity_id: *dishwasher
+    below: 5
+    for: '00:00:10'
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
+    entity_id: input_boolean.dishwasher
+
+
+- alias: Notify when dishwasher done
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.dishwasher
+    from: 'on'
+    to: 'off'
+  action:
+  - service: notify.gotify
+    data:
+      title: "Dishwasher is done."
+      message: "Empty it please."
   
 
 input_boolean:
   coffeemaker:
   coffee_notify:
+  dishwasher:

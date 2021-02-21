@@ -29,7 +29,7 @@ automation:
   - condition: template
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.notify_when_furnace_filter_needs_replacement', 'last_triggered'))) / 3600 > 8 }}"
   action:
-  - service: notify.mobile_app_pixel_xl
+  - service: notify.mobile_app_matt_phone
     data_template:
       title: "Change the furnace filter"
       message: "Furnace filter has been used for {{ states('sensor.furnace_filter_life') | int }} hours."
