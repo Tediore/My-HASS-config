@@ -13,7 +13,6 @@ lights_interior:
   - light.game_room
   - light.game_room_closet
   - light.laundry_room
-  - light.dining_room_night_light
   - light.hall_bath_night_light
   - light.tea_lights
 

@@ -70,10 +70,12 @@
     - light.andy
     - light.buffet
     - light.dresser
+    - light.front_closet
     - light.laundry_room
     - light.left_lamp
     - light.left_sconce
     - light.matt
+    - light.matt_desk
     - light.right_lamp
     - light.right_sconce
     - light.stand_lamp
@@ -101,12 +103,11 @@
     entity_id:
     - sensor.balcony_light_battery
     - sensor.button_andy_battery
+    - sensor.button_andy_desk_battery
     - sensor.button_matt_battery
     - sensor.dining_room_remote_battery_level
     - sensor.entrance_motion_battery_level
-    - sensor.game_room_closet_motion_battery
     - sensor.game_room_desk_remote_battery
-    - sensor.game_room_fan_remote_battery
     - sensor.game_room_remote_battery_level
     - sensor.game_room_table_remote_battery
     - sensor.game_room_temp_sensor_battery
@@ -125,11 +126,15 @@
     - sensor.master_bedroom_temp_battery
     - sensor.porch_light_remote_battery
     - sensor.smoke_alarm_battery_level
+    - sensor.game_room_fan_button_battery
+    - sensor.living_room_lamp_button_battery
+    - sensor.sunset_lights_button_battery
     below: 21
     for: '08:00:00'
   - platform: state
     entity_id:
     - binary_sensor.front_closet_door_battery_low
+    - binary_sensor.front_door_battery_low
     - binary_sensor.game_room_closet_door_battery_low
     - binary_sensor.game_room_closet_motion_battery_low
     - binary_sensor.game_room_window_left_battery_low
@@ -137,15 +142,14 @@
     - binary_sensor.hall_bath_toilet_leak_sensor_battery_low
     - binary_sensor.hvac_closet_battery_low
     - binary_sensor.kitchen_leak_sensor_battery_low
-    - binary_sensor.kitchen_motion_sensor_battery_low
+    - binary_sensor.kitchen_motion_battery_low
     - binary_sensor.laundry_room_door_battery_low
     - binary_sensor.laundry_room_leak_sensor_battery_low
-    - binary_sensor.linen_closet_battery_low
     - binary_sensor.master_bath_sink_leak_sensor_battery_low
     - binary_sensor.master_bath_toilet_leak_sensor_battery_low
-    - binary_sensor.master_bedroom_closet_motion_battery_low
     - binary_sensor.master_bedroom_curtains_battery_low
     - binary_sensor.master_bedroom_motion_battery_low
+    - binary_sensor.master_bedroom_window_left_battery_low
     - binary_sensor.storm_door_battery_low
     from: 'off'
     to: 'on'

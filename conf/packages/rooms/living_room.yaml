@@ -1,4 +1,24 @@
 automation:
+- alias: Turn lights on/off with TV IR
+  initial_state: true
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: &lr_ir sensor.lr_ir_received
+    to: '0X20DF10EF'
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - "{{ not is_state('media_player.living_room_vizio', 'unavailable') }}"
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.lr_tv_ir
+  - service: script.turn_on
+    data_template:
+      entity_id: "script.{{ 'pre_media' if is_state('media_player.living_room_vizio', 'off') else 'post_media' }}"
+
+
 - alias: Turn off lights and speakers when TV turned on
   initial_state: true
   mode: single
@@ -7,23 +27,19 @@ automation:
     entity_id: media_player.living_room_vizio
     from: 'off'
     to: 'on'
-  - platform: mqtt
-    topic: &lr_ir_topic 'tele/living_room_ir/RESULT'
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
-  - platform: mqtt
-    topic: *lr_ir_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
-  - platform: mqtt
-    topic: &entertainment_ctr_topic 'tele/living_room_ir/RESULT'
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
-  - platform: mqtt
-    topic: *entertainment_ctr_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
+  - platform: state
+    entity_id: *lr_ir
+    to: &ir_codes
+    - '0X20DF57A8' # Amazon video
+    - '0X20DFD728' # Netflix
+    - '0X00FF827D'
+    - '0X20DFB44B'
+    - '0X20DF629D' # SmartCast Home
   action:
   - choose:
     - conditions:
       - condition: template
-        value_template: "{{ trigger.platform == 'state' }}"
+        value_template: "{{ trigger.entity_id == 'media_player.living_room_vizio' }}"
       sequence:
       - wait_template: "{{ states('sensor.living_room_vizio_app_name') != '' }}"
         timeout: '00:00:10'
@@ -39,12 +55,9 @@ automation:
           {% endif %}
       - service: script.turn_on
         entity_id: script.pre_media
-    - conditions:
-      - condition: template
-        value_template: "{{ trigger.platform == 'mqtt' }}"
-      sequence:
-      - service: script.turn_on
-        entity_id: script.pre_media
+    default:
+    - service: script.turn_on
+      entity_id: script.pre_media
 
 
 - alias: Turn soundbar on with TV
@@ -55,18 +68,9 @@ automation:
     entity_id: media_player.living_room_vizio
     from: 'off'
     to: 'on'
-  - platform: mqtt
-    topic: *lr_ir_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
-  - platform: mqtt
-    topic: *lr_ir_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
-  - platform: mqtt
-    topic: *entertainment_ctr_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DFD728","DataLSB":"0x04FBEB14","Repeat":0}}'
-  - platform: mqtt
-    topic: *entertainment_ctr_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF57A8","DataLSB":"0x04FBEA15","Repeat":0}}'
+  - platform: state
+    entity_id: *lr_ir
+    to: *ir_codes
   action:
   - service: script.turn_on
     entity_id: script.ir_soundbar_vol_up
@@ -157,30 +161,6 @@ automation:
   action:
   - service: script.turn_on
     entity_id: script.post_media
-
-
-- alias: Turn lights on/off with TV IR
-  initial_state: true
-  mode: single
-  trigger:
-  - platform: mqtt
-    topic: *lr_ir_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF10EF","DataLSB":"0x04FB08F7","Repeat":0}}'
-  - platform: mqtt
-    topic: *entertainment_ctr_topic
-    payload: '{"IrReceived":{"Protocol":"NEC","Bits":32,"Data":"0x20DF10EF","DataLSB":"0x04FB08F7","Repeat":0}}'
-  condition:
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  - condition: template
-    value_template: "{{ not is_state('media_player.living_room_vizio', 'unavailable') }}"
-  action:
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.lr_tv_ir
-  - service: script.turn_on
-    data_template:
-      entity_id: "script.{{ 'pre_media' if is_state('media_player.living_room_vizio', 'off') else 'post_media' }}"
 
 
 - alias: Turn off living room TV bias lighting
@@ -307,7 +287,7 @@ automation:
         data:
           kelvin: 3000
           brightness_pct: 100
-          transition: 10
+          transition: 20
     - conditions:
       - condition: state
         entity_id: light.left_lamp_hk
@@ -318,7 +298,7 @@ automation:
         data:
           kelvin: 3000
           brightness_pct: 100
-          transition: 10
+          transition: 20
 
 
 script:

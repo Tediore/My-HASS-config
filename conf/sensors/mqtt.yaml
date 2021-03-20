@@ -30,3 +30,7 @@
   state_topic: "temp2mqtt/server/cpu_temp"
   value_template: "{{ value_json.fan_speed }}"
   unit_of_measurement: 'RPM'
+
+- platform: mqtt
+  name: LR IR received
+  state_topic: 'living_room/ir_received'

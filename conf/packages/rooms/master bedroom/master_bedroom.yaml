@@ -22,7 +22,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.master_bedroom_closet_motion
+    entity_id: binary_sensor.master_bedroom_closet_motion # 30 second cooldown
     to: 
     - 'on'
     - 'off'
@@ -64,7 +64,7 @@ automation:
     - light.mini_christmas_tree
 
 
-- alias: Turn master bedroom night light on with lights
+- alias: Turn tea lights on with lights
   initial_state: true
   mode: parallel
   trigger:
@@ -90,7 +90,7 @@ automation:
     entity_id: light.tea_lights
 
 
-- alias: Turn master bedroom night light off with lights
+- alias: Turn tea lights off with lights
   initial_state: true
   mode: parallel
   trigger:
@@ -125,12 +125,11 @@ automation:
     entity_id: light.matt_hk
     state: 'on'
   action:
-  - service: light.turn_on
-    entity_id: light.master_bedroom
+  - service: hue.hue_activate_scene
     data:
-      kelvin: 3000
-      brightness_pct: 100
-      transition: 20
+      group_name: Master bedroom
+      scene_name: Read
+      transition: 200
 
 
 - alias: Turn mini Christmas tree on

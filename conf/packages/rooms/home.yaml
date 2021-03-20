@@ -15,32 +15,9 @@ automation:
     - switch.hue_dark_inside
 
 
-- alias: Set brightness preset on switches
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '21:00:00'
-  - platform: sun
-    event: sunrise
-  - platform: homeassistant
-    event: start
-  action:
-  - wait_template: "{{ is_state('binary_sensor.game_room_closet', 'off') or is_state('binary_sensor.storage', 'off') }}"
-    timeout: '00:08:00'
-    continue_on_timeout: false
-  - service: script.brightness_preset
-    data:
-      device: game_room_closet_light
-      brightness_pct: "{{ 100 if 5 < now().hour < 21 else 50 }}"
-
-
 - alias: Turn on sunset lights - light level
   initial_state: true
   trigger:
-  - platform: numeric_state
-    entity_id: &kitchen sensor.kitchen_light_level
-    below: &kitchen_threshold 10
-    for: '00:01:00'
   - platform: numeric_state
     entity_id: &balcony sensor.balcony_light_level
     below: &balcony_threshold 50
@@ -63,14 +40,9 @@ automation:
   - condition: time
     after: *dark_inside_time
     before: '21:30:00'
-  - condition: or
-    conditions:
-    - condition: numeric_state
-      entity_id: *kitchen
-      below: *kitchen_threshold
-    - condition: numeric_state
-      entity_id: *balcony
-      below: *balcony_threshold
+  - condition: numeric_state
+    entity_id: *balcony
+    below: *balcony_threshold
   action:
   - service: homeassistant.turn_on
     entity_id: 
@@ -244,7 +216,6 @@ script:
       - light.kitchen_cabinets
       - light.hall_bath_night_light
       - light.master_bath_night_light
-      - light.dining_room_night_light
       data:
         transition: 1
     - service: script.turn_on

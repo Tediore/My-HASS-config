@@ -24,7 +24,7 @@ automation:
   - platform: time
     at: 
     - '07:25:00'
-    - '07:40:00'
+    - '08:00:00'
   condition:
   - condition: state
     entity_id: device_tracker.andy_phone
@@ -36,10 +36,10 @@ automation:
   action:
   - service_template: "light.turn_{{ 'on' if now().minute == 25 else 'off' }}"
     entity_id: light.entrance
-  - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
+  - wait_template: "{{ is_state('binary_sensor.front_door_zb', 'on') }}"
     timeout: '00:15:00'
     continue_on_timeout: true
-  - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
+  - wait_template: "{{ is_state('binary_sensor.front_door_zb', 'off') }}"
     timeout: '00:05:00'
     continue_on_timeout: true
   - service: light.turn_off
@@ -57,6 +57,24 @@ automation:
   action:
   - service: light.turn_on
     entity_id: light.entrance
+
+
+- alias: Turn entrance light on/off with switch
+  initial_state: true
+  trigger:
+  - platform: mqtt
+    topic: "stat/entrance_switch/button"
+    payload: 'press'
+  action:
+  - service: light.turn_on
+    entity_id: light.entrance
+    data:
+      brightness_pct: >
+        {% if is_state('light.entrance', 'off') %}
+          {{ 100 if 6 < now().hour < 22 else 50 }}
+        {% else %}
+          0
+        {% endif %}
 
 
 - alias: Turn front closet light on/off

@@ -73,14 +73,6 @@
   payload_off: 'Unavailable'
 
 - platform: mqtt
-  name: Balcony motion
-  device_class: motion
-  state_topic: tele/rf_bridge/RESULT
-  value_template: "{{ value_json.RfReceived.Data }}"
-  payload_on: '90418A'
-  off_delay: 290
-
-- platform: mqtt
   name: "Hall bath motion"
   state_topic: "hall_bath_motion/state"
   availability_topic: "tele/hall_bath_night_light/LWT"

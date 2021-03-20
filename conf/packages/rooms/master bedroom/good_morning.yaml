@@ -13,6 +13,14 @@ automation:
       value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
   - condition: template
     value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+    - condition: numeric_state
+      entity_id: sensor.master_bedroom_light_level
+      below: 20
   action:
   - service: script.turn_on
     entity_id: script.good_morning

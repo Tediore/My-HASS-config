@@ -57,7 +57,6 @@ script:
       entity_id: script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id: 
-      - light.dining_room_night_light
       - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
@@ -105,12 +104,15 @@ script:
     sequence:
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep
+    - service: script.turn_on
+      entity_id: 
+      - script.white_noise_bedroom
+      - script.porch_light_security
     - service: homeassistant.turn_off
       entity_id:
       - light.master_bedroom
       - media_player.bedroom_tv
       - light.dining_room
-      - light.buffet
       - switch.air_freshener
       - light.tea_lights
       - group.lights_christmas
@@ -123,19 +125,15 @@ script:
       entity_id: light.hall_bath_night_light
       data:
         brightness_pct: 50
-    - service: script.turn_on
-      entity_id: 
-      - script.white_noise_bedroom
-      - script.porch_light_security
+    - service: light.turn_on
+      entity_id: light.buffet
+      data:
+        brightness_pct: 25
     - service: light.turn_on
       entity_id: light.kitchen_cabinets
       data:
         brightness_pct: "{{ 30 if is_state('binary_sensor.kitchen_motion', 'on') else 10 }}"
         transition: 5
-    - service: light.turn_on
-      entity_id: light.dining_room_night_light
-      data:
-        brightness_pct: 100
     - condition: state
       entity_id: light.game_room
       state: 'on'

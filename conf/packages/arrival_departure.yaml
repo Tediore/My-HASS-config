@@ -19,6 +19,8 @@ automation:
   action:
   - service: light.turn_on
     entity_id: light.entrance
+    data:
+      brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
 
 
 - alias: Alarm disarmed from away

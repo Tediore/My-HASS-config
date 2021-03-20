@@ -1,3 +1,12 @@
+binary_sensor:
+- platform: mqtt
+  name: Balcony motion
+  device_class: motion
+  state_topic: rfbridge/balcony_motion
+  payload_on: '1'
+  off_delay: 5
+
+
 sensor:
 - platform: mqtt
   name: Fridge temp
@@ -26,7 +35,41 @@ sensor:
 - platform: mqtt
   name: Outside humidity
   state_topic: &outdoor_hum_topic "rtl_433/5801/event"
-  value_template: "{{ '{:.1f}'.format(value_json.humidity | int * (states('input_number.outside_hum_calib') | float)) }}"
+  value_template: >
+    {% set temp = states('sensor.outside_temp') | float %}
+    {% if temp < -30 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < -20 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < -10 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 0 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 10 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 20 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 30 %}
+      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 40 %}
+      {{ 100 if value_json.humidity | int * 1.2 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 50 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 60 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 70 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 80 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 90 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 100 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% elif temp < 110 %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% else %}
+      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
+    {% endif %}
   device_class: temperature
   json_attributes_topic: *outdoor_hum_topic
   unit_of_measurement: '%'
@@ -40,8 +83,8 @@ input_number:
     unit_of_measurement: '°F'
     mode: slider
 
-  outside_hum_calib:
-    min: -20
-    max: 40
-    step: 0.01
-    mode: box
+  # outside_hum_calib:
+  #   min: -20
+  #   max: 40
+  #   step: 0.01
+  #   mode: box

@@ -32,7 +32,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.button_matt_desk
+    entity_id: sensor.matt_desk_remote
     to:
     - 'on'
     - 'off'
@@ -41,7 +41,7 @@ automation:
   action:
   - choose:
     - conditions:
-      - "{{ 'brightness' not in trigger.to_state.state }}"
+      - "{{ trigger.to_state.state == 'on' }}"
       - condition: state
         entity_id: light.dresser_hk
         state: 'on'
@@ -49,7 +49,7 @@ automation:
       - service: light.turn_off
         entity_id: light.game_room
     - conditions:
-      - "{{ 'brightness' not in trigger.to_state.state }}"
+      - "{{ trigger.to_state.state == 'on' }}"
       - condition: state
         entity_id: light.dresser_hk
         state: 'off'
@@ -58,6 +58,11 @@ automation:
         data:
           group_name: Game room
           scene_name: "{{ 'Daylight' if is_state('input_boolean.dark_inside', 'off') else 'Read' }}"
+    - conditions:
+      - "{{ 'brightness' in trigger.to_state.state }}"
+      sequence:
+      - service: light.turn_off
+        entity_id: light.matt_desk
     default:
     - service: light.turn_on
       entity_id: light.matt_desk

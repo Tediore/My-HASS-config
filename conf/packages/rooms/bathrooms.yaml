@@ -25,6 +25,9 @@ automation:
     state:
     - 'armed_home'
     - 'disarmed'
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
   action:
   - service: light.turn_on
     entity_id: light.master_bath_night_light

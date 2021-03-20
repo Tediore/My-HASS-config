@@ -28,12 +28,12 @@ automation:
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  - condition: state
-    entity_id: binary_sensor.laundry_room_door
-    state: 'off'
   - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
     data_template:
       entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
+  - condition: state
+    entity_id: binary_sensor.laundry_room_door
+    state: 'off'
   - service: script.laundry_light_notify
     data:
       color_name: "{{ 'blue' if trigger.to_state.name == 'Washer' else 'orange' }}"

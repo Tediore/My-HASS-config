@@ -35,12 +35,11 @@ automation:
     - light.dresser_hk
     state: 'on'
   action:
-  - service: light.turn_on
-    entity_id: light.game_room
+  - service: hue.hue_activate_scene
     data:
-      kelvin: 3000
-      brightness_pct: 100
-      transition: 20
+      group_name: Game room
+      scene_name: Read
+      transition: 200
 
 
 - alias: Turn game room lights on/off at sunset/sunrise
@@ -131,43 +130,15 @@ automation:
   condition:
   - "{{ trigger.to_state.state != trigger.from_state.state }}"
   action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
+  - service: light.turn_on
     entity_id: light.game_room_closet
-
-
-- alias: Turn game room closet light on/off with motion
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.game_room_closet_motion
-    from: 'on'
-    to: 'off'
-    for: &no_motion_time '00:05:00'
-  - platform: state
-    entity_id: binary_sensor.game_room_closet_motion
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: binary_sensor.game_room_closet_door
-    state: 'on'
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
-      - condition: state
-        entity_id: binary_sensor.game_room_closet_door
-        state: 'on'
-        for: *no_motion_time
-      sequence: &sequence
-      - service: "light.turn_{{ trigger.to_state.state }}"
-        entity_id: light.game_room_closet
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: light.game_room_closet
-        state: 'off'
-      sequence: *sequence
+    data:
+      brightness_pct: >
+        {% if trigger.to_state.state == 'off' %}
+          0
+        {% else %}
+          {{ 100 if 6 < now().hour < 20 else 50 }}
+        {% endif %}
 
 
 script:
@@ -198,10 +169,8 @@ script:
       entity_id: 
       - switch.game_room_bias_lighting
       - climate.space_heater
-    - service: script.turn_on
-      entity_id: script.other_lights_on
     - condition: state
-      entity_id: climate.game_room
+      entity_id: climate.game_room_fan
       state: 'on'
     - service: climate.turn_off
       entity_id: climate.game_room_fan
@@ -234,7 +203,7 @@ script:
       state: 'off'
     - service: switch.turn_off
       entity_id: switch.game_room_fan_plug  # resets game room fan to speed 1
-    - delay: 1
+    - delay: 0.5
     - service: switch.turn_on
       entity_id: switch.game_room_fan_plug
     - delay: 1

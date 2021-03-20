@@ -95,28 +95,6 @@
       message: Backup error. Check log for details.
 
 
-- alias: COVID-19 increase notification
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: !secret covid_sensor_1
-  action:
-  - service: notify.gotify
-    data_template:
-      title: >
-        {% if trigger.to_state.state == trigger.from_state.state %}
-          No increase in {{ trigger.to_state.name }} confirmed cases!
-        {% else %}
-          {{ trigger.to_state.name }} confirmed cases increased
-        {% endif %}
-      message: >
-        {% if trigger.to_state.state == trigger.from_state.state %}
-          Confirmed cases are the same as yesterday ({{ states(trigger.to_state.entity_id) }}).
-        {% else %}
-          Increased from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}. Current ratio: {{ state_attr(trigger.to_state.entity_id, 'pct_confirmed') | round(0) | int }}%.
-        {% endif %}
-
-
 - alias: Birthday reminder
   initial_state: true
   trigger:
