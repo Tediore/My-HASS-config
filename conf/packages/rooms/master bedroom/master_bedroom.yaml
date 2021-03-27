@@ -76,7 +76,7 @@ automation:
     entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state:
     - 'armed_home'
     - 'disarmed'
@@ -99,7 +99,7 @@ automation:
     to: 'on'
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state:
     - 'armed_home'
     - 'disarmed'

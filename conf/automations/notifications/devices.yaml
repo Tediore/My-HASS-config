@@ -253,7 +253,7 @@
     to: 'on'
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: 'armed_away'
   action:
   - service: homeassistant.turn_off

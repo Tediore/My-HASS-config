@@ -87,15 +87,6 @@
       value_template: "{{ ((states('sensor.button_matt_temp') | float + states('sensor.button_andy_temp') | float) / 2) | round(0) }}"
       unit_of_measurement: '°F'
 
-    cell_modem_signal:
-      friendly_name: Cellular modem signal
-      value_template: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'SignalPercent') | int }}"
-      attribute_templates:
-        signal_strength: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'SignalStrength') | int }} dB"
-        bit_error_rate: "{{ state_attr('sensor.gsm_signal_imei_862455028827940', 'BitErrorRate') }}"
-      device_class: signal_strength
-      unit_of_measurement: '%'
-
     ssd_temp_disp:
       friendly_name: SSD temp
       value_template: "{{ states('sensor.ssd_temp') }} °C"

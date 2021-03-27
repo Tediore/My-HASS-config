@@ -3,7 +3,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     to: 
     - 'armed_home'
     - 'disarmed'

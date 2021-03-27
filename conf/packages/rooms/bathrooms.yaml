@@ -21,7 +21,7 @@ automation:
     to: 'on'
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state:
     - 'armed_home'
     - 'disarmed'

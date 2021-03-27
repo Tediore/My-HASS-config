@@ -13,7 +13,7 @@
     entity_id: sensor.outside_dewpoint
     below: 58
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'
@@ -163,27 +163,28 @@
   - platform: state
     entity_id: input_boolean.internet
   action:
-  - service: notify.sms_matt
+  - service: script.notify_sms
     data_template:
+      number: !secret phone_matt
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
 
 
-- alias: Log RF received
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: mqtt
-    topic: tele/rf_bridge/RESULT
-  action:
-  - service: system_log.write
-    data_template:
-      message: >
-        {% set payload = trigger.payload | from_json %}
-        {{ "RF data received: 0x" + payload.RfReceived.Data }}
-      level: info
-      logger: sms.received_sms
-  - service: notify.rf_received
-    data_template:
-      message: >
-        {% set payload = trigger.payload | from_json %}
-        {{ "RF data received: 0x" + payload.RfReceived.Data }}
+# - alias: Log RF received
+#   initial_state: true
+#   mode: parallel
+#   trigger:
+#   - platform: mqtt
+#     topic: tele/rf_bridge/RESULT
+#   action:
+#   - service: system_log.write
+#     data_template:
+#       message: >
+#         {% set payload = trigger.payload | from_json %}
+#         {{ "RF data received: 0x" + payload.RfReceived.Data }}
+#       level: info
+#       logger: sms.received_sms
+#   - service: notify.rf_received
+#     data_template:
+#       message: >
+#         {% set payload = trigger.payload | from_json %}
+#         {{ "RF data received: 0x" + payload.RfReceived.Data }}

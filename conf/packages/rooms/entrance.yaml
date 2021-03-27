@@ -12,7 +12,7 @@ automation:
   - condition: template
     value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.church', 'start_time')) | timestamp_custom('%-d') }}"
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: light.turn_on
     entity_id: light.entrance
@@ -32,14 +32,14 @@ automation:
   - condition: template
     value_template: "{{ is_state_attr('calendar.andy_work', 'message', 'Work') and as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%-d') }}"
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "light.turn_{{ 'on' if now().minute == 25 else 'off' }}"
     entity_id: light.entrance
-  - wait_template: "{{ is_state('binary_sensor.front_door_zb', 'on') }}"
+  - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
     timeout: '00:15:00'
     continue_on_timeout: true
-  - wait_template: "{{ is_state('binary_sensor.front_door_zb', 'off') }}"
+  - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
     timeout: '00:05:00'
     continue_on_timeout: true
   - service: light.turn_off
@@ -53,7 +53,7 @@ automation:
     value_template: "{{ state_attr('calendar.church', 'message') != None and 'rehearsal' in state_attr('calendar.church', 'message').lower() and ((as_timestamp(state_attr('calendar.church', 'start_time')) - 1800) == as_timestamp(states('sensor.date_time_iso'))) }}"
   condition:
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: light.turn_on
     entity_id: light.entrance

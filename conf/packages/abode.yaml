@@ -1,205 +1,81 @@
-automation:
-- alias: Auto-arm alarm home
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '00:00:00'
-  condition:
-  - condition: state
-    entity_id: input_text.abode
-    state: 'disarmed'
-  action:
-  - service: script.turn_on
-    entity_id: script.alarm_arm_home
+# automation:
+# - alias: Alarm armed home reminder
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.entrance_motion
+#     to: 'on'
+#   condition:
+#   - condition: state
+#     entity_id: input_text.alarm
+#     state: 'armed_home'
+#   action:
+#   - service: mqtt.publish
+#     data:
+#       topic: 'cmnd/entrance_light/Backlog'
+#       payload: 'dimmer 0; sleep 1; dimmer 100; sleep 1; dimmer 0; sleep 1; dimmer 100; sleep 1; dimmer 0; sleep 1; dimmer 100'
 
 
-- alias: Change entrance light LED with alarm mode
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_text.abode
-    to:
-    - 'armed_home'
-    - 'armed_away'
-    - 'disarmed'
-  action:
-  - service: light.turn_on
-    entity_id: light.entrance_led # red and green only
-    data:
-      color_temp: "{{ 500 if trigger.to_state.state == 'disarmed' else 153 }}" # 153 is red, 500 is green
-      brightness_pct: "{{ 40 if trigger.to_state.state == 'disarmed' else 100 }}"
+# - alias: Notify when sensor unresponsive
+#   initial_state: true
+#   trigger:
+#   - platform: template
+#     value_template: >
+#       {% set front = state_attr('binary_sensor.front_door_cloud', 'no_response') %}
+#       {% set balcony = state_attr('binary_sensor.balcony_door_cloud', 'no_response') %}
+#       {% set drawer = state_attr('binary_sensor.drawer_cloud', 'no_response') %}
+#       {% set keypad = state_attr('binary_sensor.keypad_cloud', 'no_response') %}
+#       {% set camera = state_attr('camera.motion_camera', 'no_response') %}
+#       {{ front == true or balcony == true or drawer == true or keypad == true or camera == true }}
+#   action:
+#   - service: notify.mobile_app_matt_phone
+#     data_template:
+#       title: "Sensor unresponsive"
+#       message: "{{ trigger.to_state.name }} sensor is not responding"
 
 
-- alias: Alarm armed home reminder
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.entrance_motion
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_text.abode
-    state: 'armed_home'
-  action:
-  - service: mqtt.publish
-    data:
-      topic: 'cmnd/entrance_light/Backlog'
-      payload: 'dimmer 0; sleep 1; dimmer 100; sleep 1; dimmer 0; sleep 1; dimmer 100; sleep 1; dimmer 0; sleep 1; dimmer 100'
 
 
-- alias: Notify when sensor unresponsive
-  initial_state: true
-  trigger:
-  - platform: template
-    value_template: >
-      {% set front = state_attr('binary_sensor.front_door_cloud', 'no_response') %}
-      {% set balcony = state_attr('binary_sensor.balcony_door_cloud', 'no_response') %}
-      {% set drawer = state_attr('binary_sensor.drawer_cloud', 'no_response') %}
-      {% set keypad = state_attr('binary_sensor.keypad_cloud', 'no_response') %}
-      {% set camera = state_attr('camera.motion_camera', 'no_response') %}
-      {{ front == true or balcony == true or drawer == true or keypad == true or camera == true }}
-  action:
-  - service: notify.mobile_app_matt_phone
-    data_template:
-      title: "Sensor unresponsive"
-      message: "{{ trigger.to_state.name }} sensor is not responding"
+# - alias: Security system triggered
+#   initial_state: true
+#   trigger:
+#   - platform: event
+#     event_type: abode_alarm
+#   condition:
+#   - condition: state
+#     entity_id: input_text.alarm
+#     state: 'armed_away'
+#   - condition: state
+#     entity_id: input_boolean.dark_inside
+#     state: 'on'
+#   action:
+#   - service: light.turn_on
+#     entity_id:
+#     - light.buffet
+#     - light.living_room
+#     data:
+#       brightness_pct: 100
+#       kelvin: 3000
+#       transition: 5
 
 
-- alias: Toggle vacation mode
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_text.abode
-    to: 'armed_away'
-    for: '24:00:00'
-  - platform: state
-    entity_id: input_text.abode
-    from: 'armed_away'
-    to: 'disarmed'
-  action:
-  - service_template: "input_boolean.turn_{{ 'on' if is_state('input_text.abode', 'armed_away') else 'off' }}"
-    entity_id: input_boolean.vacation_mode
-
-
-- alias: Vacation mode lights on
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '21:00:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.vacation_mode
-    state: 'on'
-  action:
-  - delay:
-      seconds: "{{ range(30,600) | random | int }}"
-  - service: light.turn_on
-    entity_id:
-    - light.buffet
-    - light.living_room
-    data:
-      kelvin: 3000
-      brightness_pct: 100
-  - service: light.turn_on
-    entity_id: light.kitchen_cabinets
-    data:
-      transition: 1
-  - delay:
-      seconds: "{{ range(900,1800) | random | int }}"
-  - service: light.turn_on
-    entity_id: light.game_room
-    data:
-      kelvin: 3000
-      brightness_pct: 100
-  - delay:
-      seconds: "{{ range(1800,2400) | random | int }}"
-  - service: light.turn_off
-    entity_id: 
-    - light.game_room
-    - light.living_room
-  - service: light.turn_on
-    entity_id: light.master_bedroom
-    data:
-      kelvin: 3000
-      brightness_pct: 100
-
-
-- alias: Vacation mode lights off
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '23:45:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.vacation_mode
-    state: 'on'
-  action:
-  - delay:
-      seconds: "{{ range(30,600) | random | int }}" 
-  - service: homeassistant.turn_off
-    entity_id: group.lights_interior
-
-
-- alias: Security system triggered
-  initial_state: true
-  trigger:
-  - platform: event
-    event_type: abode_alarm
-  condition:
-  - condition: state
-    entity_id: input_text.abode
-    state: 'armed_away'
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  action:
-  - service: light.turn_on
-    entity_id:
-    - light.buffet
-    - light.living_room
-    data:
-      brightness_pct: 100
-      kelvin: 3000
-      transition: 5
-
-
-- alias: Record alarm mode with cloud fallback
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: 
-    - alarm_control_panel.abode
-    - alarm_control_panel.abode_cloud
-    to: 
-    - 'disarmed'
-    - 'armed_home'
-    - 'armed_away'
-  condition:
-  - "{{ trigger.to_state.state in ['disarmed', 'armed_home', 'armed_away'] }}"
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.abode
-    data_template:
-      value: "{{ trigger.to_state.state }}"
-
-
-sensor:
-- platform: template
-  sensors:
-    alarm_mode:
-      friendly_name: "Abode"
-      value_template: "{{ states('input_text.abode').capitalize().replace('_',' ') }}"
-      icon_template: >
-        {% set alarm = states('input_text.abode') %}
-        {% if alarm == 'armed_home' %}
-          mdi:home-lock
-        {% elif alarm == 'armed_away' %}
-          mdi:lock
-        {% elif alarm == 'disarmed' %}
-          mdi:lock-open-outline
-        {% else %}
-          mdi:lock-question
-        {% endif %}
+# sensor:
+# - platform: template
+#   sensors:
+#     alarm_mode:
+#       friendly_name: "Abode"
+#       value_template: "{{ states('input_text.alarm').capitalize().replace('_',' ') }}"
+#       icon_template: >
+#         {% set alarm = states('input_text.alarm') %}
+#         {% if alarm in ['armed_home', 'armed_night'] %}
+#           mdi:home-lock
+#         {% elif alarm == 'armed_away' %}
+#           mdi:lock
+#         {% elif alarm == 'disarmed' %}
+#           mdi:lock-open-outline
+#         {% else %}
+#           mdi:lock-question
+#         {% endif %}
     
 
 # switch:
@@ -224,41 +100,35 @@ sensor:
 #   headers:
 #     Authorization: !secret alarm_auth
 
-script:
-  alarm_arm_home:
-    sequence:
-    - service: alarm_control_panel.alarm_arm_home
-      entity_id: alarm_control_panel.abode
-    - delay: '00:00:10'
-    - condition: template
-      value_template: "{{ not is_state('input_text.abode', 'armed_home') }}"
-    - service: alarm_control_panel.alarm_arm_home
-      entity_id: alarm_control_panel.abode_cloud
+# script:
+  # alarm_arm_home:
+  #   sequence:
+  #   - service: alarm_control_panel.alarm_arm_home
+  #     entity_id: alarm_control_panel.home
+  #   - delay: '00:00:10'
+  #   - condition: template
+  #     value_template: "{{ not is_state('input_text.alarm', 'armed_home') }}"
+  #   - service: alarm_control_panel.alarm_arm_home
+  #     entity_id: alarm_control_panel.home_cloud
 
-  alarm_arm_away:
-    sequence:
-    - service: alarm_control_panel.alarm_arm_away
-      entity_id: alarm_control_panel.abode
-    - delay: '00:00:10'
-    - condition: template
-      value_template: "{{ not is_state('input_text.abode', 'armed_home') }}"
-    - service: alarm_control_panel.alarm_arm_away
-      entity_id: alarm_control_panel.abode_cloud
+  # alarm_arm_away:
+  #   sequence:
+  #   - service: alarm_control_panel.alarm_arm_away
+  #     entity_id: alarm_control_panel.home
+  #   - delay: '00:00:10'
+  #   - condition: template
+  #     value_template: "{{ not is_state('input_text.alarm', 'armed_home') }}"
+  #   - service: alarm_control_panel.alarm_arm_away
+  #     entity_id: alarm_control_panel.home_cloud
 
-  alarm_disarm:
-    sequence:
-    - service: alarm_control_panel.alarm_disarm
-      entity_id: alarm_control_panel.abode
-    - delay: '00:00:10'
-    - condition: template
-      value_template: "{{ not is_state('input_text.abode', 'disarmed') }}"
-    - service: alarm_control_panel.alarm_disarm
-      entity_id: alarm_control_panel.abode_cloud
+  # alarm_disarm:
+  #   sequence:
+  #   - service: alarm_control_panel.alarm_disarm
+  #     entity_id: alarm_control_panel.home
+  #   - delay: '00:00:10'
+  #   - condition: template
+  #     value_template: "{{ not is_state('input_text.alarm', 'disarmed') }}"
+  #   - service: alarm_control_panel.alarm_disarm
+  #     entity_id: alarm_control_panel.home_cloud
 
 
-input_boolean:
-  vacation_mode:
-
-input_text:
-  abode:
-    name: Abode

@@ -9,4 +9,4 @@
 ip_bans.yaml
 secrets.yaml
 known_devices.yaml
-conf/packages/alarm.yaml
+conf/packages/security_system/

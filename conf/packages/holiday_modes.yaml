@@ -60,7 +60,7 @@ automation:
     event: start
   condition:
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - condition: template
     value_template: >
       {{ 

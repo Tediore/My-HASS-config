@@ -19,7 +19,7 @@
     for: '00:00:45'
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: armed_away
   - condition: state
     entity_id: input_boolean.vacation_mode
@@ -53,7 +53,7 @@
     to: 'off'
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: armed_away
     for: '00:01:00'
   action:
@@ -77,7 +77,7 @@
   - condition: template
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.notify_if_alarm_not_armed_when_away', 'last_triggered'))) / 3600 > 8 }}"
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: 'disarmed'
   - condition: template
     value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
@@ -105,7 +105,7 @@
     to: 'on'
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: armed_away
     for: '00:00:30'
   - condition: template

@@ -9,7 +9,7 @@ automation:
     value_template: "{{ trigger.event.data.action in ['pts_precool', 'pts_started', 'pts_ended'] }}"
   action:
     service_template: >
-      {% set alarm = states('input_text.abode') %}
+      {% set alarm = states('input_text.alarm') %}
       {% set event = trigger.event.data.action %}
       {{ 'script.turn_on' if event == 'pts_started' or (event == 'pts_precool' and alarm == 'armed_away') else 'input_boolean.turn_off' }}
     data_template:
@@ -74,7 +74,7 @@ automation:
   - condition: template
     value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.turn_on
     entity_id: script.good_morning

@@ -42,20 +42,8 @@
   data:
     priority: 10
 
-- platform: sms
-  name: sms_matt
-  recipient: !secret phone_matt
-
-- platform: sms
-  name: sms_andy
-  recipient: !secret phone_andy
-
-- platform: sms
-  name: sms_usps
-  recipient: 28777
-
 - platform: file
-  name: Received SMS
+  name: SMS received
   filename: sms_inbox
   timestamp: true
 

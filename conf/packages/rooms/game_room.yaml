@@ -10,7 +10,7 @@ automation:
   - condition: not
     conditions:
     - condition: state
-      entity_id: input_text.abode
+      entity_id: input_text.alarm
       state: 'armed_away'
     - condition: state
       entity_id: input_boolean.sleep_mode
@@ -55,7 +55,7 @@ automation:
     entity_id: input_boolean.sleep_mode
     state: 'off'
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "script.gr_lights_{{ trigger.to_state.state }}"
 
@@ -148,7 +148,7 @@ script:
       entity_id: input_boolean.sleep_mode
       state: 'off'
     - condition: template
-      value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+      value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
     - service: switch.turn_on
       entity_id: switch.game_room_bias_lighting
     - service: media_player.turn_off

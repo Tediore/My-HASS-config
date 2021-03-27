@@ -5,7 +5,7 @@ automation:
   - entity_id: 
     - binary_sensor.front_door
     - binary_sensor.front_door_cloud
-    - binary_sensor.front_door_zb
+    - binary_sensor.front_door
     platform: state
     from: 'off'
     to: 'on'
@@ -13,7 +13,7 @@ automation:
   - condition: template
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.turn_entrance_light_on_upon_entrance', 'last_triggered'))) > 60 }}"
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: 'armed_away'
     for: '00:00:30'
   action:
@@ -27,7 +27,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     from: 'armed_away'
     to: 'disarmed'
   action:
@@ -43,9 +43,9 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     to: 'armed_away'
-    for: '00:00:35'
+    for: '00:00:05'
   action:
   - service: script.turn_on
     entity_id: script.away_mode
@@ -72,9 +72,9 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     to: 'armed_away'
-    for: '00:01:00'
+    for: '00:00:35'
   condition:
   - condition: or
     conditions:

@@ -1,5 +1,5 @@
 automation:
-- alias: Notify water leaked detected or cleared
+- alias: Notify water leak detected or cleared
   initial_state: true
   mode: parallel
   max: 100
@@ -19,8 +19,9 @@ automation:
     to: 'off'
     for: '00:00:05'
   action:
-  - service: notify.sms_matt
+  - service: script.notify_sms
     data_template:
+      number: !secret phone_matt
       message: &leak_message >
         {% if trigger.to_state.state == 'on' %}
           LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
@@ -48,13 +49,14 @@ automation:
     entity_id: sensor.smoke_alarm_status
   condition:
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state: 'armed_away'
   - condition: template
     value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
   action:
-  - service: notify.sms_matt
+  - service: script.notify_sms
     data_template:
+      number: !secret phone_matt
       message: &smoke_message >
         {% if trigger.to_state.state in ['Smoke', 'CO'] %}
           {{ trigger.to_state.state.upper() }} DETECTED!
@@ -90,7 +92,7 @@ automation:
     - 'CO'
   condition:
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: light.turn_on
     entity_id:
@@ -117,7 +119,7 @@ automation:
     to: 'on'
   condition:
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: hue.hue_activate_scene
     data:
@@ -160,8 +162,8 @@ sensor:
     smoke_alarm_status:
       friendly_name: Smoke alarm status
       value_template: >
-        {% set alarm = states('sensor.smoke_alarm_alarm_type') | float %}
-        {% set level = states('sensor.smoke_alarm_alarm_level') | float %}
+        {% set alarm = states('sensor.smoke_alarm_alarmtype') | float %}
+        {% set level = states('sensor.smoke_alarm_alarmlevel') | float %}
         {% if alarm == 13 and level == 255 %}
           OK
         {% elif alarm == 1 and level == 255 %}
@@ -174,8 +176,8 @@ sensor:
           Unknown
         {% endif %}
       icon_template: >
-        {% set alarm = states('sensor.smoke_alarm_alarm_type') | float %}
-        {% set level = states('sensor.smoke_alarm_alarm_level') | float %}
+        {% set alarm = states('sensor.smoke_alarm_alarmtype') | float %}
+        {% set level = states('sensor.smoke_alarm_alarmlevel') | float %}
         {% if alarm == 13 and level == 255 %}
           mdi:smoke-detector
         {% elif alarm == 1 and level == 255 %}

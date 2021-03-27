@@ -25,7 +25,7 @@ automation:
   - platform: time
     at: &dark_inside_time '15:30:00'
   - platform: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     from: 'armed_away'
     to: 'disarmed'
   condition:
@@ -33,7 +33,7 @@ automation:
     entity_id: input_boolean.dark_inside
     state: 'off'
   - condition: state
-    entity_id: input_text.abode
+    entity_id: input_text.alarm
     state:
     - 'disarmed'
     - 'armed_home'
@@ -112,7 +112,7 @@ automation:
     subtype: single_press
   condition:
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
 
@@ -153,7 +153,7 @@ automation:
     entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: template
-    value_template: "{{ states('input_text.abode') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
     entity_id: light.buffet

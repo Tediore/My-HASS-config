@@ -2,8 +2,8 @@
   initial_state: true
   mode: parallel
   trigger:
-  - platform: event
-    event_type: sms.incoming_sms
+  - platform: mqtt
+    topic: 'sms2mqtt/received'
   condition:
   - condition: template
     value_template: !secret cmd_phone
@@ -11,25 +11,28 @@
   - choose: 
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.text == 'Ping' }}"
+        value_template: "{{ trigger.payload_json['text'] == 'Ping' }}"
       sequence:
-      - service: notify.sms_matt
+      - service: script.notify_sms
         data:
+          number: !secret phone_matt
           message: "Pong!"
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.text == 'Help' }}"
+        value_template: "{{ trigger.payload_json['text'] == 'Help' }}"
       sequence:
-      - service: notify.sms_matt
+      - service: script.notify_sms
         data_template:
+          number: !secret phone_matt
           message: >
             Command list:{{'\n'}}Ping: Test if server is up.{{'\n'}}Status: Receive summary of home status.{{'\n'}}Arm: Arm alarm in away mode.{{'\n'}}Lights off: Turn all lights off.
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.text == 'Status' }}"
+        value_template: "{{ trigger.payload_json['text'] == 'Status' }}"
       sequence:
-      - service: notify.sms_matt
+      - service: script.notify_sms
         data_template:
+          number: !secret phone_matt
           message: >
             Alarm: {{ states('sensor.alarm_mode') + '\n' }}Thermostat: {{ states('sensor.tstat_profile') + '\n' }}{{ 'All lights are off.' if is_state('group.lights_all', 'off') else 'The following lights are on: '}}{% for light in expand('group.lights_all') if light.state == 'on' -%}
             {{ light.attributes.friendly_name.lower() }}
@@ -38,52 +41,58 @@
             {%- endfor %}
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.text == 'Lights off' }}"
+        value_template: "{{ trigger.payload_json['text'] == 'Lights off' }}"
       sequence:
       - service: homeassistant.turn_off
         entity_id: group.lights_interior
       - wait_template: "{{ is_state('group.lights_interior', 'off') }}"
         timeout: '00:00:10'
         continue_on_timeout: true
-      - service: notify.sms_matt
+      - service: script.notify_sms
         data_template:
+          number: !secret phone_matt        
           message: "{{ 'Lights have been turned off.' if is_state('group.lights_interior', 'off') else 'Command timed out.' }}"
     - conditions:
       - condition: template
-        value_template: "{{ trigger.event.data.text == 'Arm' }}"
+        value_template: "{{ trigger.payload_json['text'] == 'Arm' }}"
       sequence:
       - service: script.turn_on
         entity_id: script.alarm_arm_away
-      - service: notify.sms_matt
+      - service: script.notify_sms
         data:
+          number: !secret phone_matt
           message: "Arming alarm in away mode."
-      - wait_template: "{{ is_state('input_text.abode', 'armed_away') }}"
+      - wait_template: "{{ is_state('input_text.alarm', 'armed_away') }}"
         timeout: '00:01:00'
         continue_on_timeout: true
-      - service: notify.sms_matt
+      - service: script.notify_sms
         data_template:
-          message: "{{ 'Alarm has been armed in away mode.' if is_state('input_text.abode', 'armed_away') else 'Command timed out.' }}"
+          number: !secret phone_matt
+          message: "{{ 'Alarm has been armed in away mode.' if is_state('input_text.alarm', 'armed_away') else 'Command timed out.' }}"
     default:
-    - service: notify.sms_matt
+    - service: script.notify_sms
       data_template:
-        message: "Command \"{{ trigger.event.data.text }}\" not found."
+        number: !secret phone_matt
+        message: "Command \"{{ trigger.payload_json['text'] }}\" not found."
 
 
 - alias: Log incoming SMS
   initial_state: true
   mode: parallel
   trigger:
-  - platform: event
-    event_type: sms.incoming_sms
+  - platform: mqtt
+    topic: 'sms2mqtt/received'
   condition:
   - condition: template
     value_template: !secret not_phone
+  - condition: template
+    value_template: "{{ trigger.payload_json['number'] != '128' }}"
   action:
   - service: system_log.write
     data_template:
-      message: "SMS received from {{ trigger.event.data.phone }}: {{ trigger.event.data.text }}"
+      message: "SMS received from {{ trigger.payload_json['number'] }}: {{ trigger.payload_json['text'] }}"
       level: warning
       logger: sms.received_sms
-  - service: notify.received_sms
-    data_template:
-      message: "{{ trigger.event.data.phone }}: {{ trigger.event.data.text }}"
+  - service: notify.sms_received
+    data:
+      message: "{{ trigger.payload_json['number'] }}: {{ trigger.payload_json['text'] }}"

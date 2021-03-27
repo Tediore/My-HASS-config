@@ -34,3 +34,10 @@
 - platform: mqtt
   name: LR IR received
   state_topic: 'living_room/ir_received'
+
+- platform: mqtt
+  name: Cell modem signal
+  state_topic: &sms_topic 'sms2mqtt/signal'
+  value_template: "{{ value_json['SignalPercent'] }}"
+  json_attributes_topic: *sms_topic
+  unit_of_measurement: '%'

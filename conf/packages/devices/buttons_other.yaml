@@ -146,18 +146,3 @@ automation:
       sequence:
       - service_template: "climate.turn_{{ 'on' if is_state('climate.space_heater', 'off') else 'off' }}"
         entity_id: climate.space_heater
-
-
-- alias: Sunset lights button  # in case alarm system isn't syncing properly
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.sunset_lights_button_action
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.abode
-    data:
-      value: 'disarmed'

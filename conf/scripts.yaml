@@ -1,3 +1,11 @@
+notify_sms:
+  sequence:
+    service: mqtt.publish
+    data:
+      topic: 'sms2mqtt/send'
+      payload: '{"number":"+1{{ number }}", "text":"{{ message }}"}'
+
+
 tts_living_room:
   sequence:
   - service: media_player.volume_mute
@@ -75,17 +83,3 @@ ir_soundbar_vol_dn:
     data_template:
       topic: *lr_ir_topic
       payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FFA25D"}'
-
-entry_exit_beep:
-  sequence:
-    repeat:
-      while:
-      - condition: state
-        entity_id: input_boolean.test
-        state: 'on'
-      sequence:
-      - service: mqtt.publish
-        data:
-          topic: 'cmnd/rf_bridge/backlog'
-          payload: "rfraw aac0006455"
-      - delay: 1
