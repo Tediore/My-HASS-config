@@ -198,6 +198,7 @@ script:
       - climate.space_heater
       - switch.space_heater
       - switch.air_freshener
+      - switch.old_style_sign
 
 
 input_number:

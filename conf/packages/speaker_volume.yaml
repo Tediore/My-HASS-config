@@ -30,11 +30,11 @@ automation:
       volume_level: >
         {% set app = trigger.to_state.state if trigger.to_state.domain == 'sensor' else states(trigger.to_state.entity_id.replace('input_boolean','sensor') + '_app_name') %}
         {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('input_boolean','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
-        {% set album = state_attr(trigger.to_state.entity_id.replace('sensor.','media_player.').replace('input_boolean.','media_player.').replace('_app_name',''), 'album_name') %}
+        {% set album = state_attr(trigger.to_state.entity_id.replace('sensor.','media_player.').replace('input_boolean.','media_player.').replace('_app_name',''), 'media_album_name') %}
         {% if app in ['iHeartRadio', 'Default Media Receiver'] %}
           {% if album in ['103.5 KISS FM'] %}
             {% if speaker in ['bedroom', 'kitchen', 'living room'] %}
-              0.32
+              0.28
             {% elif speaker in ['portable'] %}
               0.24
             {% elif speaker in ['hub'] %}

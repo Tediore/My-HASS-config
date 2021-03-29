@@ -74,6 +74,8 @@ automation:
     data:
       brightness_pct: 50
       transition: 10
+  - service: switch.turn_on
+    entity_id: switch.old_style_sign
   - condition: template
     value_template: "{{ state_attr('light.buffet', 'brightness') | int > 170 }}"
   - service: light.turn_on
@@ -81,23 +83,6 @@ automation:
     data:
       brightness_pct: 66
       transition: 10
-  # - service: light.turn_on
-  #   data:
-  #     entity_id: >
-  #       {% set cabinets = states('light.kitchen_cabinets') %}
-  #       {% set brightness = state_attr('light.kitchen_cabinets', 'brightness') | int %}
-  #       {% set buffet = states('light.buffet') %}
-  #       {% if cabinets == 'on' and brightness > 160 %}
-  #         {% if buffet == 'on' %}
-  #           light.kitchen_cabinets, light.buffet
-  #         {% elif cabinets == 'on' %}
-  #           light.kitchen_cabinets
-  #         {% endif %}
-  #       {% else %}
-  #         light.buffet
-  #       {% endif %}
-  #     brightness_pct: 66
-  #     transition: 10
 
 
 - alias: Turn lights on/off at sunset/sunrise if home

@@ -41,3 +41,10 @@
   value_template: "{{ value_json['SignalPercent'] }}"
   json_attributes_topic: *sms_topic
   unit_of_measurement: '%'
+
+- platform: mqtt
+  name: Snake plant moisture
+  state_topic: &snake_plant_0 'tele/tasmota_ble/Flora6c2a80'
+  value_template: "{{ value_json['Moisture'] }}"
+  json_attributes_topic: *snake_plant_0
+  unit_of_measurement: '%'

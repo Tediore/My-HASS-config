@@ -38,6 +38,7 @@ plugs:
   - switch.master_bedroom_fan_plug
   - switch.game_room_bias_lighting
   - switch.air_freshener
+  - switch.old_style_sign
 
 speakers:
   entities:
