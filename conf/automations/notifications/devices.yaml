@@ -33,6 +33,7 @@
     - sensor.game_room_temp
     - switch.air_freshener
     - switch.master_bedroom_fan_plug
+    - switch.laundry_room_plug
     - light.kitchen_cabinets
     - switch.game_room_bias_lighting
     - light.front_closet
@@ -58,6 +59,32 @@
       data:
         ttl: 0
         priority: high
+
+
+- alias: Notify when Zigbee router unavailable for 5 minutes
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - light.living_room_bias_lighting
+    - sensor.siren_battery
+    - switch.air_freshener
+    - switch.game_room_bias_lighting
+    - switch.laundry_room_plug
+    - switch.master_bedroom_fan_plug
+    - switch.old_style_sign
+    to: 'unavailable'
+    for: '00:05:00'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: &router_title Zigbee router warning
+      message: &router_message "{{ trigger.to_state.name }} has been unavailable for 5 minutes."
+  - service: persistent_notification.create
+    data:
+      title: *router_title
+      message: *router_message
 
 
 - alias: Notify when Hue light unreachable

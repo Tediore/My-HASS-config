@@ -49,3 +49,8 @@
   - cloud_cover
   - temperature_high
   - temperature_low
+
+- platform: cups
+  host: 10.0.0.34
+  printers:
+  - Printer

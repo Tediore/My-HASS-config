@@ -95,4 +95,8 @@
       logger: sms.received_sms
   - service: notify.sms_received
     data:
-      message: "{{ trigger.payload_json['number'] }}: {{ trigger.payload_json['text'] }}"
+      message: &message "{{ trigger.payload_json['number'] }}: {{ trigger.payload_json['text'] }}"
+  - service: script.notify_sms
+    data:
+      number: !secret phone_matt
+      message: *message

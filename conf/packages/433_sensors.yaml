@@ -10,7 +10,7 @@ binary_sensor:
 sensor:
 - platform: mqtt
   name: Fridge temp
-  state_topic: &fridge_topic "rtl_433/32/event"
+  state_topic: &fridge_topic "rtl_433/107/event"
   value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
   device_class: temperature
   json_attributes_topic: *fridge_topic

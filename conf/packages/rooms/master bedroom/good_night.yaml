@@ -77,7 +77,10 @@ script:
     - condition: state
       entity_id: input_boolean.sleep_mode
       state: 'on'
-    - service: script.alarm_arm_home
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        entity_id: alarm_control_panel.home
+        code: !secret alarm_code_system
 
 
   good_night_no_noise:
@@ -96,8 +99,10 @@ script:
       entity_id: climate.master_bedroom_fan
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
-    - service: script.turn_on
-      entity_id: script.alarm_arm_home
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        entity_id: alarm_control_panel.home
+        code: !secret alarm_code_system
 
 
   good_night_andy:
@@ -134,6 +139,10 @@ script:
       data:
         brightness_pct: "{{ 30 if is_state('binary_sensor.kitchen_motion', 'on') else 10 }}"
         transition: 5
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        entity_id: alarm_control_panel.home
+        code: !secret alarm_code_system
     - condition: state
       entity_id: light.game_room
       state: 'on'

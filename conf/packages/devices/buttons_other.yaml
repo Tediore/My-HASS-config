@@ -93,10 +93,10 @@ automation:
 
 - alias: Game room fan/heater button
   initial_state: true
-  mode: parallel
+  mode: single
   trigger:
   - platform: state
-    entity_id: sensor.game_room_fan_button_action
+    entity_id: &gr_fan_button sensor.game_room_fan_button_action
     to:
     - 'on'
     - 'off'
@@ -133,10 +133,17 @@ automation:
         state:
         - 'cool'
         - 'off'
-      sequence: 
-      - service: script.ir_fan_speed
-        data:
-          blaster: game_room_ir
+      sequence:
+      - repeat:
+          sequence:
+          - service: script.ir_fan_speed
+            data:
+              blaster: game_room_ir
+          - delay: 1
+          until:
+          - condition: state
+            entity_id: input_boolean.stop_fan_speed
+            state: 'on'
     - conditions:  # turn space heater on with generic thermostat
       - condition: template
         value_template: "{{ 'brightness' not in trigger.to_state.state }}"
@@ -146,3 +153,21 @@ automation:
       sequence:
       - service_template: "climate.turn_{{ 'on' if is_state('climate.space_heater', 'off') else 'off' }}"
         entity_id: climate.space_heater
+
+
+- alias: Stop fan speed
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *gr_fan_button
+    to: 'brightness_stop'
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.stop_fan_speed
+  - delay: 0.5
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.stop_fan_speed
+
+
+input_boolean:
+  stop_fan_speed:
