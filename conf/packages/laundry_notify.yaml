@@ -1,4 +1,27 @@
 automation:
+- alias: Record washer/dryer on/off
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.washer_power
+    above: 550
+  - platform: numeric_state
+    entity_id: sensor.washer_power
+    below: 1.5
+  - platform: numeric_state
+    entity_id: sensor.dryer_power
+    above: 250
+    for: '00:05:00'
+  - platform: numeric_state
+    entity_id: sensor.dryer_power
+    below: 50
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
+    data_template:
+      entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','') }}"
+
+
 - alias: Notify when washer/dryer done
   initial_state: true
   mode: parallel
@@ -37,29 +60,6 @@ automation:
   - service: script.laundry_light_notify
     data:
       color_name: "{{ 'blue' if trigger.to_state.name == 'Washer' else 'orange' }}"
-
-
-- alias: Record washer/dryer on/off
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.washer_power
-    above: 550
-  - platform: numeric_state
-    entity_id: sensor.washer_power
-    below: 1.5
-  - platform: numeric_state
-    entity_id: sensor.dryer_power
-    above: 250
-    for: '00:05:00'
-  - platform: numeric_state
-    entity_id: sensor.dryer_power
-    below: 50
-  action:
-  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
-    data_template:
-      entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','') }}"
 
 
 - alias: Reset laundry reminder booleans
