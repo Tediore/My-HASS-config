@@ -1,113 +1,77 @@
 automation:
-- alias: Turn entrance light on before sound check
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '06:55:00'
-  condition:
-  - condition: time
-    weekday: sun
-  - condition: template
-    value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
-  - condition: template
-    value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.church', 'start_time')) | timestamp_custom('%-d') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: light.turn_on
-    entity_id: light.entrance
-
-
-- alias: Turn entrance light on/off before work
-  initial_state: true
-  trigger:
-  - platform: time
-    at: 
-    - '07:25:00'
-    - '08:00:00'
-  condition:
-  - condition: state
-    entity_id: device_tracker.andy_phone
-    state: 'home'
-  - condition: template
-    value_template: "{{ is_state_attr('calendar.andy_work', 'message', 'Work') and as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%-d') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service_template: "light.turn_{{ 'on' if now().minute == 25 else 'off' }}"
-    entity_id: light.entrance
-  - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
-    timeout: '00:15:00'
-    continue_on_timeout: true
-  - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
-    timeout: '00:05:00'
-    continue_on_timeout: true
-  - service: light.turn_off
-    entity_id: light.entrance
-
-
-- alias: Turn entrance light on before rehearsal
-  initial_state: true
-  trigger:
-  - platform: template
-    value_template: "{{ state_attr('calendar.church', 'message') != None and 'rehearsal' in state_attr('calendar.church', 'message').lower() and ((as_timestamp(state_attr('calendar.church', 'start_time')) - 1800) == as_timestamp(states('sensor.date_time_iso'))) }}"
-  condition:
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: light.turn_on
-    entity_id: light.entrance
-
-
 - alias: Turn entrance light on/off with switch
   initial_state: true
   trigger:
   - platform: mqtt
-    topic: "stat/entrance_switch/button"
-    payload: 'press'
-  action:
-  - service: light.turn_on
-    entity_id: light.entrance
-    data:
-      brightness_pct: >
-        {% if is_state('light.entrance', 'off') %}
-          {{ 100 if 6 < now().hour < 22 else 50 }}
-        {% else %}
-          0
-        {% endif %}
-
-
-- alias: Turn front closet light on/off
-  initial_state: true
-  mode: parallel
-  trigger:
+    topic: "entrance_light_switch/button"
+    payload: 'SINGLE'
   - platform: state
-    entity_id: binary_sensor.front_closet_door
+    entity_id: sensor.entrance_light_button_action
     to:
     - 'on'
     - 'off'
   action:
-  - service: light.turn_on
-    entity_id: light.front_closet
-    data_template:
-      brightness_pct: >
-        {% if trigger.to_state.state == 'on' %}
-          {{ 100 if is_state('input_boolean.dark_inside', 'off') else 50 }}
-        {% else %}
-          0
-        {% endif %}
+  - service: light.toggle
+    entity_id: light.entrance
+    data:
+      brightness_pct: 100
 
 
-- alias: Turn off entrance light with dining room light
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.dining_room
-    to: 'on'
-  condition:
-  - condition: state  
-    entity_id: light.entrance
-    state: 'on'
-  action:
-  - service: light.turn_off
-    entity_id: light.entrance
+# - alias: Turn entrance light on before sound check
+#   initial_state: true
+#   trigger:
+#   - platform: time
+#     at: '06:55:00'
+#   condition:
+#   - condition: time
+#     weekday: sun
+#   - condition: template
+#     value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
+#   - condition: template
+#     value_template: "{{ as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.church', 'start_time')) | timestamp_custom('%-d') }}"
+#   - condition: template
+#     value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+#   action:
+#   - service: light.turn_on
+#     entity_id: light.entrance
+
+
+# - alias: Turn entrance light on/off before work
+#   initial_state: true
+#   trigger:
+#   - platform: time
+#     at: 
+#     - '07:25:00'
+#     - '08:00:00'
+#   condition:
+#   - condition: state
+#     entity_id: device_tracker.andy_phone
+#     state: 'home'
+#   - condition: template
+#     value_template: "{{ is_state_attr('calendar.andy_work', 'message', 'Work') and as_timestamp(now()) | timestamp_custom('%-d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%-d') }}"
+#   - condition: template
+#     value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+#   action:
+#   - service_template: "light.turn_{{ 'on' if now().minute == 25 else 'off' }}"
+#     entity_id: light.entrance
+#   - wait_template: "{{ is_state('binary_sensor.front_door', 'on') }}"
+#     timeout: '00:15:00'
+#     continue_on_timeout: true
+#   - wait_template: "{{ is_state('binary_sensor.front_door', 'off') }}"
+#     timeout: '00:05:00'
+#     continue_on_timeout: true
+#   - service: light.turn_off
+#     entity_id: light.entrance
+
+
+# - alias: Turn entrance light on before rehearsal
+#   initial_state: true
+#   trigger:
+#   - platform: template
+#     value_template: "{{ state_attr('calendar.church', 'message') != None and 'rehearsal' in state_attr('calendar.church', 'message').lower() and ((as_timestamp(state_attr('calendar.church', 'start_time')) - 1800) == as_timestamp(states('sensor.date_time_iso'))) }}"
+#   condition:
+#   - condition: template
+#     value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+#   action:
+#   - service: light.turn_on
+#     entity_id: light.entrance

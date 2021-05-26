@@ -1,0 +1,19 @@
+automation:
+- alias: Toggle buffet light with dining room lights
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.dining_room
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
+    entity_id: light.buffet
+  - condition: template
+    value_template: "{{ now().month in [11, 12] }}"
+  - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
+    entity_id: light.portable_mini_christmas_tree

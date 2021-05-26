@@ -13,7 +13,7 @@
     entity_id: sensor.outside_dewpoint
     below: 58
   - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] or is_state('device_tracker.pixel_xl_unifi', 'home') }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - condition: state
     entity_id: input_boolean.sleep_mode
     state: 'off'

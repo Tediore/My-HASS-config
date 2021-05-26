@@ -65,58 +65,55 @@
         priority: high
 
 
-- alias: Notify if alarm not armed when away  # throttled - 8 hours
+- alias: Notify when motion detected on deck
   initial_state: true
   trigger:
   - platform: state
-    entity_id: device_tracker.pixel_xl_unifi
-    from: 'home'
-    to: 'not_home'
-    for: '00:05:00'
-  condition:
-  - condition: template
-    value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.notify_if_alarm_not_armed_when_away', 'last_triggered'))) / 3600 > 8 }}"
-  - condition: state
-    entity_id: input_text.alarm
-    state: 'disarmed'
-  - condition: template
-    value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
-  action:
-  - service: notify.mobile_app_matt_phone
-    data:
-      title: "Alarm not armed"
-      message: "You're away and the alarm is disarmed. Arm in away mode?"
-      data:
-        ttl: 0
-        priority: high
-        actions:
-        - action: alarm_arm_away
-          title: Arm alarm
-
-
-- alias: Notify door opened when away
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.front_door
-    - binary_sensor.balcony_door
-    - binary_sensor.storm_door
+    entity_id: binary_sensor.deck_motion
     to: 'on'
   condition:
-  - condition: state
-    entity_id: input_text.alarm
-    state: armed_away
-    for: '00:00:30'
-  - condition: template
-    value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.home
+      state:
+      - 'armed_home'
+      - 'armed_night'
+    - condition: state
+      entity_id:
+      - light.basement_main
+      - light.office
+      state: 'on'
   action:
-  - service: notify.mobile_app_matt_phone
-    data_template:
-      title: "{{ trigger.to_state.name }} opened"
-      message: >
-        {% set time = as_timestamp(now()) | timestamp_custom('%-I:%M %p') %}
-        {{ trigger.to_state.name }} was opened at {{ time.lower().lstrip('0') }}.
-      data:
-        ttl: 0
-        priority: high
+  - service: notify.gotify_high
+    data:
+      title: Motion detected
+      message: Motion detected on deck.
+
+
+# - alias: Notify door opened when away
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id:
+#     - binary_sensor.front_door
+#     - binary_sensor.balcony_door
+#     - binary_sensor.storm_door
+#     to: 'on'
+#   condition:
+#   - condition: state
+#     entity_id: input_text.alarm
+#     state: armed_away
+#     for: '00:00:30'
+#   - condition: template
+#     value_template: "{{ not is_state('device_tracker.pixel_xl_unifi', 'home') }}"
+#   action:
+#   - service: notify.mobile_app_matt_phone
+#     data_template:
+#       title: "{{ trigger.to_state.name }} opened"
+#       message: >
+#         {% set time = as_timestamp(now()) | timestamp_custom('%-I:%M %p') %}
+#         {{ trigger.to_state.name }} was opened at {{ time.lower().lstrip('0') }}.
+#       data:
+#         ttl: 0
+#         priority: high

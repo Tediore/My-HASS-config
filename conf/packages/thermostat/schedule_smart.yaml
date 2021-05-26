@@ -32,7 +32,7 @@ automation:
     entity_id: climate.thermostat
 
 
-- alias: Start sleep mode cool early if running
+- alias: Start sleep mode cool early if idle
   initial_state: true
   trigger:
   - platform: time
@@ -44,7 +44,7 @@ automation:
     entity_id: climate.thermostat
     state: 'cool'
   - condition: template
-    value_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'cooling') and not is_state('sensor.tstat_profile', 'Sleep') }}"
+    value_template: "{{ not is_state_attr('climate.thermostat', 'hvac_action', 'cooling') and not is_state('sensor.tstat_profile', 'Sleep') }}"
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'
@@ -88,33 +88,33 @@ automation:
     entity_id: input_boolean.tstat_smart
 
 
-- alias: Turn heat off if nice outside
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.outside_temp
-    above: 55
-    for: '02:00:00'
-  - platform: template
-    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
-    for: '02:00:00'
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'heat'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
-  - condition: numeric_state
-    entity_id: sensor.outside_temp
-    above: 55
-  action:
-  - service: climate.turn_off
-    entity_id: climate.thermostat
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.tstat_smart
+# - alias: Turn heat off if nice outside
+#   initial_state: true
+#   trigger:
+#   - platform: numeric_state
+#     entity_id: sensor.outside_temp
+#     above: 55
+#     for: '02:00:00'
+#   - platform: template
+#     value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
+#     for: '02:00:00'
+#   condition:
+#   - condition: state
+#     entity_id: climate.thermostat
+#     state: 'heat'
+#   - condition: state
+#     entity_id: input_boolean.tstat_hold
+#     state: 'off'
+#   - condition: template
+#     value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
+#   - condition: numeric_state
+#     entity_id: sensor.outside_temp
+#     above: 55
+#   action:
+#   - service: climate.turn_off
+#     entity_id: climate.thermostat
+#   - service: input_boolean.turn_on
+#     entity_id: input_boolean.tstat_smart
 
 
 - alias: Ask to turn heat back on
@@ -130,7 +130,7 @@ automation:
     state: 'off'
   - condition: numeric_state
     entity_id: sensor.outside_temp
-    below: 35
+    below: 45
   - condition: or
     conditions:
     - condition: time

@@ -1,74 +1,61 @@
-automation:
-- alias: Dim down/up cabinet lights with motion
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.kitchen_motion
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: binary_sensor.kitchen_motion
-    from: 'on'
-    to: 'off'
-    for: '00:10:00'
-  - platform: state
-    entity_id: input_boolean.lr_tv_ir
-  condition:
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'off'
-  action:
-  - service: "input_boolean.turn_{{ trigger.to_state.state }}"
-    entity_id: input_boolean.kitchen_cabinet_light_ctl
-  - condition: state
-    entity_id: light.kitchen_cabinets
-    state: 'on'
-  - service: light.turn_on
-    entity_id: light.kitchen_cabinets
-    data:
-      transition: "{{ 1 if trigger.to_state.state == 'on' else 5 }}"
-      brightness_pct: >
-        {% set hour = now().hour %}
-        {% set state = trigger.to_state.state %}
-        {% if (is_state('media_player.living_room_vizio', 'on') and is_state('light.living_room', 'off')) or (now().hour < 6 or now().hour > 20) %}
-          {% if state == 'on' %}
-            66
-          {% else %}
-            33
-          {% endif %}
-        {% else %}
-          {% if state == 'on' %}
-            100
-          {% else %}
-            50
-          {% endif %}
-        {% endif %}
+light:
+- platform: mqtt
+  name: Kitchen
+  state_topic: "stat/kitchen_lights/POWER1"
+  command_topic: "cmnd/kitchen_lights/EVENT"
+  availability_topic: "tele/kitchen_lights/LWT"
+  payload_on: "ON"
+  payload_off: "OFF"
+  payload_available: "Online"
+  payload_not_available: "Offline"
 
 
-- alias: Dim down/up cabinet lights with motion - Andy sleep
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.kitchen_motion
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: binary_sensor.kitchen_motion
-    from: 'on'
-    to: 'off'
-  - platform: state
-    entity_id: input_boolean.lr_tv_ir
-  condition:
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'on'
-  action:
-  - service: light.turn_on
-    entity_id: light.kitchen_cabinets
-    data:
-      brightness_pct: "{{ 66 if trigger.to_state.state == 'on' else 25 }}"
-      transition: "{{ 1 if trigger.to_state.state == 'on' else 5 }}"
+# automation:
+# - alias: Dim down/up cabinet lights with motion
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.kitchen_motion
+#     from: 'off'
+#     to: 'on'
+#   - platform: state
+#     entity_id: binary_sensor.kitchen_motion
+#     from: 'on'
+#     to: 'off'
+#     for: '00:10:00'
+#   - platform: state
+#     entity_id: input_boolean.lr_tv_ir
+#   condition:
+#   - condition: state
+#     entity_id: input_boolean.andy_sleep
+#     state: 'off'
+#   action:
+#   - service: "input_boolean.turn_{{ trigger.to_state.state }}"
+#     entity_id: input_boolean.kitchen_cabinet_light_ctl
+#   - condition: state
+#     entity_id: light.kitchen_cabinets
+#     state: 'on'
+#   - service: light.turn_on
+#     entity_id: light.kitchen_cabinets
+#     data:
+#       transition: "{{ 1 if trigger.to_state.state == 'on' else 5 }}"
+#       brightness_pct: >
+#         {% set hour = now().hour %}
+#         {% set state = trigger.to_state.state %}
+#         {% if (is_state('media_player.living_room_vizio', 'on') and is_state('light.living_room', 'off')) or (now().hour < 6 or now().hour > 20) %}
+#           {% if state == 'on' %}
+#             66
+#           {% else %}
+#             33
+#           {% endif %}
+#         {% else %}
+#           {% if state == 'on' %}
+#             100
+#           {% else %}
+#             50
+#           {% endif %}
+#         {% endif %}
 
 
-input_boolean:
-  kitchen_cabinet_light_ctl:
+# input_boolean:
+#   kitchen_cabinet_light_ctl:

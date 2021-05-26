@@ -1,0 +1,180 @@
+automation:
+- alias: Turn basement stairs light on/off with door
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.basement_door
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: binary_sensor.basement_door
+    from: 'on'
+    to: 'off'
+    for: '00:00:15'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id:
+        - light.basement_stairs
+        - input_boolean.dark_inside
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.basement_stairs_lights
+        data:
+          kelvin: 4000
+          brightness_pct: 100
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: input_boolean.dark_inside
+        state: 'on'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.basement_stairs_bottom
+        data:
+          kelvin: 3000
+          brightness_pct: 100
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      sequence:
+      - service: light.turn_off
+        entity_id: light.basement_stairs_lights
+
+
+- alias: Turn basement bathroom night light on
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - input_boolean.dark_inside
+    - group.basement_lights
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: input_text.alarm
+    from: 'armed_away'
+    to: 'disarmed'
+  condition:
+  - condition: state
+    entity_id: 
+    - group.basement_lights
+    - input_boolean.dark_inside
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.basement_bath_night_light
+
+
+- alias: Turn basement bathroom night light off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - group.basement_lights
+    - input_boolean.dark_inside
+    from: 'on'
+    to: 'off'
+  action:
+  - service: light.turn_off
+    entity_id:
+    - light.basement_bath_night_light
+    - light.basement_hallway
+
+
+- alias: Turn basement hall light on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - light.office_2
+    - light.basement_main
+    to:
+    - 'on'
+    - 'off'
+  - platform: time
+    at: '21:00:00'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' or trigger.platform == 'time' }}"
+      - condition: state
+        entity_id: light.basement_main
+        state: 'off'
+      - condition: state
+        entity_id: light.office_2
+        state: 'on'
+      sequence: &bsmt_hall_light_on
+      - service: light.turn_on
+        entity_id: light.basement_hallway
+        data:
+          brightness_pct: 50
+          kelvin: 2700
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: light.basement_main
+        state: 'on'
+      sequence:
+      - service: light.turn_off
+        entity_id: light.basement_hallway
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      - condition: state
+        entity_id: light.office_2
+        state: 'on'
+      sequence: *bsmt_hall_light_on
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      - condition: state
+        entity_id: light.office_2
+        state: 'off'
+      sequence:
+      - service: light.turn_off
+        entity_id: light.basement_hallway
+
+
+light:
+- platform: mqtt
+  name: Basement stairs
+  state_topic: "stat/basement_stairs/POWER1"
+  command_topic: "cmnd/basement_stairs/EVENT"
+  availability_topic: "tele/basement_stairs/LWT"
+  payload_on: "ON"
+  payload_off: "OFF"
+  payload_available: "Online"
+  payload_not_available: "Offline"
+
+- platform: group
+  name: Basement stairs lights
+  entities:
+  - light.basement_stairs
+  - light.basement_stairs_bottom
+
+- platform: group
+  name: Basement fireplace lights
+  entities:
+  - light.basement_fireplace_left
+  - light.basement_fireplace_right
+
+# - platform: group
+#   name: Basement lamps
+#   entities:
+#   - light.basement_lamp_left
+#   - light.basement_lamp_right
+
+
+group:
+  basement_lights:
+    name: Basement lights
+    entities:
+      - light.basement_main
+      - light.basement_lamps #need to make this light group when we have lamps in the basement
+      - light.basement_bar
+      - light.craft_room
+      - light.craft_room_2
+      - light.office
+      - light.office_2
+      - light.right_lamp_basement

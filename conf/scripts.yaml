@@ -70,6 +70,17 @@ ir_fan_speed:
       topic: *ir_topic
       payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0xD88"}'
 
+fan_on_with_speed:
+  sequence:
+  - service: mqtt.publish
+    data:
+      topic: "cmnd/{{ room.lower().replace(' ','_') }}_fan/tuyasend4"
+      payload: "3,{{ (speed | int - 1) | int }}"
+  - delay: 1
+  - service: switch.turn_on
+    data:
+      entity_id: "switch.{{ room.lower().replace(' ','_') }}_fan"
+
 ir_soundbar_vol_up:
   sequence:
   - service: mqtt.publish

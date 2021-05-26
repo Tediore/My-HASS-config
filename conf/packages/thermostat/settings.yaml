@@ -85,8 +85,8 @@ input_number:
   tstat_cool_sleep:
     name: Sleep
     icon: mdi:sleep
-    min: 68
-    max: 74
+    min: 70
+    max: 78
     step: 1
     unit_of_measurement: '°F'
     mode: slider
@@ -206,19 +206,3 @@ sensor:
       friendly_name: "Setpoint"
       value_template: "{{ state_attr('climate.thermostat','temperature') | float('-') | round(0) }}"
       unit_of_measurement: '°F'
-
-
-automation:
-- alias: Adjust sleep temp when Andy home/away
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: device_tracker.andy_phone
-    to: 
-    - 'not_home'
-    - 'home'
-  action:
-  - service: input_number.set_value
-    entity_id: input_number.tstat_cool_sleep
-    data_template:
-      value: "{{ 69 if trigger.to_state.state == 'home' else 71 }}"

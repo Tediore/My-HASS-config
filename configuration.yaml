@@ -12,6 +12,7 @@ homeassistant:
   allowlist_external_dirs:
   - /config/.other
   external_url: !secret base_url
+amcrest: !include conf/amcrest.yaml
 automation: !include_dir_merge_list conf/automations/
 binary_sensor: !include conf/binary_sensor.yaml
 camera: !include conf_pkg/camera.yaml
@@ -51,7 +52,6 @@ switch: !include conf/switch.yaml
 system_health:
 timer: !include conf_pkg/timer.yaml
 tts: !include conf/tts.yaml
-updater: !include conf_settings/updater.yaml
 wake_on_lan:
 weather: !include conf/weather.yaml
 zeroconf:

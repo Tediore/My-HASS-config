@@ -1,0 +1,65 @@
+automation:
+- alias: Turn laundry room lights on/off with door/motion
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - binary_sensor.laundry_room_door_front
+    - binary_sensor.laundry_room_door_back
+    - binary_sensor.laundry_room_motion_front
+    - binary_sensor.laundry_room_motion_back
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: &laundry_motion
+    - binary_sensor.laundry_room_motion_front
+    - binary_sensor.laundry_room_motion_back
+    from: 'on'
+    to: 'off'
+    for: &laundry_motion_off_time '00:05:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.laundry_motion
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: light.laundry_room
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.laundry_room
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      sequence:
+      - service: light.turn_off
+        entity_id: light.laundry_room
+
+
+- alias: Disable laundry room light motion control
+  initial_state: true
+  trigger:
+  - platform: mqtt
+    topic: 'stat/laundry_room_motion'
+  action:
+  - service: input_boolean.toggle
+    entity_id: input_boolean.laundry_motion
+
+
+- alias: Laundry room lights button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.laundry_room_lights_button
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: light.toggle
+    entity_id: light.laundry_room
+
+
+input_boolean:
+  laundry_motion:

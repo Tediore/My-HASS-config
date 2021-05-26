@@ -51,6 +51,10 @@ automation:
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
+  - service: notify.gotify_andy
+    data_template:
+      title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
+      message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
   - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
     data_template:
       entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
@@ -67,8 +71,10 @@ automation:
   trigger:
   - platform: state
     entity_id: 
-    - binary_sensor.laundry_room_door
-    - binary_sensor.laundry_room_motion_hk
+    - binary_sensor.laundry_room_door_front
+    - binary_sensor.laundry_room_door_back
+    - binary_sensor.laundry_room_motion_front
+    - binary_sensor.laundry_room_motion_back
     - input_boolean.sleep_mode
     from: 'off'
     to: 'on'
@@ -82,25 +88,25 @@ automation:
     - input_boolean.dryer_reminder
 
 
-script:
-  laundry_light_notify:
-    sequence:
-    - service: scene.create
-      data:
-        scene_id: before_laundry_notify
-        snapshot_entities:
-        - light.living_room_sconces
-    - service: light.turn_on
-      entity_id: light.living_room_sconces
-      data_template:
-        color_name: "{{ color_name }}"
-    - delay: 1.5
-    - service: light.turn_on
-      entity_id: light.living_room_sconces
-      data:
-        flash: short
-    - delay: 2
-    - scene: scene.before_laundry_notify
+# script:
+#   laundry_light_notify:
+#     sequence:
+#     - service: scene.create
+#       data:
+#         scene_id: before_laundry_notify
+#         snapshot_entities:
+#         - light.living_room_sconces
+#     - service: light.turn_on
+#       entity_id: light.living_room_sconces
+#       data_template:
+#         color_name: "{{ color_name }}"
+#     - delay: 1.5
+#     - service: light.turn_on
+#       entity_id: light.living_room_sconces
+#       data:
+#         flash: short
+#     - delay: 2
+#     - scene: scene.before_laundry_notify
 
 
 input_boolean:

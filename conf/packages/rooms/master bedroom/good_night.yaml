@@ -5,7 +5,7 @@ automation:
   - platform: state
     entity_id: input_boolean.sleep_mode
     to: 'on'
-    for: '00:00:05'
+    for: '00:00:10'
   condition:
   - condition: or
     conditions:
@@ -68,8 +68,9 @@ script:
       - script.sleep_switches
       - script.porch_light_security
       - script.christmas_lights_off
-    - service: climate.turn_on
-      entity_id: climate.master_bedroom_fan
+      - script.master_bedroom_ac_on
+    - service: switch.turn_on
+      entity_id: switch.master_bedroom_fan
     - service: light.turn_on
       entity_id: light.master_bath_night_light
       data:
@@ -95,10 +96,12 @@ script:
       entity_id: 
       - script.sleep_switches
       - script.christmas_lights_off
-    - service: climate.turn_on
-      entity_id: climate.master_bedroom_fan
+    - service: switch.turn_on
+      entity_id: switch.master_bedroom_fan
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
+    - service: script.turn_on
+      entity_id: script.master_bedroom_ac_on
     - service: alarm_control_panel.alarm_arm_home
       data:
         entity_id: alarm_control_panel.home
@@ -116,35 +119,44 @@ script:
     - service: homeassistant.turn_off
       entity_id:
       - light.master_bedroom
-      - media_player.bedroom_tv
+      - light.master_bedroom_fan
+      - light.craft_room
       - light.dining_room
-      - switch.air_freshener
       - light.tea_lights
+      - media_player.bedroom_tv
+      - switch.air_freshener
       - group.lights_christmas
-      - switch.candle_warmer
     - service: light.turn_on
       entity_id: light.master_bath_night_light
       data:
         brightness_pct: 10
     - service: light.turn_on
+      entity_id: light.hallway
+      data:
+        brightness_pct: 10 # minimum is 10 (tuyaMCU nonsense)
+    - service: light.turn_on
       entity_id: light.hall_bath_night_light
       data:
         brightness_pct: 50
     - service: light.turn_on
-      entity_id: light.buffet
+      entity_id:
+      - light.buffet
+      - light.entrance
       data:
         brightness_pct: 25
     - service: light.turn_on
       entity_id: light.kitchen_cabinets
       data:
-        brightness_pct: "{{ 30 if is_state('binary_sensor.kitchen_motion', 'on') else 10 }}"
+        brightness_pct: 50
         transition: 5
     - service: alarm_control_panel.alarm_arm_home
       data:
         entity_id: alarm_control_panel.home
         code: !secret alarm_code_system
+    - service: script.turn_on
+      entity_id: script.master_bedroom_ac_on
     - condition: state
-      entity_id: light.game_room
+      entity_id: light.office
       state: 'on'
     - service: homeassistant.turn_off
       entity_id: light.living_room
@@ -195,7 +207,7 @@ script:
       - media_player.bedroom_tv
       - media_player.living_room_vizio
       - media_player.living_room_speaker
-      - media_player.portable_speaker
+      - media_player.office_speaker
       - media_player.hub
       - media_player.kitchen_speaker
 
@@ -208,6 +220,19 @@ script:
       - switch.space_heater
       - switch.air_freshener
       - switch.old_style_sign
+
+
+  master_bedroom_ac_on:
+    sequence:
+    - condition: state
+      entity_id: climate.thermostat
+      state: 'cool'
+    - service: climate.set_temperature
+      entity_id: climate.bedroom_ac
+      data:
+        temperature: "{{ 68 if is_state('input_boolean.sleep_mode', 'on') else 71 }}"
+    - service: climate.turn_on
+      entity_id: climate.bedroom_ac
 
 
 input_number:

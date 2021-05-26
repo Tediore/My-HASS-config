@@ -77,59 +77,19 @@ automation:
   - delay: 20
 
 
-- alias: Turn thermostat off when working out
-  initial_state: true
-  trigger:
-  - platform: template
-    value_template: "{{ state_attr('media_player.living_room_vizio', 'app_name') != None and state_attr('media_player.living_room_cast', 'app_name')[:3] == 'BOD' }}"
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'heat'
-  action:
-  - service: climate.turn_off
-    entity_id: climate.thermostat
-  - service: homeassistant.turn_on
-    entity_id: 
-    - input_boolean.workout
-    - switch.living_room_fan
-
-
-- alias: Resume thermostat schedule after working out
-  initial_state: true
-  trigger:
-  - platform: template
-    value_template: "{{ state_attr('media_player.living_room_cast', 'app_name') == None }}"
-  condition:
-  - condition: state
-    entity_id: input_boolean.workout
-    state: 'on'
-  action:
-  - service: homeassistant.turn_off
-    entity_id:
-    - switch.living_room_fan
-    - input_boolean.workout
-  - delay: '00:05:00'
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.tstat_sched_resume
-
-
 - alias: Set living room TV auto-brightness
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sun.sun
-    to:
-    - 'above_horizon'
-    - 'below_horizon'
-    for: '00:30:00'
+    entity_id: media_player.living_room_vizio
+    to: 'on'
   action:
   - service: vizio.update_setting
     data:
       entity_id: media_player.living_room_vizio
       setting_type: picture
       setting_name: auto_brightness_control
-      new_value: "{{ 'High' if trigger.to_state.state == 'below_horizon' else 'Off' }}"
+      new_value: "{{ 'High' if is_state('sun.sun', 'below_horizon') else 'Off' }}"
 
 
 - alias: Restore lights when TV turned off
@@ -173,75 +133,6 @@ automation:
   action:
   - service: light.turn_off
     entity_id: light.living_room_bias_lighting
-
-
-- alias: Boost TV volume when furnace on
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.hvac_action
-    to: 'cooling'
-  - platform: state
-    entity_id: sensor.hvac_action
-    to: 'heating'
-    for: '00:01:00'
-  condition:
-  - condition: state
-    entity_id: media_player.living_room_vizio
-    state: 'on'
-  - condition: template
-    value_template: "{{ not is_state_attr('media_player.living_room_vizio', 'app_name', 'SmartCast Home') }}"
-  action:
-  - repeat:
-      count: "{{ 3 if trigger.to_state.state == 'heating' else 5 }}"
-      sequence:
-      - service: script.turn_on
-        entity_id: script.ir_soundbar_vol_up
-      - delay: 0.5
-
-
-- alias: Lower TV volume when furnace off
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.hvac_action
-    from: 'cooling'
-    to:
-    - 'idle'
-    - 'off'
-    for: '00:00:52'
-  - platform: state
-    entity_id: sensor.hvac_action
-    from: 'heating'
-    to:
-    - 'idle'
-    - 'off'
-    for: '00:02:00'
-  condition:
-  - condition: state
-    entity_id: media_player.living_room_vizio
-    state: 'on'
-  action:
-  - repeat: &soundbar_vol_dn
-      count: "{{ 3 if trigger.to_state.state == 'heating' else 5 }}"
-      sequence:
-      - service: script.turn_on
-        entity_id: script.ir_soundbar_vol_dn
-      - delay: 0.5
-
-
-- alias: Lower TV volume when TV turned off
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: media_player.living_room_vizio
-    from: 'on'
-    to: 'off'
-  condition:
-  - condition: template
-    value_template: "{{ states('sensor.hvac_action') in ['cooling', 'heating'] }}"
-  action:
-  - repeat: *soundbar_vol_dn
 
 
 - alias: Toggle air freshener
@@ -305,33 +196,31 @@ script:
   pre_media:
     alias: Turn stuff off when TV turned on
     sequence:
-    - service: homeassistant.turn_off
-      entity_id:
-      - media_player.living_room_speaker
-      - media_player.bedroom_speaker
-      - media_player.kitchen_speaker
-      - media_player.hub
-      - input_boolean.lr_tv_ir
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.lr_tv_ir
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'
     - service: light.turn_on
-      entity_id: light.buffet
+      entity_id:
+      - light.hallway
+      - light.entrance
+      data:
+        brightness_pct: 25
+        transition: 5
+    - service: light.turn_on
+      entity_id:
+      - light.buffet
+      - light.kitchen_cabinets
       data:
         kelvin: 3000
         transition: 2
         brightness_pct: 50
-    - service: light.turn_on
-      entity_id: light.kitchen_cabinets
-      data:
-        brightness_pct: "{{ 50 if is_state('input_boolean.kitchen_cabinet_light_ctl', 'on') else 25 }}"
-        transition: 5
     - service: script.turn_on
       entity_id: script.christmas_lights_off
     - service: light.turn_on
       entity_id: light.living_room_bias_lighting
       data:
-        kelvin: 6500
         brightness_pct: 100
     - condition: state
       entity_id: light.living_room_lamps
@@ -346,7 +235,7 @@ script:
     sequence:
     - service: light.turn_on
       data:
-        entity_id: "{{ 'light.living_room_lamps, light.buffet' if is_state('light.living_room', 'off') else 'light.buffet' }}"
+        entity_id: "{{ 'light.living_room_lamps, light.buffet, light.hallway' if is_state('light.living_room', 'off') else 'light.buffet, light.hallway' }}"
         kelvin: 3000
         transition: 3
         brightness_pct: "{{ 100 if 6 < now().hour < 21 else 50 }}"

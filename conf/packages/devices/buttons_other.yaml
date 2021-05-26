@@ -1,80 +1,4 @@
 automation:
-- alias: Andy's desk button
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.button_andy_desk
-    to:
-    - 'on'
-    - 'off'
-    - 'brightness_move_down'
-    - 'brightness_move_up'
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state in ['on', 'off'] }}"
-      sequence:
-      - service: light.toggle
-        entity_id: light.andy_desk
-        data:
-          brightness_pct: 100
-          kelvin: "{{ 3000 if is_state('input_boolean.dark_inside', 'on') else 5000 }}"
-    - conditions:
-      - "{{ 'move' in trigger.to_state.state }}"
-      sequence:
-      - service: media_player.volume_mute
-        entity_id: media_player.portable_speaker
-        data:
-          is_volume_muted: "{{ true if is_state_attr('media_player.portable_speaker', 'is_volume_muted', false) else false }}"
-
-
-- alias: Matt's desk button
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.matt_desk_remote
-    to:
-    - 'on'
-    - 'off'
-    - 'brightness_move_down'
-    - 'brightness_move_up'
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: light.dresser_hk
-        state: 'on'
-      sequence:
-      - service: light.turn_off
-        entity_id: light.game_room
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: light.dresser_hk
-        state: 'off'
-      sequence:
-      - service: hue.hue_activate_scene
-        data:
-          group_name: Game room
-          scene_name: "{{ 'Daylight' if is_state('input_boolean.dark_inside', 'off') else 'Read' }}"
-    - conditions:
-      - "{{ 'brightness' in trigger.to_state.state }}"
-      sequence:
-      - service: light.turn_off
-        entity_id: light.matt_desk
-    default:
-    - service: light.turn_on
-      entity_id: light.matt_desk
-      data:
-        brightness_pct: >
-          {% if is_state('light.matt_desk', 'off') %}
-            50
-          {% else %}
-            {{ 100 if state_attr('light.matt_desk', 'brightness') | int < 129 else 0 }}
-          {% endif %}
-
-
 - alias: Cross stitch button
   initial_state: true
   trigger:
@@ -91,83 +15,16 @@ automation:
       kelvin: 3000
 
 
-- alias: Game room fan/heater button
+- alias: Side entrance doorbell
   initial_state: true
-  mode: single
   trigger:
   - platform: state
-    entity_id: &gr_fan_button sensor.game_room_fan_button_action
+    entity_id: sensor.side_entrance_doorbell
     to:
     - 'on'
     - 'off'
-    - 'brightness_move_down'
-    - 'brightness_move_up'
   action:
-  - choose:
-    - conditions: # turn game room fan on
-      - condition: template
-        value_template: "{{ 'brightness' not in trigger.to_state.state }}"
-      - condition: state
-        entity_id: climate.thermostat
-        state:
-        - 'cool'
-        - 'off'
-      sequence: 
-      - service_template: "{{ 'fan.turn_on' if is_state('climate.game_room_fan', 'off') else 'climate.turn_off' }}"
-        data_template:
-          entity_id: "{{ 'fan.game_room' if is_state('climate.game_room_fan', 'off') else 'climate.game_room_fan' }}"
-    - conditions: # turn space heater on without generic thermostat
-      - condition: template
-        value_template: "{{ 'brightness' in trigger.to_state.state }}"
-      - condition: state
-        entity_id: climate.thermostat
-        state: 'heat'
-      sequence: 
-      - service_template: switch.toggle
-        entity_id: switch.space_heater
-    - conditions: # change fan speed
-      - condition: template
-        value_template: "{{ 'brightness' in trigger.to_state.state }}"
-      - condition: state
-        entity_id: climate.thermostat
-        state:
-        - 'cool'
-        - 'off'
-      sequence:
-      - repeat:
-          sequence:
-          - service: script.ir_fan_speed
-            data:
-              blaster: game_room_ir
-          - delay: 1
-          until:
-          - condition: state
-            entity_id: input_boolean.stop_fan_speed
-            state: 'on'
-    - conditions:  # turn space heater on with generic thermostat
-      - condition: template
-        value_template: "{{ 'brightness' not in trigger.to_state.state }}"
-      - condition: state
-        entity_id: climate.thermostat
-        state: 'heat'
-      sequence:
-      - service_template: "climate.turn_{{ 'on' if is_state('climate.space_heater', 'off') else 'off' }}"
-        entity_id: climate.space_heater
-
-
-- alias: Stop fan speed
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: *gr_fan_button
-    to: 'brightness_stop'
-  action:
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.stop_fan_speed
-  - delay: 0.5
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.stop_fan_speed
-
-
-input_boolean:
-  stop_fan_speed:
+  - service: switch.turn_on
+    entity_id: 
+    - switch.main_floor_chime_double_beep # cut off early so that it only beeps once
+    - switch.basement_chime_double_beep

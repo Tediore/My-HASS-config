@@ -34,7 +34,7 @@
         data_template:
           number: !secret phone_matt
           message: >
-            Alarm: {{ states('sensor.alarm_mode') + '\n' }}Thermostat: {{ states('sensor.tstat_profile') + '\n' }}{{ 'All lights are off.' if is_state('group.lights_all', 'off') else 'The following lights are on: '}}{% for light in expand('group.lights_all') if light.state == 'on' -%}
+            Alarm: {{ states('sensor.alarm_mode') + '\n' }}Thermostat: {{ states('sensor.tstat_profile') + '\n' }}{{ 'All lights are off.' if is_state('group.lights_interior', 'off') else 'The following lights are on: '}}{% for light in expand('group.lights_interior') if light.state == 'on' -%}
             {{ light.attributes.friendly_name.lower() }}
             {%- if not loop.last %}{{ ', ' }} 
             {%- endif %}

@@ -6,12 +6,15 @@ automation:
   trigger:
   - platform: state
     entity_id: &water_sensors
-    - binary_sensor.laundry_room_leak
-    - binary_sensor.kitchen_leak
-    - binary_sensor.hall_bath_toilet_leak
-    - binary_sensor.hall_bath_sink_leak
-    - binary_sensor.master_bath_toilet_leak
-    - binary_sensor.master_bath_sink_leak
+    - binary_sensor.basement_bathroom_leak
+    - binary_sensor.bathroom_ejector_leak
+    - binary_sensor.hall_bath_leak
+    - binary_sensor.hvac_leak
+    - binary_sensor.dishwasher_leak
+    - binary_sensor.kitchen_sink_leak
+    - binary_sensor.master_bath_leak
+    - binary_sensor.sump_pump_leak
+    - binary_sensor.washer_sink_leak
     to: 'on'
   - platform: state
     entity_id: *water_sensors

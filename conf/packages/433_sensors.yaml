@@ -1,15 +1,6 @@
-binary_sensor:
-- platform: mqtt
-  name: Balcony motion
-  device_class: motion
-  state_topic: rfbridge/balcony_motion
-  payload_on: '1'
-  off_delay: 5
-
-
 sensor:
 - platform: mqtt
-  name: Fridge temp
+  name: Basement fridge temp
   state_topic: &fridge_topic "rtl_433/107/event"
   value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
   device_class: temperature
@@ -17,7 +8,7 @@ sensor:
   unit_of_measurement: '°F'
 
 - platform: mqtt
-  name: Freezer temp
+  name: Main fridge temp
   state_topic: &freezer_topic "rtl_433/72/event"
   value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
   device_class: temperature
@@ -25,66 +16,33 @@ sensor:
   unit_of_measurement: '°F'
 
 - platform: mqtt
-  name: Outside temp
-  state_topic: &outdoor_temp_topic "rtl_433/5801/event"
+  name: Attic temp
+  state_topic: &attic_temp_topic "rtl_433/5801/event"
   value_template: "{{ '{:.1f}'.format(((value_json.temperature_C | float * 9/5) + 32) + states('input_number.outside_temp_calib') | int) }}"
   device_class: temperature
-  json_attributes_topic: *outdoor_temp_topic
+  json_attributes_topic: *attic_temp_topic
+  unit_of_measurement: '°F'
+
+- platform: mqtt
+  name: Attic humidity
+  state_topic: &attic_hum_topic "rtl_433/5801/event"
+  value_template: "{{ '{:.0f}'.format(value_json.humidity) }}"
+  device_class: temperature
+  json_attributes_topic: *attic_hum_topic
+  unit_of_measurement: '%'
+
+- platform: mqtt
+  name: Outside temp
+  state_topic: &outside_temp_topic "rtl_433/3646/event"
+  value_template: "{{ '{:.1f}'.format(((value_json.temperature_C | float * 9/5) + 32) + states('input_number.outside_temp_calib') | int) }}"
+  device_class: temperature
+  json_attributes_topic: *attic_temp_topic
   unit_of_measurement: '°F'
 
 - platform: mqtt
   name: Outside humidity
-  state_topic: &outdoor_hum_topic "rtl_433/5801/event"
-  value_template: >
-    {% set temp = states('sensor.outside_temp') | float %}
-    {% if temp < -30 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < -20 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < -10 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 0 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 10 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 20 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 30 %}
-      {{ 100 if value_json.humidity | int * 1.35 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 40 %}
-      {{ 100 if value_json.humidity | int * 1.2 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 50 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 60 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 70 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 80 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 90 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 100 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% elif temp < 110 %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% else %}
-      {{ 100 if value_json.humidity | int * 1.05 > 100 else '{:.0f}'.format(value_json.humidity | int * 1.35) }}
-    {% endif %}
+  state_topic: &outside_hum_topic "rtl_433/3646/event"
+  value_template: "{{ '{:.0f}'.format(value_json.humidity) }}"
   device_class: temperature
-  json_attributes_topic: *outdoor_hum_topic
+  json_attributes_topic: *attic_hum_topic
   unit_of_measurement: '%'
-
-
-input_number:
-  outside_temp_calib:
-    min: -20
-    max: 20
-    step: 1
-    unit_of_measurement: '°F'
-    mode: slider
-
-  # outside_hum_calib:
-  #   min: -20
-  #   max: 40
-  #   step: 0.01
-  #   mode: box

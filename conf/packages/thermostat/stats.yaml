@@ -55,6 +55,11 @@ sensor:
       friendly_name: "Time home yesterday"
       value_template: "{{ (24 - (states('sensor.time_away_yesterday') | float)) | round(1) }}"
       unit_of_measurement: 'h'
+    
+    time_between_cycles:
+      friendly_name: "Time between cycles"
+      value_template: "{{ (((as_timestamp(states('input_text.time_cycle_start')) | float - as_timestamp(states('input_text.time_cycle_end')) | float)) / 60) | round(1) }}"
+      unit_of_measurement: 'm'
 
 
 ### History stats - heating

@@ -27,15 +27,11 @@
     - binary_sensor.master_bedroom_motion
     - binary_sensor.master_bedroom_window_left_contact
     - binary_sensor.storm_door
-    - sensor.balcony_light_level
+    - sensor.outdoor_light_level
     - sensor.kitchen_light_level
     - sensor.master_bedroom_temp
     - sensor.game_room_temp
-    - switch.air_freshener
-    - switch.master_bedroom_fan_plug
-    - switch.laundry_room_plug
     - light.kitchen_cabinets
-    - switch.game_room_bias_lighting
     - light.front_closet
     to: 'unavailable'
     for: '00:00:10'
@@ -69,11 +65,13 @@
     entity_id:
     - light.living_room_bias_lighting
     - sensor.siren_battery
-    - switch.air_freshener
+    - switch.basement_main_plug
+    - switch.dining_room_plug
     - switch.game_room_bias_lighting
-    - switch.laundry_room_plug
-    - switch.master_bedroom_fan_plug
-    - switch.old_style_sign
+    - switch.garage_plug
+    - switch.guest_bedroom_plug
+    - switch.living_room_plug
+    - switch.master_bedroom_plug
     to: 'unavailable'
     for: '00:05:00'
   action:
@@ -126,68 +124,102 @@
   mode: parallel
   max: 100
   trigger:
+
+# {% for state in states.sensor if 'battery' in state.entity_id and 'phone' not in state.entity_id and 'low' not in state.entity_id and 'ups' not in state.entity_id and 'hk' not in state.entity_id %}
+# - {{ state.entity_id -}}
+# {% endfor %}
   - platform: numeric_state
     entity_id:
-    - sensor.balcony_light_battery
+    - sensor.basement_bathroom_leak_sensor_battery
+    - sensor.basement_door_battery
+    - sensor.basement_temp_sensor_battery
+    - sensor.bathroom_ejector_leak_sensor_battery
     - sensor.button_andy_battery
-    - sensor.button_andy_desk_battery
     - sensor.button_matt_battery
     - sensor.dining_room_remote_battery_level
-    - sensor.entrance_motion_battery_level
-    - sensor.game_room_desk_remote_battery
+    - sensor.front_door_battery
+    - sensor.front_door_keypad_battery
+    - sensor.front_porch_door_battery
     - sensor.game_room_remote_battery_level
-    - sensor.game_room_table_remote_battery
-    - sensor.game_room_temp_sensor_battery
-    - sensor.hall_bath_sink_leak_battery
-    - sensor.hall_bath_toilet_leak_battery
+    - sensor.game_room_temp_battery
+    - sensor.garage_door_battery_level
+    - sensor.garage_service_door_battery
+    - sensor.hall_bath_leak_sensor_battery
+    - sensor.hall_bath_sink_leak_battery_level
+    - sensor.hvac_leak_sensor_battery
     - sensor.kitchen_leak_sensor_battery
-    - sensor.kitchen_light_level_battery
-    - sensor.kitchen_motion_sensor_battery
-    - sensor.laundry_room_leak_battery
+    - sensor.kitchen_sink_leak_sensor_battery
+    - sensor.laundry_room_door_front_battery
+    - sensor.laundry_room_temp_sensor_battery
+    - sensor.living_room_lamp_button_battery
     - sensor.living_room_remote_battery_level
-    - sensor.master_bath_sink_leak_battery
-    - sensor.master_bath_toilet_leak_battery
-    - sensor.master_bedroom_closet_motion_battery
-    - sensor.master_bedroom_motion_battery
+    - sensor.master_bath_leak_sensor_battery
     - sensor.master_bedroom_remote_battery_level
     - sensor.master_bedroom_temp_battery
-    - sensor.porch_light_remote_battery
+    - sensor.matt_s_desk_remote_battery
+    - sensor.mi_flora_battery
+    - sensor.mouse_battery
+    - sensor.office_desk_remote_battery
+    - sensor.office_temp_battery
+    - sensor.outdoor_light_sensor_battery
+    - sensor.server_battery
+    - sensor.side_door_battery
+    - sensor.side_door_keypad_battery
+    - sensor.side_entrance_doorbell_battery
+    - sensor.siren_battery
     - sensor.smoke_alarm_battery_level
-    - sensor.game_room_fan_button_battery
-    - sensor.living_room_lamp_button_battery
-    - sensor.sunset_lights_button_battery
+    - sensor.soldering_station_remote_battery
+    - sensor.sump_pump_leak_sensor_battery
+    - sensor.washer_sink_leak_sensor_battery
     below: 21
     for: '08:00:00'
+
+# {% for state in states.binary_sensor if 'battery' in state.entity_id %}
+# - {{ state.entity_id -}}
+# {% endfor %}
   - platform: state
     entity_id:
-    - binary_sensor.front_closet_door_battery_low
+    - binary_sensor.back_door_battery_low
+    - binary_sensor.basement_bathroom_leak_sensor_battery_low
+    - binary_sensor.basement_door_battery_low
+    - binary_sensor.basement_fridge_door_battery_low
+    - binary_sensor.bathroom_ejector_closet_door_battery_low
+    - binary_sensor.bathroom_ejector_leak_sensor_battery_low
+    - binary_sensor.dining_room_motion_battery_low
     - binary_sensor.front_door_battery_low
-    - binary_sensor.game_room_closet_door_battery_low
-    - binary_sensor.game_room_closet_motion_battery_low
-    - binary_sensor.game_room_window_left_battery_low
-    - binary_sensor.hall_bath_sink_leak_sensor_battery_low
-    - binary_sensor.hall_bath_toilet_leak_sensor_battery_low
-    - binary_sensor.hvac_closet_battery_low
+    - binary_sensor.front_door_keypad_battery_low
+    - binary_sensor.front_porch_door_battery_low
+    - binary_sensor.garage_door_battery_low
+    - binary_sensor.garage_service_door_battery_low
+    - binary_sensor.hall_bath_leak_sensor_battery_low
+    - binary_sensor.hallway_motion_sensor_battery_low
+    - binary_sensor.hvac_leak_sensor_battery_low
     - binary_sensor.kitchen_leak_sensor_battery_low
-    - binary_sensor.kitchen_motion_battery_low
-    - binary_sensor.laundry_room_door_battery_low
-    - binary_sensor.laundry_room_leak_sensor_battery_low
-    - binary_sensor.master_bath_sink_leak_sensor_battery_low
-    - binary_sensor.master_bath_toilet_leak_sensor_battery_low
-    - binary_sensor.master_bedroom_curtains_battery_low
-    - binary_sensor.master_bedroom_motion_battery_low
-    - binary_sensor.master_bedroom_window_left_battery_low
-    - binary_sensor.storm_door_battery_low
+    - binary_sensor.kitchen_sink_leak_sensor_battery_low
+    - binary_sensor.laundry_room_door_back_battery_low
+    - binary_sensor.laundry_room_door_front_battery_low
+    - binary_sensor.laundry_room_motion_back_battery_low
+    - binary_sensor.laundry_room_motion_front_battery_low
+    - binary_sensor.living_room_lamp_button_battery_low
+    - binary_sensor.living_room_motion_battery_low
+    - binary_sensor.master_bath_leak_sensor_battery_low
+    - binary_sensor.office_motion_sensor_battery_low
+    - binary_sensor.office_window_battery_low
+    - binary_sensor.side_door_battery_low
+    - binary_sensor.side_door_keypad_battery_low
+    - binary_sensor.side_entrance_doorbell_battery_low
+    - binary_sensor.sump_pump_leak_sensor_battery_low
+    - binary_sensor.washer_sink_leak_sensor_battery_low
     from: 'off'
     to: 'on'
   condition:
   - condition: template
     value_template: "{{ trigger.to_state.state != '' }}"
   action:
-  - service: notify.mobile_app_matt_phone
+  - service: notify.gotify_high
     data_template:
       title: &batt_low_title Device battery low
-      message: &batt_low_msg "{{ trigger.to_state.name }} battery is low."
+      message: &batt_low_msg "{{ trigger.to_state.name.replace('battery low', '').replace('battery', '') }} battery is low."
       data:
         ttl: 0
         priority: high
@@ -201,14 +233,16 @@
   initial_state: true
   trigger:
   - platform: numeric_state
-    entity_id: sensor.fridge_temp
+    entity_id: 
+    - sensor.main_fridge_temp
+    - sensor.basement_fridge_temp
     above: 45
     for: '00:30:00'
   action:
   - service: notify.mobile_app_matt_phone
     data:
-      title: &fridge_title Fridge temp too high
-      message: &fridge_msg "Fridge temperature is currently {{ states('sensor.fridge_temp') }}"
+      title: &fridge_title "{{ trigger.to_state.name }} is too high"
+      message: &fridge_msg Fridge has been above 45° for more than 30 minutes.
       data:
         ttl: 0
         priority: high
@@ -218,44 +252,43 @@
       message: *fridge_msg
 
 
-- alias: Notify when fridge temp sensor battery low
+- alias: Notify when 433MHz temp sensor battery low
   initial_state: true
   mode: parallel
   max: 10
   trigger:
   - platform: template
-    value_template: "{{ is_state_attr('sensor.freezer_temp', 'battery_ok', 0) }}"
+    value_template: "{{ is_state_attr('sensor.main_fridge_temp', 'battery_ok', 0) }}"
   - platform: template
-    value_template: "{{ is_state_attr('sensor.fridge_temp', 'battery_ok', 0) }}"
+    value_template: "{{ is_state_attr('sensor.basement_fridge_temp', 'battery_ok', 0) }}"
+  - platform: template
+    value_template: "{{ is_state_attr('sensor.attic_temp', 'battery_ok', 0) }}"
   action:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{ is_state_attr('sensor.freezer_temp', 'battery_ok', 0) }}"
-      sequence:
-      - service: notify.mobile_app_matt_phone
-        data:
-          title: &freezer_batt_title Freezer temp sensor battery low
-          message: &freezer_batt_msg Change the freezer temp sensor battery now.
-          data:
-            ttl: 0
-            priority: high
-      - service: notify.gotify_high
-        data:
-          title: *freezer_batt_title
-          message: *freezer_batt_msg
-    default:
-      - service: notify.mobile_app_matt_phone
-        data:
-          title: &fridge_batt_title Fridge temp sensor battery low
-          message: &fridge_batt_msg Change the fridge temp sensor battery now.
-          data:
-            ttl: 0
-            priority: high
-      - service: notify.gotify_high
-        data:
-          title: *fridge_batt_title
-          message: *fridge_batt_msg
+  - service: notify.mobile_app_matt_phone
+    data:
+      title: &fridge_batt_title "{{ trigger.to_state.name }} sensor battery low"
+      message: &fridge_batt_msg Change the temp sensor battery now.
+      data:
+        ttl: 0
+        priority: high
+  - service: notify.gotify_high
+    data:
+      title: *fridge_batt_title
+      message: *fridge_batt_msg
+
+
+- alias: Notify when basement fridge open more than 5 minutes
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.basement_fridge
+    to: 'on'
+    for: '00:05:00'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: "Basement fridge door has been open for 5 minutes"
+      message: "Did you forget to close it?"
 
 
 - alias: Notify when Hue bridge is ready to update
@@ -270,27 +303,3 @@
     data:
       title: "Hue bridge update available"
       message: "Please see Hue app for details."
-
-
-- alias: Notify if space heater turned on when away
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: switch.space_heater
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_text.alarm
-    state: 'armed_away'
-  action:
-  - service: homeassistant.turn_off
-    entity_id:
-    - climate.space_heater
-    - switch.space_heater
-  - service: notify.mobile_app_matt_phone
-    data:
-      title: "Space heater warning"
-      message: "Space heater has been turned on."
-      data:
-        ttl: 0
-        priority: high

@@ -1,0 +1,102 @@
+automation:
+- alias: Xbox turned on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+  condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_text.alarm
+      state: 'armed_away'
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
+  action:
+  - service_template: "script.xbox_{{ trigger.to_state.state }}"
+
+
+- alias: Turn basement ejector closet light on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bathroom_ejector_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.bathroom_ejector_closet
+
+
+- alias: Game room dimmer off press
+  initial_state: true
+  trigger:
+  - platform: device
+    device_id: 55b3148007f211ebbe759fa8f183002a
+    domain: homekit_controller
+    type: button4
+    subtype: single_press
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.xbox
+        state: 'on'
+      sequence:
+      - service: script.turn_on
+        entity_id: script.xbox_off
+    - conditions:
+      - condition: state
+        entity_id: climate.game_room_fan
+        state: 'on'
+      sequence:
+      - service: climate.turn_off
+        entity_id: climate.game_room_fan
+    - conditions:
+      - condition: state
+        entity_id: fan.game_room
+        state: 'on'
+      sequence:
+      - service: fan.turn_off
+        entity_id: fan.game_room
+    default:
+    - service: climate.turn_off
+      entity_id: climate.space_heater
+  - service: light.turn_off
+    entity_id: light.game_room_closet
+
+
+script:
+  xbox_on:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'off'
+    - condition: template
+      value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    - service: switch.turn_on
+      entity_id: switch.game_room_bias_lighting
+    - service: media_player.turn_off
+      entity_id: media_player.office_speaker
+  
+  xbox_off:
+    sequence:
+    - service: homeassistant.turn_off
+      entity_id: switch.game_room_bias_lighting
+
+
+binary_sensor:
+- platform: mqtt
+  name: Xbox
+  device_class: connectivity
+  state_topic: xbox/status
+  payload_on: 'Available'
+  payload_off: 'Unavailable'
+
+
+input_boolean:
+  office:

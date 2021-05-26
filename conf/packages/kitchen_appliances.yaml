@@ -9,45 +9,55 @@ automation:
     entity_id: *coffeemaker
     below: 10
     for: '00:00:10'
+  - platform: numeric_state
+    entity_id: &bsmt_coffeemaker sensor.basement_coffeemaker_power
+    above: 500
+  - platform: numeric_state
+    entity_id: *bsmt_coffeemaker
+    below: 10
+    for: '00:00:10'
   condition:
   - condition: state
     entity_id: input_boolean.coffee_notify
     state: 'off'
   action:
   - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
-    entity_id: input_boolean.coffeemaker
+    data:
+      entity_id: "input_boolean.{{ 'basement_' if 'basement' in trigger.to_state.entity_id else '' }}coffeemaker"
 
 
 - alias: Notify when coffee done
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_boolean.coffeemaker
+    entity_id: 
+    - input_boolean.coffeemaker
+    - input_boolean.basement_coffeemaker
     from: 'on'
     to: 'off'
   action:
   - service: notify.gotify
     data:
-      title: "Coffee is ready"
+      title: "Coffee is ready {{ 'in the basement' if 'basement' in trigger.to_state.entity_id else 'in the kitchen' }}"
       message: "Enjoy!"
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.coffee_notify
+  # - service: input_boolean.turn_on
+  #   entity_id: input_boolean.coffee_notify
 
 
-- alias: Reset coffee notification
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: *coffeemaker
-    to: '0'
-    for: '00:01:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.coffee_notify
-    state: 'on'
-  action:
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.coffee_notify
+# - alias: Reset coffee notification
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: *coffeemaker
+#     to: '0'
+#     for: '00:01:00'
+#   condition:
+#   - condition: state
+#     entity_id: input_boolean.coffee_notify
+#     state: 'on'
+#   action:
+#   - service: input_boolean.turn_off
+#     entity_id: input_boolean.coffee_notify
 
 
 - alias: Notify when dishwasher on/off
@@ -81,5 +91,6 @@ automation:
 
 input_boolean:
   coffeemaker:
+  basement_coffeemaker:
   coffee_notify:
   dishwasher:

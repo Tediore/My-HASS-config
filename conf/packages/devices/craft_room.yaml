@@ -1,0 +1,85 @@
+automation:
+- alias: Andy's desk button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.craft_room_desk_button
+    to:
+    - 'on'
+    - 'off'
+    - 'brightness_move_down'
+    - 'brightness_move_up'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      sequence:
+      - service: light.toggle
+        entity_id: light.andy_desk
+        data:
+          brightness_pct: 100
+          kelvin: "{{ 3000 if is_state('input_boolean.dark_inside', 'on') else 5000 }}"
+    - conditions:
+      - "{{ 'move' in trigger.to_state.state }}"
+      sequence:
+      - service: media_player.volume_mute
+        entity_id: media_player.craft_room_speaker
+        data:
+          is_volume_muted: "{{ true if is_state_attr('media_player.craft_room_speaker', 'is_volume_muted', false) else false }}"
+
+
+- alias: Andy's desk remote
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.craft_room_desk_remote
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      sequence:
+      - service: script.toggle_mute_craft_room_speaker
+    - conditions:
+      - "{{ 'brightness' in trigger.to_state.state }}"
+      sequence:
+      - service: switch.toggle
+        entity_id: switch.andy_heater
+    - conditions:
+      - "{{ 'colortemp' in trigger.to_state.state }}"
+      - condition: state
+        entity_id: light.craft_room
+        state: 'on'
+      sequence:
+      - service: light.turn_off
+        entity_id: light.craft_room
+      - service: hue.hue_activate_scene
+        data:
+          group_name: Craft room
+          scene_name: Read
+    - conditions:
+      - "{{ 'colortemp' in trigger.to_state.state }}"
+      - condition: state
+        entity_id: light.craft_room
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.craft_room
+      - service: light.turn_off
+        entity_id: light.craft_room_2 # Hue room
+
+
+script:
+  toggle_mute_craft_room_speaker:
+    sequence:
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: "{{ is_state_attr('media_player.craft_room_speaker', 'app_name', 'Google Play Music') }}"
+        sequence:
+        - service: media_player.media_play_pause
+          entity_id: media_player.craft_room_speaker
+      default:
+      - service: media_player.volume_mute
+        entity_id: media_player.craft_room_speaker
+        data_template:
+          is_volume_muted: "{{ false if state_attr('media_player.craft_room_speaker', 'is_volume_muted') else true }}"

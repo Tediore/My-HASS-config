@@ -30,6 +30,10 @@
       friendly_name: Outdoor dew point
       temperature: sensor.outside_temp
       rel_hum: sensor.outside_humidity
+    dewpoint_attic:
+      friendly_name: Attic dew point
+      temperature: sensor.attic_temp
+      rel_hum: sensor.attic_humidity
 
 - platform: time_date
   display_options:
@@ -39,18 +43,18 @@
 
 - platform: uptime
 
-- platform: darksky
-  api_key: !secret darksky_key
-  scan_interval: '00:03:00'
-  monitored_conditions:
-  - temperature
-  - apparent_temperature
-  - dew_point
-  - cloud_cover
-  - temperature_high
-  - temperature_low
+# - platform: darksky
+#   api_key: !secret darksky_key
+#   scan_interval: '00:03:00'
+#   monitored_conditions:
+#   - temperature
+#   - apparent_temperature
+#   - dew_point
+#   - cloud_cover
+#   - temperature_high
+#   - temperature_low
 
 - platform: cups
-  host: 10.0.0.34
+  host: raspberrypi
   printers:
   - Printer

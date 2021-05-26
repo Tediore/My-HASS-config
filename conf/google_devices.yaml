@@ -59,6 +59,12 @@ light.mini_christmas_tree:
 switch.candle_warmer:
   expose: true
   room: Other devices
+switch.dining_room_fan:
+  expose: true
+  room: Dining room
+switch.kitchen_fan:
+  expose: true
+  room: Kitchen
 switch.living_room_fan:
   expose: true
   room: Living room

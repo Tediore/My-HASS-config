@@ -19,8 +19,8 @@ automation:
   initial_state: true
   trigger:
   - platform: numeric_state
-    entity_id: &balcony sensor.balcony_light_level
-    below: &balcony_threshold 50
+    entity_id: &outdoor_light sensor.outdoor_light_level
+    below: &outdoor_light_threshold 75
     for: '00:10:00'
   - platform: time
     at: &dark_inside_time '15:30:00'
@@ -41,8 +41,8 @@ automation:
     after: *dark_inside_time
     before: '21:30:00'
   - condition: numeric_state
-    entity_id: *balcony
-    below: *balcony_threshold
+    entity_id: *outdoor_light
+    below: *outdoor_light_threshold
   action:
   - service: homeassistant.turn_on
     entity_id: 
@@ -66,6 +66,12 @@ automation:
     - condition: state
       entity_id: light.buffet
       state: 'on'
+    - condition: state
+      entity_id: light.hallway
+      state: 'on'
+    - condition: state
+      entity_id: light.entrance
+      state: 'on'
   - condition: time
     after: *time
   action:
@@ -74,8 +80,13 @@ automation:
     data:
       brightness_pct: 50
       transition: 10
-  - service: switch.turn_on
-    entity_id: switch.old_style_sign
+  - service: light.turn_on
+    entity_id:
+    - light.hallway
+    - light.entrance
+    data:
+      brightness_pct: 66
+      transition: 10
   - condition: template
     value_template: "{{ state_attr('light.buffet', 'brightness') | int > 170 }}"
   - service: light.turn_on
@@ -90,62 +101,11 @@ automation:
   trigger:
   - platform: state
     entity_id: input_boolean.dark_inside
-  - platform: device
-    device_id: 55b0121107f211ebb27d373eedc421d7
-    domain: homekit_controller
-    type: button2
-    subtype: single_press
   condition:
   - condition: template
     value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
-
-
-- alias: HVAC closet door opened/closed
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.hvac_closet
-    to:
-    - 'on'
-    - 'off'
-  condition:
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'off'
-  - condition: state
-    entity_id: input_boolean.andy_sleep
-    state: 'off'
-  action:
-  - service: light.turn_on
-    entity_id: light.laundry_room
-    data_template:
-      brightness_pct: "{{ 100 if trigger.to_state.state == 'on' else 0 }}"
-      kelvin: 4000
-  - service_template: "switch.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
-    entity_id: switch.laundry_room_motion_sensor
-
-
-- alias: Toggle buffet light with dining room lights
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.dining_room
-  condition:
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
-    entity_id: light.buffet
-  - condition: template
-    value_template: "{{ now().month in [11, 12] }}"
-  - service_template: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
-    entity_id: light.portable_mini_christmas_tree
 
 
 input_boolean:
@@ -166,6 +126,13 @@ script:
         brightness_pct: 100
         transition: 5
     - service: light.turn_on
+      entity_id:
+      - light.hallway
+      - light.entrance
+      data:
+        brightness_pct: "{{ 25 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
+        transition: 5
+    - service: light.turn_on
       entity_id: light.hall_bath_night_light
       data:
         brightness_pct: 34
@@ -174,25 +141,39 @@ script:
 
   lr_lights_sunset:
     sequence:
-    - condition: template
-      value_template: "{{ now().month not in [12,1] }}"
-    - wait_template: "{{ states('sensor.balcony_light_level') | int < 10 }}"
-      timeout: "00:30:00"
-      continue_on_timeout: true
-    - condition: state
-      entity_id: media_player.living_room_vizio
-      state: 'off'
-    - service: light.turn_on
-      data:
-        entity_id: light.living_room_lamps
-        brightness_pct: 100
-        kelvin: 3000
-        transition: 30
+    - choose:
+      - conditions:
+        - condition: state
+          entity_id: media_player.living_room_vizio
+          state: 'on'
+        sequence:
+        - service: light.turn_on
+          entity_id: light.living_room_bias_lighting
+          data:
+            brightness_pct: 100
+            kelvin: 5000
+            transition: 10
+      default:
+      - wait_template: "{{ states('sensor.outdoor_light_level') | int < 10 }}"
+        timeout: "00:30:00"
+        continue_on_timeout: true
+      - condition: state
+        entity_id: media_player.living_room_vizio
+        state: 'off'
+      - service: light.turn_on
+        data:
+          entity_id: light.living_room_lamps
+          brightness_pct: 100
+          kelvin: 3000
+          transition: 30
   
   lights_sunrise:
     sequence:
     - service: light.turn_off
-      entity_id: light.buffet
+      entity_id: 
+      - light.buffet
+      - light.entrance
+      - light.hallway
       data:
         transition: 30
     - delay: '00:00:30'
@@ -280,3 +261,14 @@ script:
       data:
         topic: "cmnd/{{ device }}/dimmer"
         payload: "{{ brightness_pct }}"
+
+
+group:
+  lights_christmas:
+    name: Christmas lights
+    entities:
+    - light.christmas_lights
+    - light.christmas_tree
+    - light.mini_christmas_tree
+    - light.portable_mini_christmas_tree
+    - light.star_lights

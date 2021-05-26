@@ -1,4 +1,0 @@
-- platform: statistics
-  name: Hall bath sink leak battery level
-  entity_id: sensor.hall_bath_sink_leak_battery
-  precision: 0

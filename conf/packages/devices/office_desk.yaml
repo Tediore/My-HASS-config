@@ -1,0 +1,164 @@
+automation:
+- alias: Office desk remote
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.office_desk_remote
+    to:
+    - 'on'
+    - 'off'
+    - 'brightness_down'
+    - 'brightness_up'
+    - 'colortemp_up'
+    - 'colortemp_down'
+  action:
+  - service_template: >
+      {% set command = trigger.to_state.state %}
+      {% if command in ['on', 'off'] %}
+        script.turn_off_office_speaker
+      {% elif 'colortemp' in command %}
+        script.move_music_{{ 'all' if is_state('media_player.office_speaker', 'playing') else 'office' }}
+      {% else %}
+        script.toggle_mute_office_speaker
+      {% endif %}
+
+
+- alias: Office desk button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.office_desk_button
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      - condition: state
+        entity_id: light.office
+        state: 'on'
+      sequence:
+      - service: light.turn_off
+        entity_id: light.office
+      - service: hue.hue_activate_scene
+        data:
+          group_name: Office
+          scene_name: Read
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      - condition: state
+        entity_id: light.office
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        entity_id: light.office
+      - service: light.turn_off
+        entity_id: light.office_2 # Hue room
+    - conditions:
+      - "{{ 'brightness' in trigger.to_state.state }}"
+      sequence:
+      - service: light.turn_off
+        entity_id: light.basement_main
+
+
+- alias: Soldering station remote
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.soldering_station_remote
+  condition:
+  - "{{ trigger.to_state.state != 'unavailable' }}"
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      sequence:
+      - service: switch.turn_on
+        entity_id: switch.soldering_iron
+    - conditions:
+      - "{{ 'brightness' in trigger.to_state.state }}"
+      sequence:
+      - service: switch.turn_on
+        entity_id: switch.rework_station
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      sequence:
+      - service: switch.turn_off
+        entity_id:
+        - switch.soldering_iron
+        - switch.rework_station
+
+
+script:
+  turn_off_office_speaker:
+    sequence:
+    - service: media_player.turn_off
+      entity_id: media_player.office_speaker
+
+  toggle_mute_office_speaker:
+    sequence:
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: "{{ is_state_attr('media_player.office_speaker', 'app_name', 'Google Play Music') }}"
+        sequence:
+        - service: media_player.media_play_pause
+          entity_id: media_player.office_speaker
+      default:
+      - service: media_player.volume_mute
+        entity_id: media_player.office_speaker
+        data_template:
+          is_volume_muted: "{{ false if state_attr('media_player.office_speaker', 'is_volume_muted') else true }}"
+
+  move_music_all:
+    alias: Move music to upstairs
+    sequence:
+    - service: media_player.play_media
+      entity_id: &upstairs_speakers media_player.hub
+      data_template:
+        media_content_id: "{{ state_attr('media_player.office_speaker', 'media_content_id') }}"
+        media_content_type: music
+    - wait_template: "{{ state_attr('media_player.office_speaker', 'media_content_id') == state_attr('media_player.hub', 'media_content_id') }}"
+      timeout: '00:00:20'
+      continue_on_timeout: false
+    - service: media_player.media_pause
+      entity_id: *upstairs_speakers
+    - service: media_player.media_play
+      entity_id: *upstairs_speakers
+    - service: media_player.turn_off
+      entity_id: media_player.office_speaker
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.music_moved
+    - delay: '00:00:20'
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.music_moved
+
+  move_music_office:
+    alias: Move music to office speaker
+    sequence:
+    - service: media_player.play_media
+      entity_id: media_player.office_speaker
+      data_template:
+        media_content_id: "{{ state_attr('media_player.hub', 'media_content_id') }}"
+        media_content_type: music
+    - wait_template: "{{ state_attr('media_player.office_speaker', 'media_content_id') == state_attr('media_player.hub', 'media_content_id') }}"
+      timeout: '00:00:20'
+      continue_on_timeout: false
+    - service: media_player.media_pause
+      entity_id: media_player.office_speaker
+    - service: media_player.media_play
+      entity_id: media_player.office_speaker
+    - service: media_player.turn_off
+      entity_id: 
+      - media_player.living_room_speaker
+      - media_player.kitchen_speaker
+      - media_player.bedroom_speaker
+      - media_player.hub
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.music_moved
+    - delay: '00:00:20'
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.music_moved
+
+
+input_boolean:
+  music_moved:

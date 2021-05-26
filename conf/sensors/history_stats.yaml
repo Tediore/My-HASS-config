@@ -23,29 +23,3 @@
   duration:
     days: 7
   end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-
-- platform: history_stats
-  name: Space heater time today
-  entity_id: sensor.space_heater_action
-  state: 'heating'
-  type: time
-  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-  end: '{{ now() }}'
-
-- platform: history_stats
-  name: Space heater time yesterday
-  entity_id: sensor.space_heater_action
-  state: 'heating'
-  type: time
-  duration:
-    hours: 24
-  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-
-- platform: history_stats
-  name: Space heater time last 7 days
-  entity_id: sensor.space_heater_action
-  state: 'heating'
-  type: time
-  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-  duration:
-    days: 7

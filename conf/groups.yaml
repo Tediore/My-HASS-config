@@ -1,44 +1,51 @@
 lights_interior:
   name: Interior lights
   entities:
-  - light.entrance
-  - light.kitchen_cabinets
-  - light.game_room_closet
+  - light.andy
+  - light.andy_desk
+  - light.basement
+  - light.basement_bar
+  - light.basement_bath_night_light
+  - light.basement_hallway
+  - light.basement_lights_main_3_way
+  - light.basement_main
+  - light.basement_stairs_lights
+  - light.bathroom_ejector_closet
   - light.buffet
-  - light.master_bedroom
-  - light.master_bedroom_closet
-  - light.kitchen_cabinets
-  - light.living_room
-  - light.dining_room
-  - light.game_room
-  - light.game_room_closet
-  - light.laundry_room
-  - light.hall_bath_night_light
-  - light.tea_lights
-
-lights_all:
-  name: All lights
-  entities:
-  - group.lights_interior
-  - light.porch
-
-
-lights_christmas:
-  name: Christmas lights
-  entities:
   - light.christmas_lights
   - light.christmas_tree
+  - light.craft_room
+  - light.craft_room_2
+  - light.dining_room
+  - light.entrance
+  - light.garage
+  - light.hall_bath_night_light
+  - light.hallway
+  - light.kitchen
+  - light.kitchen_cabinets
+  - light.laundry_room
+  - light.left_lamp
+  - light.living_room
+  - light.living_room_bias_lighting
+  - light.master_bedroom
+  - light.master_bedroom_fan
+  - light.matt
   - light.mini_christmas_tree
+  - light.office
+  - light.office_2
   - light.portable_mini_christmas_tree
-  - light.star_lights
+  - light.right_lamp_basement
+  - light.side_door_alarm_status
+  - light.side_entrance
+  - light.stand_lamp
+  - light.tea_lights
+  - light.the_glow_light
 
 plugs:
   name: Smart plugs
   entities:
-  - switch.master_bedroom_fan_plug
   - switch.game_room_bias_lighting
   - switch.air_freshener
-  - switch.old_style_sign
 
 speakers:
   entities:
@@ -46,12 +53,4 @@ speakers:
   - media_player.hub
   - media_player.living_room_speaker
   - media_player.bedroom_speaker
-  - media_player.portable_speaker
-
-windows:
-  entities:
-  - binary_sensor.living_room_window_right
-  - binary_sensor.living_room_window_left
-  - binary_sensor.game_room_window_left
-  - binary_sensor.kitchen_window_left
-  - binary_sensor.master_bedroom_window_right
+  - media_player.office_speaker
