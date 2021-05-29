@@ -1,10 +1,10 @@
-sensor:
 - platform: mqtt
   name: Basement fridge temp
   state_topic: &fridge_topic "rtl_433/107/event"
   value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
   device_class: temperature
   json_attributes_topic: *fridge_topic
+  force_update: true
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -13,6 +13,7 @@ sensor:
   value_template: "{{ '{:.1f}'.format((value_json.temperature_C | float * 9/5) + 32) }}"
   device_class: temperature
   json_attributes_topic: *freezer_topic
+  force_update: true
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -21,6 +22,7 @@ sensor:
   value_template: "{{ '{:.1f}'.format(((value_json.temperature_C | float * 9/5) + 32) + states('input_number.outside_temp_calib') | int) }}"
   device_class: temperature
   json_attributes_topic: *attic_temp_topic
+  force_update: true
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -29,6 +31,7 @@ sensor:
   value_template: "{{ '{:.0f}'.format(value_json.humidity) }}"
   device_class: temperature
   json_attributes_topic: *attic_hum_topic
+  force_update: true
   unit_of_measurement: '%'
 
 - platform: mqtt
@@ -37,6 +40,7 @@ sensor:
   value_template: "{{ '{:.1f}'.format(((value_json.temperature_C | float * 9/5) + 32) + states('input_number.outside_temp_calib') | int) }}"
   device_class: temperature
   json_attributes_topic: *attic_temp_topic
+  force_update: true
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -45,4 +49,5 @@ sensor:
   value_template: "{{ '{:.0f}'.format(value_json.humidity) }}"
   device_class: temperature
   json_attributes_topic: *attic_hum_topic
+  force_update: true
   unit_of_measurement: '%'

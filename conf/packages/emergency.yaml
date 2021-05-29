@@ -8,11 +8,13 @@ automation:
     entity_id: &water_sensors
     - binary_sensor.basement_bathroom_leak
     - binary_sensor.bathroom_ejector_leak
-    - binary_sensor.hall_bath_leak
-    - binary_sensor.hvac_leak
     - binary_sensor.dishwasher_leak
+    - binary_sensor.fridge_leak
+    - binary_sensor.hall_bath_toilet_leak
+    - binary_sensor.hvac_leak
     - binary_sensor.kitchen_sink_leak
-    - binary_sensor.master_bath_leak
+    - binary_sensor.master_bath_sink_leak
+    - binary_sensor.master_bath_toilet_leak
     - binary_sensor.sump_pump_leak
     - binary_sensor.washer_sink_leak
     to: 'on'
@@ -27,9 +29,9 @@ automation:
       number: !secret phone_matt
       message: &leak_message >
         {% if trigger.to_state.state == 'on' %}
-          LEAK DETECTED BY {{ trigger.to_state.name.upper() }}!
+          LEAK DETECTED BY {{ trigger.to_state.name.replace('water leak', '').upper() }}!
         {% else %}
-          {{ trigger.to_state.name }} cleared
+          {{ trigger.to_state.name.replace('water leak', '') }} cleared
         {% endif %}
   - service: notify.gotify_high
     data_template:

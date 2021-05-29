@@ -156,8 +156,9 @@ automation:
   - platform: state
     entity_id: climate.thermostat
     from:
-    - heat
-    - cool
+    - 'heat'
+    - 'cool'
+    - 'heat_cool'
     to: 'off'
   action:
   - service: input_text.set_value
@@ -178,15 +179,22 @@ automation:
     from: 'on'
     to: 'off'
   action:
-  - service: climate.set_temperature
-    entity_id: climate.thermostat
-    data_template:
-      temperature: "{{ 65 if is_state('input_text.tstat_prev_mode', 'heat') else 80 }}"
-  - delay: '00:00:01'
   - service: climate.set_hvac_mode
-    entity_id: climate.thermostat
-    data_template:
-      hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
+    data:
+      entity_id: climate.thermostat
+      hvac_mode: 'heat'
+  - service: climate.set_temperature # going from off to heat_cool apparently isn't possible, so do this intermediate step first
+    data:
+      entity_id: climate.thermostat
+      hvac_mode: heat
+      temperature: 65
+  - delay: 1
+  - service: climate.set_temperature # set temperatures outside of normal heating/cooling range to avoid inadvertent heating/cooling before resuming schedule
+    data:
+      entity_id: climate.thermostat
+      hvac_mode: 'heat_cool'
+      target_temp_low: 62
+      target_temp_high: 82
   - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_sched_resume

@@ -9,6 +9,11 @@ light:
   payload_available: "Online"
   payload_not_available: "Offline"
 
+- platform: group
+  name: Kitchen cabinets
+  entities:
+  - light.cabinet_lights_n
+  - light.cabinet_lights_s
 
 # automation:
 # - alias: Dim down/up cabinet lights with motion

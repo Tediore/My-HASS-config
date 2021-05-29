@@ -24,14 +24,7 @@ automation:
   condition:
   - condition: state
     entity_id: climate.thermostat
-    state: 'cool'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ not is_state('sensor.tstat_profile', 'Home') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    state: 'heat_cool'
   - condition: or
     conditions:
     - condition: time
@@ -49,6 +42,14 @@ automation:
       before: &cool_sleep_weekend input_datetime.tstat_cool_sleep_weekend
       weekday: ['fri', 'sat']
   action:
+  - service: input_boolean.turn_off
+    data:
+      entity_id: "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_cool_sleep' }}"
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_cool_home
   - service: input_boolean.turn_off
@@ -79,14 +80,7 @@ automation:
   condition:
   - condition: state
     entity_id: climate.thermostat
-    state: 'cool'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ not is_state('sensor.tstat_profile', 'Sleep') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    state: 'heat_cool'
   - condition: or
     conditions:
     - condition: time
@@ -102,6 +96,14 @@ automation:
       before: *cool_home_weekend
       weekday: ['sat', 'sun']
   action:
+  - service: input_boolean.turn_on
+    data:
+      entity_id: "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_cool_sleep' }}"
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_cool_sleep
   - service: input_boolean.turn_off
@@ -133,14 +135,7 @@ automation:
   condition:
   - condition: state
     entity_id: climate.thermostat
-    state: 'heat'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ not is_state('sensor.tstat_profile', 'Home') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    state: 'heat_cool'
   - condition: or
     conditions:
     - condition: time
@@ -158,6 +153,14 @@ automation:
       before: &heat_sleep_weekend input_datetime.tstat_heat_sleep_weekend
       weekday: ['fri', 'sat']
   action:
+  - service: input_boolean.turn_off
+    data:
+      entity_id: "{{ 'none' if trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_heat_sleep' }}"
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_heat_home
   - service: input_boolean.turn_off
@@ -188,14 +191,7 @@ automation:
   condition:
   - condition: state
     entity_id: climate.thermostat
-    state: 'heat'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ not is_state('sensor.tstat_profile', 'Sleep') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    state: 'heat_cool'
   - condition: or
     conditions:
     - condition: time
@@ -211,6 +207,14 @@ automation:
       before: *heat_home_weekend
       weekday: ['sat', 'sun']
   action:
+  - service: input_boolean.turn_on
+    data:
+      entity_id: "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_heat_sleep' }}"
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_heat_sleep
   - service: input_boolean.turn_off
@@ -230,13 +234,14 @@ automation:
     for: '00:00:30'
   condition:
   - condition: state
-    entity_id: input_boolean.tstat_hold
+    entity_id:
+    - input_boolean.tstat_hold
+    - input_boolean.tstat_away
     state: 'off'
   - condition: template
-    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] and not is_state('sensor.tstat_profile', 'Away') }}"
+    value_template: "{{ not is_state('climate.thermostat', 'off') }}"
   action:
   - service: script.turn_on
-    data_template: 
-      entity_id: "script.tstat_{{ states('climate.thermostat') }}_away"
+    entity_id: script.tstat_away
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart

@@ -227,6 +227,9 @@ script:
     - condition: state
       entity_id: climate.thermostat
       state: 'cool'
+    - condition: numeric_state
+      entity_id: sensor.outside_temp
+      above: 65
     - service: climate.set_temperature
       entity_id: climate.bedroom_ac
       data:

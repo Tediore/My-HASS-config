@@ -24,7 +24,7 @@ automation:
       - service: light.turn_on
         entity_id: light.basement_stairs_lights
         data:
-          kelvin: 4000
+          color_temp: 375
           brightness_pct: 100
     - conditions:
       - "{{ trigger.to_state.state == 'on' }}"
