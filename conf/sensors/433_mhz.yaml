@@ -39,7 +39,7 @@
   state_topic: &outside_temp_topic "rtl_433/3646/event"
   value_template: "{{ '{:.1f}'.format(((value_json.temperature_C | float * 9/5) + 32) + states('input_number.outside_temp_calib') | int) }}"
   device_class: temperature
-  json_attributes_topic: *attic_temp_topic
+  json_attributes_topic: *outside_temp_topic
   force_update: true
   unit_of_measurement: '°F'
 
@@ -48,6 +48,6 @@
   state_topic: &outside_hum_topic "rtl_433/3646/event"
   value_template: "{{ '{:.0f}'.format(value_json.humidity) }}"
   device_class: temperature
-  json_attributes_topic: *attic_hum_topic
+  json_attributes_topic: *outside_hum_topic
   force_update: true
   unit_of_measurement: '%'

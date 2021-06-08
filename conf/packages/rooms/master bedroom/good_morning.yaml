@@ -172,7 +172,7 @@ script:
   lights_wakeup:
     sequence:
     - service: light.turn_on
-      entity_id: &lights_wakeup light.master_bedroom
+      entity_id: &lights_wakeup light.master_bedroom_lamps
       data:
         brightness: 1
         color_name: orange

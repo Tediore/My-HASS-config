@@ -258,11 +258,11 @@ sensor:
             Hold
           {% endif %}
         {% elif mode == 'Cool' %}
-          {% if low == states('input_number.tstat_cool_home') | int %}
+          {% if high == states('input_number.tstat_cool_home') | int %}
             Home
-          {% elif low == states('input_number.tstat_cool_sleep') | int %}
+          {% elif high == states('input_number.tstat_cool_sleep') | int %}
             Sleep
-          {% elif low == states('input_number.tstat_cool_away') | int %}
+          {% elif high == states('input_number.tstat_cool_away') | int %}
             Away
           {% else %}
             Hold

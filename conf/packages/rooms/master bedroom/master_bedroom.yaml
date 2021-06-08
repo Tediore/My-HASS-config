@@ -8,14 +8,14 @@ automation:
     to: 'off'
   condition:
   - condition: state
-    entity_id: light.master_bedroom
+    entity_id: light.master_bedroom_lamps
     state: 'on'
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'off'
   action:
   - service: light.turn_off
-    entity_id: light.master_bedroom
+    entity_id: light.master_bedroom_lamps
 
 
 # - alias: Turn master bedroom closet light on/off with motion
@@ -27,7 +27,7 @@ automation:
 #     - 'on'
 #     - 'off'
 #   condition:
-#   - "{{ trigger.to_state.state != states('light.master_bedroom_closet') }}"
+#   - "{{ trigger.to_state.state != states('light.master_bedroom_lamps_closet') }}"
 #   - condition: state
 #     entity_id:
 #     - input_boolean.sleep_mode
@@ -35,11 +35,11 @@ automation:
 #     state: 'off'
 #   action:
 #   - service: light.turn_on
-#     entity_id: light.master_bedroom_closet
+#     entity_id: light.master_bedroom_lamps_closet
 #     data:
 #       brightness_pct: >
 #         {% if trigger.to_state.state == 'on' %}
-#           {% if is_state('light.master_bedroom', 'off') and is_state('input_boolean.dark_inside', 'on') %}
+#           {% if is_state('light.master_bedroom_lamps', 'off') and is_state('input_boolean.dark_inside', 'on') %}
 #             50
 #           {% else %}
 #             {{ 100 if 6 < now().hour < 21 else 50 }}
@@ -60,7 +60,7 @@ automation:
   action:
   - service: light.turn_off
     entity_id: 
-    - light.master_bedroom_closet
+    - light.master_bedroom_lamps_closet
     - light.mini_christmas_tree
 
 

@@ -81,7 +81,7 @@ script:
       - input_boolean.andy_sleep
     - service: light.turn_on
       entity_id: 
-      - light.master_bedroom
+      - light.master_bedroom_lamps
       - light.living_room_lamps
       - light.buffet
       data:

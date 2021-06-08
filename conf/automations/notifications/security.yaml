@@ -7,7 +7,7 @@
     - light.dining_room
     - light.game_room_closet
     - light.living_room
-    - light.master_bedroom
+    - light.master_bedroom_lamps
     - light.game_room
     - light.laundry_room
     from: 'off'

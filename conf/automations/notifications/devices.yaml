@@ -130,13 +130,13 @@
 # {% endfor %}
   - platform: numeric_state
     entity_id:
-    - sensor.basement_bathroom_leak_sensor_battery
+    - sensor.andy_s_button_battery
     - sensor.basement_door_battery
+    - sensor.basement_remote_battery_level
     - sensor.basement_temp_sensor_battery
-    - sensor.bathroom_ejector_leak_sensor_battery
-    - sensor.button_andy_battery
-    - sensor.button_matt_battery
-    - sensor.dining_room_remote_battery_level
+    - sensor.craft_room_desk_button_battery
+    - sensor.craft_room_desk_remote_battery
+    - sensor.fridge_leak_sensor_battery
     - sensor.front_door_battery
     - sensor.front_door_keypad_battery
     - sensor.front_porch_door_battery
@@ -144,21 +144,19 @@
     - sensor.game_room_temp_battery
     - sensor.garage_door_battery_level
     - sensor.garage_service_door_battery
-    - sensor.hall_bath_leak_sensor_battery
-    - sensor.hall_bath_sink_leak_battery_level
-    - sensor.hvac_leak_sensor_battery
-    - sensor.kitchen_leak_sensor_battery
-    - sensor.kitchen_sink_leak_sensor_battery
+    - sensor.hall_bath_toilet_leak_sensor_battery
     - sensor.laundry_room_door_front_battery
+    - sensor.laundry_room_lights_button_battery
     - sensor.laundry_room_temp_sensor_battery
     - sensor.living_room_lamp_button_battery
     - sensor.living_room_remote_battery_level
-    - sensor.master_bath_leak_sensor_battery
+    - sensor.master_bath_toilet_leak_sensor_battery
     - sensor.master_bedroom_remote_battery_level
     - sensor.master_bedroom_temp_battery
-    - sensor.matt_s_desk_remote_battery
+    - sensor.matt_s_button_battery
     - sensor.mi_flora_battery
     - sensor.mouse_battery
+    - sensor.office_desk_button_battery
     - sensor.office_desk_remote_battery
     - sensor.office_temp_battery
     - sensor.outdoor_light_sensor_battery
@@ -167,10 +165,8 @@
     - sensor.side_door_keypad_battery
     - sensor.side_entrance_doorbell_battery
     - sensor.siren_battery
-    - sensor.smoke_alarm_battery_level
+    - sensor.smoke_co_alarm_battery_level
     - sensor.soldering_station_remote_battery
-    - sensor.sump_pump_leak_sensor_battery
-    - sensor.washer_sink_leak_sensor_battery
     below: 21
     for: '08:00:00'
 
@@ -185,36 +181,41 @@
     - binary_sensor.basement_fridge_door_battery_low
     - binary_sensor.bathroom_ejector_closet_door_battery_low
     - binary_sensor.bathroom_ejector_leak_sensor_battery_low
-    - binary_sensor.dining_room_motion_battery_low
+    - binary_sensor.craft_room_desk_button_battery_low
+    - binary_sensor.deck_motion_sensor_battery_low
+    - binary_sensor.dining_room_motion_sensor_battery_low
+    - binary_sensor.dishwasher_leak_sensor_battery_low
+    - binary_sensor.fridge_leak_sensor_battery_low
     - binary_sensor.front_door_battery_low
     - binary_sensor.front_door_keypad_battery_low
     - binary_sensor.front_porch_door_battery_low
     - binary_sensor.garage_door_battery_low
     - binary_sensor.garage_service_door_battery_low
-    - binary_sensor.hall_bath_leak_sensor_battery_low
+    - binary_sensor.hall_bath_toilet_leak_sensor_battery_low
     - binary_sensor.hallway_motion_sensor_battery_low
     - binary_sensor.hvac_leak_sensor_battery_low
-    - binary_sensor.kitchen_leak_sensor_battery_low
     - binary_sensor.kitchen_sink_leak_sensor_battery_low
     - binary_sensor.laundry_room_door_back_battery_low
     - binary_sensor.laundry_room_door_front_battery_low
+    - binary_sensor.laundry_room_lights_button_battery_low
     - binary_sensor.laundry_room_motion_back_battery_low
     - binary_sensor.laundry_room_motion_front_battery_low
     - binary_sensor.living_room_lamp_button_battery_low
     - binary_sensor.living_room_motion_battery_low
-    - binary_sensor.master_bath_leak_sensor_battery_low
-    - binary_sensor.office_motion_sensor_battery_low
+    - binary_sensor.master_bath_sink_leak_sensor_battery_low
+    - binary_sensor.master_bath_toilet_leak_sensor_battery_low
+    - binary_sensor.office_desk_button_battery_low
     - binary_sensor.office_window_battery_low
     - binary_sensor.side_door_battery_low
     - binary_sensor.side_door_keypad_battery_low
     - binary_sensor.side_entrance_doorbell_battery_low
+    - binary_sensor.smoke_co_alarm_battery_islow
     - binary_sensor.sump_pump_leak_sensor_battery_low
     - binary_sensor.washer_sink_leak_sensor_battery_low
-    from: 'off'
     to: 'on'
-  condition:
-  - condition: template
-    value_template: "{{ trigger.to_state.state != '' }}"
+  # condition:
+  # - condition: template
+  #   value_template: "{{ trigger.to_state.state != '' }}"
   action:
   - service: notify.gotify_high
     data_template:
@@ -237,12 +238,12 @@
     - sensor.main_fridge_temp
     - sensor.basement_fridge_temp
     above: 45
-    for: '00:30:00'
+    for: '02:00:00'
   action:
   - service: notify.mobile_app_matt_phone
     data:
       title: &fridge_title "{{ trigger.to_state.name }} is too high"
-      message: &fridge_msg Fridge has been above 45° for more than 30 minutes.
+      message: &fridge_msg Fridge has been above 45° for more than two hours.
       data:
         ttl: 0
         priority: high

@@ -84,6 +84,7 @@ automation:
     entity_id:
     - light.hallway
     - light.entrance
+    - light.other_buffet
     data:
       brightness_pct: 66
       transition: 10
@@ -129,13 +130,15 @@ script:
       entity_id:
       - light.hallway
       - light.entrance
+      - light.other_buffet
       data:
         brightness_pct: "{{ 25 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
+        kelvin: 3000
         transition: 5
     - service: light.turn_on
       entity_id: light.hall_bath_night_light
       data:
-        brightness_pct: 34
+        brightness_pct: 100
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
 
@@ -201,7 +204,7 @@ script:
 
   wait_master_bedroom_lights_off:
     sequence:
-    - wait_template: "{{ is_state('light.master_bedroom', 'off') }}"
+    - wait_template: "{{ is_state('light.master_bedroom_lamps', 'off') }}"
       timeout: '08:00:00'
       continue_on_timeout: false
     - service: light.turn_on

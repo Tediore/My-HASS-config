@@ -37,6 +37,22 @@
       message: "CPU temperature has been above 80 °C for more than five minutes."
 
 
+- alias: Notify if server fan speed out of range
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.server_fan_speed
+    above: 4000
+  - platform: numeric_state
+    entity_id: sensor.server_fan_speed
+    below: 2500
+  action:
+  - service: notify.gotify_high
+    data:
+      title: "Check server fan"
+      message: "Server fan speed invalid - check for issues"
+
+
 - alias: Notify when humidity rising quickly
   initial_state: true
   trigger:
@@ -78,21 +94,6 @@
   - service: persistent_notification.dismiss
     data:
       notification_id: config_entry_discovery
-
-
-- alias: Notify when issue with auto-backup
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.backup_log
-  condition:
-  - condition: template
-    value_template: "{{ states('sensor.backup_log') != '' }}"
-  action:
-  - service: persistent_notification.create
-    data:
-      title: Backup error
-      message: Backup error. Check log for details.
 
 
 - alias: Birthday reminder

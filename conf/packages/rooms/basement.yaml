@@ -24,7 +24,7 @@ automation:
       - service: light.turn_on
         entity_id: light.basement_stairs_lights
         data:
-          color_temp: 375
+          kelvin: 4000
           brightness_pct: 100
     - conditions:
       - "{{ trigger.to_state.state == 'on' }}"
@@ -89,7 +89,7 @@ automation:
   trigger:
   - platform: state
     entity_id: 
-    - light.office_2
+    - light.office_lamps
     - light.basement_main
     to:
     - 'on'
@@ -104,7 +104,7 @@ automation:
         entity_id: light.basement_main
         state: 'off'
       - condition: state
-        entity_id: light.office_2
+        entity_id: light.office_lamps
         state: 'on'
       sequence: &bsmt_hall_light_on
       - service: light.turn_on
@@ -123,13 +123,13 @@ automation:
     - conditions:
       - "{{ trigger.to_state.state == 'off' }}"
       - condition: state
-        entity_id: light.office_2
+        entity_id: light.office_lamps
         state: 'on'
       sequence: *bsmt_hall_light_on
     - conditions:
       - "{{ trigger.to_state.state == 'off' }}"
       - condition: state
-        entity_id: light.office_2
+        entity_id: light.office_lamps
         state: 'off'
       sequence:
       - service: light.turn_off
@@ -174,7 +174,7 @@ group:
       - light.basement_lamps #need to make this light group when we have lamps in the basement
       - light.basement_bar
       - light.craft_room
-      - light.craft_room_2
+      - light.craft_room_lamps
       - light.office
-      - light.office_2
+      - light.office_lamps
       - light.right_lamp_basement

@@ -4,7 +4,7 @@ automation:
   trigger:
   - platform: numeric_state
     entity_id: &outdoor_light sensor.outdoor_light_level
-    below: &outdoor_light_threshold 10
+    below: &outdoor_light_threshold 5
     for: '00:10:00'
   - platform: sun
     event: sunset

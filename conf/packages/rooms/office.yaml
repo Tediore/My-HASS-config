@@ -40,34 +40,13 @@ automation:
     domain: homekit_controller
     type: button4
     subtype: single_press
+  condition:
+  - condition: state
+    entity_id: binary_sensor.xbox
+    state: 'on'
   action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: binary_sensor.xbox
-        state: 'on'
-      sequence:
-      - service: script.turn_on
-        entity_id: script.xbox_off
-    - conditions:
-      - condition: state
-        entity_id: climate.game_room_fan
-        state: 'on'
-      sequence:
-      - service: climate.turn_off
-        entity_id: climate.game_room_fan
-    - conditions:
-      - condition: state
-        entity_id: fan.game_room
-        state: 'on'
-      sequence:
-      - service: fan.turn_off
-        entity_id: fan.game_room
-    default:
-    - service: climate.turn_off
-      entity_id: climate.space_heater
-  - service: light.turn_off
-    entity_id: light.game_room_closet
+  - service: script.turn_on
+    entity_id: script.xbox_off
 
 
 script:

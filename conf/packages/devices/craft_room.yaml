@@ -54,7 +54,7 @@ automation:
         entity_id: light.craft_room
       - service: hue.hue_activate_scene
         data:
-          group_name: Craft room
+          group_name: Craft room lamps
           scene_name: Read
     - conditions:
       - "{{ 'colortemp' in trigger.to_state.state }}"
@@ -65,7 +65,7 @@ automation:
       - service: light.turn_on
         entity_id: light.craft_room
       - service: light.turn_off
-        entity_id: light.craft_room_2 # Hue room
+        entity_id: light.craft_room_lamps # Hue room
 
 
 script:

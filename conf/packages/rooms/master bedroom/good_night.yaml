@@ -118,7 +118,7 @@ script:
       - script.porch_light_security
     - service: homeassistant.turn_off
       entity_id:
-      - light.master_bedroom
+      - light.master_bedroom_lamps
       - light.master_bedroom_fan
       - light.craft_room
       - light.dining_room
@@ -224,9 +224,13 @@ script:
 
   master_bedroom_ac_on:
     sequence:
-    - condition: state
-      entity_id: climate.thermostat
-      state: 'cool'
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: climate.thermostat
+        state:
+        - 'heat'
+        - 'off'
     - condition: numeric_state
       entity_id: sensor.outside_temp
       above: 65

@@ -44,7 +44,7 @@ automation:
   action:
   - service: input_boolean.turn_off
     data:
-      entity_id: "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_cool_sleep' }}"
+      entity_id: &no_bool "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_cool_sleep' }}"
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'
@@ -98,7 +98,7 @@ automation:
   action:
   - service: input_boolean.turn_on
     data:
-      entity_id: "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_cool_sleep' }}"
+      entity_id: *no_bool
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'
@@ -155,7 +155,7 @@ automation:
   action:
   - service: input_boolean.turn_off
     data:
-      entity_id: "{{ 'none' if trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_heat_sleep' }}"
+      entity_id: *no_bool
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'
@@ -209,7 +209,7 @@ automation:
   action:
   - service: input_boolean.turn_on
     data:
-      entity_id: "{{ 'none' if trigger.platform == 'state' and trigger.to_state.domain == 'input_number' else 'input_boolean.tstat_heat_sleep' }}"
+      entity_id: *no_bool
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'

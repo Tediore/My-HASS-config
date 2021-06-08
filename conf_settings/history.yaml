@@ -13,7 +13,7 @@ include:
   - light.front_closet
   - light.dining_room
   - light.living_room
-  - light.master_bedroom
+  - light.master_bedroom_lamps
   - light.game_room
   - light.laundry_room
   - light.porch

@@ -226,7 +226,9 @@ script:
       entity_id: light.living_room_lamps
       state: 'on'
     - service: light.turn_off
-      entity_id: light.living_room
+      entity_id:
+      - light.living_room
+      - light.other_buffet
       data:
         transition: 2
 
@@ -235,7 +237,7 @@ script:
     sequence:
     - service: light.turn_on
       data:
-        entity_id: "{{ 'light.living_room_lamps, light.buffet, light.hallway' if is_state('light.living_room', 'off') else 'light.buffet, light.hallway' }}"
+        entity_id: "{{ 'light.living_room_lamps, light.buffet, light.other_buffet, light.hallway' if is_state('light.living_room', 'off') else 'light.buffet, light.other_buffet, light.hallway' }}"
         kelvin: 3000
         transition: 3
         brightness_pct: "{{ 100 if 6 < now().hour < 21 else 50 }}"

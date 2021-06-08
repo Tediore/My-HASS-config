@@ -15,7 +15,7 @@ lights_interior:
   - light.christmas_lights
   - light.christmas_tree
   - light.craft_room
-  - light.craft_room_2
+  - light.craft_room_lamps
   - light.dining_room
   - light.entrance
   - light.garage
@@ -27,16 +27,16 @@ lights_interior:
   - light.left_lamp
   - light.living_room
   - light.living_room_bias_lighting
-  - light.master_bedroom
+  - light.master_bedroom_lamps
   - light.master_bedroom_fan
   - light.matt
   - light.mini_christmas_tree
   - light.office
-  - light.office_2
+  - light.office_lamps
   - light.portable_mini_christmas_tree
   - light.right_lamp_basement
   - light.side_door_alarm_status
-  - light.side_entrance
+  - switch.side_entrance_light
   - light.stand_lamp
   - light.tea_lights
   - light.the_glow_light

@@ -41,7 +41,7 @@ automation:
         entity_id: light.office
       - service: hue.hue_activate_scene
         data:
-          group_name: Office
+          group_name: Office lamps
           scene_name: Read
     - conditions:
       - "{{ trigger.to_state.state in ['on', 'off'] }}"
@@ -52,7 +52,7 @@ automation:
       - service: light.turn_on
         entity_id: light.office
       - service: light.turn_off
-        entity_id: light.office_2 # Hue room
+        entity_id: light.office_lamps # Hue room
     - conditions:
       - "{{ 'brightness' in trigger.to_state.state }}"
       sequence:

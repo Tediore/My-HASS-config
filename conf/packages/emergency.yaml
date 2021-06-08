@@ -101,7 +101,7 @@ automation:
   action:
   - service: light.turn_on
     entity_id:
-    - light.master_bedroom
+    - light.master_bedroom_lamps
     - light.living_room
     data:
       color_name: red
@@ -142,7 +142,7 @@ automation:
   - service: light.turn_on
     entity_id:
     - light.buffet
-    - light.master_bedroom
+    - light.master_bedroom_lamps
     - light.living_room
     data:
       brightness_pct: 100

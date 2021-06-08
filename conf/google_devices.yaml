@@ -1,51 +1,90 @@
-climate.thermostat:
+### Craft room
+light.craft_room:
+  expose: true
+  room: Craft room
+light.craft_room_lamps:
   expose: true
   room: Other devices
-fan.game_room:
-  expose: true
-  room: Game room
-light.buffet:
-  expose: true
-  room: Other devices
+
+
+### Dining room
 light.dining_room:
   expose: true
   room: Dining room
-light.entrance:
+
+switch.dining_room_fan:
   expose: true
-  room: Other devices
-light.front_closet:
-  expose: true
-  room: Other devices
-light.game_room:
-  expose: true
-  room: Game room
-light.kitchen_cabinets:
+  room: Dining room
+
+
+### Kitchen
+light.kitchen:
   expose: true
   room: Kitchen
-light.laundry_room_2:
+light.kitchen_cabinets:
+  expose: true
+  room: Other devices
+
+switch.kitchen_fan:
+  expose: true
+  room: Kitchen
+
+
+### Laundry room
+light.laundry_room:
   expose: true
   room: Laundry room
+
+
+### Living room
 light.living_room:
   expose: true
   room: Living room
-light.living_room_lamps:
+
+switch.living_room_fan:
   expose: true
-  room: Other devices
-light.master_bedroom:
+  room: Living room
+
+
+### Master bedroom
+climate.bedroom_ac:
+  name: Master bedroom AC
   expose: true
   room: Master bedroom
-light.porch:
+
+light.master_bedroom_fan:
   expose: true
-  room: Other devices
-script.alarm_arm_home:
+  room: Master bedroom
+light.master_bedroom_lamps:
   expose: true
-  room: Other devices
-script.cross_stitch_light:
-  expose: true
-  room: Other devices
+  room: Master bedroom
+
 switch.bedroom_fan:
   expose: true
   room: Master bedroom
+
+
+### Office
+light.office:
+  expose: true
+  room: Office
+light.office_lamps:
+  expose: true
+  room: Other devices
+
+switch.game_room_bias_lighting:
+  expose: true
+  room: Office
+
+
+### Other
+climate.thermostat:
+  expose: true
+  room: Other devices
+
+light.buffet:
+  expose: true
+  room: Other devices
 light.christmas_lights:
   name: Christmas lights
   expose: true
@@ -53,21 +92,35 @@ light.christmas_lights:
 light.christmas_tree:
   expose: true
   room: Other devices
+light.entrance:
+  expose: true
+  room: Other devices
+light.front_closet:
+  expose: true
+  room: Other devices
+light.living_room_lamps:
+  expose: true
+  room: Other devices
 light.mini_christmas_tree:
   expose: true
   room: Other devices
-switch.candle_warmer:
+light.other_buffet:
   expose: true
   room: Other devices
-switch.dining_room_fan:
+
+script.alarm_arm_home:
   expose: true
-  room: Dining room
-switch.kitchen_fan:
+  room: Other devices
+script.cross_stitch_light:
   expose: true
-  room: Kitchen
-switch.living_room_fan:
+  room: Other devices
+
+switch.porch_light:
   expose: true
-  room: Living room
-switch.game_room_bias_lighting:
+  room: Other devices
+switch.side_entrance_light:
   expose: true
-  room: Game room
+  room: Other devices
+switch.side_porch_light:
+  expose: true
+  room: Other devices
