@@ -1,4 +1,4 @@
-notify_sms:
+sms_send:
   sequence:
     service: mqtt.publish
     data:

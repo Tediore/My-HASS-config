@@ -127,7 +127,7 @@ automation:
   action:
   - service: hue.hue_activate_scene
     data:
-      group_name: Master bedroom
+      group_name: Master bedroom lamps
       scene_name: Read
       transition: 200
 

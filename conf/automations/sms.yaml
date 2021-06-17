@@ -13,7 +13,7 @@
       - condition: template
         value_template: "{{ trigger.payload_json['text'] == 'Ping' }}"
       sequence:
-      - service: script.notify_sms
+      - service: script.sms_send
         data:
           number: !secret phone_matt
           message: "Pong!"
@@ -21,7 +21,7 @@
       - condition: template
         value_template: "{{ trigger.payload_json['text'] == 'Help' }}"
       sequence:
-      - service: script.notify_sms
+      - service: script.sms_send
         data_template:
           number: !secret phone_matt
           message: >
@@ -30,7 +30,7 @@
       - condition: template
         value_template: "{{ trigger.payload_json['text'] == 'Status' }}"
       sequence:
-      - service: script.notify_sms
+      - service: script.sms_send
         data_template:
           number: !secret phone_matt
           message: >
@@ -48,7 +48,7 @@
       - wait_template: "{{ is_state('group.lights_interior', 'off') }}"
         timeout: '00:00:10'
         continue_on_timeout: true
-      - service: script.notify_sms
+      - service: script.sms_send
         data_template:
           number: !secret phone_matt        
           message: "{{ 'Lights have been turned off.' if is_state('group.lights_interior', 'off') else 'Command timed out.' }}"
@@ -58,19 +58,19 @@
       sequence:
       - service: script.turn_on
         entity_id: script.alarm_arm_away
-      - service: script.notify_sms
+      - service: script.sms_send
         data:
           number: !secret phone_matt
           message: "Arming alarm in away mode."
       - wait_template: "{{ is_state('input_text.alarm', 'armed_away') }}"
         timeout: '00:01:00'
         continue_on_timeout: true
-      - service: script.notify_sms
+      - service: script.sms_send
         data_template:
           number: !secret phone_matt
           message: "{{ 'Alarm has been armed in away mode.' if is_state('input_text.alarm', 'armed_away') else 'Command timed out.' }}"
     default:
-    - service: script.notify_sms
+    - service: script.sms_send
       data_template:
         number: !secret phone_matt
         message: "Command \"{{ trigger.payload_json['text'] }}\" not found."
@@ -96,7 +96,7 @@
   - service: notify.sms_received
     data:
       message: &message "{{ trigger.payload_json['number'] }}: {{ trigger.payload_json['text'] }}"
-  - service: script.notify_sms
+  - service: script.sms_send
     data:
       number: !secret phone_matt
       message: *message

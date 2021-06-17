@@ -15,52 +15,45 @@ light:
   - light.cabinet_lights_n
   - light.cabinet_lights_s
 
-# automation:
-# - alias: Dim down/up cabinet lights with motion
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.kitchen_motion
-#     from: 'off'
-#     to: 'on'
-#   - platform: state
-#     entity_id: binary_sensor.kitchen_motion
-#     from: 'on'
-#     to: 'off'
-#     for: '00:10:00'
-#   - platform: state
-#     entity_id: input_boolean.lr_tv_ir
-#   condition:
-#   - condition: state
-#     entity_id: input_boolean.andy_sleep
-#     state: 'off'
-#   action:
-#   - service: "input_boolean.turn_{{ trigger.to_state.state }}"
-#     entity_id: input_boolean.kitchen_cabinet_light_ctl
-#   - condition: state
-#     entity_id: light.kitchen_cabinets
-#     state: 'on'
-#   - service: light.turn_on
-#     entity_id: light.kitchen_cabinets
-#     data:
-#       transition: "{{ 1 if trigger.to_state.state == 'on' else 5 }}"
-#       brightness_pct: >
-#         {% set hour = now().hour %}
-#         {% set state = trigger.to_state.state %}
-#         {% if (is_state('media_player.living_room_vizio', 'on') and is_state('light.living_room', 'off')) or (now().hour < 6 or now().hour > 20) %}
-#           {% if state == 'on' %}
-#             66
-#           {% else %}
-#             33
-#           {% endif %}
-#         {% else %}
-#           {% if state == 'on' %}
-#             100
-#           {% else %}
-#             50
-#           {% endif %}
-#         {% endif %}
+automation:
+- alias: Dim down/up cabinet lights with kitchen lights
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.kitchen
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: light.kitchen_cabinets
+        state: 'on'
+      - "{{ state_attr('light.kitchen_cabinets', 'brightness') | int < 254 }}"
+      sequence:
+      - service: scene.create
+        data:
+          scene_id: kitchen_cabinets
+          snapshot_entities:
+          - light.kitchen_cabinets
+      - service: light.turn_on
+        entity_id: light.kitchen_cabinets
+        data:
+          brightness_pct: 100
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.kitchen_cabinet_light_ctl
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      - condition: state
+        entity_id: input_boolean.kitchen_cabinet_light_ctl
+        state: 'on'
+      sequence:
+      - scene: scene.kitchen_cabinets
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.kitchen_cabinet_light_ctl
 
 
-# input_boolean:
-#   kitchen_cabinet_light_ctl:
+input_boolean:
+  kitchen_cabinet_light_ctl:

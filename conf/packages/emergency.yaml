@@ -24,7 +24,7 @@ automation:
     to: 'off'
     for: '00:00:05'
   action:
-  - service: script.notify_sms
+  - service: script.sms_send
     data_template:
       number: !secret phone_matt
       message: &leak_message >
@@ -59,7 +59,7 @@ automation:
   - condition: template
     value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
   action:
-  - service: script.notify_sms
+  - service: script.sms_send
     data_template:
       number: !secret phone_matt
       message: &smoke_message >
@@ -128,11 +128,11 @@ automation:
   action:
   - service: hue.hue_activate_scene
     data:
-      group_name: Living room
+      group_name: Living room lamps
       scene_name: Water
   - service: hue.hue_activate_scene
     data:
-      group_name: Master bedroom
+      group_name: Master bedroom lamps
       scene_name: Water
   - service: light.turn_on
     entity_id: light.buffet

@@ -5,6 +5,7 @@
   device_class: temperature
   json_attributes_topic: *fridge_topic
   force_update: true
+  expire_after: 300
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -14,6 +15,7 @@
   device_class: temperature
   json_attributes_topic: *freezer_topic
   force_update: true
+  expire_after: 300
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -23,6 +25,7 @@
   device_class: temperature
   json_attributes_topic: *attic_temp_topic
   force_update: true
+  expire_after: 300
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -32,6 +35,7 @@
   device_class: temperature
   json_attributes_topic: *attic_hum_topic
   force_update: true
+  expire_after: 300
   unit_of_measurement: '%'
 
 - platform: mqtt
@@ -41,6 +45,7 @@
   device_class: temperature
   json_attributes_topic: *outside_temp_topic
   force_update: true
+  expire_after: 300
   unit_of_measurement: '°F'
 
 - platform: mqtt
@@ -50,4 +55,5 @@
   device_class: temperature
   json_attributes_topic: *outside_hum_topic
   force_update: true
+  expire_after: 300
   unit_of_measurement: '%'

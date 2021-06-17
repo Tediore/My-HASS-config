@@ -164,7 +164,7 @@
   - platform: state
     entity_id: input_boolean.internet
   action:
-  - service: script.notify_sms
+  - service: script.sms_send
     data_template:
       number: !secret phone_matt
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."

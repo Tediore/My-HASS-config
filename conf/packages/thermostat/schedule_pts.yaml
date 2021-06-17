@@ -1,0 +1,100 @@
+automation:
+- alias: Set PTS start/end time
+  initial_state: true
+  trigger:
+  - platform: mqtt
+    topic: 'sms2mqtt/received'
+    payload: 'ComEd PTS Summer Hours Alert: TODAY'
+    value_template: "{{ value_json.text[:35] }}"
+  action:
+  - service: input_datetime.set_datetime
+    entity_id: input_datetime.tstat_peak_savings_start
+    data:
+      time: >
+        {% set payload = trigger.payload %}
+        {% set start = payload[payload.find('from') + 4:payload.find(' - ')] %}
+        {% set mid = payload[payload.find(' - ') + 3:] %}
+        {% if start.find('am') == -1 %}
+          {{- (start[:start.find('m') - 2] | int + 12) | string + ':00:00' }}
+        {% else %}
+          {{- '0' + (start[:start.find('m') - 2] | int) | string + ':00:00' }}
+        {% endif %}
+  - service: input_datetime.set_datetime
+    entity_id: input_datetime.tstat_peak_savings_end
+    data:
+      time: >
+        {% set payload = trigger.payload %}
+        {% set mid = payload[payload.find(' - ') + 3:] %}
+        {% set end = mid[:mid.find('m') + 1] %}
+        {% if end.find('am') == -1 %}
+          {{- (end[:end.find('m') - 2] | int + 12) | string + ':00:00' }}
+        {% else %}
+          {{- '0' + (end[:end.find('m') - 2] | int) | string + ':00:00' }}
+        {% endif %}
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.tstat_peak_savings
+
+
+- alias: Turn cooling off/on - peak time savings
+  initial_state: true
+  trigger:
+  - platform: time
+    at:
+    - &start input_datetime.tstat_peak_savings_start
+    - &end input_datetime.tstat_peak_savings_end
+  condition:
+  - condition: state
+    entity_id: input_boolean.tstat_peak_savings
+    state: 'on'
+  action:
+  - choose:
+    - conditions:
+      - condition: time
+        before: *end
+      sequence:
+      - service: climate.set_temperature
+        entity_id: climate.thermostat
+        data:
+          target_temp_high: 85
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.tstat_peak_savings_active
+    - conditions:
+      - condition: time
+        after: *start
+      sequence:
+      - service: input_boolean.turn_off
+        entity_id:
+        - input_boolean.tstat_peak_savings
+        - input_boolean.tstat_peak_savings_active
+
+
+script:
+  tstat_peak_savings:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.tstat_peak_savings
+      state: 'off'
+    - wait_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'idle') }}"
+      timeout: '00:05:00'
+      continue_on_timeout: true
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.tstat_peak_savings
+    - wait_template: "{{ is_state('climate.thermostat', 'off') }}"
+      timeout: '00:00:10'
+      continue_on_timeout: false
+    - service: notify.gotify
+      data:
+        title: Peak time savings active
+        message: Thermostat has been turned off.
+
+
+input_datetime:
+  tstat_peak_savings_start: &tstat_times
+    has_date: false
+    has_time: true
+  tstat_peak_savings_end: *tstat_times
+
+
+input_boolean:
+  tstat_peak_savings:
+  tstat_peak_savings_active:

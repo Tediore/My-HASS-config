@@ -136,7 +136,9 @@ script:
         kelvin: 3000
         transition: 5
     - service: light.turn_on
-      entity_id: light.hall_bath_night_light
+      entity_id: 
+      - light.hall_bath_night_light
+      - light.master_bath_night_light
       data:
         brightness_pct: 100
     - service: script.turn_on

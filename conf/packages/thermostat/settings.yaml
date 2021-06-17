@@ -149,7 +149,6 @@ input_boolean:
   tstat_sched_resume:
     name: Resume thermostat schedule
   tstat_smart:
-  tstat_peak_savings:
 
   tstat_heat_sleep:
   tstat_cool_sleep:
@@ -241,7 +240,7 @@ sensor:
           Off
         {% elif is_state('input_boolean.tstat_hold', 'on') %}
           Hold
-        {% elif is_state('input_boolean.tstat_peak_savings', 'on') %}
+        {% elif is_state('input_boolean.tstat_peak_savings_active', 'on') %}
           PTS
         {% elif is_state('input_boolean.tstat_smart', 'on') %}
           Smart
@@ -273,7 +272,7 @@ sensor:
     
     tstat_current_temp:
       friendly_name: "Inside"
-      value_template: "{{ state_attr('climate.thermostat','current_temperature') | float('-') | round(0) }}"
+      value_template: "{{ state_attr('climate.thermostat','current_temperature') | float('-') }}"
       unit_of_measurement: '°F'
     
     tstat_current_humidity:

@@ -190,12 +190,12 @@ script:
       - condition: state
         entity_id: sun.sun
         state: 'below_horizon'
-    - service: light.turn_on
+    - service: homeassistant.turn_on
       entity_id: 
       - light.entrance
       - switch.side_entrance_light
     - delay: '00:01:00'
-    - service: light.turn_off
+    - service: switch.turn_off
       entity_id: switch.side_entrance_light
 
   
@@ -231,7 +231,7 @@ script:
         kelvin: 3000
     - service: hue.hue_activate_scene
       data:
-        group_name: Living room
+        group_name: Living room lamps
         scene_name: Read lamps
 
 
@@ -254,7 +254,7 @@ script:
         kelvin: 3000
     - service: hue.hue_activate_scene
       data:
-        group_name: Living room
+        group_name: Living room lamps
         scene_name: Christmas
     - service: input_boolean.turn_on
       entity_id: input_boolean.christmas_porch_light_loop

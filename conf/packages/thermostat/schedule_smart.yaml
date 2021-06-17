@@ -1,37 +1,4 @@
 automation:
-- alias: Manage cooling for PTS
-  initial_state: true
-  trigger:
-  - platform: event
-    event_type: ifttt_webhook_received
-  condition:
-  - condition: template
-    value_template: "{{ trigger.event.data.action in ['pts_precool', 'pts_started', 'pts_ended'] }}"
-  action:
-    service_template: >
-      {% set alarm = states('input_text.alarm') %}
-      {% set event = trigger.event.data.action %}
-      {{ 'script.turn_on' if event == 'pts_started' or (event == 'pts_precool' and alarm == 'armed_away') else 'input_boolean.turn_off' }}
-    data_template:
-      entity_id: "{{ 'input_boolean' if trigger.event.data.action == 'pts_ended' else 'script' }}.tstat_peak_savings"
-
-
-- alias: Turn cooling off - peak time savings
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.tstat_peak_savings
-    from: 'off'
-    to: 'on'
-  action:
-  - service: input_text.set_value
-    entity_id: input_text.tstat_prev_mode
-    data_template:
-      value: "{{ 'cool' if is_state('climate.thermostat', 'cool') else 'off' }}"
-  - service: climate.turn_off
-    entity_id: climate.thermostat
-
-
 - alias: Start sleep mode cool early if idle
   initial_state: true
   trigger:
@@ -218,21 +185,3 @@ script:
         value: 'cool'
     - service: input_boolean.turn_on
       entity_id: input_boolean.tstat_sched_resume
-
-  tstat_peak_savings:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.tstat_peak_savings
-      state: 'off'
-    - wait_template: "{{ is_state_attr('climate.thermostat', 'hvac_action', 'idle') }}"
-      timeout: '00:05:00'
-      continue_on_timeout: true
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.tstat_peak_savings
-    - wait_template: "{{ is_state('climate.thermostat', 'off') }}"
-      timeout: '00:00:10'
-      continue_on_timeout: false
-    - service: notify.gotify
-      data:
-        title: Peak time savings active
-        message: Thermostat has been turned off.
