@@ -15,16 +15,16 @@ automation:
       kelvin: 3000
 
 
-- alias: Side entrance doorbell
+- alias: Kitchen cabinet lights button
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.side_entrance_doorbell
+    entity_id: sensor.kitchen_cabinet_lights_button_action
     to:
     - 'on'
     - 'off'
   action:
-  - service: switch.turn_on
-    entity_id: 
-    - switch.main_floor_chime_double_beep # cut off early so that it only beeps once
-    - switch.basement_chime_double_beep
+  - service: light.turn_on
+    entity_id: light.kitchen_cabinets
+    data:
+      brightness_pct: "{{ 100 if is_state('light.kitchen_cabinets', 'off') else 0 }}"

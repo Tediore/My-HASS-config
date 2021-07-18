@@ -27,7 +27,7 @@ automation:
 #     - 'on'
 #     - 'off'
 #   condition:
-#   - "{{ trigger.to_state.state != states('light.master_bedroom_lamps_closet') }}"
+#   - "{{ trigger.to_state.state != states('light.master_bedroom_closet') }}"
 #   - condition: state
 #     entity_id:
 #     - input_boolean.sleep_mode
@@ -35,7 +35,7 @@ automation:
 #     state: 'off'
 #   action:
 #   - service: light.turn_on
-#     entity_id: light.master_bedroom_lamps_closet
+#     entity_id: light.master_bedroom_closet
 #     data:
 #       brightness_pct: >
 #         {% if trigger.to_state.state == 'on' %}
@@ -60,7 +60,7 @@ automation:
   action:
   - service: light.turn_off
     entity_id: 
-    - light.master_bedroom_lamps_closet
+    - light.master_bedroom_closet
     - light.mini_christmas_tree
 
 
@@ -171,6 +171,37 @@ automation:
     entity_id: light.mini_christmas_tree
 
 
+- alias: Turn master bedroom AC generic tstat on with switch button
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: switch.bedroom_ac
+    to:
+    - 'off'
+    - 'on'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: climate.bedroom_ac
+        state: 'off'
+      sequence:
+      - service: climate.set_temperature
+        entity_id: climate.bedroom_ac
+        data:
+          temperature: "{{ states('input_number.bedroom_ac_temp_andy') | int }}"
+          hvac_mode: cool
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      - condition: state
+        entity_id: climate.bedroom_ac
+        state: 'on'
+      sequence:
+      - service: climate.turn_off
+        entity_id: climate.bedroom_ac
+
+
 switch:
 - platform: template
   switches:
@@ -224,7 +255,24 @@ climate:
   heater: switch.bedroom_ac
   ac_mode: true
   target_sensor: sensor.master_bedroom_temp
-  min_temp: 68
+  min_temp: 66
   max_temp: 75
   cold_tolerance: 0
   hot_tolerance: 2
+  precision: 0.1
+
+
+input_number:
+  bedroom_ac_temp_matt:
+    name: Matt sleep
+    min: 65
+    max: 75
+    step: 1
+    mode: box
+
+  bedroom_ac_temp_andy:
+    name: Andy sleep
+    min: 65
+    max: 75
+    step: 1
+    mode: box

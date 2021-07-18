@@ -94,26 +94,44 @@ automation:
     to:
     - 'on'
     - 'off'
-  - platform: time
-    at: '21:00:00'
+  - platform: state
+    entity_id: input_boolean.dark_inside
+    to: 'on'
+  - platform: homeassistant
+    event: start
+  # - platform: time
+  #   at: '21:00:00'
+  - platform: mqtt
+    topic: basement_hall_light
+    payload: toggle
   action:
   - choose:
     - conditions:
-      - "{{ trigger.to_state.state == 'on' or trigger.platform == 'time' }}"
+      - "{{ trigger.platform == 'mqtt' }}"
+      sequence:
+      - service: light.toggle
+        entity_id: light.basement_hallway
+        data:
+          kelvin: 4000
+          brightness_pct: 100
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' or trigger.platform == 'homeassistant' }}"
       - condition: state
         entity_id: light.basement_main
         state: 'off'
       - condition: state
-        entity_id: light.office_lamps
+        entity_id: 
+        - light.office_lamps
+        - input_boolean.dark_inside
         state: 'on'
       sequence: &bsmt_hall_light_on
       - service: light.turn_on
         entity_id: light.basement_hallway
         data:
           brightness_pct: 50
-          kelvin: 2700
+          kelvin: 2800
     - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
+      - "{{ trigger.to_state.state == 'on' or trigger.platform == 'homeassistant' }}"
       - condition: state
         entity_id: light.basement_main
         state: 'on'
@@ -121,19 +139,52 @@ automation:
       - service: light.turn_off
         entity_id: light.basement_hallway
     - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
+      - "{{ trigger.to_state.state == 'off' or trigger.platform == 'homeassistant' }}"
       - condition: state
-        entity_id: light.office_lamps
+        entity_id: 
+        - light.office_lamps
+        - input_boolean.dark_inside
         state: 'on'
       sequence: *bsmt_hall_light_on
     - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
+      - "{{ trigger.to_state.state == 'off' or trigger.platform == 'homeassistant' }}"
       - condition: state
         entity_id: light.office_lamps
         state: 'off'
+      - condition: state
+        entity_id: light.basement_hallway
+        state: 'on'
       sequence:
       - service: light.turn_off
         entity_id: light.basement_hallway
+
+
+- alias: Sync basement color lights
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &basement_color_lights
+    - light.bar_lights
+    - light.basement_fireplace_lights
+  condition:
+  - condition: state
+    entity_id: input_boolean.sync_basement_color_lights
+    state: 'on'
+  action:
+  - delay: 1
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      sequence:
+      - service: light.turn_off
+        entity_id: *basement_color_lights
+    default:
+    - service: light.turn_on
+      entity_id: *basement_color_lights
+      data:
+        brightness: "{{ state_attr(trigger.to_state.entity_id, 'brightness') }}"
+        rgb_color: "{{ state_attr(trigger.to_state.entity_id, 'rgb_color') }}"
+  - delay: 2
 
 
 light:
@@ -159,6 +210,7 @@ light:
   - light.basement_fireplace_left
   - light.basement_fireplace_right
 
+
 # - platform: group
 #   name: Basement lamps
 #   entities:
@@ -170,11 +222,15 @@ group:
   basement_lights:
     name: Basement lights
     entities:
-      - light.basement_main
-      - light.basement_lamps #need to make this light group when we have lamps in the basement
-      - light.basement_bar
-      - light.craft_room
-      - light.craft_room_lamps
-      - light.office
-      - light.office_lamps
-      - light.right_lamp_basement
+    - light.basement_main
+    - light.basement_lamps #need to make this light group when we have lamps in the basement
+    - light.basement_bar
+    - light.craft_room
+    - light.craft_room_lamps
+    - light.office
+    - light.office_lamps
+    - light.right_lamp_basement
+
+
+input_boolean:
+  sync_basement_color_lights:

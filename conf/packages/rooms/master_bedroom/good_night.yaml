@@ -220,6 +220,9 @@ script:
 
   master_bedroom_ac_on:
     sequence:
+    - condition: state
+      entity_id: input_boolean.auto_bedroom_ac
+      state: 'on'
     - condition: not
       conditions:
       - condition: state
@@ -235,7 +238,7 @@ script:
     - service: climate.set_temperature
       entity_id: climate.bedroom_ac
       data:
-        temperature: "{{ 68 if is_state('input_boolean.sleep_mode', 'on') else 71 }}"
+        temperature: "{{ states('input_number.bedroom_ac_temp_matt') | int if is_state('input_boolean.sleep_mode', 'on') else states('input_number.bedroom_ac_temp_andy') | int }}"
     - service: climate.turn_on
       entity_id: climate.bedroom_ac
 
@@ -254,3 +257,4 @@ input_boolean:
   sleep_mode:
   andy_sleep:
   white_noise:
+  auto_bedroom_ac:

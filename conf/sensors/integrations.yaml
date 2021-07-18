@@ -7,6 +7,7 @@
   - type: load_5m
   - type: load_15m
 
+
 - platform: rest
   resource: !secret hue_rest
   name: Hue bridge
@@ -19,6 +20,7 @@
   - swversion
   - apiversion
   scan_interval: 30
+
 
 - platform: dewpoint
   sensors:
@@ -34,6 +36,15 @@
       friendly_name: Attic dew point
       temperature: sensor.attic_temp
       rel_hum: sensor.attic_humidity
+    dewpoint_laundry_room:
+      friendly_name: Laundry room dew point
+      temperature: sensor.laundry_room_temp
+      rel_hum: sensor.laundry_room_humidity
+    dewpoint_basement:
+      friendly_name: Basement dew point
+      temperature: sensor.basement_temp
+      rel_hum: sensor.basement_humidity
+
 
 - platform: time_date
   display_options:
@@ -53,6 +64,7 @@
 #   - cloud_cover
 #   - temperature_high
 #   - temperature_low
+
 
 - platform: cups
   host: raspberrypi

@@ -4,7 +4,7 @@ lights_interior:
   - light.andy
   - light.andy_desk
   - light.basement
-  - light.basement_bar
+  - light.bar_lights
   - light.basement_bath_night_light
   - light.basement_hallway
   - light.basement_lights_main_3_way
@@ -18,7 +18,7 @@ lights_interior:
   - light.craft_room_lamps
   - light.dining_room
   - light.entrance
-  - light.garage
+  - switch.garage_lights
   - light.hall_bath_night_light
   - light.hallway
   - light.kitchen

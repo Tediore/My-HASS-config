@@ -16,8 +16,8 @@ automation:
       entity_id: input_boolean.dark_inside
       state: 'on'
   action:
-  - service: light.turn_on
-    entity_id: light.garage
+  - service: switch.turn_on
+    entity_id: switch.garage_lights
 
 
 - alias: Turn garage door lights on with service door
@@ -35,15 +35,15 @@ automation:
     to: 'off'
     for: '00:02:00'
   action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.garage
+  - service: "switch.turn_{{ trigger.to_state.state }}"
+    entity_id: switch.garage_lights
 
 
 - alias: Turn garage lights off after power restored
   initial_state: true
   trigger:
   - platform: state
-    entity_id: light.garage
+    entity_id: switch.garage_lights
     to: 'on'
   condition:
   - condition: state
@@ -52,5 +52,5 @@ automation:
     - binary_sensor.garage_door
     state: 'off'
   action:
-  - service: light.turn_off
-    entity_id: light.garage
+  - service: switch.turn_off
+    entity_id: switch.garage_lights

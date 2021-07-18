@@ -1,12 +1,9 @@
 automation:
-- alias: Turn entrance light on/off with switch
+- alias: Turn entrance light on/off with remote
   initial_state: true
   trigger:
-  - platform: mqtt
-    topic: "entrance_light_switch/button"
-    payload: 'SINGLE'
   - platform: state
-    entity_id: sensor.entrance_light_button_action
+    entity_id: sensor.entrance_light_remote
     to:
     - 'on'
     - 'off'

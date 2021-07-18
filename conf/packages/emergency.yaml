@@ -6,6 +6,7 @@ automation:
   trigger:
   - platform: state
     entity_id: &water_sensors
+    - binary_sensor.bar_leak
     - binary_sensor.basement_bathroom_leak
     - binary_sensor.bathroom_ejector_leak
     - binary_sensor.dishwasher_leak

@@ -1,13 +1,4 @@
 - platform: rest
-  name: Laundry room motion sensor
-  resource: !secret hue_motion
-  state_resource: !secret hue_motion_state
-  method: put
-  body_on: '{"on":true}'
-  body_off: '{"on":false}'
-  is_on_template: "{{ value_json.config.on == true }}"
-
-- platform: rest
   name: Hue dark inside
   resource: !secret hue_dark_inside
   state_resource: !secret hue_dark_inside_state

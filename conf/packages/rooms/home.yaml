@@ -58,6 +58,9 @@ automation:
   - platform: homeassistant
     event: start
   condition:
+  - condition: state
+    entity_id: input_boolean.overnight_guest
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
@@ -75,6 +78,9 @@ automation:
   - condition: time
     after: *time
   action:
+  - wait_template: "{{ is_state('media_player.living_room_vizio', 'off') }}"
+    timeout: '00:30:00'
+    continue_on_timeout: false
   - service: light.turn_on
     entity_id: light.kitchen_cabinets
     data:
@@ -107,10 +113,6 @@ automation:
     value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
-
-
-input_boolean:
-  dark_inside:
 
 
 script:
@@ -277,3 +279,8 @@ group:
     - light.mini_christmas_tree
     - light.portable_mini_christmas_tree
     - light.star_lights
+
+
+input_boolean:
+  dark_inside:
+  overnight_guest:

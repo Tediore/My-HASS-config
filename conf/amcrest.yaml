@@ -5,5 +5,4 @@
   resolution: high
   stream_source: rtsp
   binary_sensors:
-  - motion_detected
   - online

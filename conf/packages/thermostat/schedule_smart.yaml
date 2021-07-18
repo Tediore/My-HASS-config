@@ -160,7 +160,7 @@ automation:
     data:
       entity_id: climate.thermostat
       hvac_mode: 'heat_cool'
-      target_temp_low: 62
+      target_temp_low: 65
       target_temp_high: 82
   - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
   - service: input_boolean.turn_off

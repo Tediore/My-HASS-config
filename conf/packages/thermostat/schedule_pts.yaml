@@ -56,6 +56,7 @@ automation:
         entity_id: climate.thermostat
         data:
           target_temp_high: 85
+          target_temp_low: 62
       - service: input_boolean.turn_on
         entity_id: input_boolean.tstat_peak_savings_active
     - conditions:

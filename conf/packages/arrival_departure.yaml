@@ -23,7 +23,7 @@ automation:
   action:
   - service: light.turn_on
     data:
-      entity_id: "light.{{ 'entrance' if trigger.to_state.object_id == 'front_door' else 'side_entrance' }}"
+      entity_id: "{{ 'light.entrance' if trigger.to_state.object_id == 'front_door' else 'switch.side_entrance_light' }}"
       brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
       kelvin: 2700
 
@@ -128,6 +128,7 @@ automation:
     entity_id: light.master_bedroom_lamps
     data:
       brightness_pct: 100
+      kelvin: 3000
 
 
 - alias: Turn off arrival boolean
@@ -220,11 +221,21 @@ script:
   lights_normal:
     sequence:
     - service: light.turn_on
-      entity_id: 
+      entity_id:
+      - light.entrance
       - light.buffet
-      - light.kitchen_cabinets
-      - light.hall_bath_night_light
+      - light.other_buffet
       - light.hallway
+      data:
+        transition: 1
+        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
+        kelvin: 3000
+    - service: light.turn_on
+      entity_id: light.kitchen_cabinets
+      data:
+        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 50 }}"
+    - service: light.turn_on
+      entity_id: light.hall_bath_night_light
       data:
         transition: 1
         brightness_pct: 100
@@ -246,34 +257,19 @@ script:
       - light.star_lights
     - service: light.turn_on
       entity_id:
+      - light.entrance
       - light.buffet
-      - light.kitchen_cabinets
+      - light.other_buffet
+      - light.hallway
       data:
         transition: 1
-        brightness_pct: 100
+        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
         kelvin: 3000
-    - service: hue.hue_activate_scene
-      data:
-        group_name: Living room lamps
-        scene_name: Christmas
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.christmas_porch_light_loop
     - service: light.turn_on
-      entity_id: light.porch
+      entity_id: light.kitchen_cabinets
       data:
-        brightness_pct: 100
-        rgb_color: [0,255,0]
-    - delay: '00:01:00'
-    - service: light.turn_on
-      entity_id: light.living_room_lamps
-      data:
-        brightness_pct: 100
-        kelvin: 3000
-        transition: 10
-    - service: light.turn_off
-      entity_id: light.living_room_sconces
-      data:
-        transition: 10
+        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 50 }}"
+
 
   window_notify:
     sequence:

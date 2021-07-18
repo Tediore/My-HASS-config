@@ -1,0 +1,67 @@
+automation:
+- alias: Turn office lamps on at sunset
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.dark_inside
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.xbox
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.office_lamps
+    data:
+      kelvin: 3000
+      transition: 10
+      brightness_pct: 100
+  - condition: state
+    entity_id: light.basement_main
+    state: 'off'
+  - service: light.turn_on
+    entity_id: light.right_lamp_basement
+    data:
+      kelvin: 3000
+      brightness_pct: 100
+
+
+- alias: Turn basement ejector closet light on/off
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bathroom_ejector_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.bathroom_ejector_closet
+
+
+- alias: Game room dimmer off press
+  initial_state: true
+  trigger:
+  - platform: device
+    device_id: 55b3148007f211ebbe759fa8f183002a
+    domain: homekit_controller
+    type: button4
+    subtype: single_press
+  action:
+  - service: switch.turn_off
+    entity_id: switch.game_room_bias_lighting
+
+
+light:
+- platform: group
+  name: Office cans
+  entities:
+  - light.office_ne
+  - light.office_nw
+  - light.office_middle
+  - light.office_se
+  - light.office_sw
+
+
+input_boolean:
+  office:

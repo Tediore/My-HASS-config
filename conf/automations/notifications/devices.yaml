@@ -63,15 +63,13 @@
   trigger:
   - platform: state
     entity_id:
-    - light.living_room_bias_lighting
-    - sensor.siren_battery
-    - switch.basement_main_plug
-    - switch.dining_room_plug
-    - switch.game_room_bias_lighting
-    - switch.garage_plug
+    - switch.air_freshener
+    - switch.basement_fridge_plug
+    - switch.bathroom_ejector_closet
+    - switch.garage_lights
     - switch.guest_bedroom_plug
-    - switch.living_room_plug
     - switch.master_bedroom_plug
+    - sensor.siren_battery
     to: 'unavailable'
     for: '00:05:00'
   action:

@@ -1,0 +1,122 @@
+automation:
+- alias: Bar lights remote
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.bar_lights_remote_action
+    # first button: toggle light
+    # second button: change light color
+    # third button: reset to original settings
+    to:
+    - 'on'
+    - 'off'
+    - 'brightness_up'
+    - 'brightness_down'
+    - 'colortemp_down'
+    - 'colortemp_up'
+  action:
+  - service: script.turn_on
+    data:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command in ['on', 'off'] %}
+          script.bar_lights_{{ 'on' if is_state('light.bar_lights', 'off') else 'off' }}
+        {% elif 'brightness' in command %}
+          {% if is_state('input_boolean.bar_lights_color', 'on') %}
+            script.bar_lights_color
+          {% else %}
+            script.bar_lights_orig
+          {% endif %}
+        {% else %}
+          script.bar_lights_reset
+        {% endif %}
+
+
+- alias: Reset bar lights input to white
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.bar_lights
+    from: 'on'
+    to: 'off'
+  action:
+  - service: input_text.set_value
+    entity_id: input_text.bar_lights_color
+    data:
+      value: 'white'
+
+
+script:
+  bar_lights_on:
+    sequence:
+    - service: light.turn_on
+      entity_id: light.bar_lights
+      data:
+        brightness_pct: 100
+    - service: input_text.set_value
+      entity_id: input_text.bar_lights_color
+      data:
+        value: 'white'
+
+  bar_lights_off:
+    sequence:
+    - service: homeassistant.turn_off
+      entity_id: 
+      - light.bar_lights
+      - input_boolean.bar_lights_color
+    - service: input_text.set_value
+      entity_id: input_text.bar_lights_color
+      data:
+        value: 'white'
+
+  bar_lights_orig:
+    sequence:
+    - service: scene.create
+      data:
+        scene_id: bar_lights_orig
+        snapshot_entities:
+        - light.bar_lights
+    - service: script.turn_on
+      entity_id: script.bar_lights_color
+
+  bar_lights_color:
+    sequence:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.bar_lights_color
+    - service: light.turn_on
+      entity_id: light.bar_lights
+      data_template:
+        brightness_pct: 100
+        color_name: &color >
+          {% set color = states('input_text.bar_lights_color') %}
+          {% set dict = {
+            'white': 'red',
+            'red': 'orange',
+            'orange': 'green',
+            'green': 'cyan',
+            'cyan': 'blue',
+            'blue': 'darkslateblue',
+            'darkslateblue': 'red'
+          } %}
+          {{ dict[color] }}
+    - service: input_text.set_value
+      entity_id: input_text.bar_lights_color
+      data_template:
+        value: *color
+
+  bar_lights_reset:
+    sequence:
+    - scene: scene.bar_lights_orig
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.bar_lights_color
+    - service: input_text.set_value
+      entity_id: input_text.bar_lights_color
+      data:
+        value: 'white'
+
+
+input_text:
+  bar_lights_color:
+
+input_boolean:
+  bar_lights_color:

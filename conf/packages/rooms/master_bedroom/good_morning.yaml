@@ -107,23 +107,10 @@ automation:
   trigger:
   - platform: time
     at: 
-    - '06:45:00'
+    - '06:50:00'
     - '07:15:00'
   condition:
-  - condition: or
-    conditions:
-    - condition: template  # workday or heat on
-      value_template: >
-        {{ 
-          ((as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')) 
-          and now().hour < 7) or is_state('climate.thermostat', 'heat')
-        }}
-    - condition: template  # day off or heat off
-      value_template: >
-        {{ 
-          ((as_timestamp(now()) | timestamp_custom('%d') != as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')) 
-          and now().hour == 7) or not is_state('climate.thermostat', 'heat')
-        }}
+  - "{{ (now().hour == 6 and is_state('binary_sensor.workday', 'on')) or (now().hour == 7 and is_state('binary_sensor.workday', 'off')) }}"
   action:
   - service: homeassistant.turn_off
     entity_id:

@@ -7,11 +7,13 @@ automation:
     entity_id: &lr_ir sensor.lr_ir_received
     to: '0X20DF10EF'
   condition:
+  - "{{ not is_state('media_player.living_room_vizio', 'unavailable') }}"
+  action:
+  - service: script.turn_on
+    entity_id: script.update_lr_tv
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
-  - "{{ not is_state('media_player.living_room_vizio', 'unavailable') }}"
-  action:
   - service: input_boolean.turn_on
     entity_id: input_boolean.lr_tv_ir
   - service: script.turn_on
@@ -36,6 +38,8 @@ automation:
     - '0X20DFB44B'
     - '0X20DF629D' # SmartCast Home
   action:
+  - service: script.turn_on
+    entity_id: script.update_lr_tv
   - choose:
     - conditions:
       - condition: template
@@ -202,6 +206,13 @@ script:
       entity_id: input_boolean.dark_inside
       state: 'on'
     - service: light.turn_on
+      entity_id: light.living_room_bias_lighting
+      data:
+        brightness_pct: 60
+    - condition: state
+      entity_id: input_boolean.overnight_guest
+      state: 'off'
+    - service: light.turn_on
       entity_id:
       - light.hallway
       - light.entrance
@@ -218,10 +229,6 @@ script:
         brightness_pct: 50
     - service: script.turn_on
       entity_id: script.christmas_lights_off
-    - service: light.turn_on
-      entity_id: light.living_room_bias_lighting
-      data:
-        brightness_pct: 100
     - condition: state
       entity_id: light.living_room_lamps
       state: 'on'
@@ -247,6 +254,13 @@ script:
       entity_id: light.living_room_bias_lighting
     - service: input_boolean.turn_off
       entity_id: input_boolean.lr_tv_ir
+
+  update_lr_tv:
+    sequence:
+    - delay: 3
+    - service: homeassistant.update_entity
+      data:
+        entity_id: media_player.living_room_vizio
 
   cross_stitch_light:
     sequence:

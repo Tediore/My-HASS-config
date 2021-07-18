@@ -5,7 +5,7 @@ automation:
   - platform: numeric_state
     entity_id: &outdoor_light sensor.outdoor_light_level
     below: &outdoor_light_threshold 5
-    for: '00:10:00'
+    for: '00:20:00'
   - platform: sun
     event: sunset
     offset: '00:01:00'
@@ -162,22 +162,22 @@ automation:
 #     entity_id: input_boolean.on_balcony
 
 
-script:
-  porch_light_security:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.extra_sleep
-      state: 'off'
-    - service: light.turn_on
-      entity_id: light.porch
-      data:
-        brightness_pct: 50
-        kelvin: 3700
-    - service: input_text.set_value
-      entity_id: input_text.porch_light_color
-      data:
-        value: 'white'
+# script:
+#   porch_light_security:
+#     sequence:
+#     - condition: state
+#       entity_id: input_boolean.extra_sleep
+#       state: 'off'
+#     - service: light.turn_on
+#       entity_id: light.porch
+#       data:
+#         brightness_pct: 50
+#         kelvin: 3700
+#     - service: input_text.set_value
+#       entity_id: input_text.porch_light_color
+#       data:
+#         value: 'white'
 
 
-input_boolean:
-  on_balcony:
+# input_boolean:
+#   on_balcony:

@@ -179,43 +179,6 @@ automation:
       value: "{{ state_attr('climate.thermostat', 'hvac_action') }}"
 
 
-# group:
-#   tstat_heat_home:
-#     entities:
-#     - input_boolean.tstat_away
-#     - input_boolean.tstat_heat_sleep
-#     - input_boolean.tstat_cool_home
-#     - input_boolean.tstat_cool_sleep
-
-#   tstat_heat_sleep:
-#     entities:
-#     - input_boolean.tstat_away
-#     - input_boolean.tstat_heat_home
-#     - input_boolean.tstat_cool_home
-#     - input_boolean.tstat_cool_sleep
-
-#   tstat_cool_home:
-#     entities:
-#     - input_boolean.tstat_away
-#     - input_boolean.tstat_cool_sleep
-#     - input_boolean.tstat_heat_home
-#     - input_boolean.tstat_heat_sleep
-
-#   tstat_cool_sleep:
-#     entities:
-#     - input_boolean.tstat_away
-#     - input_boolean.tstat_cool_home
-#     - input_boolean.tstat_heat_home
-#     - input_boolean.tstat_heat_sleep
-
-#   tstat_away:
-#     entities:
-#     - input_boolean.tstat_cool_home
-#     - input_boolean.tstat_cool_sleep
-#     - input_boolean.tstat_heat_home
-#     - input_boolean.tstat_heat_sleep
-
-
 sensor:
 - platform: template
   sensors:
@@ -233,8 +196,8 @@ sensor:
     tstat_profile:
       friendly_name: Profile
       value_template: >
-        {% set low = state_attr('climate.thermostat', 'target_temp_low') | int %}
-        {% set high = state_attr('climate.thermostat', 'target_temp_high') | int %}
+        {% set low = state_attr('climate.thermostat', 'target_temp_low') | round(0) | int %}
+        {% set high = state_attr('climate.thermostat', 'target_temp_high') | round(0) | int %}
         {% set mode = states('sensor.tstat_mode') %}
         {% if is_state('climate.thermostat', 'off') %}
           Off
