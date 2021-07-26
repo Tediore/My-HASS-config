@@ -15,16 +15,17 @@ automation:
       kelvin: 3000
 
 
-- alias: Kitchen cabinet lights button
+- alias: Basement lamp button
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.kitchen_cabinet_lights_button_action
+    entity_id: sensor.basement_lamp_button_action
     to:
     - 'on'
     - 'off'
   action:
-  - service: light.turn_on
-    entity_id: light.kitchen_cabinets
+  - service: light.toggle
+    entity_id: light.right_lamp_basement
     data:
-      brightness_pct: "{{ 100 if is_state('light.kitchen_cabinets', 'off') else 0 }}"
+      brightness_pct: 100
+      kelvin: 3000

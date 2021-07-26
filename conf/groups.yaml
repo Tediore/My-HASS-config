@@ -1,43 +1,36 @@
 lights_interior:
   name: Interior lights
   entities:
-  - light.andy
-  - light.andy_desk
   - light.basement
   - light.bar_lights
   - light.basement_bath_night_light
   - light.basement_hallway
-  - light.basement_lights_main_3_way
   - light.basement_main
   - light.basement_stairs_lights
   - light.bathroom_ejector_closet
-  - light.buffet
   - light.christmas_lights
   - light.christmas_tree
   - light.craft_room
   - light.craft_room_lamps
   - light.dining_room
   - light.entrance
-  - switch.garage_lights
   - light.hall_bath_night_light
   - light.hallway
   - light.kitchen
   - light.kitchen_cabinets
   - light.laundry_room
-  - light.left_lamp
   - light.living_room
   - light.living_room_bias_lighting
   - light.master_bedroom_lamps
   - light.master_bedroom_fan
-  - light.matt
   - light.mini_christmas_tree
   - light.office
   - light.office_lamps
+  - light.other
   - light.portable_mini_christmas_tree
-  - light.right_lamp_basement
-  - light.side_door_alarm_status
+  - light.side_entrance_leds
   - switch.side_entrance_light
-  - light.stand_lamp
+  - switch.garage_lights
   - light.tea_lights
   - light.the_glow_light
 

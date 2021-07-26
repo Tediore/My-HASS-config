@@ -1,7 +1,6 @@
 exclude:
   domains:
   - camera
-  - cover
   - sun
   - zone
   entities:

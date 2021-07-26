@@ -1,0 +1,44 @@
+- platform: mqtt
+  name: Matt's car TPMS FR
+  state_topic: &matt-tpms-1 "rtl_433/03b84694/event"
+  value_template: &kpa2psi "{{ '{:.1f}'.format((value_json.pressure_kPa | float / 6.895)) }}"
+  device_class: temperature
+  json_attributes_topic: *matt-tpms-1
+  force_update: true
+  expire_after: &tpms-expiration 3600
+  unit_of_measurement: 'psi'
+
+- platform: mqtt
+  name: Matt's car TPMS FL
+  state_topic: &matt-tpms-2 "rtl_433/05221694/event"
+  value_template: *kpa2psi
+  device_class: temperature
+  json_attributes_topic: *matt-tpms-2
+  force_update: true
+  expire_after: *tpms-expiration
+  unit_of_measurement: 'psi'
+
+- platform: mqtt
+  name: Matt's car TPMS RL
+  state_topic: &matt-tpms-3 "rtl_433/05aa4e66/event"
+  value_template: *kpa2psi
+  device_class: temperature
+  json_attributes_topic: *matt-tpms-3
+  force_update: true
+  expire_after: *tpms-expiration
+  unit_of_measurement: 'psi'
+
+- platform: mqtt
+  name: Matt's car TPMS RR
+  state_topic: &matt-tpms-4 "rtl_433/05ab5d66/event"
+  value_template: *kpa2psi
+  device_class: temperature
+  json_attributes_topic: *matt-tpms-4
+  force_update: true
+  expire_after: *tpms-expiration
+  unit_of_measurement: 'psi'
+
+# BDE3E2 -0.12
+# 89D2E2 -0.24
+# D2CBE2 -0.38
+# A521C8 -2.28

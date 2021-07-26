@@ -1,21 +1,26 @@
 automation:
-- alias: Turn bedroom lights off when curtains opened during day
+- alias: Turn bedroom lights off in morning on workday
   initial_state: true
   trigger:
-  - platform: state
-    entity_id: binary_sensor.master_bedroom_curtains
-    from: 'on'
-    to: 'off'
+  - platform: time
+    at: '07:45:00'
   condition:
   - condition: state
     entity_id: light.master_bedroom_lamps
     state: 'on'
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'off'
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
+    - condition: template
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: light.turn_off
     entity_id: light.master_bedroom_lamps
+    data:
+      transition: 60
 
 
 # - alias: Turn master bedroom closet light on/off with motion
@@ -47,70 +52,6 @@ automation:
 #         {% else %}
 #           0
 #         {% endif %}
-
-
-- alias: Turn master bedroom closet light off with remote
-  initial_state: true
-  trigger:
-  - platform: device
-    device_id: 55b3b74407f211eba837e390742b5002
-    domain: homekit_controller
-    type: button4
-    subtype: single_press
-  action:
-  - service: light.turn_off
-    entity_id: 
-    - light.master_bedroom_closet
-    - light.mini_christmas_tree
-
-
-- alias: Turn tea lights on with lights
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: state
-    entity_id: light.matt_hk
-    to: 'off'
-  condition:
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  - condition: state
-    entity_id: input_text.alarm
-    state:
-    - 'armed_home'
-    - 'disarmed'
-  - condition: state
-    entity_id:
-    - input_boolean.sleep_mode
-    - input_boolean.andy_sleep
-    state: 'off'
-  action:
-  - service: light.turn_on
-    entity_id: light.tea_lights
-
-
-- alias: Turn tea lights off with lights
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: state
-    entity_id: light.matt_hk
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_text.alarm
-    state:
-    - 'armed_home'
-    - 'disarmed'
-  - condition: state
-    entity_id:
-    - input_boolean.sleep_mode
-    - input_boolean.andy_sleep
-    state: 'off'
-  action:
-  - service: light.turn_off
-    entity_id: light.tea_lights
 
 
 - alias: Transition master bedroom lights to warm

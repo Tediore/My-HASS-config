@@ -60,8 +60,6 @@ script:
       - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
-      - input_boolean.christmas_porch_light_loop
-      - switch.candle_warmer
     - service: script.turn_on
       entity_id: 
       - script.media_players_off
@@ -238,7 +236,14 @@ script:
     - service: climate.set_temperature
       entity_id: climate.bedroom_ac
       data:
-        temperature: "{{ states('input_number.bedroom_ac_temp_matt') | int if is_state('input_boolean.sleep_mode', 'on') else states('input_number.bedroom_ac_temp_andy') | int }}"
+        temperature: >
+          {% if is_state('climate.bedroom_ac', 'cool') %}
+            {{ state_attr('climate.bedroom_ac', 'temperature') | int }}
+          {% elif is_state('input_boolean.sleep_mode', 'on') %}
+            {{ states('input_number.bedroom_ac_temp_matt') | int }}
+          {% else %}
+            {{ states('input_number.bedroom_ac_temp_andy') | int }}
+          {% endif %}
     - service: climate.turn_on
       entity_id: climate.bedroom_ac
 

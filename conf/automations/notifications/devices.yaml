@@ -9,30 +9,44 @@
     for: '00:00:45'
   - platform: state
     entity_id:
-    - binary_sensor.front_closet_door
-    - binary_sensor.game_room_closet_door
-    - binary_sensor.game_room_closet_motion
-    - binary_sensor.game_room_window_left
+    - binary_sensor.back_door
+    - binary_sensor.basement_door
+    - binary_sensor.basement_fridge_door
+    - binary_sensor.bathroom_ejector_closet_door
+    - binary_sensor.front_door
+    - binary_sensor.garage_service_door
+    - binary_sensor.laundry_room_door_back
+    - binary_sensor.laundry_room_door_front
+    - binary_sensor.office_window
+    - binary_sensor.patio_door
+    - binary_sensor.side_door
+
+    - binary_sensor.basement_motion
+    - binary_sensor.deck_motion
+    - binary_sensor.dining_room_motion
+    - binary_sensor.hall_motion
+    - binary_sensor.laundry_room_motion_front
+    - binary_sensor.laundry_room_motion_back
+    - binary_sensor.living_room_motion
+
+    - binary_sensor.bar_leak
+    - binary_sensor.basement_bathroom_leak
+    - binary_sensor.bathroom_ejector_leak
+    - binary_sensor.dishwasher_leak
+    - binary_sensor.fridge_leak
+    - binary_sensor.hvac_leak
+    - binary_sensor.kitchen_sink_leak
     - binary_sensor.hall_bath_sink_leak
     - binary_sensor.hall_bath_toilet_leak
-    - binary_sensor.hvac_closet
     - binary_sensor.kitchen_leak
-    - binary_sensor.kitchen_motion
-    - binary_sensor.laundry_room_door
-    - binary_sensor.laundry_room_leak
     - binary_sensor.master_bath_sink_leak
     - binary_sensor.master_bath_toilet_leak
-    - binary_sensor.master_bedroom_closet_motion
-    - binary_sensor.master_bedroom_curtains
-    - binary_sensor.master_bedroom_motion
-    - binary_sensor.master_bedroom_window_left_contact
-    - binary_sensor.storm_door
-    - sensor.outdoor_light_level
-    - sensor.kitchen_light_level
+    - binary_sensor.sump_pump_leak
+    - binary_sensor.washer_sink_leak
+
     - sensor.master_bedroom_temp
-    - sensor.game_room_temp
+    - sensor.outdoor_light_level
     - light.kitchen_cabinets
-    - light.front_closet
     to: 'unavailable'
     for: '00:00:10'
   - platform: state
@@ -91,16 +105,21 @@
   - platform: state
     entity_id:
     - light.andy
+    - light.andy_closet
+    - light.andy_desk
+    - light.basement_hallway
+    - light.bathroom_ejector_closet
     - light.buffet
+    - light.dining_room_1
+    - light.dining_room_2
+    - light.dining_room_3
     - light.dresser
-    - light.front_closet
-    - light.laundry_room
+    - light.guest_bedroom_closet
     - light.left_lamp
-    - light.left_sconce
     - light.matt
-    - light.matt_desk
+    - light.matt_closet
+    - light.other_buffet
     - light.right_lamp
-    - light.right_sconce
     - light.stand_lamp
     to: 'unavailable'
     for: '00:10:00'

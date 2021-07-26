@@ -217,8 +217,7 @@ script:
       - light.hallway
       - light.entrance
       data:
-        brightness_pct: 25
-        transition: 5
+        brightness_pct: 33
     - service: light.turn_on
       entity_id:
       - light.buffet
@@ -244,7 +243,7 @@ script:
     sequence:
     - service: light.turn_on
       data:
-        entity_id: "{{ 'light.living_room_lamps, light.buffet, light.other_buffet, light.hallway' if is_state('light.living_room', 'off') else 'light.buffet, light.other_buffet, light.hallway' }}"
+        entity_id: "light.buffet, light.other_buffet, light.hallway, light.entrance{{ ', light.living_room_lamps' if is_state('light.living_room', 'off') else '' }}"
         kelvin: 3000
         transition: 3
         brightness_pct: "{{ 100 if 6 < now().hour < 21 else 50 }}"
@@ -257,7 +256,7 @@ script:
 
   update_lr_tv:
     sequence:
-    - delay: 3
+    - delay: 5
     - service: homeassistant.update_entity
       data:
         entity_id: media_player.living_room_vizio

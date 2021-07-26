@@ -21,11 +21,17 @@ automation:
     state: 'armed_away'
     for: '00:00:30'
   action:
-  - service: light.turn_on
-    data:
-      entity_id: "{{ 'light.entrance' if trigger.to_state.object_id == 'front_door' else 'switch.side_entrance_light' }}"
-      brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
-      kelvin: 2700
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.object_id == 'front_door' }}"
+      sequence:
+      - service: light.turn_on
+        entity_id: light.entrance
+        data:
+          brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
+    default:
+    - service: switch.turn_on
+      entity_id: switch.side_entrance_light
 
 
 - alias: Alarm disarmed from away

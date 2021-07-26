@@ -3,31 +3,28 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: &garage_door cover.garage_door
+    entity_id: &garage_door binary_sensor.garage_door
     to:
-    - 'open'
-    - 'closed'
+    - 'on'
+    - 'off'
   - platform: state
     entity_id: sun.sun
     to: 'below_horizon'
   action:
   - choose:
-    # when the garage door is opened or is already open at sunset, turn the garage lights on
     - conditions:
-      - "{{ trigger.to_state.state in ['open', 'below_horizon'] }}"
+      - "{{ trigger.to_state.state in ['on', 'below_horizon'] }}" # when the garage door is opened or is already open at sunset, turn the garage lights on
       - condition: state
         entity_id: sun.sun
         state: 'below_horizon'
       - condition: state
         entity_id: *garage_door
-        state: 'open'
+        state: 'on'
       sequence:
       - service: switch.turn_on
         entity_id: &garage_lights switch.garage_lights
-
-    # when the garage door is closed and the service door isn't open, turn the garage lights on and keep them on
     - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
+      - "{{ trigger.to_state.state == 'off' }}" # when the garage door is closed and the service door isn't open, turn the garage lights on and keep them on
       - condition: state
         entity_id:
         - &service_door binary_sensor.garage_service_door
@@ -54,15 +51,10 @@ automation:
     from: 'on'
     to: 'off'
     for: '00:02:00'
-  - platform: state
-    entity_id: *garage_lights_hold
-    to: 'on'
-    for: '00:05:00'
   action:
   - choose:
-    # when the service door is opened and the sun is below horizon or the garage door is closed, turn on garage lights
     - conditions:
-      - "{{ trigger.to_state.state == 'on' and trigger.to_state.object_id == 'garage_service_door' }}"
+      - "{{ trigger.to_state.state == 'on' }}" # when the service door is opened and the sun is below horizon or the garage door is closed, turn on garage lights
       - condition: or
         conditions:
         - condition: state
@@ -70,37 +62,26 @@ automation:
           state: 'below_horizon'
         - condition: state
           entity_id: *garage_door
-          state: 'closed'
+          state: 'off'
       sequence:
       - service: switch.turn_on
         entity_id: *garage_lights
-
-    # when the service door is opened after the garage lights were being held on, turn off the hold boolean
     - conditions:
-      - "{{ trigger.to_state.state == 'on' and trigger.to_state.object_id == 'garage_service_door' }}"
+      - "{{ trigger.to_state.state == 'on' }}" # when the service door is opened after the garage lights were being held on, turn off the hold boolean
       - condition: state
         entity_id: *garage_lights_hold
         state: 'on'
       sequence:
       - service: input_boolean.turn_off
         entity_id: *garage_lights_hold
-
-    # when the service door is closed and the garage lights hold is off, turn off the garage lights
     - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
+      - "{{ trigger.to_state.state == 'off' }}" # when the service door is closed and the garage lights hold is off, turn off the garage lights
       - condition: state
         entity_id: *garage_lights_hold
         state: 'off'
       sequence:
       - service: switch.turn_off
         entity_id: *garage_lights
-
-    # when the garage door is opened and closed with no change in service door for 5 minutes, turn off garage lights hold
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' and trigger.to_state.object_id == 'garage_lights_hold' }}"
-      sequence:
-      - service: input_boolean.turn_off
-        entity_id: *garage_lights_hold
 
 
 - alias: End garage lights hold
@@ -113,25 +94,6 @@ automation:
   action:
   - service: input_boolean.turn_off
     entity_id: *garage_lights_hold
-
-
-- alias: Open garage door when service door opened if leaving
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: *service_door
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_boolean.leaving
-    state: 'on'
-  - condition: state
-    entity_id: *garage_door
-    state: 'closed'
-  action:
-  - service: cover.open_cover
-    entity_id: *garage_door
 
 
 cover:

@@ -10,6 +10,11 @@ sensor:
       friendly_name: "Cooling runtime today"
       value_template: "{{ (states('sensor.cooling_time_today') | float) | round(1) }}"
       unit_of_measurement: 'h'
+
+    cooling_runtime_waking_hours:
+      friendly_name: "Cooling runtime waking hours"
+      value_template: "{{ (states('sensor.cooling_time_daytime') | float) | round(1) }}"
+      unit_of_measurement: 'h'
     
     cooling_runtime_yesterday:
       friendly_name: "Cooling runtime yesterday"
@@ -200,6 +205,30 @@ sensor:
   type: time
   start: "{{ states('input_text.time_cycle_start') }}"
   end: '{{ now() }}'
+
+- platform: history_stats
+  name: Cooling time daytime
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: time
+  start: '{{ now().replace(hour=7).replace(minute=0).replace(second=0) }}'
+  end: '{{ now().replace(hour=22).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Cooling cycles daytime
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: count
+  start: '{{ now().replace(hour=7).replace(minute=0).replace(second=0) }}'
+  end: '{{ now().replace(hour=22).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Cooling percent daytime
+  entity_id: sensor.hvac_action
+  state: 'cooling'
+  type: ratio
+  start: '{{ now().replace(hour=7).replace(minute=0).replace(second=0) }}'
+  end: '{{ now().replace(hour=22).replace(minute=0).replace(second=0) }}'
 
 
 ### History stats - other
