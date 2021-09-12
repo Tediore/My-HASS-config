@@ -33,6 +33,7 @@ I currently have the following devices connected to Home Assistant:
   - IR blasters
   - Lights
   - Plugs
+  - Shelly 1 (with a reed sensor) used to smartify my garage door opener
   - Switches and dimmers
 - Vizio TVs
 - Roku TV
