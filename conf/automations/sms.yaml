@@ -79,7 +79,7 @@
     - service: script.sms_send
       data_template:
         number: !secret phone_matt
-        message: "Command \"{{ trigger.payload_json['text'] }}\" not found."
+        message: "Command “{{ trigger.payload_json['text'] }}” not found."
 
 
 - alias: Log incoming SMS
