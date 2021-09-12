@@ -1,0 +1,22 @@
+- name: Office vibe
+  entities:
+    light.office_middle:
+      state: 'on'
+      rgb_color: [0, 128, 255]
+      brightness_pct: 100
+    light.office_ne:
+      state: 'on'
+      rgb_color: [0, 255, 0]
+      brightness_pct: 100
+    light.office_nw:
+      state: 'on'
+      rgb_color: [255, 0, 0]
+      brightness_pct: 100
+    light.office_se:
+      state: 'on'
+      rgb_color: [255, 64, 0]
+      brightness_pct: 100
+    light.office_sw:
+      state: 'on'
+      rgb_color: [191, 0, 255]
+      brightness_pct: 100

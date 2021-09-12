@@ -16,14 +16,14 @@ automation:
       kelvin: 3000
       transition: 10
       brightness_pct: 100
-  - condition: state
-    entity_id: light.basement_main
-    state: 'off'
-  - service: light.turn_on
-    entity_id: light.right_lamp_basement
-    data:
-      kelvin: 3000
-      brightness_pct: 100
+  # - condition: state
+  #   entity_id: light.basement_main
+  #   state: 'off'
+  # - service: light.turn_on
+  #   entity_id: light.right_lamp_basement
+  #   data:
+  #     kelvin: 3000
+  #     brightness_pct: 100
 
 
 - alias: Turn basement ejector closet light on/off
@@ -52,6 +52,54 @@ automation:
     entity_id: switch.game_room_bias_lighting
 
 
+- alias: Switch lights when Xbox turned on
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id:
+    - input_boolean.dark_inside
+    - light.office
+    state: 'on'
+  action:
+  - service: light.turn_off
+    entity_id: light.office
+    data:
+      transition: 5
+  - service: light.turn_on
+    entity_id: light.office_lamps
+    data:
+      transition: 3
+  - service: media_player.turn_off
+    entity_id: media_player.office_speaker
+  # - service: hue.hue_activate_scene
+  #   data:
+  #     group_name: Office lamps
+  #     scene_name: Read
+
+
+- alias: Transition office lights to warm white at sunset if on
+  initial_state: true
+  trigger:
+  - platform: sun
+    event: sunset
+    # offset: '-00:31:00'
+  condition:
+  - condition: state
+    entity_id: light.office
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.office_cans
+    data:
+      kelvin: 2000
+      transition: 20
+
+
 light:
 - platform: group
   name: Office cans
@@ -62,6 +110,19 @@ light:
   - light.office_se
   - light.office_sw
 
+- platform: group
+  name: Office lamps
+  entities:
+  - light.office_shelf_lamp
+  - light.office_table_lamp
+
 
 input_boolean:
   office:
+
+binary_sensor:
+- platform: mqtt
+  name: Xbox
+  state_topic: 'xbox/status'
+  payload_on: 'Available'
+  payload_off: 'Unavailable'

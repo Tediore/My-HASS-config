@@ -23,3 +23,12 @@
   duration:
     days: 7
   end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Basement door opened last 7 days
+  entity_id: binary_sensor.basement_door
+  state: 'on'
+  type: count
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7

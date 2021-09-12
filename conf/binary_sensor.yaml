@@ -5,7 +5,7 @@
       value_template: >
         {% set state = ['playing', 'paused', 'idle'] %}
         {% set speakers = [
-          states('media_player.bedroom_speaker') in values,
+          states('media_player.master_bedroom_clock') in values,
           states('media_player.living_room_speaker') in values,
           states('media_player.laundry_room_speaker') in values, 
           states('media_player.hub') in values
@@ -27,7 +27,7 @@
       value_template: >
         {% set rejects = ['off', 'unavailable'] %}
         {% set speakers = [
-          states('media_player.bedroom_speaker') not in rejects, 
+          states('media_player.master_bedroom_clock') not in rejects, 
           states('media_player.living_room_speaker') not in rejects, 
           states('media_player.kitchen_speaker') not in rejects,
           states('media_player.hub') not in rejects,
@@ -73,3 +73,11 @@
   payload_available: "Online"
   payload_not_available: "Offline"
   device_class: motion
+
+- platform: mqtt
+  name: Weather station battery low
+  state_topic: &weather_station_topic "rtl_433/1291/event"
+  value_template: "{{ value_json.battery_ok }}"
+  payload_on: "0"
+  payload_off: "1"
+  device_class: battery

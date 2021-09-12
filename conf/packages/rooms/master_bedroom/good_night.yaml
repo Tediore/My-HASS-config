@@ -24,7 +24,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: media_player.bedroom_speaker
+    entity_id: &bedroom_speaker media_player.master_bedroom_clock
     from: 'playing'
     to: 'idle'
   condition:
@@ -38,7 +38,7 @@ automation:
       state: 'on'
   action:
   - service: media_player.play_media
-    entity_id: media_player.bedroom_speaker
+    entity_id: *bedroom_speaker
     data:
       media_content_id: !secret white_noise
       media_content_type: audio/mp3
@@ -60,11 +60,10 @@ script:
       - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
+      - switch.air_freshener
     - service: script.turn_on
       entity_id: 
       - script.media_players_off
-      - script.sleep_switches
-      - script.porch_light_security
       - script.christmas_lights_off
       - script.master_bedroom_ac_on
     - service: switch.turn_on
@@ -80,6 +79,11 @@ script:
       data:
         entity_id: alarm_control_panel.home
         code: !secret alarm_code_system
+    - condition: state
+      entity_id: switch.living_room_fan
+      state: 'on'
+    - service: switch.turn_off
+      entity_id: switch.living_room_fan
 
 
   good_night_no_noise:
@@ -90,10 +94,9 @@ script:
       - group.lights_interior
       - input_boolean.christmas_porch_light_loop
       - media_player.living_room_vizio
+      - switch.air_freshener
     - service: script.turn_on
-      entity_id: 
-      - script.sleep_switches
-      - script.christmas_lights_off
+      entity_id: script.christmas_lights_off
     - service: switch.turn_on
       entity_id: switch.master_bedroom_fan
     - service: input_boolean.turn_on
@@ -111,9 +114,7 @@ script:
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep
     - service: script.turn_on
-      entity_id: 
-      - script.white_noise_bedroom
-      - script.porch_light_security
+      entity_id: script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id:
       - light.master_bedroom_lamps
@@ -162,32 +163,32 @@ script:
     - service: input_boolean.turn_on
       entity_id: input_boolean.white_noise
     - service: media_player.volume_mute
-      entity_id: media_player.bedroom_speaker
+      entity_id: *bedroom_speaker
       data:
         is_volume_muted: true
     - service: media_player.turn_on
-      entity_id: media_player.bedroom_speaker
+      entity_id: *bedroom_speaker
     - service: media_player.play_media
-      entity_id: media_player.bedroom_speaker
+      entity_id: *bedroom_speaker
       data:
         media_content_id: 'http://10.0.0.2:8123/local/audio/silence.mp3'
         media_content_type: audio/mp3
     - delay: '00:00:02'
     - service: media_player.volume_set
-      entity_id: media_player.bedroom_speaker
+      entity_id: *bedroom_speaker
       data_template:
         volume_level: "{{ states('input_number.white_noise_vol') | int / 100 }}"
     - delay: '00:00:02'
     - service: media_player.play_media
-      entity_id: media_player.bedroom_speaker
+      entity_id: *bedroom_speaker
       data:
         media_content_id: !secret white_noise
         media_content_type: audio/mp3
-    - wait_template: "{{ is_state('media_player.bedroom_speaker', 'playing') }}"
+    - wait_template: "{{ is_state('*bedroom_speaker', 'playing') }}"
       timeout: '00:00:10'
       continue_on_timeout: true
     - service: media_player.volume_mute
-      entity_id: media_player.bedroom_speaker
+      entity_id: *bedroom_speaker
       data:
         is_volume_muted: false
     - service: input_boolean.turn_off
@@ -204,16 +205,6 @@ script:
       - media_player.office_speaker
       - media_player.hub
       - media_player.kitchen_speaker
-
-
-  sleep_switches:
-    sequence:
-    - service: homeassistant.turn_off
-      entity_id: 
-      - climate.space_heater
-      - switch.space_heater
-      - switch.air_freshener
-      - switch.old_style_sign
 
 
   master_bedroom_ac_on:

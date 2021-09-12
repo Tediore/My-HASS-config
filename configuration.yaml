@@ -15,11 +15,11 @@ homeassistant:
 amcrest: !include conf/amcrest.yaml
 automation: !include_dir_merge_list conf/automations/
 binary_sensor: !include conf/binary_sensor.yaml
-camera: !include conf_pkg/camera.yaml
-climate: !include conf_pkg/climate.yaml
+camera: !include conf/camera.yaml
+climate: !include conf/climate.yaml
 config:
 discovery: !include conf_settings/discovery.yaml
-fan: !include conf_pkg/fan.yaml
+fan: !include conf/fan.yaml
 frontend: !include conf_settings/frontend.yaml
 google: !include conf_static/calendar.yaml
 google_assistant: !include conf_static/google_assistant.yaml
@@ -50,9 +50,9 @@ stream:
 sun:
 switch: !include conf/switch.yaml
 system_health:
-timer: !include conf_pkg/timer.yaml
+timer: !include conf/timer.yaml
 tts: !include conf/tts.yaml
 wake_on_lan:
-weather: !include conf/weather.yaml
+#weather: !include conf/weather.yaml
 zeroconf:
 zone: !include conf/zone.yaml

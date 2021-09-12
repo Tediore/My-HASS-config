@@ -8,12 +8,14 @@ automation:
     - binary_sensor.laundry_room_door_back
     - binary_sensor.laundry_room_motion_front
     - binary_sensor.laundry_room_motion_back
+    - binary_sensor.storage_motion
     from: 'off'
     to: 'on'
   - platform: state
     entity_id: &laundry_motion
     - binary_sensor.laundry_room_motion_front
     - binary_sensor.laundry_room_motion_back
+    - binary_sensor.storage_motion
     from: 'on'
     to: 'off'
     for: &laundry_motion_off_time '00:05:00'
@@ -22,20 +24,9 @@ automation:
     entity_id: input_boolean.laundry_motion
     state: 'on'
   action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: light.laundry_room
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.laundry_room
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
-      sequence:
-      - service: light.turn_off
-        entity_id: light.laundry_room
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    data:
+      entity_id: "light.{{ 'laundry_room' if 'laundry_room' in trigger.to_state.entity_id else 'storage' }}"
 
 
 - alias: Disable laundry room light motion control
@@ -44,7 +35,7 @@ automation:
   - platform: mqtt
     topic: 'stat/laundry_room_motion'
   action:
-  - service: input_boolean.toggle
+  - service: "input_boolean.turn_{{ trigger.payload }}"
     entity_id: input_boolean.laundry_motion
 
 

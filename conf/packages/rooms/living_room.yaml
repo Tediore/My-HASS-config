@@ -32,11 +32,10 @@ automation:
   - platform: state
     entity_id: *lr_ir
     to: &ir_codes
-    - '0X20DF57A8' # Amazon video
+    - '0X20DF57A8' # Amazon Video
     - '0X20DFD728' # Netflix
     - '0X00FF827D'
-    - '0X20DFB44B'
-    - '0X20DF629D' # SmartCast Home
+    - '0X20DFB44B' # SmartCast Home
   action:
   - service: script.turn_on
     entity_id: script.update_lr_tv
@@ -145,8 +144,7 @@ automation:
   - platform: time_pattern
     hours: '/2'
   condition:
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  - "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - condition: state
     entity_id: 
     - input_boolean.sleep_mode
@@ -165,6 +163,7 @@ automation:
     from: 'off'
     to: 'on'
   condition:
+  - "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   - condition: state
     entity_id: 
     - input_boolean.dark_inside
@@ -217,7 +216,7 @@ script:
       - light.hallway
       - light.entrance
       data:
-        brightness_pct: 33
+        brightness_pct: 50
     - service: light.turn_on
       entity_id:
       - light.buffet
@@ -243,7 +242,7 @@ script:
     sequence:
     - service: light.turn_on
       data:
-        entity_id: "light.buffet, light.other_buffet, light.hallway, light.entrance{{ ', light.living_room_lamps' if is_state('light.living_room', 'off') else '' }}"
+        entity_id: "light.buffet, light.other_buffet, light.hallway, light.entrance{{ ', light.living_room' if is_state('light.living_room', 'off') else '' }}"
         kelvin: 3000
         transition: 3
         brightness_pct: "{{ 100 if 6 < now().hour < 21 else 50 }}"
@@ -277,10 +276,10 @@ switch:
       turn_on: &fan_power
       - service: script.ir_fan_power
         data:
-          blaster: entertainment_center_ir
+          blaster: living_room_ir
       turn_off: *fan_power
+      value_template: "{{ states('sensor.living_room_fan_power') | int > 20 }}"
 
 
 input_boolean:
   lr_tv_ir:
-  workout:

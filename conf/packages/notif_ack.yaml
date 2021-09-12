@@ -1,0 +1,18 @@
+automation:
+- alias: Notification ACKs
+  initial_state: true
+  trigger:
+  - platform: webhook
+    webhook_id: !secret ack0
+  action:
+  - service: input_boolean.turn_on
+    data:
+      entity_id: &webhook-bool "input_boolean.{{ trigger.webhook_id }}"
+  - delay: 15
+  - service: input_boolean.turn_off
+    data:
+      entity_id: *webhook-bool
+
+
+input_boolean:
+  fridge_temp_ack:

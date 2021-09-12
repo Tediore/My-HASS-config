@@ -18,7 +18,7 @@ automation:
           {% if is_state('input_boolean.sleep_mode', 'off') %}
             script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
           {% else %}
-            script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
+            script.{{ 'toggle_bedroom_fan' if is_state('media_player.master_bedroom_clock', 'playing') else 'white_noise_bedroom' }}
           {% endif %}
         {% elif command == 'hold' %}
           script.toggle_bedroom_fan

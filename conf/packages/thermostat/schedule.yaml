@@ -11,6 +11,7 @@ automation:
     entity_id: 
     - input_boolean.tstat_sched_resume
     - input_boolean.tstat_hold
+    - input_boolean.tstat_peak_savings
     from: 'on'
     to: 'off'
   - platform: state
@@ -67,6 +68,7 @@ automation:
     entity_id: 
     - input_boolean.tstat_sched_resume
     - input_boolean.tstat_hold
+    - input_boolean.tstat_peak_savings
     from: 'on'
     to: 'off'
   - platform: state
@@ -228,10 +230,11 @@ automation:
   - platform: state
     entity_id: input_text.alarm
     to: 'armed_away'
+    for: '00:30:00'
   - platform: state
     entity_id: input_text.alarm
     to: 'armed_away'
-    for: '00:00:30'
+    for: '00:30:30'
   condition:
   - condition: state
     entity_id:

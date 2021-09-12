@@ -39,10 +39,12 @@ automation:
       sequence:
       - service: light.turn_off
         entity_id: light.office
-      - service: hue.hue_activate_scene
-        data:
-          group_name: Office lamps
-          scene_name: Read
+      - service: light.turn_on
+        entity_id: light.office_lamps
+      # - service: hue.hue_activate_scene
+      #   data:
+      #     group_name: Office lamps
+      #     scene_name: Read
     - conditions:
       - "{{ trigger.to_state.state in ['on', 'off'] }}"
       - condition: state
@@ -52,7 +54,7 @@ automation:
       - service: light.turn_on
         entity_id: light.office
       - service: light.turn_off
-        entity_id: light.office_lamps # Hue room
+        entity_id: light.office_lamps
     - conditions:
       - "{{ 'brightness' in trigger.to_state.state }}"
       sequence:
@@ -151,7 +153,7 @@ script:
       entity_id: 
       - media_player.living_room_speaker
       - media_player.kitchen_speaker
-      - media_player.bedroom_speaker
+      - media_player.master_bedroom_clock
       - media_player.hub
     - service: input_boolean.turn_on
       entity_id: input_boolean.music_moved

@@ -1,19 +1,19 @@
 - platform: template
   sensors:
-    outside_temp_darksky:
-      friendly_name: "Outside"
-      value_template: "{{ state_attr('weather.dark_sky', 'temperature') | float('-') | round(0) }}"
-      unit_of_measurement: '°F'
+    # outside_temp_darksky:
+    #   friendly_name: "Outside"
+    #   value_template: "{{ state_attr('weather.dark_sky', 'temperature') | float('-') | round(0) }}"
+    #   unit_of_measurement: '°F'
 
-    outside_temp_display:
-      friendly_name: "Outside"
-      value_template: "{{ states('sensor.outside_temp') | round(0) | int }}"
-      unit_of_measurement: '°F'
+    # outside_temp_display:
+    #   friendly_name: "Outside"
+    #   value_template: "{{ states('sensor.outside_temp') | round(0) | int }}"
+    #   unit_of_measurement: '°F'
 
-    outside_humidity_darksky:
-      friendly_name: "Outside"
-      value_template: "{{ 50 if is_state('weather.dark_sky', 'unavailable') else state_attr('weather.dark_sky', 'humidity') | round(0) }}"
-      unit_of_measurement: '%'
+    # outside_humidity_darksky:
+    #   friendly_name: "Outside"
+    #   value_template: "{{ 50 if is_state('weather.dark_sky', 'unavailable') else state_attr('weather.dark_sky', 'humidity') | round(0) }}"
+    #   unit_of_measurement: '%'
     
     dewpoint_outside_display:
       friendly_name: "Dew point"
@@ -47,3 +47,10 @@
         {% else %}
           Max
         {% endif %}
+
+    wind_direction:
+      friendly_name: Wind direction
+      value_template: >
+        {% set degrees = ((states('sensor.wind_direction_degrees') | float - 11.25) / 22.5) | round(0, 'ceil') | int %}
+        {% set compass = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'] %}
+        {{ compass[degrees] }}

@@ -1,8 +1,8 @@
 - platform: rest
   name: Hue dark inside
   resource: !secret hue_dark_inside
-  state_resource: !secret hue_dark_inside_state
+  state_resource: !secret hue_dark_inside
   method: put
-  body_on: '{"flag":true}'
-  body_off: '{"flag":false}'
+  body_on: '{"state": {"flag": true}}'
+  body_off: '{"state": {"flag": false}}'
   is_on_template: "{{ value_json.state.flag == true }}"

@@ -4,22 +4,23 @@ automation:
   mode: parallel
   trigger:
   - platform: numeric_state
-    entity_id: sensor.washer_power
-    above: 550
+    entity_id: sensor.washer_pwr
+    above: 500
   - platform: numeric_state
-    entity_id: sensor.washer_power
-    below: 1.5
+    entity_id: sensor.washer_pwr
+    below: 3
+    for: '00:01:30'
   - platform: numeric_state
     entity_id: sensor.dryer_power
     above: 250
-    for: '00:05:00'
+    for: '00:00:30'
   - platform: numeric_state
     entity_id: sensor.dryer_power
     below: 50
   action:
   - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
     data_template:
-      entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','') }}"
+      entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','').replace('_pwr','') }}"
 
 
 - alias: Notify when washer/dryer done
@@ -107,6 +108,16 @@ automation:
 #         flash: short
 #     - delay: 2
 #     - scene: scene.before_laundry_notify
+
+
+sensor:
+- platform: mqtt
+  name: Washer pwr
+  state_topic: 'washer/power'
+  availability_topic: 'tele/washer/LWT'
+  payload_available: "Online"
+  payload_not_available: "Offline"
+  unit_of_measurement: 'W'
 
 
 input_boolean:

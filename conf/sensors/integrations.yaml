@@ -8,19 +8,19 @@
   - type: load_15m
 
 
-- platform: rest
-  resource: !secret hue_rest
-  name: Hue bridge
-  value_template: "{{ value_json['swupdate2']['bridge']['state'] }}"
-  json_attributes:
-  - name
-  - zigbeechannel
-  - ipaddress
-  - modelid
-  - swversion
-  - apiversion
-  scan_interval: 30
+- platform: statistics
+  name: Indoor temp stats
+  entity_id: sensor.tstat_current_temp
+  sampling_size: 30
+  max_age: 1800
+  precision: 1
 
+- platform: template
+  sensors:
+    indoor_temp_trend:
+      friendly_name: Indoor temp trend
+      value_template: "{{ state_attr('sensor.indoor_temp_stats', 'average_change') }}"
+      unit_of_measurement: '°F'
 
 - platform: dewpoint
   sensors:
@@ -45,7 +45,6 @@
       temperature: sensor.basement_temp
       rel_hum: sensor.basement_humidity
 
-
 - platform: time_date
   display_options:
   - date
@@ -53,20 +52,3 @@
   - date_time_iso
 
 - platform: uptime
-
-# - platform: darksky
-#   api_key: !secret darksky_key
-#   scan_interval: '00:03:00'
-#   monitored_conditions:
-#   - temperature
-#   - apparent_temperature
-#   - dew_point
-#   - cloud_cover
-#   - temperature_high
-#   - temperature_low
-
-
-- platform: cups
-  host: raspberrypi
-  printers:
-  - Printer

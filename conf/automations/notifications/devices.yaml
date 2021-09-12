@@ -34,7 +34,7 @@
     - binary_sensor.bathroom_ejector_leak
     - binary_sensor.dishwasher_leak
     - binary_sensor.fridge_leak
-    - binary_sensor.hvac_leak
+    - binary_sensor.water_heater_leak
     - binary_sensor.kitchen_sink_leak
     - binary_sensor.hall_bath_sink_leak
     - binary_sensor.hall_bath_toilet_leak
@@ -48,7 +48,7 @@
     - sensor.outdoor_light_level
     - light.kitchen_cabinets
     to: 'unavailable'
-    for: '00:00:10'
+    for: '00:01:00'
   - platform: state
     entity_id: 
     - light.porch
@@ -210,7 +210,7 @@
     - binary_sensor.garage_service_door_battery_low
     - binary_sensor.hall_bath_toilet_leak_sensor_battery_low
     - binary_sensor.hallway_motion_sensor_battery_low
-    - binary_sensor.hvac_leak_sensor_battery_low
+    - binary_sensor.water_heater_leak_sensor_battery_low
     - binary_sensor.kitchen_sink_leak_sensor_battery_low
     - binary_sensor.laundry_room_door_back_battery_low
     - binary_sensor.laundry_room_door_front_battery_low
@@ -249,13 +249,14 @@
 
 - alias: Notify when fridge temp too high
   initial_state: true
+  mode: parallel
   trigger:
   - platform: numeric_state
     entity_id: 
     - sensor.main_fridge_temp
     - sensor.basement_fridge_temp
     above: 45
-    for: '02:00:00'
+    # for: '02:00:00'
   action:
   - service: notify.mobile_app_matt_phone
     data:
@@ -268,6 +269,14 @@
     data:
       title: *fridge_title
       message: *fridge_msg
+  - delay: 10
+  - condition: state
+    entity_id: input_boolean.fridge_temp_ack
+    state: 'off'
+  - service: script.sms_send
+    data_template:
+      number: !secret phone_matt
+      message: *fridge_title
 
 
 - alias: Notify when 433MHz temp sensor battery low

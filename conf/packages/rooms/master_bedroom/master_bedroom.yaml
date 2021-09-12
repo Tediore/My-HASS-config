@@ -115,32 +115,11 @@ automation:
 - alias: Turn master bedroom AC generic tstat on with switch button
   initial_state: true
   trigger:
-  - platform: state
-    entity_id: switch.bedroom_ac
-    to:
-    - 'off'
-    - 'on'
+  - platform: mqtt
+    topic: stat/master_bedroom_ac/power
   action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: climate.bedroom_ac
-        state: 'off'
-      sequence:
-      - service: climate.set_temperature
-        entity_id: climate.bedroom_ac
-        data:
-          temperature: "{{ states('input_number.bedroom_ac_temp_andy') | int }}"
-          hvac_mode: cool
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
-      - condition: state
-        entity_id: climate.bedroom_ac
-        state: 'on'
-      sequence:
-      - service: climate.turn_off
-        entity_id: climate.bedroom_ac
+  - service: "climate.turn_{{ states('switch.bedroom_ac') }}"
+    entity_id: climate.bedroom_ac
 
 
 switch:
@@ -201,6 +180,7 @@ climate:
   cold_tolerance: 0
   hot_tolerance: 2
   precision: 0.1
+  min_cycle_duration: '00:05:00'
 
 
 input_number:

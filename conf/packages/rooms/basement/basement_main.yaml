@@ -99,25 +99,12 @@ automation:
     to: 'on'
   - platform: homeassistant
     event: start
-  # - platform: time
-  #   at: '21:00:00'
-  - platform: mqtt
-    topic: basement_hall_light
-    payload: toggle
   action:
   - choose:
     - conditions:
-      - "{{ trigger.platform == 'mqtt' }}"
-      sequence:
-      - service: light.toggle
-        entity_id: light.basement_hallway
-        data:
-          kelvin: 4000
-          brightness_pct: 100
-    - conditions:
       - "{{ trigger.to_state.state == 'on' or trigger.platform == 'homeassistant' }}"
       - condition: state
-        entity_id: light.basement_main
+        entity_id: light.basement
         state: 'off'
       - condition: state
         entity_id: 
@@ -128,12 +115,11 @@ automation:
       - service: light.turn_on
         entity_id: light.basement_hallway
         data:
-          brightness_pct: 50
-          kelvin: 2800
+          brightness_pct: 20
     - conditions:
       - "{{ trigger.to_state.state == 'on' or trigger.platform == 'homeassistant' }}"
       - condition: state
-        entity_id: light.basement_main
+        entity_id: light.basement
         state: 'on'
       sequence:
       - service: light.turn_off
@@ -187,6 +173,29 @@ automation:
   - delay: 2
 
 
+- alias: Enable/disable basement motion night light
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: group.basement_lights
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  action:
+  - service: mqtt.publish
+    data:
+      topic: 'cmnd/basement_night_light/rule1'
+      payload: "{{ 1 if trigger.to_state.state == 'off' else 0 }}"
+  - condition: template
+    value_template: "{{ trigger.to_state.state == 'on' }}"
+  - service: light.turn_off
+    entity_id: light.basement_night_light
+
+
 light:
 - platform: mqtt
   name: Basement stairs
@@ -210,21 +219,21 @@ light:
   - light.basement_fireplace_left
   - light.basement_fireplace_right
 
-
-# - platform: group
-#   name: Basement lamps
-#   entities:
-#   - light.basement_lamp_left
-#   - light.basement_lamp_right
+- platform: group
+  name: Basement lamps
+  entities:
+  - light.basement_lamp_left
+  - light.basement_lamp_right
 
 
 group:
   basement_lights:
     name: Basement lights
     entities:
-    - light.basement_main
-    - light.basement_lamps #need to make this light group when we have lamps in the basement
-    - light.basement_bar
+    - light.bar_lights
+    - light.basement
+    - light.basement_lamps
+    - light.basement_stairs_lights
     - light.craft_room
     - light.craft_room_lamps
     - light.office

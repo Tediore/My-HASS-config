@@ -9,9 +9,3 @@
   longitude: !secret lon_home
   radius: 100
   icon: 'mdi:home'
-
-- name: gym
-  latitude: !secret lat_gym
-  longitude: !secret lon_gym
-  radius: 100
-  icon: 'mdi:dumbbell'

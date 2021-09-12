@@ -7,7 +7,7 @@ automation:
     to:
     - 'below_horizon'
     - 'above_horizon'
-    for: '00:20:00'
+    for: &horizon_time '00:20:00'
   action:
   - service: "homeassistant.turn_{{ 'on' if trigger.to_state.state == 'below_horizon' else 'off' }}" 
     entity_id:
@@ -20,10 +20,8 @@ automation:
   trigger:
   - platform: numeric_state
     entity_id: &outdoor_light sensor.outdoor_light_level
-    below: &outdoor_light_threshold 75
-    for: '00:05:00'
-  - platform: time
-    at: &dark_inside_time '15:30:00'
+    below: &outdoor_light_threshold 55
+    for: &light_threshold_time '00:05:00'
   - platform: state
     entity_id: input_text.alarm
     from: 'armed_away'
@@ -37,17 +35,41 @@ automation:
     state:
     - 'disarmed'
     - 'armed_home'
-  - condition: time
-    after: *dark_inside_time
-    before: '21:30:00'
-  - condition: numeric_state
-    entity_id: *outdoor_light
-    below: *outdoor_light_threshold
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: *outdoor_light
+      below: *outdoor_light_threshold
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+      for: *horizon_time
   action:
   - service: homeassistant.turn_on
     entity_id: 
     - input_boolean.dark_inside
     - switch.hue_dark_inside
+
+
+- alias: Turn lights back off if light level goes back up
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: *outdoor_light
+    above: 54
+    for: '00:10:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: input_text.alarm
+    state:
+    - 'disarmed'
+    - 'armed_home'
+  action:
+  - service: script.turn_on
+    entity_id: script.lights_sunrise
 
 
 - alias: Dim cabinet and buffet lights at night
@@ -84,7 +106,7 @@ automation:
   - service: light.turn_on
     entity_id: light.kitchen_cabinets
     data:
-      brightness_pct: 50
+      brightness_pct: 75
       transition: 10
   - service: light.turn_on
     entity_id:
@@ -94,6 +116,7 @@ automation:
     data:
       brightness_pct: 66
       transition: 10
+      kelvin: 3000
   - condition: template
     value_template: "{{ state_attr('light.buffet', 'brightness') | int > 170 }}"
   - service: light.turn_on
@@ -101,6 +124,7 @@ automation:
     data:
       brightness_pct: 66
       transition: 10
+      kelvin: 3000
 
 
 - alias: Turn lights on/off at sunset/sunrise if home
@@ -115,6 +139,94 @@ automation:
   - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
 
 
+- alias: Turn off main floor lights when in office and craft room
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &main_floor_motion
+    - binary_sensor.dining_room_motion
+    - binary_sensor.hallway_motion
+    - binary_sensor.living_room_motion
+    to: 'off'
+    for: '01:00:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.overnight_guest
+    state: 'off'
+  - condition: state
+    entity_id: *main_floor_motion
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.office
+      state: 'on'
+    - condition: state
+      entity_id: light.office_lamps
+      state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.craft_room
+      state: 'on'
+    - condition: state
+      entity_id: light.craft_room_lamps
+      state: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: script.main_floor_lights_off
+
+
+- alias: Turn off main floor lights when Andy's sleeping
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.andy_sleep
+    to: 'on'
+    for: '01:00:00'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.office
+      state: 'on'
+    - condition: state
+      entity_id: light.office_lamps
+      state: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: script.main_floor_lights_off
+
+
+- alias: Turn main floor lights back on from basement
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.basement_door
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.main_floor_lights_off
+    state: 'on'
+  action:
+  - scene: scene.main_floor_lights
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.main_floor_lights_off
+
+
+- alias: Sync Tasmota device states on restart
+  initial_state: true
+  trigger:
+  - platform: homeassistant
+    event: start
+  action:
+  - service: mqtt.publish
+    data:
+      topic: cmnd/tasmotas/state
+      payload: ''
+
+
 script:
   lights_sunset:
     sequence:
@@ -127,20 +239,19 @@ script:
       entity_id: light.kitchen_cabinets
       data:
         brightness_pct: 100
-        transition: 5
+        transition: 10
     - service: light.turn_on
-      entity_id:
-      - light.entrance
-      - light.other_buffet
+      entity_id: light.entrance
       data:
         brightness_pct: "{{ 25 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
         kelvin: 3000
-        transition: 5
+        transition: 10
     - service: light.turn_on
       entity_id: light.hallway
       data:
         brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
-        transition: 5
+        kelvin: 3000
+        transition: 10
     - service: light.turn_on
       entity_id: 
       - light.hall_bath_night_light
@@ -149,6 +260,15 @@ script:
         brightness_pct: 100
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
+    - condition: state
+      entity_id: media_player.living_room_vizio
+      state: 'off'
+    - service: light.turn_on
+      entity_id: light.other_buffet
+      data:
+        brightness_pct: 100
+        kelvin: 3000
+        transition: 10
 
   lr_lights_sunset:
     sequence:
@@ -168,6 +288,8 @@ script:
       - wait_template: "{{ states('sensor.outdoor_light_level') | int < 10 }}"
         timeout: "00:30:00"
         continue_on_timeout: true
+      - condition: template
+        value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
       - condition: state
         entity_id: media_player.living_room_vizio
         state: 'off'
@@ -183,14 +305,15 @@ script:
     - service: light.turn_off
       entity_id: 
       - light.buffet
+      - light.other_buffet
       - light.entrance
       - light.hallway
+      - light.kitchen_cabinets
       data:
-        transition: 30
-    - delay: '00:00:30'
+        transition: 20
+    - delay: '00:00:20'
     - service: light.turn_off
       entity_id: 
-      - light.kitchen_cabinets
       - light.hall_bath_night_light
       - light.master_bath_night_light
       data:
@@ -210,15 +333,15 @@ script:
         transition: 10
         brightness_pct: "{{ 100 if is_state('media_player.living_room_vizio', 'off') else 50 }}"
 
-  wait_master_bedroom_lights_off:
-    sequence:
-    - wait_template: "{{ is_state('light.master_bedroom_lamps', 'off') }}"
-      timeout: '08:00:00'
-      continue_on_timeout: false
-    - service: light.turn_on
-      entity_id: light.tea_lights
-      data:
-        brightness_pct: 100
+  # wait_master_bedroom_lights_off:
+  #   sequence:
+  #   - wait_template: "{{ is_state('light.master_bedroom_lamps', 'off') }}"
+  #     timeout: '08:00:00'
+  #     continue_on_timeout: false
+  #   - service: light.turn_on
+  #     entity_id: light.tea_lights
+  #     data:
+  #       brightness_pct: 100
 
   christmas_tree_on:
     sequence:
@@ -273,6 +396,25 @@ script:
         topic: "cmnd/{{ device }}/dimmer"
         payload: "{{ brightness_pct }}"
 
+  main_floor_lights_off:
+    sequence:
+    - service: scene.create
+      data:
+        scene_id: main_floor_lights
+        snapshot_entities: &main_floor_lights
+        # - light.buffet
+        # - light.entrance
+        # - light.hallway
+        - light.hall_bath_night_light
+        - light.kitchen_cabinets
+        - light.living_room_lamps
+        - light.master_bath_night_light
+        - light.other_buffet
+    - service: light.turn_off
+      entity_id: *main_floor_lights
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.main_floor_lights_off
+
 
 group:
   lights_christmas:
@@ -288,3 +430,4 @@ group:
 input_boolean:
   dark_inside:
   overnight_guest:
+  main_floor_lights_off:

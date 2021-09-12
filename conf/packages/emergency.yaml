@@ -12,7 +12,7 @@ automation:
     - binary_sensor.dishwasher_leak
     - binary_sensor.fridge_leak
     - binary_sensor.hall_bath_toilet_leak
-    - binary_sensor.hvac_leak
+    - binary_sensor.water_heater_leak
     - binary_sensor.kitchen_sink_leak
     - binary_sensor.master_bath_sink_leak
     - binary_sensor.master_bath_toilet_leak

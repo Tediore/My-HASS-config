@@ -29,10 +29,6 @@ automation:
     - 'ONBATT'
     - 'ONLINE'
   action:
-  - service: input_text.set_value
-    data_template:
-      entity_id: "{{ 'input_text.time_power_lost' if trigger.to_state.state == 'ONBATT' else 'input_text.time_power_restored' }}"
-      value: "{{ as_timestamp(now()) }}"
   - service: notify.gotify_high
     data_template:
       title: "{{ 'Power lost' if trigger.to_state.state == 'ONBATT' else 'Power restored' }}"
@@ -71,7 +67,7 @@ sensor:
     power_outage_length:
       friendly_name: Power outage length
       value_template: >
-        {% set diff = ((states('input_text.time_power_restored') | float - states('input_text.time_power_lost') | float) / 60) | round(0) %}
+        {% set diff = ((as_timestamp(states('sensor.server_ups_transfer_from_battery')[:-6].replace(' ','T')) - as_timestamp(states('sensor.server_ups_transfer_to_battery')[:-6].replace(' ','T'))) / 60) | round(0) %}
         {% if diff < 1 %}
           less than a minute.
         {% elif diff == 1 %}
@@ -79,8 +75,3 @@ sensor:
         {% else %}
           {{ diff }} minutes.
         {% endif %}
-
-
-input_text:
-  time_power_lost:
-  time_power_restored:

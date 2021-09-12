@@ -1,5 +1,5 @@
 automation:
-- alias: Turn garage door lights on with garage door
+- alias: Turn garage lights on/off with garage door
   initial_state: true
   trigger:
   - platform: state
@@ -8,111 +8,101 @@ automation:
     - 'open'
     - 'closed'
   - platform: state
+    entity_id: *garage_door
+    to: 'open'
+    for: &open_time '00:00:05'
+  - platform: state
     entity_id: sun.sun
     to: 'below_horizon'
+  condition:
+  - "{{ trigger.from_state.state not in ['unavailable', 'unknown'] }}"
   action:
   - choose:
     # when the garage door is opened or is already open at sunset, turn the garage lights on
     - conditions:
-      - "{{ trigger.to_state.state in ['open', 'below_horizon'] }}"
       - condition: state
         entity_id: sun.sun
         state: 'below_horizon'
       - condition: state
         entity_id: *garage_door
         state: 'open'
-      sequence:
-      - service: switch.turn_on
-        entity_id: &garage_lights switch.garage_lights
-
-    # when the garage door is closed and the service door isn't open, turn the garage lights on and keep them on
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
       - condition: state
-        entity_id:
-        - &service_door binary_sensor.garage_service_door
-        - *garage_lights
+        entity_id: &garage_lights switch.garage_lights
         state: 'off'
-      sequence:
-      - service: homeassistant.turn_on
-        entity_id:
-        - *garage_lights
-        - &garage_lights_hold input_boolean.garage_lights_hold
-
-
-- alias: Turn garage door lights on with service door
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: *service_door
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: 
-    - *service_door
-    - *garage_lights_hold
-    from: 'on'
-    to: 'off'
-    for: '00:02:00'
-  - platform: state
-    entity_id: *garage_lights_hold
-    to: 'on'
-    for: '00:05:00'
-  action:
-  - choose:
-    # when the service door is opened and the sun is below horizon or the garage door is closed, turn on garage lights
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' and trigger.to_state.object_id == 'garage_service_door' }}"
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: sun.sun
-          state: 'below_horizon'
-        - condition: state
-          entity_id: *garage_door
-          state: 'closed'
       sequence:
       - service: switch.turn_on
         entity_id: *garage_lights
 
-    # when the service door is opened after the garage lights were being held on, turn off the hold boolean
+    # when the garage door is opened during the day and the lights are on, turn the garage lights off
     - conditions:
-      - "{{ trigger.to_state.state == 'on' and trigger.to_state.object_id == 'garage_service_door' }}"
+      - "{{ trigger.to_state.state == 'open' }}"
       - condition: state
-        entity_id: *garage_lights_hold
+        entity_id: sun.sun
+        state: 'above_horizon'
+      - condition: state
+        entity_id: *garage_lights
         state: 'on'
-      sequence:
-      - service: input_boolean.turn_off
-        entity_id: *garage_lights_hold
-
-    # when the service door is closed and the garage lights hold is off, turn off the garage lights
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
-      - condition: state
-        entity_id: *garage_lights_hold
-        state: 'off'
       sequence:
       - service: switch.turn_off
         entity_id: *garage_lights
 
-    # when the garage door is opened and closed with no change in service door for 5 minutes, turn off garage lights hold
+    # when the garage door is closed, turn the garage lights on
     - conditions:
-      - "{{ trigger.to_state.state == 'on' and trigger.to_state.object_id == 'garage_lights_hold' }}"
+      - "{{ trigger.to_state.state == 'closed' }}"
+      - condition: state
+        entity_id: *garage_lights
+        state: 'off'
       sequence:
-      - service: input_boolean.turn_off
-        entity_id: *garage_lights_hold
+      - service: switch.turn_on
+        entity_id: *garage_lights
 
 
-- alias: End garage lights hold
+- alias: Turn garage lights on with service door
   initial_state: true
   trigger:
   - platform: state
-    entity_id: *garage_lights_hold
+    entity_id: &service_door binary_sensor.garage_service_door
+    from: 'off'
     to: 'on'
-    for: '00:05:00'
+  condition:
+  - condition: state
+    entity_id: *garage_lights
+    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+    - condition: state
+      entity_id: *garage_door
+      state: 'closed'
   action:
-  - service: input_boolean.turn_off
-    entity_id: *garage_lights_hold
+  - service: switch.turn_on
+    entity_id: *garage_lights
+
+
+- alias: Turn garage lights off when garage and service door closed for 10 minutes
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - *garage_door
+    - *service_door
+    to:
+    - 'closed'
+    - 'off'
+    for: &closed_time '00:10:00'
+  condition:
+  - "{{ trigger.from_state.state not in ['unavailable', 'unknown'] }}"
+  - condition: state
+    entity_id:
+    - *garage_door
+    - *service_door
+    state: 'off'
+    for: *closed_time
+  action:
+  - service: switch.turn_off
+    entity_id: *garage_lights
 
 
 - alias: Open garage door when service door opened if leaving
@@ -132,6 +122,8 @@ automation:
   action:
   - service: cover.open_cover
     entity_id: *garage_door
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.leaving
 
 
 cover:
@@ -149,7 +141,3 @@ cover:
     state_open: "open"
     state_closed: "closed"
     device_class: garage
-
-
-input_boolean:
-  garage_lights_hold:

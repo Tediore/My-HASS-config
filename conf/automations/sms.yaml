@@ -11,7 +11,7 @@
   - choose: 
     - conditions:
       - condition: template
-        value_template: "{{ trigger.payload_json['text'] == 'Ping' }}"
+        value_template: "{{ trigger.payload_json['text'].lower() == 'ping' }}"
       sequence:
       - service: script.sms_send
         data:
@@ -19,16 +19,16 @@
           message: "Pong!"
     - conditions:
       - condition: template
-        value_template: "{{ trigger.payload_json['text'] == 'Help' }}"
+        value_template: "{{ trigger.payload_json['text'].lower() == 'help' }}"
       sequence:
       - service: script.sms_send
         data_template:
           number: !secret phone_matt
           message: >
-            Command list:{{'\n'}}Ping: Test if server is up.{{'\n'}}Status: Receive summary of home status.{{'\n'}}Arm: Arm alarm in away mode.{{'\n'}}Lights off: Turn all lights off.
+            Command list:{{'\n\n'}}Ping: Test if server is up.{{'\n\n'}}Status: Receive summary of home status.{{'\n\n'}}Arm: Arm alarm in away mode.{{'\n\n'}}Away: Set thermostat to away mode.{{'\n\n'}}Lights off: Turn all lights off.
     - conditions:
       - condition: template
-        value_template: "{{ trigger.payload_json['text'] == 'Status' }}"
+        value_template: "{{ trigger.payload_json['text'].lower() == 'status' }}"
       sequence:
       - service: script.sms_send
         data_template:
@@ -41,7 +41,7 @@
             {%- endfor %}
     - conditions:
       - condition: template
-        value_template: "{{ trigger.payload_json['text'] == 'Lights off' }}"
+        value_template: "{{ trigger.payload_json['text'].lower() == 'lights off' }}"
       sequence:
       - service: homeassistant.turn_off
         entity_id: group.lights_interior
@@ -54,7 +54,7 @@
           message: "{{ 'Lights have been turned off.' if is_state('group.lights_interior', 'off') else 'Command timed out.' }}"
     - conditions:
       - condition: template
-        value_template: "{{ trigger.payload_json['text'] == 'Arm' }}"
+        value_template: "{{ trigger.payload_json['text'].lower() == 'arm' }}"
       sequence:
       - service: script.turn_on
         entity_id: script.alarm_arm_away
@@ -69,6 +69,12 @@
         data_template:
           number: !secret phone_matt
           message: "{{ 'Alarm has been armed in away mode.' if is_state('input_text.alarm', 'armed_away') else 'Command timed out.' }}"
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.payload_json['text'].lower() == 'away' }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.tstat_away
     default:
     - service: script.sms_send
       data_template:

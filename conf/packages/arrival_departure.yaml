@@ -4,7 +4,9 @@ automation:
   trigger:
   - entity_id: 
     - binary_sensor.front_door
+    - binary_sensor.front_storm_door
     - binary_sensor.side_door
+    - binary_sensor.side_storm_door
     platform: state
     to: 'on'
   condition:
@@ -23,13 +25,19 @@ automation:
   action:
   - choose:
     - conditions:
-      - "{{ trigger.to_state.object_id == 'front_door' }}"
+      - "{{ 'front' in trigger.to_state.object_id }}"
+      - condition: state
+        entity_id: light.entrance
+        state: 'off'
       sequence:
       - service: light.turn_on
         entity_id: light.entrance
         data:
           brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
     default:
+    - condition: state
+      entity_id: switch.side_entrance_light
+      state: 'off'
     - service: switch.turn_on
       entity_id: switch.side_entrance_light
 
@@ -60,22 +68,22 @@ automation:
   action:
   - service: script.turn_on
     entity_id: script.away_mode
-  - delay: '00:00:05'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: sensor.tstat_profile
-      state: 
-      - 'Away'
-      - 'Hold'
-    - condition: state
-      entity_id: climate.thermostat
-      state: 'off'
+  - delay: '00:00:07'
+  # - condition: or
+  #   conditions:
+  #   - condition: state
+  #     entity_id: sensor.tstat_profile
+  #     state: 
+  #     - 'Away'
+  #     - 'Hold'
+    # - condition: state
+    #   entity_id: climate.thermostat
+    #   state: 'off'
   - condition: state
     entity_id: group.lights_interior
     state: 'off'
   - service: script.notify_away
-    data_template:
+    data:
       title: Away mode activated
 
 
@@ -112,7 +120,7 @@ automation:
     entity_id: binary_sensor.any_tv
     state: 'off'
   - service: script.notify_away
-    data_template:
+    data:
       title: Away mode activated (second attempt)
 
 
@@ -164,7 +172,22 @@ script:
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
-      entity_id: script.christmas_lights_off
+      entity_id: 
+      - script.lr_fan_off
+      - script.christmas_lights_off
+    - condition: template
+      value_template: "{{ not is_state('climate.thermostat', 'off') }}"
+    - condition: state
+      entity_id: climate.thermostat
+      attribute: hvac_action
+      state: 'idle'
+    - condition: state
+      entity_id:
+      - input_boolean.tstat_hold
+      - input_boolean.tstat_away
+      state: 'off'
+    - service: script.turn_on
+      entity_id: script.tstat_away
 
 
   notify_away:
@@ -173,12 +196,12 @@ script:
       data_template:
         title: "{{ title }}"
         message: >
-          {% set profile = states('sensor.tstat_profile') %}
-          {% set tstat = states('climate.thermostat') %}
-          {% if tstat == 'off' %}
-            Lights are off, thermostat is off.
-          {% elif profile in ['Away', 'Hold'] %}
-            Lights are off, thermostat is set to {{ profile.lower() }}.
+          {% set tstat = states('sensor.tstat_profile') %}
+          {% set action = states('sensor.hvac_action') %}
+          {% if tstat in ['off', 'Away'] %}
+            Lights are off, thermostat is {{ 'off' if tstat == 'off' else 'set to away' }}.
+          {% elif action != 'idle' %}
+            Lights are off.
           {% else %}
             Uhh... this shouldn't be possible.
           {% endif %}
@@ -239,7 +262,7 @@ script:
     - service: light.turn_on
       entity_id: light.kitchen_cabinets
       data:
-        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 50 }}"
+        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 75 }}"
     - service: light.turn_on
       entity_id: light.hall_bath_night_light
       data:
@@ -292,6 +315,16 @@ script:
         data:
           ttl: 0
           priority: high
+
+
+  lr_fan_off:
+    sequence:
+    - condition: state
+      entity_id: &lr_fan switch.living_room_fan
+      state: 'on'
+    - service: switch.turn_off
+      entity_id: *lr_fan
+
 
 input_boolean:
   arrival:

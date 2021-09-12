@@ -5,9 +5,10 @@ lights_interior:
   - light.bar_lights
   - light.basement_bath_night_light
   - light.basement_hallway
-  - light.basement_main
+  - light.basement_lamps
   - light.basement_stairs_lights
   - light.bathroom_ejector_closet
+  - light.buffet
   - light.christmas_lights
   - light.christmas_tree
   - light.craft_room
@@ -26,13 +27,14 @@ lights_interior:
   - light.mini_christmas_tree
   - light.office
   - light.office_lamps
-  - light.other
+  - light.other_buffet
+  - light.other_dining_room
+  - light.other_buffet
   - light.portable_mini_christmas_tree
-  - light.side_entrance_leds
-  - switch.side_entrance_light
-  - switch.garage_lights
   - light.tea_lights
   - light.the_glow_light
+  - switch.side_entrance_light
+  - switch.garage_lights
 
 plugs:
   name: Smart plugs
@@ -42,8 +44,9 @@ plugs:
 
 speakers:
   entities:
-  - media_player.kitchen_speaker
+  - media_player.master_bedroom_clock
+  - media_player.craft_room_speaker
   - media_player.hub
+  - media_player.laundry_room_speaker
   - media_player.living_room_speaker
-  - media_player.bedroom_speaker
   - media_player.office_speaker

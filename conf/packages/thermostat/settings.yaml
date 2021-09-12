@@ -71,6 +71,13 @@ script:
         entity_id: climate.thermostat
         target_temp_low: "{{ states('input_number.tstat_heat_away') | int }}"
         target_temp_high: "{{ states('input_number.tstat_cool_away') | int }}"
+    - service: notify.mobile_app_matt_phone
+      data:
+        title: "Away mode activated"
+        message: "Thermostat has been set to away mode."
+        data:
+          ttl: 0
+          priority: high
 
 
 input_number:
@@ -235,7 +242,7 @@ sensor:
     
     tstat_current_temp:
       friendly_name: "Inside"
-      value_template: "{{ state_attr('climate.thermostat','current_temperature') | float('-') }}"
+      value_template: "{{ states('sensor.thermostat_current_temperature') | float('-') }}"
       unit_of_measurement: '°F'
     
     tstat_current_humidity:
@@ -257,3 +264,7 @@ sensor:
       friendly_name: Max
       value_template: "{{ state_attr('climate.thermostat', 'target_temp_high') | int if is_state('climate.thermostat', 'heat_cool') else 'Off' }}"
       unit_of_measurement: '°F'
+
+    tstat_status:
+      friendly_name: Thermostat
+      value_template: "{{ state_attr('climate.thermostat', 'hvac_action').title() + ' (' + states('climate.thermostat').replace('_','/').title() + ') ' + state_attr('climate.thermostat', 'target_temp_low') | string + '-' + state_attr('climate.thermostat', 'target_temp_high') | string + ' °F' }}"
