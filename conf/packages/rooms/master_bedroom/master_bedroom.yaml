@@ -112,14 +112,19 @@ automation:
     entity_id: light.mini_christmas_tree
 
 
-- alias: Turn master bedroom AC generic tstat on with switch button
+- alias: Turn generic tstats on with buttons on plugs
   initial_state: true
   trigger:
   - platform: mqtt
     topic: stat/master_bedroom_ac/power
+    id: bedroom_ac
+  - platform: mqtt
+    topic: stat/box_fan/power
+    id: box_fan
   action:
-  - service: "climate.turn_{{ states('switch.bedroom_ac') }}"
-    entity_id: climate.bedroom_ac
+  - service: "climate.turn_{{ 'on' if is_state('climate.' + trigger.id, 'off') else 'off' }}"
+    data:
+      entity_id: "climate.{{ trigger.id }}"
 
 
 switch:
@@ -164,7 +169,7 @@ climate:
   name: Master bedroom fan
   heater: switch.bedroom_fan
   ac_mode: true
-  target_sensor: sensor.master_bedroom_temp
+  target_sensor: &bedroom_temp sensor.master_bedroom_temp
   min_temp: 63
   max_temp: 75
   cold_tolerance: 0
@@ -174,13 +179,24 @@ climate:
   name: Bedroom AC 
   heater: switch.bedroom_ac
   ac_mode: true
-  target_sensor: sensor.master_bedroom_temp
+  target_sensor: *bedroom_temp
   min_temp: 66
   max_temp: 75
   cold_tolerance: 0
   hot_tolerance: 2
   precision: 0.1
   min_cycle_duration: '00:05:00'
+
+- platform: generic_thermostat
+  name: Box fan
+  heater: switch.box_fan
+  ac_mode: true
+  target_sensor: *bedroom_temp
+  min_temp: 66
+  max_temp: 75
+  cold_tolerance: 0
+  hot_tolerance: 2
+  precision: 0.5
 
 
 input_number:

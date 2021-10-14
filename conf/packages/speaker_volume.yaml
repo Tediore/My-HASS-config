@@ -5,11 +5,11 @@ automation:
   trigger:
   - platform: state
     entity_id:
-    - sensor.bedroom_speaker_app_name
     - sensor.craft_room_speaker_app_name
     - sensor.hub_app_name
-    - sensor.kitchen_speaker_app_name
+    - sensor.laundry_room_speaker_app_name
     - sensor.living_room_speaker_app_name
+    - sensor.master_bedroom_clock_app_name
     - sensor.office_speaker_app_name
   - platform: state
     entity_id: input_boolean.office_speaker
@@ -27,8 +27,8 @@ automation:
         {% set app = trigger.to_state.state if trigger.to_state.domain == 'sensor' else states(trigger.to_state.entity_id.replace('input_boolean','sensor') + '_app_name') %}
         {% set speaker = trigger.to_state.entity_id.replace('sensor.','').replace('input_boolean','').replace('_speaker','').replace('_app_name','').replace('_',' ') %}
         {% set album = state_attr(trigger.to_state.entity_id.replace('sensor.','media_player.').replace('input_boolean.','media_player.').replace('_app_name',''), 'media_album_name') %}
-        {% if app in ['iHeartRadio', 'Default Media Receiver'] %}
-          {% if speaker in ['bedroom', 'kitchen', 'living room'] %}
+        {% if app in ['iHeartRadio', 'Audacy', 'Default Media Receiver'] %}
+          {% if speaker in ['bedroom', 'laundry room', 'living room'] %}
             0.32
           {% elif speaker in ['office', 'craft room'] %}
             0.36
@@ -40,7 +40,7 @@ automation:
         {% elif app in ['Google Play Music', 'Spotify', 'YouTube Music'] %}
           {% if speaker in ['bedroom', 'kitchen', 'living room'] %}
             0.36
-          {% elif speaker in ['office', 'craft room'] %}
+          {% elif speaker in ['office', 'laundry room'] %}
             0.3
           {% elif speaker in ['hub'] %}
             0.4
@@ -107,3 +107,27 @@ automation:
 
 input_boolean:
   office_speaker:
+
+
+sensor:
+- platform: attributes
+  attribute: app_name
+  entities:
+  - media_player.craft_room_speaker
+  - media_player.hub
+  - media_player.laundry_room_speaker
+  - media_player.living_room_speaker
+  - media_player.master_bedroom_clock
+  - media_player.office_speaker
+  - media_player.living_room_vizio
+  - media_player.living_room_cast
+
+- platform: attributes
+  attribute: media_title
+  entities:
+  - media_player.craft_room_speaker
+  - media_player.hub
+  - media_player.laundry_room_speaker
+  - media_player.living_room_speaker
+  - media_player.master_bedroom_clock
+  - media_player.office_speaker

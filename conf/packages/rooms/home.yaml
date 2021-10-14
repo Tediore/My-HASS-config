@@ -27,6 +27,8 @@ automation:
     from: 'armed_away'
     to: 'disarmed'
   condition:
+  - condition: time
+    after: '15:00:00'
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'off'

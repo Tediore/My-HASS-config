@@ -118,6 +118,7 @@ automation:
     - input_boolean.andy_sleep
     - switch.bedroom_fan
     - climate.bedroom_ac
+    - climate.box_fan
   - service: switch.turn_on
     entity_id: switch.air_freshener
 

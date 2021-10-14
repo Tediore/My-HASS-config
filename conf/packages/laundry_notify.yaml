@@ -74,7 +74,7 @@ automation:
     entity_id: 
     - binary_sensor.laundry_room_door_front
     - binary_sensor.laundry_room_door_back
-    - binary_sensor.laundry_room_motion_front
+    - binary_sensor.laundry_room_motion
     - binary_sensor.laundry_room_motion_back
     - input_boolean.sleep_mode
     from: 'off'

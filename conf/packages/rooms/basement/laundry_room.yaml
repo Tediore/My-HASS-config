@@ -6,16 +6,15 @@ automation:
     entity_id: 
     - binary_sensor.laundry_room_door_front
     - binary_sensor.laundry_room_door_back
-    - binary_sensor.laundry_room_motion_front
-    - binary_sensor.laundry_room_motion_back
+    - binary_sensor.laundry_room_motion
     - binary_sensor.storage_motion
     from: 'off'
     to: 'on'
   - platform: state
     entity_id: &laundry_motion
-    - binary_sensor.laundry_room_motion_front
-    - binary_sensor.laundry_room_motion_back
+    - binary_sensor.laundry_room_motion
     - binary_sensor.storage_motion
+    - binary_sensor.utility_sink_motion
     from: 'on'
     to: 'off'
     for: &laundry_motion_off_time '00:05:00'
@@ -26,7 +25,7 @@ automation:
   action:
   - service: "light.turn_{{ trigger.to_state.state }}"
     data:
-      entity_id: "light.{{ 'laundry_room' if 'laundry_room' in trigger.to_state.entity_id else 'storage' }}"
+      entity_id: "light.{{ 'storage' if 'storage' in trigger.to_state.entity_id else 'laundry_room' }}"
 
 
 - alias: Disable laundry room light motion control

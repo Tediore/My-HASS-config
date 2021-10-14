@@ -35,7 +35,10 @@ automation:
 
     # when the garage door is opened during the day and the lights are on, turn the garage lights off
     - conditions:
-      - "{{ trigger.to_state.state == 'open' }}"
+      - condition: state
+        entity_id: *garage_door
+        state: 'open'
+        for: *open_time
       - condition: state
         entity_id: sun.sun
         state: 'above_horizon'
@@ -81,6 +84,44 @@ automation:
     entity_id: *garage_lights
 
 
+- alias: Turn garage lights on/off with motion
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &garage_motion binary_sensor.garage_motion
+    to: 'on'
+  - platform: state
+    entity_id: *garage_motion
+    to: 'off'
+    for: '00:10:00'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: *garage_lights
+        state: 'off'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sun.sun
+          state: 'below_horizon'
+        - condition: state
+          entity_id: *garage_door
+          state: 'closed'
+      sequence:
+      - service: switch.turn_on
+        entity_id: *garage_lights
+    - conditions:
+      - "{{ trigger.to_state.state == 'off' }}"
+      - condition: state
+        entity_id: *garage_lights
+        state: 'on'
+      sequence:
+      - service: switch.turn_off
+        entity_id: *garage_lights
+
+
 - alias: Turn garage lights off when garage and service door closed for 10 minutes
   initial_state: true
   trigger:
@@ -88,18 +129,29 @@ automation:
     entity_id:
     - *garage_door
     - *service_door
+    - *garage_motion
     to:
     - 'closed'
     - 'off'
     for: &closed_time '00:10:00'
   condition:
-  - "{{ trigger.from_state.state not in ['unavailable', 'unknown'] }}"
   - condition: state
-    entity_id:
-    - *garage_door
-    - *service_door
+    entity_id: *garage_door
+    state: 'closed'
+    for: *closed_time
+  - condition: state
+    entity_id: *service_door
     state: 'off'
     for: *closed_time
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: *garage_motion
+      state: 'unavailable'
+    - condition: state
+      entity_id: *garage_motion
+      state: 'off'
+      for: *closed_time
   action:
   - service: switch.turn_off
     entity_id: *garage_lights

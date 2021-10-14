@@ -31,7 +31,7 @@
 
     - binary_sensor.bar_leak
     - binary_sensor.basement_bathroom_leak
-    - binary_sensor.bathroom_ejector_leak
+    - binary_sensor.water_main_leak
     - binary_sensor.dishwasher_leak
     - binary_sensor.fridge_leak
     - binary_sensor.water_heater_leak
@@ -197,7 +197,7 @@
     - binary_sensor.basement_door_battery_low
     - binary_sensor.basement_fridge_door_battery_low
     - binary_sensor.bathroom_ejector_closet_door_battery_low
-    - binary_sensor.bathroom_ejector_leak_sensor_battery_low
+    - binary_sensor.water_main_leak_sensor_battery_low
     - binary_sensor.craft_room_desk_button_battery_low
     - binary_sensor.deck_motion_sensor_battery_low
     - binary_sensor.dining_room_motion_sensor_battery_low
@@ -256,7 +256,7 @@
     - sensor.main_fridge_temp
     - sensor.basement_fridge_temp
     above: 45
-    # for: '02:00:00'
+    for: '02:00:00'
   action:
   - service: notify.mobile_app_matt_phone
     data:
