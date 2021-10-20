@@ -52,24 +52,8 @@ automation:
 script:
   toggle_bedroom_fan:
     sequence:
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: switch.bedroom_fan
-          state: 'on'
-        sequence:
-        - service: climate.turn_off
-          entity_id: climate.master_bedroom_fan
-      - conditions:
-        - condition: state
-          entity_id: switch.bedroom_fan
-          state: 'off'
-        sequence:
-        - service: climate.turn_off
-          entity_id: climate.master_bedroom_fan
-        - delay: 0.1
-        - service: switch.turn_on
-          entity_id: switch.bedroom_fan
+    - service: switch.toggle
+      entity_id: switch.bedroom_fan
   
   early_departure:
     sequence:

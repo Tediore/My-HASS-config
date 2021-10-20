@@ -1,0 +1,47 @@
+group:
+  security_sensors:
+    entities:
+    - binary_sensor.front_door
+    - binary_sensor.front_porch_door
+    - binary_sensor.side_door
+    - binary_sensor.back_door
+    - binary_sensor.dining_room_motion
+    - binary_sensor.hallway_motion
+    - binary_sensor.master_bedroom_window_left
+    - binary_sensor.master_bedroom_window_right
+    - binary_sensor.second_bedroom_window
+    - binary_sensor.guest_bedroom_window
+    - binary_sensor.living_room_window_left
+    - binary_sensor.living_room_window_right
+    - binary_sensor.kitchen_window
+
+
+sensor:
+- platform: template
+  sensors:
+    sensor_warning:
+      value_template: >
+        {% for state in expand('group.security_sensors') -%}
+        {% set unavailable = ((as_timestamp(now()) - as_timestamp(state.attributes.last_seen)) / 3600) > 3 %}
+        {{- unavailable | int -}}
+        {% endfor %}
+
+
+automation:
+- alias: Notify when sensor not seen for 3 hours
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.sensor_warning
+  condition:
+  - "{{ states('sensor.sensor_warning') | int != 0 }}"
+  action:
+  - service: notify.gotify_high
+    data:
+      title: Sensor unavailable
+      message: >
+        {% for state in expand('group.security_sensors') %}
+        {% if (as_timestamp(now()) - as_timestamp(state.attributes.last_seen)) / 3600 > 3 %}
+        {{ state.name.replace('contact','sensor').replace('occupancy','').strip() }} has not been seen for over 3 hours.
+        {% endif %}
+        {% endfor %}

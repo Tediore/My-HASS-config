@@ -34,20 +34,6 @@
       value_template: "{{ (states('sensor.attic_temp') | float - states('sensor.outside_temp') | float) | round(1) }}"
       unit_of_measurement: '°F'
 
-    server_fan_speed_pct:
-      friendly_name: Server fan speed
-      value_template: >
-        {% set speed = states('sensor.server_fan_speed') | int %}
-        {% if speed < 3200 %}
-          Low
-        {% elif speed < 3600 %}
-          Medium
-        {% elif speed < 3900 %}
-          High
-        {% else %}
-          Max
-        {% endif %}
-
     wind_direction:
       friendly_name: Wind direction
       value_template: >

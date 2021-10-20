@@ -9,17 +9,6 @@ automation:
     entity_id: *coffeemaker
     below: 10
     for: '00:00:10'
-  - platform: numeric_state
-    entity_id: &bsmt_coffeemaker sensor.basement_coffeemaker_power
-    above: 500
-  - platform: numeric_state
-    entity_id: *bsmt_coffeemaker
-    below: 10
-    for: '00:00:10'
-  condition:
-  - condition: state
-    entity_id: input_boolean.coffee_notify
-    state: 'off'
   action:
   - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
     data:
@@ -30,9 +19,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: 
-    - input_boolean.coffeemaker
-    - input_boolean.basement_coffeemaker
+    entity_id: input_boolean.coffeemaker
     from: 'on'
     to: 'off'
   action:
@@ -40,57 +27,7 @@ automation:
     data:
       title: "Coffee is ready {{ 'in the basement' if 'basement' in trigger.to_state.entity_id else 'in the kitchen' }}"
       message: "Enjoy!"
-  # - service: input_boolean.turn_on
-  #   entity_id: input_boolean.coffee_notify
-
-
-# - alias: Reset coffee notification
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: *coffeemaker
-#     to: '0'
-#     for: '00:01:00'
-#   condition:
-#   - condition: state
-#     entity_id: input_boolean.coffee_notify
-#     state: 'on'
-#   action:
-#   - service: input_boolean.turn_off
-#     entity_id: input_boolean.coffee_notify
-
-
-- alias: Notify when dishwasher on/off
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: &dishwasher sensor.dishwasher_power
-    above: 1000
-  - platform: numeric_state
-    entity_id: *dishwasher
-    below: 5
-    for: '00:00:10'
-  action:
-  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
-    entity_id: input_boolean.dishwasher
-
-
-- alias: Notify when dishwasher done
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.dishwasher
-    from: 'on'
-    to: 'off'
-  action:
-  - service: notify.gotify
-    data:
-      title: "Dishwasher is done."
-      message: "Empty it please."
   
 
 input_boolean:
   coffeemaker:
-  basement_coffeemaker:
-  coffee_notify:
-  dishwasher:

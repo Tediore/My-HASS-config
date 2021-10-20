@@ -252,7 +252,11 @@ sensor:
     
     tstat_setpoint:
       friendly_name: "Setpoint"
-      value_template: "{{ state_attr('climate.thermostat','target_temp_low') | float('-') | round(0) if is_state('sensor.tstat_mode', 'Heat') else state_attr('climate.thermostat','target_temp_heat') | float('-') | round(0) }}"
+      value_template: >
+        {{ 
+          state_attr('climate.thermostat','target_temp_low') | float('-') | round(0) if is_state('sensor.tstat_mode', 'Heat') 
+          else state_attr('climate.thermostat','target_temp_heat') | float('-') | round(0)
+        }}
       unit_of_measurement: '°F'
     
     tstat_target_low:
@@ -267,4 +271,10 @@ sensor:
 
     tstat_status:
       friendly_name: Thermostat
-      value_template: "{{ state_attr('climate.thermostat', 'hvac_action').title() + ' (' + states('climate.thermostat').replace('_','/').title() + ') ' + state_attr('climate.thermostat', 'target_temp_low') | string + '-' + state_attr('climate.thermostat', 'target_temp_high') | string + ' °F' }}"
+      value_template: >-
+        {{
+          (state_attr('climate.thermostat', 'hvac_action').title() 
+          + ' (' + states('climate.thermostat').replace('_','/').title() + ') ' 
+          + state_attr('climate.thermostat', 'target_temp_low') | string + '-' 
+          + state_attr('climate.thermostat', 'target_temp_high') | string + ' °F') | replace('None-None °F','')
+        }}

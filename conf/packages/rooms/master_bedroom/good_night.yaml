@@ -61,13 +61,12 @@ script:
       - input_boolean.washer
       - input_boolean.dryer
       - switch.air_freshener
-    - service: script.turn_on
+    - service: homeassistant.turn_on
       entity_id: 
       - script.media_players_off
       - script.christmas_lights_off
       - script.master_bedroom_ac_on
-    - service: climate.turn_on
-      entity_id: climate.master_bedroom_fan
+      - switch.master_bedroom_fan
     - service: light.turn_on
       entity_id: light.master_bath_night_light
       data:
@@ -113,8 +112,10 @@ script:
     sequence:
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep
-    - service: script.turn_on
-      entity_id: script.white_noise_bedroom
+    - service: homeassistant.turn_on
+      entity_id: 
+      - switch.master_bedroom_fan
+      - script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id:
       - light.master_bedroom_lamps

@@ -17,9 +17,16 @@
     - binary_sensor.garage_service_door
     - binary_sensor.laundry_room_door_back
     - binary_sensor.laundry_room_door_front
-    - binary_sensor.office_window
     - binary_sensor.patio_door
     - binary_sensor.side_door
+
+    - binary_sensor.guest_bedroom_window
+    - binary_sensor.kitchen_window
+    - binary_sensor.living_room_window_left
+    - binary_sensor.living_room_window_right
+    - binary_sensor.master_bedroom_window_left
+    - binary_sensor.master_bedroom_window_right
+    - binary_sensor.second_bedroom_window
 
     - binary_sensor.basement_motion
     - binary_sensor.deck_motion
@@ -59,7 +66,7 @@
     to: 'unavailable'
     for: '00:10:00'
   - platform: numeric_state
-    entity_id: !secret cell_modem
+    entity_id: sensor.cell_modem_signal
     above: -1
   action:
   - service: notify.mobile_app_matt_phone
@@ -148,42 +155,58 @@
   - platform: numeric_state
     entity_id:
     - sensor.andy_s_button_battery
+    - sensor.bar_leak_sensor_battery
+    - sensor.bar_lights_remote_battery
+    - sensor.basement_bathroom_sink_leak_sensor_battery
+    - sensor.basement_bathroom_toilet_leak_sensor_battery
     - sensor.basement_door_battery
-    - sensor.basement_remote_battery_level
+    - sensor.basement_lamp_button_battery
     - sensor.basement_temp_sensor_battery
     - sensor.craft_room_desk_button_battery
     - sensor.craft_room_desk_remote_battery
+    - sensor.dishwasher_leak_sensor_battery
     - sensor.fridge_leak_sensor_battery
     - sensor.front_door_battery
     - sensor.front_door_keypad_battery
     - sensor.front_porch_door_battery
-    - sensor.game_room_remote_battery_level
-    - sensor.game_room_temp_battery
-    - sensor.garage_door_battery_level
+    - sensor.garage_motion_sensor_battery
     - sensor.garage_service_door_battery
+    - sensor.guest_bedroom_window_battery
+    - sensor.hall_bath_sink_leak_sensor_battery
     - sensor.hall_bath_toilet_leak_sensor_battery
+    - sensor.hallway_motion_sensor_battery
+    - sensor.hvac_leak_sensor_battery
+    - sensor.kitchen_sink_leak_sensor_battery
+    - sensor.kitchen_window_battery
     - sensor.laundry_room_door_front_battery
     - sensor.laundry_room_lights_button_battery
+    - sensor.laundry_room_motion_sensor_battery
     - sensor.laundry_room_temp_sensor_battery
     - sensor.living_room_lamp_button_battery
     - sensor.living_room_remote_battery_level
+    - sensor.living_room_window_left_battery
+    - sensor.living_room_window_right_battery
+    - sensor.master_bath_sink_leak_sensor_battery
     - sensor.master_bath_toilet_leak_sensor_battery
     - sensor.master_bedroom_remote_battery_level
-    - sensor.master_bedroom_temp_battery
+    - sensor.master_bedroom_temp_sensor_battery
+    - sensor.master_bedroom_window_left_battery
+    - sensor.master_bedroom_window_right_battery
     - sensor.matt_s_button_battery
-    - sensor.mi_flora_battery
-    - sensor.mouse_battery
     - sensor.office_desk_button_battery
     - sensor.office_desk_remote_battery
-    - sensor.office_temp_battery
+    - sensor.office_temp_sensor_battery
     - sensor.outdoor_light_sensor_battery
+    - sensor.second_bedroom_window_battery
     - sensor.server_battery
     - sensor.side_door_battery
     - sensor.side_door_keypad_battery
-    - sensor.side_entrance_doorbell_battery
     - sensor.siren_battery
-    - sensor.smoke_co_alarm_battery_level
     - sensor.soldering_station_remote_battery
+    - sensor.sump_pump_leak_sensor_battery
+    - sensor.washer_sink_leak_sensor_battery
+    - sensor.water_heater_leak_sensor_battery
+    - sensor.water_main_leak_sensor_battery
     below: 21
     for: '08:00:00'
 
@@ -193,42 +216,56 @@
   - platform: state
     entity_id:
     - binary_sensor.back_door_battery_low
-    - binary_sensor.basement_bathroom_leak_sensor_battery_low
+    - binary_sensor.bar_leak_sensor_battery_low
+    - binary_sensor.basement_bathroom_sink_leak_sensor_battery_low
+    - binary_sensor.basement_bathroom_toilet_leak_sensor_battery_low
     - binary_sensor.basement_door_battery_low
     - binary_sensor.basement_fridge_door_battery_low
+    - binary_sensor.basement_lamp_button_battery_low
+    - binary_sensor.basement_motion_sensor_battery_low
     - binary_sensor.bathroom_ejector_closet_door_battery_low
-    - binary_sensor.water_main_leak_sensor_battery_low
     - binary_sensor.craft_room_desk_button_battery_low
-    - binary_sensor.deck_motion_sensor_battery_low
     - binary_sensor.dining_room_motion_sensor_battery_low
     - binary_sensor.dishwasher_leak_sensor_battery_low
     - binary_sensor.fridge_leak_sensor_battery_low
     - binary_sensor.front_door_battery_low
     - binary_sensor.front_door_keypad_battery_low
     - binary_sensor.front_porch_door_battery_low
-    - binary_sensor.garage_door_battery_low
+    - binary_sensor.front_storm_door_battery_low
     - binary_sensor.garage_service_door_battery_low
+    - binary_sensor.guest_bedroom_window_battery_low
+    - binary_sensor.hall_bath_sink_leak_sensor_battery_low
     - binary_sensor.hall_bath_toilet_leak_sensor_battery_low
     - binary_sensor.hallway_motion_sensor_battery_low
-    - binary_sensor.water_heater_leak_sensor_battery_low
+    - binary_sensor.hvac_leak_sensor_battery_low
+    - binary_sensor.kitchen_motion_sensor_battery_low
     - binary_sensor.kitchen_sink_leak_sensor_battery_low
+    - binary_sensor.kitchen_window_battery_low
     - binary_sensor.laundry_room_door_back_battery_low
     - binary_sensor.laundry_room_door_front_battery_low
     - binary_sensor.laundry_room_lights_button_battery_low
-    - binary_sensor.laundry_room_motion_back_battery_low
-    - binary_sensor.laundry_room_motion_front_battery_low
     - binary_sensor.living_room_lamp_button_battery_low
     - binary_sensor.living_room_motion_battery_low
+    - binary_sensor.living_room_window_left_battery_low
+    - binary_sensor.living_room_window_right_battery_low
     - binary_sensor.master_bath_sink_leak_sensor_battery_low
     - binary_sensor.master_bath_toilet_leak_sensor_battery_low
+    - binary_sensor.master_bedroom_window_left_battery_low
+    - binary_sensor.master_bedroom_window_right_battery_low
+    - binary_sensor.office_closet_door_left_battery_low
+    - binary_sensor.office_closet_door_right_battery_low
     - binary_sensor.office_desk_button_battery_low
-    - binary_sensor.office_window_battery_low
+    - binary_sensor.second_bedroom_window_battery_low
     - binary_sensor.side_door_battery_low
     - binary_sensor.side_door_keypad_battery_low
-    - binary_sensor.side_entrance_doorbell_battery_low
-    - binary_sensor.smoke_co_alarm_battery_islow
+    - binary_sensor.side_storm_door_battery_low
+    - binary_sensor.storage_motion_sensor_battery_low
     - binary_sensor.sump_pump_leak_sensor_battery_low
+    - binary_sensor.utility_sink_motion_sensor_battery_low
     - binary_sensor.washer_sink_leak_sensor_battery_low
+    - binary_sensor.water_heater_leak_sensor_battery_low
+    - binary_sensor.water_main_leak_sensor_battery_low
+    - binary_sensor.weather_station_battery_low
     to: 'on'
   # condition:
   # - condition: template

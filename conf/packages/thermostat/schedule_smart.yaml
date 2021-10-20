@@ -55,35 +55,6 @@ automation:
     entity_id: input_boolean.tstat_smart
 
 
-# - alias: Turn heat off if nice outside
-#   initial_state: true
-#   trigger:
-#   - platform: numeric_state
-#     entity_id: sensor.outside_temp
-#     above: 55
-#     for: '02:00:00'
-#   - platform: template
-#     value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
-#     for: '02:00:00'
-#   condition:
-#   - condition: state
-#     entity_id: climate.thermostat
-#     state: 'heat'
-#   - condition: state
-#     entity_id: input_boolean.tstat_hold
-#     state: 'off'
-#   - condition: template
-#     value_template: "{{ states('sensor.tstat_current_temp') | float > states('input_number.tstat_heat_home') | float }}"
-#   - condition: numeric_state
-#     entity_id: sensor.outside_temp
-#     above: 55
-#   action:
-#   - service: climate.turn_off
-#     entity_id: climate.thermostat
-#   - service: input_boolean.turn_on
-#     entity_id: input_boolean.tstat_smart
-
-
 - alias: Ask to turn heat back on
   initial_state: true
   trigger:
@@ -117,6 +88,37 @@ automation:
           title: Turn heat on
 
 
+- alias: Turn thermostat off if window opened
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &windows group.windows
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: *windows
+    from: 'on'
+    to: 'off'
+    for: '00:01:00'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'on' }}"
+      - condition: state
+        entity_id: &window_bool input_boolean.tstat_window_off
+        state: 'off'
+      sequence:
+      - service: climate.turn_off
+        entity_id: climate.thermostat
+      - service: input_boolean.turn_on
+        entity_id: *window_bool
+    default:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.tstat_sched_resume
+    - service: input_boolean.turn_off
+      entity_id: *window_bool
+
+
 - alias: Record previous thermostat mode
   initial_state: true
   trigger:
@@ -146,16 +148,6 @@ automation:
     from: 'on'
     to: 'off'
   action:
-  - service: climate.set_hvac_mode
-    data:
-      entity_id: climate.thermostat
-      hvac_mode: 'heat'
-  - service: climate.set_temperature # going from off to heat_cool apparently isn't possible, so do this intermediate step first
-    data:
-      entity_id: climate.thermostat
-      hvac_mode: heat
-      temperature: 65
-  - delay: 1
   - service: climate.set_temperature # set temperatures outside of normal heating/cooling range to avoid inadvertent heating/cooling before resuming schedule
     data:
       entity_id: climate.thermostat
@@ -185,3 +177,7 @@ script:
         value: 'cool'
     - service: input_boolean.turn_on
       entity_id: input_boolean.tstat_sched_resume
+
+
+input_boolean:
+  tstat_window_off:

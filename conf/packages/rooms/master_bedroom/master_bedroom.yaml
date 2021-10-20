@@ -127,6 +127,24 @@ automation:
       entity_id: "climate.{{ trigger.id }}"
 
 
+- alias: Turn closet lights on/off with doors
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.andy_closet_door
+    - binary_sensor.matt_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: "light.{{ trigger.to_state.object_id.replace('_door','') }}"
+      brightness_pct: "{{ 67 if (trigger.to_state.state == 'on' and is_state('input_boolean.dark_inside', 'on')) else 0 }}"
+
+
 switch:
 - platform: template
   switches:
@@ -146,40 +164,12 @@ switch:
         entity_id: switch.master_bedroom_fan
 
 
-# fan:
-# - platform: mqtt
-#   name: Master bedroom
-#   availability_topic: 'tele/master_bedroom_fan/LWT'
-#   payload_available: 'Online'
-#   payload_not_available: 'Offline'
-#   state_topic: 'stat/master_bedroom_fan/POWER'
-#   command_topic: 'cmnd/master_bedroom_fan/POWER'
-#   payload_on: 'ON'
-#   payload_off: 'OFF'
-#   percentage_state_topic: 'stat/master_bedroom_fan/speed'
-#   percentage_value_template: "{{ (value | replace('3,','') | int + 1) * 25 }}"
-#   percentage_command_topic: 'cmnd/master_bedroom_fan/tuyasend4'
-#   percentage_command_template: "3,{{ ((value | int - 1) / 25) | int }}"
-#   speed_range_min: 1
-#   speed_range_max: 4
-
-
 climate:
-- platform: generic_thermostat
-  name: Master bedroom fan
-  heater: switch.bedroom_fan
-  ac_mode: true
-  target_sensor: &bedroom_temp sensor.master_bedroom_temp
-  min_temp: 63
-  max_temp: 75
-  cold_tolerance: 0
-  hot_tolerance: 1
-
 - platform: generic_thermostat
   name: Bedroom AC 
   heater: switch.bedroom_ac
   ac_mode: true
-  target_sensor: *bedroom_temp
+  target_sensor: &bedroom_temp sensor.master_bedroom_temp
   min_temp: 66
   max_temp: 75
   cold_tolerance: 0
