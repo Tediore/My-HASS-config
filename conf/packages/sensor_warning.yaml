@@ -30,11 +30,12 @@ sensor:
 automation:
 - alias: Notify when sensor not seen for 3 hours
   initial_state: true
+  mode: parallel
   trigger:
   - platform: state
     entity_id: sensor.sensor_warning
   condition:
-  - "{{ states('sensor.sensor_warning') | int != 0 }}"
+  - "{{ states('sensor.sensor_warning') | int > 0 }}"
   action:
   - service: notify.gotify_high
     data:
