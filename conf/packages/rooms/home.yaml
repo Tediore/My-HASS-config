@@ -58,7 +58,7 @@ automation:
   trigger:
   - platform: numeric_state
     entity_id: *outdoor_light
-    above: 54
+    above: *outdoor_light_threshold
     for: '00:10:00'
   condition:
   - condition: state
@@ -304,6 +304,8 @@ script:
   
   lights_sunrise:
     sequence:
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.dark_inside
     - service: light.turn_off
       entity_id: 
       - light.buffet

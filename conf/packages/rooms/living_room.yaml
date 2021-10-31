@@ -170,29 +170,12 @@ automation:
     - light.left_lamp
     state: 'on'
   action:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: light.left_sconce_hk
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.living_room
-        data:
-          kelvin: 3000
-          brightness_pct: 100
-          transition: 20
-    - conditions:
-      - condition: state
-        entity_id: light.left_lamp_hk
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.living_room_lamps
-        data:
-          kelvin: 3000
-          brightness_pct: 100
-          transition: 20
+  - service: light.turn_on
+    entity_id: light.living_room_lamps
+    data:
+      kelvin: 3000
+      brightness_pct: 100
+      transition: 20
 
 
 script:

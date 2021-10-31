@@ -1,0 +1,11 @@
+name: Home
+latitude: !secret lat_home
+longitude: !secret lon_home
+elevation: !secret elev
+unit_system: imperial
+time_zone: America/Chicago
+customize: !include /config/customize.yaml
+auth_providers:
+- type: homeassistant
+packages: !include_dir_named conf/packages/
+external_url: !secret base_url

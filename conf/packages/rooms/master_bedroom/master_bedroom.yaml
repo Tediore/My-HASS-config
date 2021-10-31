@@ -63,7 +63,7 @@ automation:
     to: 'on'
   condition:
   - condition: state
-    entity_id: light.matt_hk
+    entity_id: light.matt
     state: 'on'
   action:
   - service: hue.hue_activate_scene
@@ -100,12 +100,12 @@ automation:
     to: 'off'
     for: '00:05:00'
   - platform: state
-    entity_id: light.matt_hk
+    entity_id: light.matt
     from: 'on'
     to: 'off'
   condition:
   - condition: state
-    entity_id: light.matt_hk
+    entity_id: light.matt
     state: 'off'
   action:
   - service: light.turn_off
@@ -182,7 +182,7 @@ climate:
   heater: switch.box_fan
   ac_mode: true
   target_sensor: *bedroom_temp
-  min_temp: 66
+  min_temp: 64
   max_temp: 75
   cold_tolerance: 0
   hot_tolerance: 2

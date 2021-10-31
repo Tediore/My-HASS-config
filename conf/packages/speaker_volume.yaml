@@ -31,9 +31,9 @@ automation:
           {% if speaker in ['bedroom', 'laundry room', 'living room'] %}
             0.32
           {% elif speaker in ['office', 'craft room'] %}
-            0.36
+            0.28 if album == '103.5 KISS FM' else 0.36
           {% elif speaker in ['hub'] %}
-            0.44
+            0.38 if album == '103.5 KISS FM' else 0.44
           {% else %}
             0.36
           {% endif %}

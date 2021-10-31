@@ -2,8 +2,10 @@ group:
   security_sensors:
     entities:
     - binary_sensor.front_door
+    - binary_sensor.front_storm_door
     - binary_sensor.front_porch_door
     - binary_sensor.side_door
+    - binary_sensor.side_storm_door
     - binary_sensor.back_door
     - binary_sensor.dining_room_motion
     - binary_sensor.hallway_motion
@@ -42,7 +44,7 @@ automation:
       title: Sensor unavailable
       message: >
         {% for state in expand('group.security_sensors') %}
-        {% if (as_timestamp(now()) - as_timestamp(state.attributes.last_seen)) / 3600 > 3 %}
+        {% if (as_timestamp(now()) - as_timestamp(state.attributes.last_seen), 0) / 3600 > 3 %}
         {{ state.name.replace('contact','sensor').replace('occupancy','').strip() }} has not been seen for over 3 hours.
         {% endif %}
         {% endfor %}
