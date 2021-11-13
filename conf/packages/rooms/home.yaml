@@ -106,12 +106,8 @@ automation:
     timeout: '00:30:00'
     continue_on_timeout: false
   - service: light.turn_on
-    entity_id: light.kitchen_cabinets
-    data:
-      brightness_pct: 75
-      transition: 10
-  - service: light.turn_on
     entity_id:
+    - light.kitchen_cabinets
     - light.hallway
     - light.entrance
     - light.other_buffet

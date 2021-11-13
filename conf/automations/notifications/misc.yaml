@@ -37,22 +37,6 @@
       message: "CPU temperature has been above 80 °C for more than five minutes."
 
 
-- alias: Notify if server fan speed out of range
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.server_fan_speed
-    above: 4000
-  - platform: numeric_state
-    entity_id: sensor.server_fan_speed
-    below: 2500
-  action:
-  - service: notify.gotify_high
-    data:
-      title: "Check server fan"
-      message: "Server fan speed invalid - check for issues"
-
-
 - alias: Notify when humidity rising quickly
   initial_state: true
   trigger:

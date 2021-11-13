@@ -9,6 +9,7 @@ automation:
     - binary_sensor.bar_leak
     - binary_sensor.basement_bathroom_sink_leak
     - binary_sensor.basement_bathroom_toilet_leak
+    - binary_sensor.basement_shower_leak
     - binary_sensor.dishwasher_leak
     - binary_sensor.fridge_leak
     - binary_sensor.hall_bath_toilet_leak

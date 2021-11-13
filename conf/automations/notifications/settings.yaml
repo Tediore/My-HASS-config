@@ -16,7 +16,7 @@
         switch.turn_off
       {% endif %}
     data_template:
-      entity_id: >
+      target: >
         {% set action = trigger.event.data.action %}
         {% if action == 'alarm_arm_away' %}
           script.alarm_arm_away

@@ -68,19 +68,21 @@ automation:
   action:
   - service: script.turn_on
     entity_id: script.away_mode
-  - delay: '00:00:07'
-  # - condition: or
-  #   conditions:
-  #   - condition: state
-  #     entity_id: sensor.tstat_profile
-  #     state: 
-  #     - 'Away'
-  #     - 'Hold'
-    # - condition: state
-    #   entity_id: climate.thermostat
-    #   state: 'off'
+  - delay: '00:00:05'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: sensor.tstat_profile
+      state: 
+      - 'Away'
+      - 'Hold'
+      - 'PTS'
+      - 'Smart'
+    - condition: state
+      entity_id: climate.thermostat
+      state: 'off'
   - condition: state
-    entity_id: group.lights_interior
+    entity_id: group.lights_all
     state: 'off'
   - service: script.notify_away
     data:
@@ -166,15 +168,21 @@ script:
   away_mode:
     sequence:
     - service: homeassistant.turn_off
-      entity_id:
-      - group.lights_interior
-      - group.plugs
+      data:
+        target: >
+          {{ 'group.lights_interior' if is_state('input_boolean.dark_inside', 'off') else 'group.select_lights_interior' }}
+    - service: homeassistant.turn_off
+      entity_id: group.plugs
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
       entity_id: 
       - script.lr_fan_off
       - script.christmas_lights_off
+    - service: script.turn_on
+      data:
+        entity_id: >
+          {{ 'script.lights_kitty' if is_state('input_boolean.dark_inside', 'on') else none }}
     - condition: template
       value_template: "{{ not is_state('climate.thermostat', 'off') }}"
     - condition: state
@@ -198,7 +206,7 @@ script:
         message: >
           {% set tstat = states('sensor.tstat_profile') %}
           {% set action = states('sensor.hvac_action') %}
-          {% if tstat in ['off', 'Away'] %}
+          {% if tstat in ['Off', 'Away'] %}
             Lights are off, thermostat is {{ 'off' if tstat == 'off' else 'set to away' }}.
           {% elif action != 'idle' %}
             Lights are off.
@@ -220,10 +228,16 @@ script:
       - condition: state
         entity_id: sun.sun
         state: 'below_horizon'
-    - service: homeassistant.turn_on
-      entity_id: 
+    - service: switch.turn_on
+      entity_id: switch.side_entrance_light
+    - service: light.turn_on
+      entity_id:
       - light.entrance
-      - switch.side_entrance_light
+      - light.kitchen_cabinets
+      - light.buffet
+      - light.hallway
+      data:
+        brightness_pct: "{{ 100 if now().hour in range(7,21) else 66 }}"
     - delay: '00:01:00'
     - service: switch.turn_off
       entity_id: switch.side_entrance_light
@@ -298,6 +312,18 @@ script:
       entity_id: light.kitchen_cabinets
       data:
         brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 50 }}"
+
+
+  lights_kitty:
+    sequence:
+    - service: light.turn_on
+      entity_id:
+      - light.buffet
+      - light.hallway
+      - light.living_room
+      data:
+        brightness_pct: 20
+        kelvin: 3000
 
 
   window_notify:

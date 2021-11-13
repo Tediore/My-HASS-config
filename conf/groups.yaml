@@ -1,6 +1,13 @@
 lights_interior:
   name: Interior lights
   entities:
+  - group.select_lights_interior
+  - light.buffet
+  - light.hallway
+  - light.living_room
+
+select_lights_interior:
+  entities:
   - light.basement
   - light.bar_lights
   - light.basement_bath_night_light
@@ -8,7 +15,6 @@ lights_interior:
   - light.basement_lamps
   - light.basement_stairs_lights
   - light.bathroom_ejector_closet
-  - light.buffet
   - light.christmas_lights
   - light.christmas_tree
   - light.craft_room
@@ -16,11 +22,9 @@ lights_interior:
   - light.dining_room
   - light.entrance
   - light.hall_bath_night_light
-  - light.hallway
   - light.kitchen
   - light.kitchen_cabinets
   - light.laundry_room
-  - light.living_room
   - light.living_room_bias_lighting
   - light.master_bedroom_lamps
   - light.master_bedroom_fan

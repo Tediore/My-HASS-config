@@ -4,3 +4,10 @@
   module_url: /local/panel-redirect.js
   config:
     target: /config/server_control
+
+# - name: panel-redirect
+#   sidebar_title: Cameras
+#   sidebar_icon: mdi:video
+#   module_url: /local/panel-redirect.js
+#   config:
+#     target: /lovelace/cameras

@@ -5,7 +5,7 @@ binary_sensor: !include conf/binary_sensor.yaml
 camera: !include conf/camera.yaml
 climate: !include conf/climate.yaml
 config:
-discovery: !include conf_settings/discovery.yaml
+discovery:
 fan: !include conf/fan.yaml
 frontend: !include conf_settings/frontend.yaml
 google: !include conf_static/calendar.yaml
