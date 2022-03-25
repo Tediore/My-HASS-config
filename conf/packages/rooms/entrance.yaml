@@ -1,5 +1,6 @@
 automation:
 - alias: Turn entrance light on/off with remote
+  id: 'eeQu8saengoh3Mah6Ohfa4'
   initial_state: true
   trigger:
   - platform: state

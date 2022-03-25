@@ -2,12 +2,12 @@
   sensors:
     dewpoint_outside_display:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dewpoint_outside') | float | round(0) }}"
+      value_template: "{{ states('sensor.dewpoint_outside') | float(0) | round(0) }}"
       unit_of_measurement: '°F'
 
     dewpoint_inside_display:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dewpoint_inside') | float | round(0) }}"
+      value_template: "{{ states('sensor.dewpoint_inside') | float(0) | round(0) }}"
       unit_of_measurement: '°F'
 
     ssd_temp_disp:
@@ -16,12 +16,12 @@
 
     attic_temp_delta:
       friendly_name: Attic temp delta
-      value_template: "{{ (states('sensor.attic_temp') | float - states('sensor.outside_temp') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.attic_temp') | float(0) - states('sensor.outside_temp') | float(0)) | round(1) }}"
       unit_of_measurement: '°F'
 
     wind_direction:
       friendly_name: Wind direction
       value_template: >
-        {% set degrees = ((states('sensor.wind_direction_degrees') | float - 11.25) / 22.5) | round(0, 'ceil') | int %}
+        {% set degrees = ((states('sensor.wind_direction_degrees') | float(0) - 11.25) / 22.5) | round(0, 'ceil') | int(0) %}
         {% set compass = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'] %}
         {{ compass[degrees] }}

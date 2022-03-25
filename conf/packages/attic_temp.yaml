@@ -1,30 +1,32 @@
 automation:
 - alias: Record highest attic/outside temp
+  id: 'eilax6be4angohWu1aiy6O'
   initial_state: true
   mode: parallel
   trigger:
   - platform: template
-    value_template: "{{ states('sensor.attic_temp') | float > states('input_number.attic_temp_max') | float }}"
+    value_template: "{{ states('sensor.attic_temp') | float(0) > states('input_number.attic_temp_max') | float(0) }}"
   - platform: template
-    value_template: "{{ states('sensor.outside_temp') | float > states('input_number.outside_temp_max') | float }}"
+    value_template: "{{ states('sensor.outside_temp') | float(0) > states('input_number.outside_temp_max') | float(0) }}"
   - platform: template
-    value_template: "{{ states('sensor.attic_temp_delta') | float > states('input_number.attic_temp_delta_max') | float }}"
+    value_template: "{{ states('sensor.attic_temp_delta') | float(0) > states('input_number.attic_temp_delta_max') | float(0) }}"
   action:
   - service: input_number.set_value
     data:
       entity_id: input_number.attic_temp_max
-      value: "{{ states('sensor.attic_temp') | float if states('sensor.attic_temp') | float > states('input_number.attic_temp_max') | float else states('input_number.attic_temp_max') | float }}"
+      value: "{{ states('sensor.attic_temp') | float(0) if states('sensor.attic_temp') | float(0) > states('input_number.attic_temp_max') | float(0) else states('input_number.attic_temp_max') | float(0) }}"
   - service: input_number.set_value
     data:
       entity_id: input_number.outside_temp_max
-      value: "{{ states('sensor.outside_temp') | float if states('sensor.outside_temp') | float > states('input_number.outside_temp_max') | float else states('input_number.outside_temp_max') | float }}"
+      value: "{{ states('sensor.outside_temp') | float(0) if states('sensor.outside_temp') | float(0) > states('input_number.outside_temp_max') | float(0) else states('input_number.outside_temp_max') | float(0) }}"
   - service: input_number.set_value
     data:
       entity_id: input_number.attic_temp_delta_max
-      value: "{{ states('sensor.attic_temp_delta') | float if states('sensor.attic_temp_delta') | float > states('input_number.attic_temp_delta_max') | float else states('input_number.attic_temp_delta_max') | float }}"
+      value: "{{ states('sensor.attic_temp_delta') | float(0) if states('sensor.attic_temp_delta') | float(0) > states('input_number.attic_temp_delta_max') | float(0) else states('input_number.attic_temp_delta_max') | float(0) }}"
 
 
 - alias: Reset highest attic/outside temp
+  id: 'bu8iSa7dogoH4ienoNg5qu'
   initial_state: true
   trigger:
   - platform: time
@@ -70,15 +72,15 @@ sensor:
   sensors:
     attic_temp_max:
       friendly_name: Max attic temp
-      value_template: "{{ states('input_number.attic_temp_max') | float | round(1) }}"
+      value_template: "{{ states('input_number.attic_temp_max') | float(0) | round(1) }}"
       unit_of_measurement: '°F'
 
     outside_temp_max:
       friendly_name: Max outside temp
-      value_template: "{{ states('input_number.outside_temp_max') | float | round(1) }}"
+      value_template: "{{ states('input_number.outside_temp_max') | float(0) | round(1) }}"
       unit_of_measurement: '°F'
 
     attic_temp_delta_max:
       friendly_name: Max attic temp delta
-      value_template: "{{ states('input_number.attic_temp_delta_max') | float | round(1) }}"
+      value_template: "{{ states('input_number.attic_temp_delta_max') | float(0) | round(1) }}"
       unit_of_measurement: '°F'

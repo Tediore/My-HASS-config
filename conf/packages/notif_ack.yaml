@@ -1,5 +1,6 @@
 automation:
 - alias: Notification ACKs
+  id: 'aicuo9oosoh3iquooTahge'
   initial_state: true
   trigger:
   - platform: webhook

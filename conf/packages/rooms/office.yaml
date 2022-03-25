@@ -1,0 +1,244 @@
+automation:
+- alias: Turn office lamps on at sunset
+  id: 'ra4naiPhohg3lighuu6aat'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.dark_inside
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.xbox
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.office_lamps
+    data:
+      kelvin: 2200
+      transition: 10
+      brightness_pct: 100
+
+
+- alias: Turn basement ejector closet light on/off
+  id: 'xahK5deebaxeethaif9goh'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.bathroom_ejector_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.bathroom_ejector_closet
+
+
+- alias: Turn game room bias lighting on if lamps are on
+  id: 'RiePahthu5Ya6Aib9uemoh'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.xbox
+    - light.office_lamps
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id:
+    - binary_sensor.xbox
+    - light.office_lamps
+    state: 'on'
+  action:
+  - service: switch.turn_on
+    entity_id: switch.game_room_bias_lighting
+
+
+- alias: Switch lights when Xbox turned on
+  id: 'ungeiW8ieloid2Aedoht1s'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id:
+    - input_boolean.dark_inside
+    - light.office_fan
+    state: 'on'
+  action:
+  - service: light.turn_off
+    entity_id: light.office_fan
+    data:
+      transition: 5
+  - service: light.turn_on
+    entity_id: light.office_lamps
+    data:
+      transition: 3
+  - service: media_player.turn_off
+    entity_id: media_player.office_speaker
+
+
+# - alias: Toggle camera monitor
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: &in_office binary_sensor.in_office_at_night
+#     to: 'on'
+#   - platform: state
+#     entity_id: *in_office
+#     to: 'off'
+#     for: '00:00:03'
+#   action:
+#   - service: "switch.turn_{{ trigger.to_state.state }}"
+#     entity_id: switch.camera_monitor
+
+
+# - alias: Adjust camera monitor brightness with office lights
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id:
+#     - light.office
+#     - light.office_lamps
+#   condition:
+#   - "{{ trigger.to_state.state not in ['off', 'unavailable'] }}"
+#   action:
+#   - service: input_number.set_value
+#     entity_id: input_number.camera_monitor_brightness
+#     data:
+#       value: >
+#         {% if trigger.to_state.object_id == 'office' %}
+#           {{ 100 if state_attr('light.office', 'brightness') | int > 128 else 45 }}
+#         {% else %}
+#           20
+#         {% endif %}
+
+
+# - alias: Adjust camera monitor brightness with input number
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: input_number.camera_monitor_brightness
+#   action:
+#   - service: shell_command.camera_monitor_brightness
+#     data:
+#       brightness_pct: "{{ trigger.to_state.state | int }}"
+
+
+light:
+# - platform: group
+#   name: Office cans
+#   entities:
+#   - light.office_ne
+#   - light.office_nw
+#   - light.office_middle
+#   - light.office_se
+#   - light.office_sw
+
+- platform: group
+  name: Office lamps
+  entities:
+  - light.office_shelf_lamp
+  - light.office_table_lamp
+
+
+script:
+  # office_spooky:
+  #   sequence:
+  #   - service: light.turn_on
+  #     entity_id:
+  #     - light.office_middle
+  #     - light.office_nw
+  #     - light.office_se
+  #     data:
+  #       brightness_pct: 100
+  #       rgb_color: [255,63,0]
+  #   - service: light.turn_on
+  #     entity_id:
+  #     - light.office_ne
+  #     - light.office_sw
+  #     data:
+  #       brightness_pct: 100
+  #       rgb_color: [63,0,255]
+
+  # office_xmas:
+  #   sequence:
+  #   - service: light.turn_on
+  #     entity_id:
+  #     - light.office_middle
+  #     - light.office_nw
+  #     - light.office_se
+  #     data:
+  #       brightness_pct: 100
+  #       rgb_color: [255,0,0]
+  #   - service: light.turn_on
+  #     entity_id:
+  #     - light.office_ne
+  #     - light.office_sw
+  #     data:
+  #       brightness_pct: 100
+  #       rgb_color: [0,255,0]
+
+
+# scene:
+# - name: Office vibe
+#   entities:
+#     light.office_middle:
+#       state: 'on'
+#       rgb_color: [0, 128, 255]
+#       brightness_pct: 100
+#     light.office_ne:
+#       state: 'on'
+#       rgb_color: [0, 255, 0]
+#       brightness_pct: 100
+#     light.office_nw:
+#       state: 'on'
+#       rgb_color: [255, 0, 0]
+#       brightness_pct: 100
+#     light.office_se:
+#       state: 'on'
+#       rgb_color: [255, 64, 0]
+#       brightness_pct: 100
+#     light.office_sw:
+#       state: 'on'
+#       rgb_color: [191, 0, 255]
+#       brightness_pct: 100
+
+
+input_boolean:
+  office:
+
+
+input_number:
+  camera_monitor_brightness:
+    name: Camera monitor brightness
+    min: 0
+    max: 100
+    step: 5
+    mode: slider
+
+
+binary_sensor:
+- platform: mqtt
+  name: Xbox
+  state_topic: 'xbox/status'
+  payload_on: 'Available'
+  payload_off: 'Unavailable'
+
+- platform: template
+  sensors:
+    in_office_at_night:
+      friendly_name: In office at night
+      value_template: >
+        {{
+          (
+            is_state('binary_sensor.xbox', 'on') or
+            is_state('binary_sensor.desktop', 'on') or
+            is_state('light.office', 'on') or
+            is_state('light.office_lamps', 'on')
+          ) and
+          is_state('sun.sun', 'below_horizon')
+        }}

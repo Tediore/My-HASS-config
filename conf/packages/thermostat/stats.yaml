@@ -3,67 +3,67 @@ sensor:
   sensors:
     current_cycle_length:
       friendly_name: "Length of current cycle"
-      value_template: "{{ (((states('sensor.cooling_since_cycle_start') | float) * 60) + ((states('sensor.heating_since_cycle_start') | float) * 60)) | round(1) }}"
+      value_template: "{{ (((states('sensor.cooling_since_cycle_start') | float(0)) * 60) + ((states('sensor.heating_since_cycle_start') | float(0)) * 60)) | round(1) }}"
       unit_of_measurement: 'm'
 
     cooling_runtime_today:
       friendly_name: "Cooling runtime today"
-      value_template: "{{ (states('sensor.cooling_time_today') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.cooling_time_today') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
 
     cooling_runtime_waking_hours:
       friendly_name: "Cooling runtime waking hours"
-      value_template: "{{ (states('sensor.cooling_time_daytime') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.cooling_time_daytime') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
     
     cooling_runtime_yesterday:
       friendly_name: "Cooling runtime yesterday"
-      value_template: "{{ (states('sensor.cooling_time_yesterday') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.cooling_time_yesterday') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
     
     cooling_runtime_week:
       friendly_name: "Cooling runtime last 7 days"
-      value_template: "{{ (states('sensor.cooling_time_last_7_days') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.cooling_time_last_7_days') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
     
     avg_cooling_week:
       friendly_name: "Average cooling runtime per day"
-      value_template: "{{ ((states('sensor.cooling_time_last_7_days') | float) / 7) | round(1) }}"
+      value_template: "{{ ((states('sensor.cooling_time_last_7_days') | float(0)) / 7) | round(1) }}"
       unit_of_measurement: 'h'
     
     heating_runtime_today:
       friendly_name: "Heating runtime today"
-      value_template: "{{ (states('sensor.heating_time_today') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.heating_time_today') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
     
     heating_runtime_yesterday:
       friendly_name: "Heating runtime yesterday"
-      value_template: "{{ (states('sensor.heating_time_yesterday') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.heating_time_yesterday') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
     
     heating_runtime_week:
       friendly_name: "Heating runtime last 7 days"
-      value_template: "{{ (states('sensor.heating_time_last_7_days') | float) | round(1) }}"
+      value_template: "{{ (states('sensor.heating_time_last_7_days') | float(0)) | round(1) }}"
       unit_of_measurement: 'h'
     
     avg_heating_week:
       friendly_name: "Average heating runtime per day"
-      value_template: "{{ ((states('sensor.heating_time_last_7_days') | float) / 7) | round(1) }}"
+      value_template: "{{ ((states('sensor.heating_time_last_7_days') | float(0)) / 7) | round(1) }}"
       unit_of_measurement: 'h'
     
     time_home_today:
       friendly_name: "Time home today"
-      value_template: "{{ ((states('sensor.home_today') | float) + (states('sensor.standby_today') | float)) | round(1) }}"
+      value_template: "{{ ((states('sensor.home_today') | float(0)) + (states('sensor.standby_today') | float(0))) | round(1) }}"
       unit_of_measurement: 'h'
     
     time_home_yesterday:
       friendly_name: "Time home yesterday"
-      value_template: "{{ (24 - (states('sensor.time_away_yesterday') | float)) | round(1) }}"
+      value_template: "{{ (24 - (states('sensor.time_away_yesterday') | float(0))) | round(1) }}"
       unit_of_measurement: 'h'
     
     time_between_cycles:
       friendly_name: "Time between cycles"
-      value_template: "{{ (((as_timestamp(states('input_text.time_cycle_start')) | float - as_timestamp(states('input_text.time_cycle_end')) | float)) / 60) | round(1) }}"
+      value_template: "{{ (((as_timestamp(states('input_text.time_cycle_start')) | float(0) - as_timestamp(states('input_text.time_cycle_end')) | float(0))) / 60) | round(1) }}"
       unit_of_measurement: 'm'
 
 

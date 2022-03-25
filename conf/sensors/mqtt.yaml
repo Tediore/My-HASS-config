@@ -1,16 +1,12 @@
 - platform: mqtt
   name: SSD temp
-  state_topic: "ssd_temp/temp"
+  state_topic: "server_drives/ssd/temp"
+  unit_of_measurement: 'C'
 
 - platform: mqtt
-  name: Server battery
-  state_topic: &server_battery_topic "battery2mqtt/server/BAT0"
-  value_template: "{{ value_json.capacity }}"
-  unit_of_measurement: '%'
-  device_class: battery
-  json_attributes_topic: *server_battery_topic
-  availability_topic: "battery2mqtt/server/status"
-  force_update: true
+  name: HDD temp
+  state_topic: "server_drives/hdd/temp"
+  unit_of_measurement: 'C'
 
 - platform: mqtt
   name: Server CPU temp
@@ -19,11 +15,6 @@
   unit_of_measurement: 'C'
   device_class: temperature
 
-- platform: mqtt
-  name: Server fan speed
-  state_topic: "temp2mqtt/server/cpu_temp"
-  value_template: "{{ value_json.fan_speed }}"
-  unit_of_measurement: 'RPM'
 
 - platform: mqtt
   name: LR IR received
@@ -50,39 +41,39 @@
   json_attributes_topic: *hue_topic
   availability_topic: 'hue2mqtt/status'
 
-- platform: mqtt
-  name: Printer black ink level
-  state_topic: &printer_topic 'ink2mqtt/printer'
-  value_template: "{{ value_json['agent1-level'] }}"
-  availability_topic: &printer_avail 'ink2mqtt/printer/status'
-  unit_of_measurement: '%'
-  icon: mdi:water
+# - platform: mqtt
+#   name: Printer black ink level
+#   state_topic: &printer_topic 'ink2mqtt/printer'
+#   value_template: "{{ value_json['agent1-level'] }}"
+#   availability_topic: &printer_avail 'ink2mqtt/printer/status'
+#   unit_of_measurement: '%'
+#   icon: mdi:water
 
-- platform: mqtt
-  name: Printer black ink health
-  state_topic: *printer_topic
-  value_template: "{{ value_json['agent1-health-desc'] }}"
-  availability_topic: *printer_avail
-  icon: mdi:water-check
+# - platform: mqtt
+#   name: Printer black ink health
+#   state_topic: *printer_topic
+#   value_template: "{{ value_json['agent1-health-desc'] }}"
+#   availability_topic: *printer_avail
+#   icon: mdi:water-check
 
-- platform: mqtt
-  name: Printer color ink level
-  state_topic: *printer_topic
-  value_template: "{{ value_json['agent2-level'] }}"
-  availability_topic: *printer_avail
-  unit_of_measurement: '%'
-  icon: mdi:water-outline
+# - platform: mqtt
+#   name: Printer color ink level
+#   state_topic: *printer_topic
+#   value_template: "{{ value_json['agent2-level'] }}"
+#   availability_topic: *printer_avail
+#   unit_of_measurement: '%'
+#   icon: mdi:water-outline
 
-- platform: mqtt
-  name: Printer color ink health
-  state_topic: *printer_topic
-  value_template: "{{ value_json['agent2-health-desc'] }}"
-  availability_topic: *printer_avail
-  icon: mdi:water-check-outline
+# - platform: mqtt
+#   name: Printer color ink health
+#   state_topic: *printer_topic
+#   value_template: "{{ value_json['agent2-health-desc'] }}"
+#   availability_topic: *printer_avail
+#   icon: mdi:water-check-outline
 
-- platform: mqtt
-  name: Printer status
-  state_topic: *printer_topic
-  value_template: "{{ value_json['status-desc'] }}"
-  availability_topic: *printer_avail
-  icon: mdi:printer
+# - platform: mqtt
+#   name: Printer status
+#   state_topic: *printer_topic
+#   value_template: "{{ value_json['status-desc'] }}"
+#   availability_topic: *printer_avail
+#   icon: mdi:printer

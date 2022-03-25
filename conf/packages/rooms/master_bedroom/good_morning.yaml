@@ -1,5 +1,6 @@
 automation:
 - alias: Good morning - workday
+  id: 'Too9leichah6zeikee1nap'
   initial_state: true
   trigger:
   - platform: time
@@ -34,6 +35,7 @@ automation:
 
 
 - alias: Set workday wakeup time
+  id: 'IG8faiheing2zohdeeBasa'
   initial_state: true
   trigger:
   - platform: template
@@ -47,7 +49,8 @@ automation:
       time: "{{ '06:50:00' if is_state_attr('calendar.andy_work', 'message', 'Work') else '07:15:00' }}"
 
 
-- alias: Stop white noise
+- alias: Stop white noise and fan
+  id: 'zeeW2feeree1aloo5fuh0e'
   initial_state: true
   trigger:
   - platform: time
@@ -64,9 +67,12 @@ automation:
   action:
   - service: script.turn_on
     entity_id: script.stop_white_noise
+  - service: switch.turn_off
+    entity_id: switch.bedroom_fan
 
 
 - alias: Reset volume after extra sleep
+  id: 'jat2nealoziep0Gee6weiv'
   initial_state: true
   trigger:
   - platform: state
@@ -103,6 +109,7 @@ automation:
 
 
 - alias: Turn sleep mode and fan off in morning
+  id: 'veShooreinoa0ahdixeeh6'
   initial_state: true
   trigger:
   - platform: time
@@ -206,11 +213,11 @@ script:
         - service: media_player.volume_set
           entity_id: media_player.master_bedroom_clock
           data_template:
-            volume_level: "{{ state_attr('media_player.master_bedroom_clock', 'volume_level') | float - 0.01 }}"
+            volume_level: "{{ state_attr('media_player.master_bedroom_clock', 'volume_level') | float(0) - 0.01 }}"
         - delay: '0.25'
         until:
         - condition: template
-          value_template: "{{ state_attr('media_player.master_bedroom_clock', 'volume_level') | float < 0.10 }}"
+          value_template: "{{ state_attr('media_player.master_bedroom_clock', 'volume_level') | float(0) < 0.10 }}"
 
 
 input_boolean:

@@ -4,7 +4,7 @@ lights_interior:
   - group.select_lights_interior
   - light.buffet
   - light.hallway
-  - light.living_room
+  - light.living_room_lamps
 
 select_lights_interior:
   entities:
@@ -38,7 +38,6 @@ select_lights_interior:
   - light.tea_lights
   - light.the_glow_light
   - switch.side_entrance_light
-  - switch.garage_lights
 
 plugs:
   name: Smart plugs
@@ -57,10 +56,10 @@ speakers:
 
 windows:
   entities:
-  - binary_sensor.guest_bedroom_window
   - binary_sensor.kitchen_window
   - binary_sensor.living_room_window_left
   - binary_sensor.living_room_window_right
   - binary_sensor.master_bedroom_window_left
   - binary_sensor.master_bedroom_window_right
-  - binary_sensor.second_bedroom_window
+  - binary_sensor.office_window
+  - binary_sensor.spare_room_window

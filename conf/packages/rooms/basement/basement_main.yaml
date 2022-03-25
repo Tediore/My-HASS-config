@@ -1,5 +1,6 @@
 automation:
 - alias: Turn basement stairs light on/off with door
+  id: 'ixegoogee0ohSh4deekeer'
   initial_state: true
   trigger:
   - platform: state
@@ -12,39 +13,28 @@ automation:
     to: 'off'
     for: '00:00:15'
   action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id:
-        - light.basement_stairs
-        - input_boolean.dark_inside
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.basement_stairs_lights
-        data:
-          kelvin: 4000
-          brightness_pct: 100
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: input_boolean.dark_inside
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.basement_stairs_bottom
-        data:
-          kelvin: 3000
-          brightness_pct: 100
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
-      sequence:
-      - service: light.turn_off
-        entity_id: light.basement_stairs_lights
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.basement_stairs
+
+
+- alias: Turn basement stairs bottom light on/off with basement stairs
+  id: 'Afie9Daez7dohfooDoovai'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.basement_stairs
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - "{{ not is_state('light.basement_stairs_bottom', trigger.to_state.state) }}"
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.basement_stairs_bottom
 
 
 - alias: Turn basement bathroom night light on
+  id: 'aiyahfah9aexah8Zoh6oad'
   initial_state: true
   trigger:
   - platform: state
@@ -69,6 +59,7 @@ automation:
 
 
 - alias: Turn basement bathroom night light off
+  id: 'aa4xooBuy2iexaulah0Iuf'
   initial_state: true
   trigger:
   - platform: state
@@ -84,68 +75,8 @@ automation:
     - light.basement_hallway
 
 
-- alias: Turn basement hall light on/off
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: 
-    - light.office_lamps
-    - light.basement_main
-    to:
-    - 'on'
-    - 'off'
-  - platform: state
-    entity_id: input_boolean.dark_inside
-    to: 'on'
-  - platform: homeassistant
-    event: start
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' or trigger.platform == 'homeassistant' }}"
-      - condition: state
-        entity_id: light.basement
-        state: 'off'
-      - condition: state
-        entity_id: 
-        - light.office_lamps
-        - input_boolean.dark_inside
-        state: 'on'
-      sequence: &bsmt_hall_light_on
-      - service: light.turn_on
-        entity_id: light.basement_hallway
-        data:
-          brightness_pct: 20
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' or trigger.platform == 'homeassistant' }}"
-      - condition: state
-        entity_id: light.basement
-        state: 'on'
-      sequence:
-      - service: light.turn_off
-        entity_id: light.basement_hallway
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' or trigger.platform == 'homeassistant' }}"
-      - condition: state
-        entity_id: 
-        - light.office_lamps
-        - input_boolean.dark_inside
-        state: 'on'
-      sequence: *bsmt_hall_light_on
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' or trigger.platform == 'homeassistant' }}"
-      - condition: state
-        entity_id: light.office_lamps
-        state: 'off'
-      - condition: state
-        entity_id: light.basement_hallway
-        state: 'on'
-      sequence:
-      - service: light.turn_off
-        entity_id: light.basement_hallway
-
-
 - alias: Sync basement color lights
+  id: 'ooxaa2sae3ei0yeboo0Dai'
   initial_state: true
   trigger:
   - platform: state
@@ -171,29 +102,6 @@ automation:
         brightness: "{{ state_attr(trigger.to_state.entity_id, 'brightness') }}"
         rgb_color: "{{ state_attr(trigger.to_state.entity_id, 'rgb_color') }}"
   - delay: 2
-
-
-- alias: Enable/disable basement motion night light
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: group.basement_lights
-    to:
-    - 'on'
-    - 'off'
-  condition:
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-  action:
-  - service: mqtt.publish
-    data:
-      topic: 'cmnd/basement_night_light/rule1'
-      payload: "{{ 1 if trigger.to_state.state == 'off' else 0 }}"
-  - condition: template
-    value_template: "{{ trigger.to_state.state == 'on' }}"
-  - service: light.turn_off
-    entity_id: light.basement_night_light
 
 
 light:
@@ -236,8 +144,7 @@ group:
     - light.basement_stairs_lights
     - light.craft_room
     - light.craft_room_lamps
-    - light.office
-    - light.office_lamps
+    - light.guest_bedroom
     - light.right_lamp_basement
 
 

@@ -9,7 +9,7 @@
     entity_id: input_select.temperature
     data_template:
       option: >
-        {% set temp = trigger.to_state.state | float %}
+        {% set temp = trigger.to_state.state | float(0) %}
         {% if temp < 17 %}
           Cold
         {% elif temp < 27 %}
@@ -132,7 +132,7 @@
           entity_id: input_boolean.button_press
           state: 'off'
         - condition: template
-          value_template: "{{ state_attr('light.whatever', 'brightness') | int < 6 }}"
+          value_template: "{{ state_attr('light.whatever', 'brightness') | int(0) < 6 }}"
 
 
 - alias: Record last motion sensor activated

@@ -9,9 +9,9 @@ script:
     - service: climate.set_temperature
       data:
         entity_id: climate.thermostat
-        target_temp_low: "{{ states('input_number.tstat_heat_home') | int }}"
+        target_temp_low: "{{ states('input_number.tstat_heat_home') | int(0) }}"
         target_temp_high: &no_cool >
-          {{ states('input_number.tstat_cool_sleep') | int if is_state('climate.thermostat', 'off') else state_attr('climate.thermostat', 'target_temp_high') | int }}
+          {{ states('input_number.tstat_cool_sleep') | int(0) if is_state('climate.thermostat', 'off') else state_attr('climate.thermostat', 'target_temp_high') | int(0) }}
 
   tstat_heat_sleep:
     alias: Heat - sleep
@@ -23,7 +23,7 @@ script:
     - service: climate.set_temperature
       data:
         entity_id: climate.thermostat
-        target_temp_low: "{{ states('input_number.tstat_heat_sleep') | int }}"
+        target_temp_low: "{{ states('input_number.tstat_heat_sleep') | int(0) }}"
         target_temp_high: *no_cool
 
   tstat_cool_home:
@@ -37,8 +37,8 @@ script:
       data:
         entity_id: climate.thermostat
         target_temp_low: &no_heat >
-          {{ states('input_number.tstat_heat_sleep') | int if is_state('climate.thermostat', 'off') else state_attr('climate.thermostat', 'target_temp_low') | int }}
-        target_temp_high: "{{ states('input_number.tstat_cool_home') | int }}"
+          {{ states('input_number.tstat_heat_sleep') | int(0) if is_state('climate.thermostat', 'off') else state_attr('climate.thermostat', 'target_temp_low') | int(0) }}
+        target_temp_high: "{{ states('input_number.tstat_cool_home') | int(0) }}"
   
   tstat_cool_sleep:
     alias: Cool - sleep
@@ -51,7 +51,7 @@ script:
       data:
         entity_id: climate.thermostat
         target_temp_low: *no_heat
-        target_temp_high: "{{ states('input_number.tstat_cool_sleep') | int }}"
+        target_temp_high: "{{ states('input_number.tstat_cool_sleep') | int(0) }}"
 
   tstat_away:
     alias: Thermostat away
@@ -63,8 +63,8 @@ script:
     - service: climate.set_temperature
       data:
         entity_id: climate.thermostat
-        target_temp_low: "{{ states('input_number.tstat_heat_away') | int }}"
-        target_temp_high: "{{ states('input_number.tstat_cool_away') | int }}"
+        target_temp_low: "{{ states('input_number.tstat_heat_away') | int(0) }}"
+        target_temp_high: "{{ states('input_number.tstat_cool_away') | int(0) }}"
     - service: notify.mobile_app_matt_phone
       data:
         title: "Away mode activated"
@@ -197,8 +197,8 @@ sensor:
     tstat_profile:
       friendly_name: Profile
       value_template: >
-        {% set low = state_attr('climate.thermostat', 'target_temp_low') | round(0) | int %}
-        {% set high = state_attr('climate.thermostat', 'target_temp_high') | round(0) | int %}
+        {% set low = state_attr('climate.thermostat', 'target_temp_low') | round(0) | int(0) %}
+        {% set high = state_attr('climate.thermostat', 'target_temp_high') | round(0) | int(0) %}
         {% set mode = states('sensor.tstat_mode') %}
         {% if is_state('climate.thermostat', 'off') %}
           Off
@@ -211,21 +211,21 @@ sensor:
         {% elif is_state('input_boolean.tstat_away', 'on') %}
           Away
         {% elif mode == 'Heat' %}
-          {% if low == states('input_number.tstat_heat_home') | int %}
+          {% if low == states('input_number.tstat_heat_home') | int(0) %}
             Home
-          {% elif low == states('input_number.tstat_heat_sleep') | int %}
+          {% elif low == states('input_number.tstat_heat_sleep') | int(0) %}
             Sleep
-          {% elif low == states('input_number.tstat_heat_away') | int %}
+          {% elif low == states('input_number.tstat_heat_away') | int(0) %}
             Away
           {% else %}
             Hold
           {% endif %}
         {% elif mode == 'Cool' %}
-          {% if high == states('input_number.tstat_cool_home') | int %}
+          {% if high == states('input_number.tstat_cool_home') | int(0) %}
             Home
-          {% elif high == states('input_number.tstat_cool_sleep') | int %}
+          {% elif high == states('input_number.tstat_cool_sleep') | int(0) %}
             Sleep
-          {% elif high == states('input_number.tstat_cool_away') | int %}
+          {% elif high == states('input_number.tstat_cool_away') | int(0) %}
             Away
           {% else %}
             Hold
@@ -255,12 +255,12 @@ sensor:
     
     tstat_target_low:
       friendly_name: Min
-      value_template: "{{ state_attr('climate.thermostat', 'target_temp_low') | int if is_state('climate.thermostat', 'heat_cool') else 'Off' }}"
+      value_template: "{{ state_attr('climate.thermostat', 'target_temp_low') | int(0) if is_state('climate.thermostat', 'heat_cool') else 'Off' }}"
       unit_of_measurement: '°F'
     
     tstat_target_high:
       friendly_name: Max
-      value_template: "{{ state_attr('climate.thermostat', 'target_temp_high') | int if is_state('climate.thermostat', 'heat_cool') else 'Off' }}"
+      value_template: "{{ state_attr('climate.thermostat', 'target_temp_high') | int(0) if is_state('climate.thermostat', 'heat_cool') else 'Off' }}"
       unit_of_measurement: '°F'
 
     tstat_status:

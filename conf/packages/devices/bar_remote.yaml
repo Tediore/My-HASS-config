@@ -1,5 +1,6 @@
 automation:
 - alias: Bar lights remote
+  id: 'ChahLe9ohtienecuol6que'
   initial_state: true
   trigger:
   - platform: state
@@ -33,6 +34,7 @@ automation:
 
 
 - alias: Reset bar lights input to white
+  id: 'BeiTiPhahheaw2aeZiozan'
   initial_state: true
   trigger:
   - platform: state

@@ -25,19 +25,20 @@ sensor:
       value_template: >
         {% for state in expand('group.security_sensors') -%}
         {% set unavailable = ((as_timestamp(now()) - as_timestamp(state.attributes.last_seen)) / 3600) > 3 %}
-        {{- unavailable | int -}}
+        {{- unavailable | int(0) -}}
         {% endfor %}
 
 
 automation:
 - alias: Notify when sensor not seen for 3 hours
+  id: 'Geemeeghoo3du5ka7Jouqu'
   initial_state: true
   mode: parallel
   trigger:
   - platform: state
     entity_id: sensor.sensor_warning
   condition:
-  - "{{ states('sensor.sensor_warning') | int > 0 }}"
+  - "{{ states('sensor.sensor_warning') | int(0) > 0 }}"
   action:
   - service: notify.gotify_high
     data:

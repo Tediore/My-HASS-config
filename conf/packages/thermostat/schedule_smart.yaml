@@ -1,94 +1,6 @@
 automation:
-- alias: Start sleep mode cool early if idle
-  initial_state: true
-  trigger:
-  - platform: time
-    at: &cool_sleep_workday_early '21:00:00'
-  - platform: time
-    at: &cool_sleep_weekend_early '21:30:00'
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'cool'
-  - condition: template
-    value_template: "{{ not is_state_attr('climate.thermostat', 'hvac_action', 'cooling') and not is_state('sensor.tstat_profile', 'Sleep') }}"
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: or
-    conditions:
-    - condition: time
-      after: *cool_sleep_workday_early
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      after: *cool_sleep_weekend_early
-      weekday: ['fri', 'sat']
-  action:
-  - service: script.turn_on
-    entity_id: script.tstat_cool_sleep
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.tstat_smart
-
-
-- alias: Start home schedule earlier - sound check
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '06:20:00'
-  condition:
-  - condition: time
-    weekday: sun
-  - condition: template
-    value_template: "{{ state_attr('calendar.church', 'message') != None and 'sound check' in state_attr('calendar.church', 'message').lower() }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service: script.turn_on
-    entity_id: script.good_morning
-  - condition: template
-    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - service_template: "script.{{ states('climate.thermostat') }}_home"
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.tstat_smart
-
-
-- alias: Ask to turn heat back on
-  initial_state: true
-  trigger:
-  - platform: time
-    at: &cool_sleep_workday '21:00:00'
-  - platform: time
-    at: &cool_sleep_weekend '21:30:00'
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'off'
-  - condition: numeric_state
-    entity_id: sensor.outside_temp
-    below: 45
-  - condition: or
-    conditions:
-    - condition: time
-      after: *cool_sleep_workday
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      after: *cool_sleep_workday
-      weekday: ['fri', 'sat']
-  action:
-  - service: notify.mobile_app_matt_phone
-    data_template:
-      title: "Turn heat back on in sleep mode?"
-      message: "It's currently {{ states('sensor.outside_temp') | float | round(0) }}° outside."
-      data:
-        actions:
-        - action: heat_reenable
-          title: Turn heat on
-
-
 - alias: Turn thermostat off if window opened
+  id: 'eeCu9yoothielah9Xeiroe'
   initial_state: true
   trigger:
   - platform: state
@@ -113,13 +25,19 @@ automation:
       - service: input_boolean.turn_on
         entity_id: *window_bool
     default:
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.tstat_sched_resume
+    - service: climate.set_hvac_mode
+      data:
+        entity_id: climate.thermostat
+        hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
+    - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
+    - service: button.press
+      entity_id: button.thermostat_clear_hold
     - service: input_boolean.turn_off
       entity_id: *window_bool
 
 
 - alias: Record previous thermostat mode
+  id: 'OhLoe1Ge6oGo0aiPhoJoo2'
   initial_state: true
   trigger:
   - platform: state
@@ -136,6 +54,7 @@ automation:
 
 
 - alias: Resume tstat schedule - set mode
+  id: 'Iro8kaedahchux6oki9pee'
   initial_state: true
   trigger:
   - platform: state
@@ -153,8 +72,37 @@ automation:
       temperature: "{{ 65 if is_state('input_text.tstat_prev_mode', 'heat') else 80 }}"
       hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
   - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
+  - service: button.press
+    entity_id: button.thermostat_clear_hold
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_sched_resume
+
+
+- alias: Start home mode earlier when cold in master bedroom
+  id: 'iu9ahs1Aigoophien7xei4'
+  initial_state: true
+  trigger:
+  - platform: time_pattern
+    minutes: '/10'
+  condition:
+  - condition: time
+    after: '04:49:00'
+    before: '06:00:00'
+  - condition: state
+    entity_id: climate.thermostat
+    state: 'heat'
+  - "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  - condition: or
+    conditions:
+    - "{{ states('sensor.tstat_current_temp') | float < 62 and now().hour < 5 and now().minute < 51 }}"
+    - "{{ states('sensor.tstat_current_temp') | float < 63 and now().hour < 6 and now().minute < 11 }}"
+    - "{{ states('sensor.tstat_current_temp') | float < 64 and now().hour < 6 and now().minute < 31 }}"
+    - "{{ states('sensor.tstat_current_temp') | float < 65 and now().hour < 6 and now().minute < 51 }}"
+  action:
+  - service: climate.set_temperature
+    entity_id: climate.thermostat
+    data:
+      temperature: 70
 
 
 script:

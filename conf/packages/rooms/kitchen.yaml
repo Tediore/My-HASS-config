@@ -1,5 +1,6 @@
 automation:
 - alias: Dim down/up cabinet lights with kitchen lights
+  id: 'theit5ait1MieDi3Geixee'
   initial_state: true
   trigger:
   - platform: state
@@ -14,7 +15,7 @@ automation:
       - condition: state
         entity_id: light.kitchen_cabinets
         state: 'on'
-      - "{{ state_attr('light.kitchen_cabinets', 'brightness') | int < 254 }}"
+      - "{{ state_attr('light.kitchen_cabinets', 'brightness') | int(0) < 254 }}"
       sequence:
       - service: scene.create
         data:
@@ -38,6 +39,38 @@ automation:
         entity_id: input_boolean.kitchen_cabinet_light_ctl
 
 
+- alias: Record coffeemaker on/off
+  id: 'gai4IeyaewaxuyeeWipei2'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: &coffeemaker sensor.coffeemaker_power
+    above: 1000
+  - platform: numeric_state
+    entity_id: *coffeemaker
+    below: 10
+    for: '00:00:10'
+  action:
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
+    data:
+      entity_id: "input_boolean.{{ 'basement_' if 'basement' in trigger.to_state.entity_id else '' }}coffeemaker"
+
+
+- alias: Notify when coffee done
+  id: 'ul9ein6Faicheim9Chahku'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.coffeemaker
+    from: 'on'
+    to: 'off'
+  action:
+  - service: notify.gotify
+    data:
+      title: "Coffee is ready"
+      message: "Enjoy!"
+
+
 light:
 - platform: mqtt
   name: Kitchen
@@ -55,5 +88,7 @@ light:
   - light.cabinet_lights_n
   - light.cabinet_lights_s
 
+
 input_boolean:
   kitchen_cabinet_light_ctl:
+  coffeemaker:

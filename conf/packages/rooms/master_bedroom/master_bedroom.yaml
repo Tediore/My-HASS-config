@@ -1,5 +1,6 @@
 automation:
 - alias: Turn bedroom lights off in morning on workday
+  id: 'saoNg0IeZahlaiRuu4lahl'
   initial_state: true
   trigger:
   - platform: time
@@ -23,38 +24,8 @@ automation:
       transition: 60
 
 
-# - alias: Turn master bedroom closet light on/off with motion
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.master_bedroom_closet_motion # 30 second cooldown
-#     to: 
-#     - 'on'
-#     - 'off'
-#   condition:
-#   - "{{ trigger.to_state.state != states('light.master_bedroom_closet') }}"
-#   - condition: state
-#     entity_id:
-#     - input_boolean.sleep_mode
-#     - input_boolean.andy_sleep
-#     state: 'off'
-#   action:
-#   - service: light.turn_on
-#     entity_id: light.master_bedroom_closet
-#     data:
-#       brightness_pct: >
-#         {% if trigger.to_state.state == 'on' %}
-#           {% if is_state('light.master_bedroom_lamps', 'off') and is_state('input_boolean.dark_inside', 'on') %}
-#             50
-#           {% else %}
-#             {{ 100 if 6 < now().hour < 21 else 50 }}
-#           {% endif %}
-#         {% else %}
-#           0
-#         {% endif %}
-
-
 - alias: Transition master bedroom lights to warm
+  id: 'EitaeNg7et5ogh2Ahph2Ae'
   initial_state: true
   trigger:
   - platform: state
@@ -74,6 +45,7 @@ automation:
 
 
 - alias: Turn mini Christmas tree on
+  id: 'Voh7tieRoh6jahthuojeit'
   initial_state: true
   trigger:
   - platform: state
@@ -93,6 +65,7 @@ automation:
 
 
 - alias: Turn mini Christmas tree off
+  id: 'futok5uwu2paaMaigh7ied'
   initial_state: true
   trigger:
   - platform: state
@@ -113,6 +86,7 @@ automation:
 
 
 - alias: Turn generic tstats on with buttons on plugs
+  id: 'Yee7shiv2isheilu8fahhi'
   initial_state: true
   trigger:
   - platform: mqtt
@@ -128,6 +102,7 @@ automation:
 
 
 - alias: Turn closet lights on/off with doors
+  id: 'ahchooGeoph0ab6IiceuSh'
   initial_state: true
   mode: parallel
   trigger:
@@ -143,6 +118,97 @@ automation:
     data:
       entity_id: "light.{{ trigger.to_state.object_id.replace('_door','') }}"
       brightness_pct: "{{ 67 if (trigger.to_state.state == 'on' and is_state('input_boolean.dark_inside', 'on')) else 0 }}"
+
+
+- alias: Matt button
+  id: 'iep4tahz8sah7riet7maiJ'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.button_matt
+    to:
+    - 'single'
+    - 'double'
+    - 'hold'
+  action:
+  - service: script.turn_on
+    data_template:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command == 'single' %}
+          {% if is_state('input_boolean.sleep_mode', 'off') %}
+            script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+          {% else %}
+            script.{{ 'toggle_bedroom_fan' if is_state('media_player.master_bedroom_clock', 'playing') else 'white_noise_bedroom' }}
+          {% endif %}
+        {% elif command == 'hold' %}
+          script.toggle_bedroom_fan
+        {% else %}
+          script.early_departure
+        {% endif %}
+
+
+- alias: Andy button
+  id: 'Sheiqueer6sheex5zie9ai'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.button_andy
+    to: 
+    - 'single'
+    - 'hold'
+  action:
+    service_template: >
+      {% if trigger.to_state.state == 'single' %}
+        {% if is_state('input_boolean.andy_sleep', 'off') %}
+          script.good_night_andy
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
+      {% else %}
+        script.button_andy_test
+      {% endif %}
+
+
+script:
+  toggle_bedroom_fan:
+    sequence:
+    - service: switch.toggle
+      entity_id: switch.bedroom_fan
+  
+  early_departure:
+    sequence:
+    - service: script.turn_on
+      entity_id: script.stop_white_noise
+    - service: input_boolean.turn_off
+      entity_id:
+      - input_boolean.sleep_mode
+      - input_boolean.andy_sleep
+    - service: light.turn_on
+      entity_id: 
+      - light.master_bedroom_lamps
+      - light.living_room_lamps
+      - light.buffet
+      data:
+        transition: 30
+        kelvin: 3000
+        brightness_pct: 33
+    - service: light.turn_on
+      entity_id: light.kitchen_cabinets
+      data:
+        brightness_pct: 66
+        transition: 1
+    - service: alarm_control_panel.alarm_disarm
+      entity_id: alarm_control_panel.home
+
+
+  button_andy_test:
+    sequence:
+    - service: notify.gotify
+      data:
+        message: "Andy's button is working."
 
 
 switch:
@@ -166,27 +232,27 @@ switch:
 
 climate:
 - platform: generic_thermostat
-  name: Bedroom AC 
-  heater: switch.bedroom_ac
-  ac_mode: true
-  target_sensor: &bedroom_temp sensor.master_bedroom_temp
-  min_temp: 66
-  max_temp: 75
-  cold_tolerance: 0
-  hot_tolerance: 2
-  precision: 0.1
-  min_cycle_duration: '00:05:00'
-
-- platform: generic_thermostat
   name: Box fan
   heater: switch.box_fan
   ac_mode: true
-  target_sensor: *bedroom_temp
+  target_sensor: &bedroom_temp sensor.master_bedroom_temp
   min_temp: 64
   max_temp: 75
   cold_tolerance: 0
   hot_tolerance: 2
   precision: 0.5
+
+# - platform: generic_thermostat
+#   name: Bedroom AC 
+#   heater: switch.bedroom_ac
+#   ac_mode: true
+#   target_sensor: *bedroom_temp
+#   min_temp: 66
+#   max_temp: 75
+#   cold_tolerance: 0
+#   hot_tolerance: 2
+#   precision: 0.1
+#   min_cycle_duration: '00:05:00'
 
 
 input_number:

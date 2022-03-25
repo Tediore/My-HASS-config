@@ -1,4 +1,5 @@
 - alias: Notify when device unavailable
+  id: 'Magah7iediTii3Bi'
   initial_state: true
   mode: parallel
   max: 100
@@ -79,6 +80,7 @@
 
 
 - alias: Notify when Zigbee router unavailable for 5 minutes
+  id: 'EphooCiob0oofaYo'
   initial_state: true
   mode: parallel
   trigger:
@@ -105,6 +107,7 @@
 
 
 - alias: Notify when Hue light unreachable
+  id: 'aShoqu1lohz1luov'
   initial_state: true
   mode: parallel
   max: 100
@@ -122,7 +125,7 @@
     - light.dining_room_3
     - light.dresser
     - light.guest_bedroom_closet
-    - light.left_lamp
+    - light.living_room_lamp_left
     - light.matt
     - light.matt_closet
     - light.other_buffet
@@ -144,6 +147,7 @@
 
 
 - alias: Notify when sensor battery low
+  id: 'roo8eoBo2Meemi2s'
   initial_state: true
   mode: parallel
   max: 100
@@ -285,6 +289,7 @@
 
 
 - alias: Notify when fridge temp too high
+  id: 'zasuuwohtieN4Wei'
   initial_state: true
   mode: parallel
   trigger:
@@ -317,6 +322,7 @@
 
 
 - alias: Notify when 433MHz temp sensor battery low
+  id: 'idi6ahyahRupheir'
   initial_state: true
   mode: parallel
   max: 10
@@ -342,6 +348,7 @@
 
 
 - alias: Notify when basement fridge open more than 5 minutes
+  id: 'ieFeih9taingievo'
   initial_state: true
   trigger:
   - platform: state
@@ -356,6 +363,7 @@
 
 
 - alias: Notify when Hue bridge is ready to update
+  id: 'iem9EiNgogoo2Oi8'
   initial_state: true
   trigger:
   - platform: state

@@ -1,14 +1,19 @@
 automation:
 - alias: Andy's desk button
+  id: 'lai8eiquah4quuf6theeXi'
   initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.craft_room_desk_button
-    to:
+    to: &remote_states
     - 'on'
     - 'off'
+    - 'brightness_down'
     - 'brightness_move_down'
     - 'brightness_move_up'
+    - 'brightness_up'
+    - 'colortemp_up'
+    - 'colortemp_down'
   action:
   - choose:
     - conditions:
@@ -29,10 +34,12 @@ automation:
 
 
 - alias: Andy's desk remote
+  id: 'AeGh4fuos1theiroej4zie'
   initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.craft_room_desk_remote
+    to: *remote_states
   action:
   - choose:
     - conditions:

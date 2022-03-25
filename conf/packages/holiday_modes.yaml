@@ -1,5 +1,6 @@
 automation:
 - alias: Toggle holiday modes
+  id: 'phoofaad8chil5Ahngahzi'
   initial_state: true
   trigger:
   - platform: time
@@ -91,6 +92,7 @@ automation:
 
 
 - alias: Turn on balcony Christmas lights
+  id: 'Sheb6MiejahYaeX0eingee'
   initial_state: true
   trigger:
   - platform: state

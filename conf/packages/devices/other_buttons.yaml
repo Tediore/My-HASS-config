@@ -1,5 +1,6 @@
 automation:
 - alias: Cross stitch button
+  id: 'iehohd7Veiwi8yiegooth7'
   initial_state: true
   trigger:
   - platform: state
@@ -16,6 +17,7 @@ automation:
 
 
 - alias: Basement lamp button
+  id: 'cahgha9pol7riaHu5sei6k'
   initial_state: true
   trigger:
   - platform: state
@@ -25,7 +27,7 @@ automation:
     - 'off'
   action:
   - service: light.toggle
-    entity_id: light.right_lamp_basement
+    entity_id: light.basement_lamps
     data:
       brightness_pct: 100
-      kelvin: 3000
+      kelvin: 2200

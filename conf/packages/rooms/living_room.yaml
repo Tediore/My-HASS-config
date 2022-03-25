@@ -1,5 +1,6 @@
 automation:
 - alias: Turn lights on/off with TV IR
+  id: 'Ook9zahch9eish9Cheeroo'
   initial_state: true
   mode: single
   trigger:
@@ -22,6 +23,7 @@ automation:
 
 
 - alias: Turn off lights and speakers when TV turned on
+  id: 'esaengaH9lei7ahGhohfoh'
   initial_state: true
   mode: single
   trigger:
@@ -64,6 +66,7 @@ automation:
 
 
 - alias: Turn soundbar on with TV
+  id: 'aB9OhkahheitaiQuuDie0u'
   initial_state: true
   mode: single
   trigger:
@@ -80,22 +83,24 @@ automation:
   - delay: 20
 
 
-- alias: Set living room TV auto-brightness
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: media_player.living_room_vizio
-    to: 'on'
-  action:
-  - service: vizio.update_setting
-    data:
-      entity_id: media_player.living_room_vizio
-      setting_type: picture
-      setting_name: auto_brightness_control
-      new_value: "{{ 'High' if is_state('sun.sun', 'below_horizon') else 'Off' }}"
+# - alias: Set living room TV auto-brightness
+#   id: 'uSh3xiel1ileibie7yaMee'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: media_player.living_room_vizio
+#     to: 'on'
+#   action:
+#   - service: vizio.update_setting
+#     data:
+#       entity_id: media_player.living_room_vizio
+#       setting_type: picture
+#       setting_name: auto_brightness_control
+#       new_value: "{{ 'High' if is_state('sun.sun', 'below_horizon') else 'Off' }}"
 
 
 - alias: Restore lights when TV turned off
+  id: 'wuudeaC1Ooyaiphe3uwaPh'
   initial_state: true
   trigger:
   - platform: state
@@ -127,6 +132,7 @@ automation:
 
 
 - alias: Turn off living room TV bias lighting
+  id: 'ahNgaqu8ahgho9aemohg0E'
   initial_state: true
   trigger:
   - platform: state
@@ -139,6 +145,7 @@ automation:
 
 
 - alias: Toggle air freshener
+  id: 'Een7Geivooch9zei2fehei'
   initial_state: true
   trigger:
   - platform: time_pattern
@@ -156,6 +163,7 @@ automation:
 
 
 - alias: Transition living room lights to warm
+  id: 'Ahv2yoobuvudahgh2theip'
   initial_state: true
   trigger:
   - platform: state
@@ -167,15 +175,15 @@ automation:
   - condition: state
     entity_id: 
     - input_boolean.dark_inside
-    - light.left_lamp
+    - light.living_room_lamp_left
     state: 'on'
   action:
   - service: light.turn_on
     entity_id: light.living_room_lamps
     data:
-      kelvin: 3000
+      kelvin: 2700
       brightness_pct: 100
-      transition: 20
+      transition: 10
 
 
 script:
@@ -205,13 +213,15 @@ script:
       - light.buffet
       - light.kitchen_cabinets
       data:
-        kelvin: 3000
+        kelvin: 2700
         transition: 2
         brightness_pct: 50
     - service: script.turn_on
-      entity_id: script.christmas_lights_off
+      entity_id:
+      - script.deck_lights_tv_on
+      - script.christmas_lights_off
     - condition: state
-      entity_id: light.living_room_lamps
+      entity_id: light.living_room
       state: 'on'
     - service: light.turn_off
       entity_id:
@@ -225,12 +235,14 @@ script:
     sequence:
     - service: light.turn_on
       data:
-        entity_id: "light.buffet, light.other_buffet, light.hallway, light.entrance{{ ', light.living_room' if is_state('light.living_room', 'off') else '' }}"
-        kelvin: 3000
+        entity_id: "light.buffet, light.other_buffet, light.hallway, light.entrance{{ ', light.living_room_lamps' if is_state('light.living_room_lamps', 'off') else '' }}"
+        kelvin: 2700
         transition: 3
-        brightness_pct: "{{ 100 if 6 < now().hour < 21 else 50 }}"
+        brightness_pct: "{{ 100 if 6 < now().hour < 21 else 75 }}"
     - service: script.turn_on
-      entity_id: script.christmas_lights_on
+      entity_id:
+      - script.deck_lights_tv_off
+      - script.christmas_lights_on
     - service: light.turn_off
       entity_id: light.living_room_bias_lighting
     - service: input_boolean.turn_off
@@ -251,6 +263,28 @@ script:
         kelvin: 5000
         brightness_pct: 100
 
+  deck_lights_tv_on:
+    sequence:
+    - condition: state
+      entity_id: light.deck
+      state: 'on'
+    - service: scene.create
+      data:
+        scene_id: deck_lights_before
+        snapshot_entities:
+        - light.deck
+    - service: light.turn_on
+      entity_id: light.deck
+      data:
+        brightness_pct: 25
+
+  deck_lights_tv_off:
+    sequence:
+    - condition: state
+      entity_id: light.deck
+      state: 'on'
+    - scene: scene.deck_lights_before
+
 
 switch:
 - platform: template
@@ -261,7 +295,19 @@ switch:
         data:
           blaster: living_room_ir
       turn_off: *fan_power
-      value_template: "{{ states('sensor.living_room_fan_power') | int > 20 }}"
+      value_template: "{{ states('sensor.living_room_fan_power') | int(0) > 20 }}"
+
+
+light:
+- platform: group
+  name: Living room lamps
+  entities:
+  - light.living_room_lamp_left
+
+- platform: group
+  name: Living room
+  entities:
+  - light.living_room_lamps
 
 
 input_boolean:

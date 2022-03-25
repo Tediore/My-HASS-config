@@ -1,63 +1,63 @@
-automation:
-- alias: WKQX playing
-  initial_state: true
-  mode: parallel
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.bedroom_speaker_media_title
-    - sensor.hub_media_title
-    - sensor.kitchen_speaker_media_title
-    - sensor.living_room_speaker_media_title
-    - sensor.portable_speaker_media_title
-    to: '101WKQX'
-  condition:
-  - condition: state
-    entity_id: input_boolean.wkqx
-    state: 'off'
-  action:
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.wkqx
+# automation:
+# - alias: WKQX playing
+#   initial_state: true
+#   mode: parallel
+#   trigger:
+#   - platform: state
+#     entity_id:
+#     - sensor.bedroom_speaker_media_title
+#     - sensor.hub_media_title
+#     - sensor.kitchen_speaker_media_title
+#     - sensor.living_room_speaker_media_title
+#     - sensor.portable_speaker_media_title
+#     to: '101WKQX'
+#   condition:
+#   - condition: state
+#     entity_id: input_boolean.wkqx
+#     state: 'off'
+#   action:
+#   - service: input_boolean.turn_on
+#     entity_id: input_boolean.wkqx
 
 
-- alias: Toggle WKQX song polling
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.wkqx
-    to: 'on'
-  - platform: state
-    entity_id: binary_sensor.any_speaker
-    to: 'off'
-    for: '00:00:15'
-  action:
-  - service_template: >
-      {% if trigger.to_state.state == 'off' %} 
-        {% if is_state('input_boolean.wkqx', 'on') %}
-          homeassistant.turn_{{ states('input_boolean.music_moved') }}
-        {% else %}
-          homeassistant.turn_off
-        {% endif %}
-      {% else %}
-        homeassistant.turn_on
-      {% endif %}
-    data_template:
-      entity_id: >
-        {% if trigger.to_state.state == 'off' %} 
-          {% if is_state('input_boolean.wkqx', 'on') %}
-            input_boolean.wkqx
-          {% else %}
-            input_boolean.wkqx, input_boolean.music_moved
-          {% endif %}
-        {% else %}
-          input_boolean.wkqx
-        {% endif %}
+# - alias: Toggle WKQX song polling
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: input_boolean.wkqx
+#     to: 'on'
+#   - platform: state
+#     entity_id: binary_sensor.any_speaker
+#     to: 'off'
+#     for: '00:00:15'
+#   action:
+#   - service_template: >
+#       {% if trigger.to_state.state == 'off' %} 
+#         {% if is_state('input_boolean.wkqx', 'on') %}
+#           homeassistant.turn_{{ states('input_boolean.music_moved') }}
+#         {% else %}
+#           homeassistant.turn_off
+#         {% endif %}
+#       {% else %}
+#         homeassistant.turn_on
+#       {% endif %}
+#     data_template:
+#       entity_id: >
+#         {% if trigger.to_state.state == 'off' %} 
+#           {% if is_state('input_boolean.wkqx', 'on') %}
+#             input_boolean.wkqx
+#           {% else %}
+#             input_boolean.wkqx, input_boolean.music_moved
+#           {% endif %}
+#         {% else %}
+#           input_boolean.wkqx
+#         {% endif %}
 
 
-sensor:
-- platform: mqtt
-  name: WKQX song
-  state_topic: "wkqx/now_playing"
+# sensor:
+# - platform: mqtt
+#   name: WKQX song
+#   state_topic: "wkqx/now_playing"
 
-input_boolean:
-  wkqx:
+# input_boolean:
+#   wkqx:

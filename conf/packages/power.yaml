@@ -1,5 +1,6 @@
 automation:
 - alias: Notify when shutting down
+  id: 'oojoodooH7urahron1teit'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -17,6 +18,7 @@ automation:
 
 
 - alias: Notify when power lost or restored
+  id: 'sahf7phuQu0phaiZ8Jee9f'
   initial_state: true
   mode: parallel
   trigger:
@@ -51,7 +53,7 @@ sensor:
         {% if ups == 'on' %}
           AC power
         {% elif ups == 'off' %}
-          On battery: {{ states('sensor.server_ups_battery') | float }}% ({{ states('sensor.server_ups_time_left') | float | round(0) }} min)
+          On battery: {{ states('sensor.server_ups_battery') | float(0) }}% ({{ states('sensor.server_ups_time_left') | float(0) | round(0) }} min)
         {% else %}
           Unknown
         {% endif %}
@@ -68,7 +70,7 @@ sensor:
     power_outage_length:
       friendly_name: Power outage length
       value_template: >
-        {% set diff = ((states('input_text.time_power_restored') | float - states('input_text.time_power_lost') | float) / 60) | round(0) %}
+        {% set diff = ((states('input_text.time_power_restored') | float(0) - states('input_text.time_power_lost') | float(0)) / 60) | round(0) %}
         {% if diff < 1 %}
           less than a minute.
         {% elif diff == 1 %}

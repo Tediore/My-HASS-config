@@ -1,5 +1,6 @@
 automation:
 - alias: Record washer/dryer on/off
+  id: 'ahCh5iehugh6laesheeWe8'
   initial_state: true
   mode: parallel
   trigger:
@@ -18,12 +19,13 @@ automation:
     entity_id: sensor.dryer_power
     below: 50
   action:
-  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float > 250 else 'off' }}"
+  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 250 else 'off' }}"
     data_template:
       entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','').replace('_pwr','') }}"
 
 
 - alias: Notify when washer/dryer done
+  id: 'ieJ7eitheen4xithoe0ohd'
   initial_state: true
   mode: parallel
   trigger:
@@ -68,6 +70,7 @@ automation:
 
 
 - alias: Reset laundry reminder booleans
+  id: 'Ieguvaicood1xeeJu5eeM6'
   initial_state: true
   trigger:
   - platform: state

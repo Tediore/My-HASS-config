@@ -1,6 +1,6 @@
-### Cooling
 automation:
-- alias: Thermostat home - cool
+- alias: Thermostat resume schedule
+  id: 'Xo9chon6esieF5Wai1chie'
   initial_state: true
   trigger:
   - platform: state
@@ -13,222 +13,48 @@ automation:
     - input_boolean.tstat_hold
     from: 'on'
     to: 'off'
-  - platform: state
-    entity_id: input_number.tstat_cool_home
-  - platform: homeassistant
-    event: start
-  - platform: time
-    at: 
-    - &cool_home_workday input_datetime.tstat_cool_home_workday
-    - &cool_home_weekend input_datetime.tstat_cool_home_weekend
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'cool'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  - condition: or
-    conditions:
-    - condition: time
-      after: *cool_home_workday
-      weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
-    - condition: time
-      after: *cool_home_weekend
-      weekday: ['sat', 'sun']
-  - condition: or
-    conditions:
-    - condition: time
-      before: &cool_sleep_workday input_datetime.tstat_cool_sleep_workday
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      before: &cool_sleep_weekend input_datetime.tstat_cool_sleep_weekend
-      weekday: ['fri', 'sat']
   action:
-  - service: script.turn_on
-    entity_id: script.tstat_cool_home
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.tstat_smart
+  - service: button.press
+    entity_id: button.thermostat_clear_hold
 
 
-- alias: Thermostat sleep - cool
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_text.alarm
-    from: 'armed_away'
-    to: 'disarmed'
-  - platform: state
-    entity_id: 
-    - input_boolean.tstat_sched_resume
-    - input_boolean.tstat_hold
-    from: 'on'
-    to: 'off'
-  - platform: state
-    entity_id: input_number.tstat_cool_sleep
-  - platform: homeassistant
-    event: start
-  - platform: time
-    at: 
-    - *cool_sleep_workday
-    - *cool_sleep_weekend
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'cool'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  - condition: or
-    conditions:
-    - condition: time
-      after: *cool_sleep_workday
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      after: *cool_sleep_weekend
-      weekday: ['fri', 'sat']
-    - condition: time
-      before: *cool_home_workday
-      weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
-    - condition: time
-      before: *cool_home_weekend
-      weekday: ['sat', 'sun']
-  action:
-  - service: script.turn_on
-    entity_id: script.tstat_cool_sleep
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.tstat_smart
-
-
-### Heating
-- alias: Thermostat home - heat
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_text.alarm
-    from: 'armed_away'
-    to: 'disarmed'
-  - platform: state
-    entity_id: 
-    - input_boolean.tstat_sched_resume
-    - input_boolean.tstat_hold
-    from: 'on'
-    to: 'off'
-  - platform: state
-    entity_id: input_number.tstat_heat_home
-  - platform: homeassistant
-    event: start
-  - platform: time
-    at: 
-    - &heat_home_workday input_datetime.tstat_heat_home_workday
-    - &heat_home_weekend input_datetime.tstat_heat_home_weekend
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'heat'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  - condition: or
-    conditions:
-    - condition: time
-      after: *heat_home_workday
-      weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
-    - condition: time
-      after: *heat_home_weekend
-      weekday: ['sat', 'sun']
-  - condition: or
-    conditions:
-    - condition: time
-      before: &heat_sleep_workday input_datetime.tstat_heat_sleep_workday
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      before: &heat_sleep_weekend input_datetime.tstat_heat_sleep_weekend
-      weekday: ['fri', 'sat']
-  action:
-  - service: script.turn_on
-    entity_id: script.tstat_heat_home
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.tstat_smart
-
-
-- alias: Thermostat sleep - heat
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_text.alarm
-    from: 'armed_away'
-    to: 'disarmed'
-  - platform: state
-    entity_id: 
-    - input_boolean.tstat_sched_resume
-    - input_boolean.tstat_hold
-    from: 'on'
-    to: 'off'
-  - platform: state
-    entity_id: input_number.tstat_heat_sleep
-  - platform: homeassistant
-    event: start
-  - platform: time
-    at: 
-    - *heat_sleep_workday
-    - *heat_sleep_weekend
-  condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'heat'
-  - condition: state
-    entity_id: input_boolean.tstat_hold
-    state: 'off'
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  - condition: or
-    conditions:
-    - condition: time
-      after: *heat_sleep_workday
-      weekday: ['sun', 'mon', 'tue', 'wed', 'thu']
-    - condition: time
-      after: *heat_sleep_weekend
-      weekday: ['fri', 'sat']
-    - condition: time
-      before: *heat_home_workday
-      weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
-    - condition: time
-      before: *heat_home_weekend
-      weekday: ['sat', 'sun']
-  action:
-  - service: script.turn_on
-    entity_id: script.tstat_heat_sleep
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.tstat_smart
-
-
-### Away
 - alias: Thermostat away
+  id: 'ohy9quaeph1eikohxieCei'
   initial_state: true
   trigger:
   - platform: state
     entity_id: input_text.alarm
     to: 'armed_away'
+    for: '00:30:00'
   - platform: state
     entity_id: input_text.alarm
     to: 'armed_away'
-    for: '00:00:30'
+    for: '00:30:30'
   condition:
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'
-  - condition: template
-    value_template: "{{ states('climate.thermostat') in ['cool', 'heat'] }}"
   action:
-  - service: script.turn_on
-    data_template: 
-      entity_id: "script.tstat_{{ states('climate.thermostat') }}_away"
+  - service: select.select_option
+    entity_id: select.thermostat_current_mode
+    data:
+      option: 'away'
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart
+
+
+- alias: Resume tstat schedule if hold flag not set
+  id: 'Eishufe7uach4eimaiquik'
+  initial_state: true
+  trigger:
+  - platform: time
+    at:
+    - '06:15:00'
+    - '21:30:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.tstat_hold
+    state: 'off'
+  action:
+  - service: button.press
+    entity_id: button.thermostat_clear_hold

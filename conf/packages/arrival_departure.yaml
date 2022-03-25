@@ -1,5 +1,6 @@
 automation:
 - alias: Turn entrance light on upon entrance
+  id: 'vei6Ilae0mooZohyaisaix'
   initial_state: true
   trigger:
   - entity_id: 
@@ -23,26 +24,18 @@ automation:
     state: 'armed_away'
     for: '00:00:30'
   action:
-  - choose:
-    - conditions:
-      - "{{ 'front' in trigger.to_state.object_id }}"
-      - condition: state
-        entity_id: light.entrance
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.entrance
-        data:
-          brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
-    default:
-    - condition: state
-      entity_id: switch.side_entrance_light
-      state: 'off'
-    - service: switch.turn_on
-      entity_id: switch.side_entrance_light
+  - service: switch.turn_on
+    entity_id: switch.side_entrance_light
+  - service: light.turn_on
+    entity_id: light.entrance
+    data:
+      brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
+  - service: script.turn_on
+    entity_id: script.arrival_night
 
 
 - alias: Alarm disarmed from away
+  id: 'luheechourei9Lowie2mui'
   initial_state: true
   trigger:
   - platform: state
@@ -59,6 +52,7 @@ automation:
 
 
 - alias: Activate away mode when armed away
+  id: 'Del1UJaejeiK2eiy1goo9s'
   initial_state: true
   trigger:
   - platform: state
@@ -90,6 +84,7 @@ automation:
 
 
 - alias: Away mode backup attempt
+  id: 'xooco5teb6bi9yaJeeth5P'
   initial_state: true
   trigger:
   - platform: state
@@ -126,53 +121,15 @@ automation:
       title: Away mode activated (second attempt)
 
 
-- alias: Master bedroom lights night arrival
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.hallway_motion
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: 
-    - input_boolean.arrival
-    - input_boolean.dark_inside
-    state: 'on'
-  action:
-  - service: light.turn_on
-    entity_id: light.master_bedroom_lamps
-    data:
-      brightness_pct: 100
-      kelvin: 3000
-
-
-- alias: Turn off arrival boolean
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.hallway_motion
-    from: 'off'
-    to: 'on'
-  - platform: state
-    entity_id: input_text.alarm
-    from: 'armed_away'
-    to: 'disarmed'
-    for: '00:03:00'
-  action:
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.arrival
-
-
 script:
   away_mode:
     sequence:
     - service: homeassistant.turn_off
-      data:
-        target: >
-          {{ 'group.lights_interior' if is_state('input_boolean.dark_inside', 'off') else 'group.select_lights_interior' }}
+      target: 
+        entity_id: "group.{{ 'lights_interior' if is_state('input_boolean.dark_inside', 'off') else 'select_lights_interior' }}"
     - service: homeassistant.turn_off
-      entity_id: group.plugs
+      target:
+        entity_id: group.plugs
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
@@ -181,8 +138,7 @@ script:
       - script.christmas_lights_off
     - service: script.turn_on
       data:
-        entity_id: >
-          {{ 'script.lights_kitty' if is_state('input_boolean.dark_inside', 'on') else none }}
+        entity_id: "{{ 'script.lights_kitty' if is_state('input_boolean.dark_inside', 'on') else none }}"
     - condition: template
       value_template: "{{ not is_state('climate.thermostat', 'off') }}"
     - condition: state
@@ -230,14 +186,6 @@ script:
         state: 'below_horizon'
     - service: switch.turn_on
       entity_id: switch.side_entrance_light
-    - service: light.turn_on
-      entity_id:
-      - light.entrance
-      - light.kitchen_cabinets
-      - light.buffet
-      - light.hallway
-      data:
-        brightness_pct: "{{ 100 if now().hour in range(7,21) else 66 }}"
     - delay: '00:01:00'
     - service: switch.turn_off
       entity_id: switch.side_entrance_light
@@ -251,10 +199,6 @@ script:
     - service: script.turn_on
       data:
         entity_id: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas', 'on') else 'normal' }}"
-    - service: timer.start
-      entity_id: timer.master_bedroom_enter
-      data:
-        duration: 180
     - condition: template
       value_template: "{{ now().month in [11, 12] }}"
     - service: light.turn_on
@@ -269,49 +213,34 @@ script:
       - light.buffet
       - light.other_buffet
       - light.hallway
+      - light.living_room_lamps
       data:
         transition: 1
         brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
-        kelvin: 3000
+        kelvin: 2700
     - service: light.turn_on
       entity_id: light.kitchen_cabinets
       data:
         brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 75 }}"
     - service: light.turn_on
-      entity_id: light.hall_bath_night_light
+      entity_id: 
+      - light.hall_bath_night_light
+      - light.master_bath_night_light
       data:
         transition: 1
         brightness_pct: 100
-        kelvin: 3000
-    - service: hue.hue_activate_scene
-      data:
-        group_name: Living room lamps
-        scene_name: Read lamps
+        kelvin: 2700
 
 
   lights_christmas:
     sequence:
+    - service: script.turn_on
+      entity_id: script.lights_normal
     - service: homeassistant.turn_on
       entity_id: 
       - light.christmas_tree
       - light.mini_christmas_tree
-      - light.portable_mini_christmas_tree
       - light.christmas_lights
-      - light.star_lights
-    - service: light.turn_on
-      entity_id:
-      - light.entrance
-      - light.buffet
-      - light.other_buffet
-      - light.hallway
-      data:
-        transition: 1
-        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
-        kelvin: 3000
-    - service: light.turn_on
-      entity_id: light.kitchen_cabinets
-      data:
-        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 50 }}"
 
 
   lights_kitty:
@@ -323,7 +252,7 @@ script:
       - light.living_room
       data:
         brightness_pct: 20
-        kelvin: 3000
+        kelvin: 2700
 
 
   window_notify:
@@ -350,10 +279,3 @@ script:
       state: 'on'
     - service: switch.turn_off
       entity_id: *lr_fan
-
-
-input_boolean:
-  arrival:
-
-timer:
-  master_bedroom_enter:

@@ -1,5 +1,6 @@
 automation:
 - alias: Turn laundry room lights on/off with door/motion
+  id: 'aith6dooCu3Eir5pufeina'
   initial_state: true
   trigger:
   - platform: state
@@ -25,10 +26,17 @@ automation:
   action:
   - service: "light.turn_{{ trigger.to_state.state }}"
     data:
-      entity_id: "light.{{ 'storage' if 'storage' in trigger.to_state.entity_id else 'laundry_room' }}"
+      entity_id: >
+        {% set trigger = trigger.to_state.object_id.replace('laundry_room_', '').replace('_motion', '') %}
+        {% if trigger in ['storage', 'door_back'] %}
+          light.storage, light.laundry_room
+        {% else %}
+          light.laundry_room
+        {% endif %}
 
 
 - alias: Disable laundry room light motion control
+  id: 'fei7aapo1xah1eixuThu2p'
   initial_state: true
   trigger:
   - platform: mqtt
@@ -36,19 +44,6 @@ automation:
   action:
   - service: "input_boolean.turn_{{ trigger.payload }}"
     entity_id: input_boolean.laundry_motion
-
-
-- alias: Laundry room lights button
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.laundry_room_lights_button
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: light.toggle
-    entity_id: light.laundry_room
 
 
 input_boolean:

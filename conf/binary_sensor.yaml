@@ -48,9 +48,9 @@
     workday:
       value_template: >
         {{
-          (((as_timestamp(now()) | timestamp_custom('%d') | int == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') | int) )) 
+          (((as_timestamp(now()) | timestamp_custom('%d') | int(0) == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') | int(0)) )) 
         or 
-          (((as_timestamp(now()) | timestamp_custom('%d') | int == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') | int ))) 
+          (((as_timestamp(now()) | timestamp_custom('%d') | int(0) == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') | int(0) ))) 
         }}
 
 

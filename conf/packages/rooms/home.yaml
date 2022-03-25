@@ -1,5 +1,6 @@
 automation:
 - alias: Toggle dark inside boolean
+  id: 'ainei8ohpetaa2cheLeilu'
   initial_state: true
   trigger:
   - platform: state
@@ -16,11 +17,12 @@ automation:
 
 
 - alias: Turn on sunset lights - light level
+  id: 'ieb7uceicaejai0eiLaoza'
   initial_state: true
   trigger:
   - platform: numeric_state
     entity_id: &outdoor_light sensor.outdoor_light_level
-    below: &outdoor_light_threshold 55
+    below: &outdoor_light_threshold 80
     for: &light_threshold_time '00:05:00'
   - platform: state
     entity_id: input_text.alarm
@@ -28,7 +30,7 @@ automation:
     to: 'disarmed'
   condition:
   - condition: time
-    after: '15:00:00'
+    after: '14:00:00'
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'off'
@@ -54,6 +56,7 @@ automation:
 
 
 - alias: Turn lights back off if light level goes back up
+  id: 'eeXus7ugei6eirieGhivoh'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -75,6 +78,7 @@ automation:
 
 
 - alias: Dim cabinet and buffet lights at night
+  id: 'faShei9wi9de8ia4aquoag'
   initial_state: true
   trigger:
   - platform: time
@@ -114,106 +118,44 @@ automation:
     data:
       brightness_pct: 66
       transition: 10
-      kelvin: 3000
+      kelvin: 2700
   - condition: template
-    value_template: "{{ state_attr('light.buffet', 'brightness') | int > 170 }}"
+    value_template: "{{ state_attr('light.buffet', 'brightness') | int(0) > 170 }}"
   - service: light.turn_on
     entity_id: light.buffet
     data:
       brightness_pct: 66
       transition: 10
-      kelvin: 3000
+      kelvin: 2700
 
 
-- alias: Turn lights on/off at sunset/sunrise if home
+- alias: Turn lights on/off at sunset/sunrise
+  id: 'eifait7ohwo4haeW9oozah'
   initial_state: true
   trigger:
   - platform: state
     entity_id: input_boolean.dark_inside
-  condition:
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  action:
-  - service_template: "script.lights_{{ 'sunset' if trigger.platform == 'device' or trigger.to_state.state == 'on' else 'sunrise' }}"
-
-
-- alias: Turn off main floor lights when in office and craft room
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: &main_floor_motion
-    - binary_sensor.dining_room_motion
-    - binary_sensor.hallway_motion
-    - binary_sensor.living_room_motion
-    to: 'off'
-    for: '01:00:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.overnight_guest
-    state: 'off'
-  - condition: state
-    entity_id: *main_floor_motion
-    state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.office
-      state: 'on'
-    - condition: state
-      entity_id: light.office_lamps
-      state: 'on'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.craft_room
-      state: 'on'
-    - condition: state
-      entity_id: light.craft_room_lamps
-      state: 'on'
+    to:
+    - 'on'
+    - 'off'
   action:
   - service: script.turn_on
-    entity_id: script.main_floor_lights_off
-
-
-- alias: Turn off main floor lights when Andy's sleeping
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.andy_sleep
-    to: 'on'
-    for: '01:00:00'
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.office
-      state: 'on'
-    - condition: state
-      entity_id: light.office_lamps
-      state: 'on'
-  action:
-  - service: script.turn_on
-    entity_id: script.main_floor_lights_off
-
-
-- alias: Turn main floor lights back on from basement
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.basement_door
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_boolean.main_floor_lights_off
-    state: 'on'
-  action:
-  - scene: scene.main_floor_lights
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.main_floor_lights_off
+    data:
+      entity_id: >
+        script.{%- set alarm = states('alarm_control_panel.home') -%}
+        {%- if trigger.to_state.state == 'on' -%}
+          {%- if alarm == 'armed_away' -%}
+            lights_kitty
+          {%- else -%}
+            lights_sunset
+          {%- endif -%}
+        {%- else -%}
+          lights_sunrise
+        {%- endif -%}
 
 
 - alias: Sync Tasmota device states on restart
+  id: 'Neruw7Phaew0iuquai4eQu'
   initial_state: true
   trigger:
   - platform: homeassistant
@@ -242,13 +184,13 @@ script:
       entity_id: light.entrance
       data:
         brightness_pct: "{{ 25 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
-        kelvin: 3000
+        kelvin: 2700
         transition: 10
     - service: light.turn_on
       entity_id: light.hallway
       data:
         brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
-        kelvin: 3000
+        kelvin: 2700
         transition: 10
     - service: light.turn_on
       entity_id: 
@@ -265,7 +207,7 @@ script:
       entity_id: light.other_buffet
       data:
         brightness_pct: 100
-        kelvin: 3000
+        kelvin: 2700
         transition: 10
 
   lr_lights_sunset:
@@ -283,7 +225,7 @@ script:
             kelvin: 5000
             transition: 10
       default:
-      - wait_template: "{{ states('sensor.outdoor_light_level') | int < 10 }}"
+      - wait_template: "{{ states('sensor.outdoor_light_level') | int(0) < 10 }}"
         timeout: "00:30:00"
         continue_on_timeout: true
       - condition: template
@@ -295,8 +237,8 @@ script:
         data:
           entity_id: light.living_room_lamps
           brightness_pct: 100
-          kelvin: 3000
-          transition: 30
+          kelvin: 2700
+          transition: 10
   
   lights_sunrise:
     sequence:
@@ -310,8 +252,8 @@ script:
       - light.hallway
       - light.kitchen_cabinets
       data:
-        transition: 20
-    - delay: '00:00:20'
+        transition: 10
+    - delay: '00:00:10'
     - service: light.turn_off
       entity_id: 
       - light.hall_bath_night_light
@@ -329,7 +271,7 @@ script:
     - service: light.turn_on
       entity_id: light.buffet
       data_template:
-        kelvin: 3000
+        kelvin: 2700
         transition: 10
         brightness_pct: "{{ 100 if is_state('media_player.living_room_vizio', 'off') else 50 }}"
 

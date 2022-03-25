@@ -1,5 +1,6 @@
 automation:
 - alias: Turn outside lights on at night
+  id: 'Coquu3eiTh5eelah5oonai'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -13,9 +14,20 @@ automation:
     - switch.pole_light
     - switch.porch_light
     - switch.side_porch_light
+  - service: light.turn_on
+    entity_id:
+    - light.garage_wall_n
+    - light.back_side_security
+    data:
+      brightness_pct: 35
+  - service: light.turn_on
+    entity_id: light.deck
+    data:
+      brightness_pct: 25
 
 
 - alias: Turn outside lights off at sunrise
+  id: 'Eingaefu7veiphooph8adu'
   initial_state: true
   trigger:
   - platform: sun

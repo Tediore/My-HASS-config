@@ -1,5 +1,6 @@
 automation:
 - alias: Set speaker volume based on app
+  id: 'rai2eifeijahvaeFeev7to'
   initial_state: true
   mode: parallel
   trigger:
@@ -31,9 +32,9 @@ automation:
           {% if speaker in ['bedroom', 'laundry room', 'living room'] %}
             0.32
           {% elif speaker in ['office', 'craft room'] %}
-            0.28 if album == '103.5 KISS FM' else 0.36
+            {{ 0.28 if album == '103.5 KISS FM' else 0.36 }}
           {% elif speaker in ['hub'] %}
-            0.38 if album == '103.5 KISS FM' else 0.44
+            {{ 0.38 if album == '103.5 KISS FM' else 0.44 }}
           {% else %}
             0.36
           {% endif %}
@@ -53,6 +54,7 @@ automation:
 
 
 - alias: Lower office speaker volume when receiving a call
+  id: 'He3fohshif6dohkae1quee'
   initial_state: true
   trigger:
   - platform: state
@@ -82,6 +84,7 @@ automation:
 
 
 - alias: Mute/unmute office speaker when in call
+  id: 'aeS1bi4ohpho7Xah2ahWai'
   initial_state: true
   trigger:
   - platform: state
@@ -112,9 +115,8 @@ input_boolean:
 sensor:
 - platform: attributes
   attribute: app_name
-  entities:
+  entities: &media_players
   - media_player.craft_room_speaker
-  - media_player.hub
   - media_player.laundry_room_speaker
   - media_player.living_room_speaker
   - media_player.master_bedroom_clock
@@ -124,10 +126,4 @@ sensor:
 
 - platform: attributes
   attribute: media_title
-  entities:
-  - media_player.craft_room_speaker
-  - media_player.hub
-  - media_player.laundry_room_speaker
-  - media_player.living_room_speaker
-  - media_player.master_bedroom_clock
-  - media_player.office_speaker
+  entities: *media_players

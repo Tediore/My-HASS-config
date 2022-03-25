@@ -1,5 +1,6 @@
 automation:
 - alias: Toggle update boolean
+  id: 'quei8ThaaCie7Oosh2eefe'
   initial_state: true
   trigger:
   - platform: homeassistant
@@ -12,6 +13,7 @@ automation:
 
 
 - alias: Notify when beta available
+  id: 'eNoh0aumoo7Do0oGhu0leh'
   initial_state: true
   trigger:
   - platform: template
@@ -32,6 +34,7 @@ automation:
 
 
 - alias: Notify for all updates
+  id: 'zoor0aXizookeeto0iohee'
   initial_state: true
   trigger:
   - platform: state
@@ -66,22 +69,22 @@ sensor:
       value_template: >
         {% set current = states('sensor.current_version') %}
         {% set latest = states('sensor.latest_version') %}
-        {% set current_int = current[:9].replace('.','') | int %}
-        {% set latest_int = latest[:9].replace('.','') | int %}
+        {% set current_int = current[:9].replace('.','') | int(0) %}
+        {% set latest_int = latest[:9].replace('.','') | int(0) %}
         {% if current.find('b') != -1 and latest.find('b') != -1 %}
-          {% if latest[latest.find('b') + 1] | float > current[current.find('b') + 1] | float %}
+          {% if latest[latest.find('b') + 1] | float(0) > current[current.find('b') + 1] | float(0) %}
             {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest
           {% endif %}
         {% elif current.find('b') == -1 and latest.find('b') != -1 %}
-          {% if latest_int | float > current_int %}
+          {% if latest_int | float(0) > current_int %}
             {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest
           {% endif %}
         {% elif current.find('b') != -1 and latest.find('b') == -1 %}
-          {% if latest_int | float > current_int %}
+          {% if latest_int | float(0) > current_int %}
             {{ latest }} is available, and you are running {{ current }}.
           {% else %}
             Newest

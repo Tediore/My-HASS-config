@@ -1,5 +1,6 @@
 automation:
 - alias: Notify water leak detected or cleared
+  id: 'ke5johth8ooKoosh8ooRoh'
   initial_state: true
   mode: parallel
   max: 100
@@ -57,6 +58,7 @@ automation:
 
 
 - alias: Turn lights on when leak detected
+  id: 'Ooghoh5idae9hieso5iFe5'
   initial_state: true
   mode: parallel
   trigger:
@@ -88,6 +90,7 @@ automation:
 
 
 - alias: Return lights to state before water leak
+  id: 'Tohqu4xahtheexaGh0phu2'
   initial_state: true
   trigger:
   - platform: event
@@ -187,8 +190,8 @@ automation:
 #     smoke_alarm_status:
 #       friendly_name: Smoke alarm status
 #       value_template: >
-#         {% set alarm = states('sensor.smoke_alarm_alarmtype') | float %}
-#         {% set level = states('sensor.smoke_alarm_alarmlevel') | float %}
+#         {% set alarm = states('sensor.smoke_alarm_alarmtype') | float(0) %}
+#         {% set level = states('sensor.smoke_alarm_alarmlevel') | float(0) %}
 #         {% if alarm == 13 and level == 255 %}
 #           OK
 #         {% elif alarm == 1 and level == 255 %}
@@ -201,8 +204,8 @@ automation:
 #           Unknown
 #         {% endif %}
 #       icon_template: >
-#         {% set alarm = states('sensor.smoke_alarm_alarmtype') | float %}
-#         {% set level = states('sensor.smoke_alarm_alarmlevel') | float %}
+#         {% set alarm = states('sensor.smoke_alarm_alarmtype') | float(0) %}
+#         {% set level = states('sensor.smoke_alarm_alarmlevel') | float(0) %}
 #         {% if alarm == 13 and level == 255 %}
 #           mdi:smoke-detector
 #         {% elif alarm == 1 and level == 255 %}

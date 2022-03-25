@@ -1,4 +1,5 @@
 - alias: Notify actions
+  id: 'Ahv5ea0ri9laephe0Uch4a'
   initial_state: true
   trigger:
   - platform: event

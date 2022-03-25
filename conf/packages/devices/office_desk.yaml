@@ -1,14 +1,17 @@
 automation:
 - alias: Office desk remote
+  id: 'phe5ea2ahCeid4joo6yoo4'
   initial_state: true
   mode: parallel
   trigger:
   - platform: state
     entity_id: sensor.office_desk_remote
-    to:
+    to: &remote_states
     - 'on'
     - 'off'
     - 'brightness_down'
+    - 'brightness_move_down'
+    - 'brightness_move_up'
     - 'brightness_up'
     - 'colortemp_up'
     - 'colortemp_down'
@@ -18,17 +21,19 @@ automation:
       {% if command in ['on', 'off'] %}
         script.turn_off_office_speaker
       {% elif 'colortemp' in command %}
-        script.move_music_{{ 'all' if is_state('media_player.office_speaker', 'playing') else 'office' }}
+        script.toggle_camera_monitor
       {% else %}
         script.toggle_mute_office_speaker
       {% endif %}
 
 
 - alias: Office desk button
+  id: 'ahtuph9teboo8jae2aiSai'
   initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.office_desk_button
+    to: *remote_states
   action:
   - choose:
     - conditions:
@@ -59,14 +64,16 @@ automation:
       - "{{ 'brightness' in trigger.to_state.state }}"
       sequence:
       - service: light.turn_off
-        entity_id: light.basement_main
+        entity_id: light.basement
 
 
 - alias: Soldering station remote
+  id: 'Too5eep6OuZ7UkohChiet4'
   initial_state: true
   trigger:
   - platform: state
     entity_id: sensor.soldering_station_remote
+    to: *remote_states
   condition:
   - "{{ trigger.to_state.state != 'unavailable' }}"
   action:
@@ -161,6 +168,10 @@ script:
     - service: input_boolean.turn_off
       entity_id: input_boolean.music_moved
 
+  toggle_camera_monitor:
+    sequence:
+    - service: switch.toggle
+      entity_id: switch.camera_monitor
 
 input_boolean:
   music_moved:

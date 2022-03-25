@@ -35,27 +35,6 @@ tts_living_room:
   - service: media_player.turn_off
     entity_id: media_player.living_room_speaker
 
-
-hass_online:
-  sequence:
-  - service: notify.gotify
-    data_template:
-      title: "Home Assistant started"
-      message: >
-        {{ 
-        [
-        "System online.",
-        "The system is (not) down.",
-        "Don't have too much fun.",
-        "Be careful with that!",
-        "At your service.",
-        "Don't say I never did nothing for ya.",
-        "FATAL ERROR: Just kidding.",
-        "You might need to restart one more time.",
-        "Once more, with feeling!",
-        "How many times are you gonna do that today?"
-        ] | random }}
-
 ir_fan_power:
   sequence:
   - service: mqtt.publish
@@ -75,7 +54,7 @@ fan_on_with_speed:
   - service: mqtt.publish
     data:
       topic: "cmnd/{{ room.lower().replace(' ','_') }}_fan/tuyasend4"
-      payload: "3,{{ (speed | int - 1) | int }}"
+      payload: "3,{{ (speed | int(0) - 1) | int(0) }}"
   - delay: 1
   - service: switch.turn_on
     data:

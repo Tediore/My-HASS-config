@@ -1,4 +1,5 @@
 - alias: Notify lights on when away
+  id: 'Ienaesook9keeshet0unie'
   initial_state: true
   trigger:
   - platform: state
@@ -45,6 +46,7 @@
 
 
 - alias: Notify lights off when away
+  id: 'OhwaiNgaKai9Uvei4Ohg6l'
   initial_state: true
   trigger:
     platform: state
@@ -65,11 +67,17 @@
         priority: high
 
 
-- alias: Notify when motion detected on deck
+- alias: Notify when camera motion detected
+  id: 'ni2ceijee4chahc4La6bah'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.deck_motion
+    entity_id:
+    - binary_sensor.deck_camera_motion
+    - binary_sensor.front_porch_camera_motion
+    - binary_sensor.front_yard_camera_motion
+    - binary_sensor.side_door_camera_motion
+    from: 'off'
     to: 'on'
   condition:
   - condition: or
@@ -81,14 +89,15 @@
       - 'armed_night'
     - condition: state
       entity_id:
-      - light.basement_main
+      - light.basement
       - light.office
+      - light.office_lamps
       state: 'on'
   action:
   - service: notify.gotify_high
     data:
       title: Motion detected
-      message: Motion detected on deck.
+      message: "Motion detected {{ 'at' if 'side_door' in trigger.to_state.object_id else 'on' }} {{ trigger.to_state.name.replace(' camera motion', '').lower() }}."
 
 
 # - alias: Notify door opened when away

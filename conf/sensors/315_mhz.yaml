@@ -1,7 +1,7 @@
 - platform: mqtt
   name: Matt's car TPMS FR
   state_topic: &matt-tpms-1 "rtl_433/03b84694/event"
-  value_template: &kpa2psi "{{ '{:.1f}'.format((value_json.pressure_kPa | float / 6.895)) }}"
+  value_template: &kpa2psi "{{ '{:.1f}'.format((value_json.pressure_kPa | float(0) / 6.895)) }}"
   device_class: temperature
   json_attributes_topic: *matt-tpms-1
   force_update: true

@@ -1,5 +1,6 @@
 automation:
 - alias: Lights off backup attempt
+  id: 'noo5ePh0ophohH9oa1ahj7'
   initial_state: true
   trigger:
   - platform: state
@@ -21,6 +22,7 @@ automation:
 
 
 - alias: Repeat white noise in sleep mode
+  id: 'tha9phooh7ReicomahdieS'
   initial_state: true
   trigger:
   - platform: state
@@ -42,6 +44,18 @@ automation:
     data:
       media_content_id: !secret white_noise
       media_content_type: audio/mp3
+
+
+# - alias: Turn bedroom fan on after Andy's button pressed
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: input_boolean.andy_sleep
+#     to: 'on'
+#     for: '00:20:00'
+#   action:
+#   - service: switch.turn_on
+#     entity_id: switch.bedroom_fan
 
 
 script:
@@ -112,10 +126,8 @@ script:
     sequence:
     - service: input_boolean.turn_on
       entity_id: input_boolean.andy_sleep
-    - service: homeassistant.turn_on
-      entity_id: 
-      - switch.master_bedroom_fan
-      - script.white_noise_bedroom
+    - service: script.turn_on
+      entity_id: script.white_noise_bedroom
     - service: homeassistant.turn_off
       entity_id:
       - light.master_bedroom_lamps
@@ -178,7 +190,7 @@ script:
     - service: media_player.volume_set
       entity_id: *bedroom_speaker
       data_template:
-        volume_level: "{{ states('input_number.white_noise_vol') | int / 100 }}"
+        volume_level: "{{ states('input_number.white_noise_vol') | int(0) / 100 }}"
     - delay: '00:00:02'
     - service: media_player.play_media
       entity_id: *bedroom_speaker
@@ -230,11 +242,11 @@ script:
       data:
         temperature: >
           {% if is_state('climate.bedroom_ac', 'cool') %}
-            {{ state_attr('climate.bedroom_ac', 'temperature') | int }}
+            {{ state_attr('climate.bedroom_ac', 'temperature') | int(0) }}
           {% elif is_state('input_boolean.sleep_mode', 'on') %}
-            {{ states('input_number.bedroom_ac_temp_matt') | int }}
+            {{ states('input_number.bedroom_ac_temp_matt') | int(0) }}
           {% else %}
-            {{ states('input_number.bedroom_ac_temp_andy') | int }}
+            {{ states('input_number.bedroom_ac_temp_andy') | int(0) }}
           {% endif %}
     - service: climate.turn_on
       entity_id: climate.bedroom_ac

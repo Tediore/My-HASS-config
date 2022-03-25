@@ -1,8 +1,9 @@
 - alias: Suggest opening the windows  # throttled - 8 hours
+  id: 'thaitheePuo3ohv8'
   initial_state: true
   trigger:
     platform: template
-    value_template: "{{ (states('sensor.tstat_current_temp') | float - states('sensor.outside_temp') | float) > 9 }}"
+    value_template: "{{ (states('sensor.tstat_current_temp') | float(0) - states('sensor.outside_temp') | float(0)) > 9 }}"
   condition:
   - condition: template
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.suggest_opening_the_windows', 'last_triggered'))) / 3600 > 8 }}"
@@ -21,14 +22,15 @@
   - service: notify.gotify
     data_template:
       title: "Consider opening the windows"
-      message: "It's {{ states('sensor.tstat_current_temp') | float | round(0) | int }}° inside and only {{ states('sensor.outside_temp') | float | round(0) | int }}° outside."
+      message: "It's {{ states('sensor.tstat_current_temp') | float(0) | round(0) | int(0) }}° inside and only {{ states('sensor.outside_temp') | float(0) | round(0) | int(0) }}° outside."
 
 
 - alias: Notify when server CPU hot
+  id: 'Wievoh1ii0phodei'
   initial_state: true
   trigger:
   - platform: template
-    value_template: "{{ states('sensor.server_cpu_temp') | int > 80 }}"
+    value_template: "{{ states('sensor.server_cpu_temp') | int(0) > 80 }}"
     for: '00:05:00'
   action:
   - service: notify.gotify_high
@@ -38,6 +40,7 @@
 
 
 - alias: Notify when humidity rising quickly
+  id: 'alie4ciek7ingu6O'
   initial_state: true
   trigger:
   - platform: state
@@ -67,11 +70,14 @@
 
 
 - alias: Notify when Home Assistant starts
+  id: 'yo9Ju1Au6daePhaH'
   trigger:
     platform: homeassistant
     event: start
   action:
-  - service: script.hass_online
+  - service: notify.gotify
+    data_template:
+      title: "Home Assistant started"
   - wait_template: "{{ is_state('persistent_notification.config_entry_discovery', 'notifying') }}"
     timeout: "00:01:00"
     continue_on_timeout: false
@@ -81,6 +87,7 @@
 
 
 - alias: Birthday reminder
+  id: 'seigoKush3DohW5w'
   initial_state: true
   trigger:
   - platform: state
@@ -95,6 +102,7 @@
 
 
 - alias: Dismiss discovery notification
+  id: 'mieGhe9xai9lieco'
   initial_state: true
   trigger:
     platform: state
@@ -107,6 +115,7 @@
 
 
 - alias: Notify if IPv6 address changes
+  id: 'ahRau6IuquahTh1n'
   initial_state: true
   trigger:
   - platform: state
@@ -126,6 +135,7 @@
 
 
 - alias: Record internet outage
+  id: 'WooWir8etaithoaz'
   initial_state: true
   trigger:
   - platform: state
@@ -143,6 +153,7 @@
 
 
 - alias: Notify when internet out/restored
+  id: 'quei5bohN1Ue0rip'
   initial_state: true
   trigger:
   - platform: state
@@ -152,24 +163,3 @@
     data_template:
       number: !secret phone_matt
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
-
-
-# - alias: Log RF received
-#   initial_state: true
-#   mode: parallel
-#   trigger:
-#   - platform: mqtt
-#     topic: tele/rf_bridge/RESULT
-#   action:
-#   - service: system_log.write
-#     data_template:
-#       message: >
-#         {% set payload = trigger.payload | from_json %}
-#         {{ "RF data received: 0x" + payload.RfReceived.Data }}
-#       level: info
-#       logger: sms.received_sms
-#   - service: notify.rf_received
-#     data_template:
-#       message: >
-#         {% set payload = trigger.payload | from_json %}
-#         {{ "RF data received: 0x" + payload.RfReceived.Data }}
