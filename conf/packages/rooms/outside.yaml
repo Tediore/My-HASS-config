@@ -16,7 +16,7 @@ automation:
     - switch.side_porch_light
   - service: light.turn_on
     entity_id:
-    - light.garage_wall_n
+    - light.garage_outside
     - light.back_side_security
     data:
       brightness_pct: 35
@@ -44,151 +44,95 @@ automation:
     entity_id: light.christmas_lights
 
 
-# - alias: Turn porch light white when door opened
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.balcony_door
-#     to: 'on'
-#   - platform: state
-#     entity_id: sun.sun
-#     to: 'below_horizon'
-#   condition:
-#   - condition: state
-#     entity_id: binary_sensor.balcony_door
-#     state: 'on'
-#   - condition: state
-#     entity_id: sun.sun
-#     state: 'below_horizon'
-#   - condition: state
-#     entity_id: input_boolean.on_balcony
-#     state: 'off'
-#   - condition: template
-#     value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
-#   action:
-#   - service: scene.create
-#     data:
-#       scene_id: before_balcony_opened
-#       snapshot_entities:
-#       - light.porch
-#   - service: light.turn_on
-#     entity_id: light.porch
-#     data:
-#       kelvin: 4000
-#       brightness_pct: 100
-#       transition: 5
+- alias: Notify when object detected on camera and change security lights
+  id: 'uYohr6ooch2thazahquoo0mo'
+  initial_state: true
+  trigger:
+  - platform: mqtt
+    topic: frigate/events
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: time
+    after: '19:30:00'
+  - condition: template
+    value_template: >
+      {% set camera = trigger.payload_json["after"]["camera"].lower().replace('_','') %}
+      {{ camera in ['south wall', 'backyard', 'deck', 'garage side'] }}
+  action:
+  - service: script.turn_on
+    entity_id: script.security_lights_up
+    data:
+      scene_id: &light >
+        {% set camera = trigger.payload_json["after"]["camera"].lower() %}
+        {% set dict = {
+          'backyard': 'back_side_security',
+          'deck': 'deck',
+          'garage_side': 'garage_outside',
+          'south_wall': 'back_side_security'
+        } %}
+        {{ dict[camera] }}
+      light: *light
+  - service: notify.mobile_app_matt_phone
+    data:
+      title: "{{ trigger.payload_json['after']['label'].title() }} detected"
+      message: >
+        {% set camera = trigger.payload_json["after"]["camera"].replace('Garage_side', 'garage side door').replace('_',' ').lower() %}
+        {% set object = trigger.payload_json["after"]["label"] %}
+        {% if 'yard' in camera %}
+          {% set wording = 'in' %}
+        {% elif 'door' in camera or 'side' in camera %}
+          {% set wording = 'at' %}
+        {% else %}
+          {% set wording = 'on' %}
+        {% endif %}
+        A {{ object }} was detected {{ wording }} the {{ location }}.
+      data:
+        image: &secret frigate_url
+        tag: '{{trigger.payload_json["after"]["id"]}}'
+        when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 
 
-# - alias: Restore porch light color when door closed
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.balcony_door
-#     from: 'on'
-#     to: 'off'
-#     for: '00:00:10'
-#   condition:
-#   - condition: state
-#     entity_id: sun.sun
-#     state: 'below_horizon'
-#   - condition: state
-#     entity_id: input_boolean.on_balcony
-#     state: 'off'
-#   - condition: template
-#     value_template: "{{ states('input_text.porch_light_xy_color') != None }}"
-#   action:
-#   - service: scene.turn_on
-#     entity_id: scene.before_balcony_opened
-#     data:
-#       transition: 2
+- alias: Return security lights to previous state
+  id: 'Oojoh5neicahS7ahNgiogh5x'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.back_side_security
+    - input_boolean.deck
+    - input_boolean.garage_outside
+    - input_boolean.south_wall
+    to: 'on'
+    for: '00:05:00'
+  action:
+  - service: scene.turn_on
+    data:
+      entity_id: "scene.{{ trigger.to_state.object_id }}"
+  - service: input_boolean.turn_off
+    data:
+      entity_id: "input_boolean.{{ trigger.to_state.object_id }}"
 
 
-# - alias: Turn porch light on/off with motion
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.balcony_motion
-#     to: 'on'
-#   condition:
-#   - condition: state
-#     entity_id: sun.sun
-#     state: 'below_horizon'
-#     for: '00:30:00'
-#   - condition: not
-#     conditions:
-#     - condition: state
-#       entity_id: binary_sensor.balcony_door
-#       state: 'on'
-#   action:
-#   - service: scene.create
-#     data:
-#       scene_id: before_porch_light
-#       snapshot_entities:
-#       - light.porch
-#   - service: light.turn_on
-#     entity_id: light.porch
-#     data:
-#       brightness_pct: 100
-#   - wait_template: "{{ is_state('binary_sensor.balcony_motion', 'off') }}"
-#     timeout: '00:05:30'
-#     continue_on_timeout: true
-#   - scene: scene.before_porch_light
+script:
+  security_lights_up:
+    sequence:
+    - service: scene.create
+      data:
+        scene_id: "{{ scene_id }}"
+        snapshot_entities: "light.{{ light }}"
+    - service: light.turn_on
+      data:
+        entity_id: "light.{{ light }}"
+        brightness_pct: 100
+    - service: input_boolean.turn_on
+      data:
+        entity_id: "input_boolean.{{ light }}"
 
 
-# - alias: Record when on balcony
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.balcony_door
-#     from: 'off'
-#     to: 'on'
-#   condition:
-#   - condition: state
-#     entity_id: sun.sun
-#     state: 'below_horizon'
-#   - condition: state
-#     entity_id: input_boolean.on_balcony
-#     state: 'off'
-#   action:
-#   - wait_template: "{{ is_state('binary_sensor.balcony_motion', 'on') }}"
-#     timeout: '00:00:30'
-#     continue_on_timeout: false
-#   - service: input_boolean.turn_on
-#     entity_id: input_boolean.on_balcony
-
-
-# - alias: Clear when on balcony
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.balcony_door
-#     from: 'on'
-#     to: 'off'
-#   condition:
-#   - condition: state
-#     entity_id: input_boolean.on_balcony
-#     state: 'on'
-#   action:
-#   - service: input_boolean.turn_off
-#     entity_id: input_boolean.on_balcony
-
-
-# script:
-#   porch_light_security:
-#     sequence:
-#     - condition: state
-#       entity_id: input_boolean.extra_sleep
-#       state: 'off'
-#     - service: light.turn_on
-#       entity_id: light.porch
-#       data:
-#         brightness_pct: 50
-#         kelvin: 3700
-#     - service: input_text.set_value
-#       entity_id: input_text.porch_light_color
-#       data:
-#         value: 'white'
-
-
-# input_boolean:
-#   on_balcony:
+input_boolean:
+  back_side_security:
+  deck:
+  garage_outside:
+  south_wall:

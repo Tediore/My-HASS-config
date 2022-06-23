@@ -7,6 +7,7 @@ automation:
     entity_id: &windows group.windows
     from: 'off'
     to: 'on'
+    for: '00:01:00'
   - platform: state
     entity_id: *windows
     from: 'on'
@@ -48,7 +49,7 @@ automation:
     to: 'off'
   action:
   - service: input_text.set_value
-    entity_id: input_text.tstat_prev_mode
+    entity_id: &prev_mode input_text.tstat_prev_mode
     data_template:
       value: "{{ trigger.from_state.state }}"
 
@@ -66,16 +67,32 @@ automation:
     from: 'on'
     to: 'off'
   action:
-  - service: climate.set_temperature
-    entity_id: climate.thermostat
+  - service: script.turn_on
+    entity_id: script.tstat_sched_resume
+
+
+- alias: Switch between heat and cool modes
+  id: 'haeP1IeYais9Eilai5IeK0oi'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    id: 'heat'
+    entity_id: &current_temp sensor.thermostat_current_temperature
+    below: 69
+  - platform: numeric_state
+    id: 'cool'
+    entity_id: *current_temp
+    above: 76
+  action:
+  - service: input_text.set_value
     data:
-      temperature: "{{ 65 if is_state('input_text.tstat_prev_mode', 'heat') else 80 }}"
-      hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
-  - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
-  - service: button.press
-    entity_id: button.thermostat_clear_hold
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.tstat_sched_resume
+      entity_id: *prev_mode
+      value: "{{ trigger.id }}"
+  - condition: state
+    entity_id: *windows
+    state: 'off'
+  - service: script.turn_on
+    entity_id: script.tstat_sched_resume
 
 
 - alias: Start home mode earlier when cold in master bedroom
@@ -124,6 +141,18 @@ script:
     - service: input_boolean.turn_on
       entity_id: input_boolean.tstat_sched_resume
 
+  tstat_sched_resume:
+    sequence:
+    - service: climate.set_temperature
+      entity_id: climate.thermostat
+      data:
+        temperature: "{{ 65 if is_state('input_text.tstat_prev_mode', 'heat') else 80 }}"
+        hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
+    - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
+    - service: button.press
+      entity_id: button.thermostat_clear_hold
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.tstat_sched_resume
 
 input_boolean:
   tstat_window_off:

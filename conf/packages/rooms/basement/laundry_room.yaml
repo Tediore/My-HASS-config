@@ -1,5 +1,5 @@
 automation:
-- alias: Turn laundry room lights on/off with door/motion
+- alias: Turn laundry room lights on with door/motion
   id: 'aith6dooCu3Eir5pufeina'
   initial_state: true
   trigger:
@@ -11,19 +11,7 @@ automation:
     - binary_sensor.storage_motion
     from: 'off'
     to: 'on'
-  - platform: state
-    entity_id: &laundry_motion
-    - binary_sensor.laundry_room_motion
-    - binary_sensor.storage_motion
-    - binary_sensor.utility_sink_motion
-    from: 'on'
-    to: 'off'
-    for: &laundry_motion_off_time '00:05:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.laundry_motion
-    state: 'on'
-  action:
+  action: &laundry_room_light_action
   - service: "light.turn_{{ trigger.to_state.state }}"
     data:
       entity_id: >
@@ -33,6 +21,26 @@ automation:
         {% else %}
           light.laundry_room
         {% endif %}
+
+
+- alias: Turn laundry room lights off with motion
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &laundry_motion
+    - binary_sensor.laundry_room_motion
+    - binary_sensor.storage_motion
+    from: 'on'
+    to: 'off'
+    for: &laundry_motion_off_time '00:05:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.laundry_motion
+    state: 'on'
+  - condition: state
+    entity_id: *laundry_motion
+    state: 'off'
+  action: *laundry_room_light_action
 
 
 - alias: Disable laundry room light motion control

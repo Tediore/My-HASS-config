@@ -1,17 +1,1 @@
-- platform: rest
-  name: Hue dark inside
-  resource: !secret hue_dark_inside
-  state_resource: !secret hue_dark_inside
-  method: put
-  body_on: '{"state": {"flag": true}}'
-  body_off: '{"state": {"flag": false}}'
-  is_on_template: "{{ value_json.state.flag == true }}"
-
-# - platform: command_line
-#   switches:
-#     camera_monitor:
-#       friendly_name: Camera monitor
-#       command_on: 'ssh pi@10.0.2.34 -i /config/ssh/id_rsa -o "StrictHostKeyChecking=no" /usr/bin/ddcutil setvcp D6 01'
-#       command_off: 'ssh pi@10.0.2.34 -i /config/ssh/id_rsa -o "StrictHostKeyChecking=no" /usr/bin/ddcutil setvcp D6 04'
-#       command_state: 'ssh pi@10.0.2.34 -i /config/ssh/id_rsa -o "StrictHostKeyChecking=no" /usr/bin/ddcutil getvcp D6'
-#       value_template: "{{ value[-2] == '1' }}"
+[]

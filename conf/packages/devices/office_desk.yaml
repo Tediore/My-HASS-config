@@ -21,7 +21,7 @@ automation:
       {% if command in ['on', 'off'] %}
         script.turn_off_office_speaker
       {% elif 'colortemp' in command %}
-        script.toggle_camera_monitor
+        script.toggle_office_fan
       {% else %}
         script.toggle_mute_office_speaker
       {% endif %}
@@ -38,33 +38,9 @@ automation:
   - choose:
     - conditions:
       - "{{ trigger.to_state.state in ['on', 'off'] }}"
-      - condition: state
-        entity_id: light.office
-        state: 'on'
       sequence:
-      - service: light.turn_off
-        entity_id: light.office
-      - service: light.turn_on
-        entity_id: light.office_lamps
-      # - service: hue.hue_activate_scene
-      #   data:
-      #     group_name: Office lamps
-      #     scene_name: Read
-    - conditions:
-      - "{{ trigger.to_state.state in ['on', 'off'] }}"
-      - condition: state
-        entity_id: light.office
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.office
-      - service: light.turn_off
-        entity_id: light.office_lamps
-    - conditions:
-      - "{{ 'brightness' in trigger.to_state.state }}"
-      sequence:
-      - service: light.turn_off
-        entity_id: light.basement
+      - service: switch.toggle
+        entity_id: switch.office_fan
 
 
 - alias: Soldering station remote
@@ -172,6 +148,11 @@ script:
     sequence:
     - service: switch.toggle
       entity_id: switch.camera_monitor
+
+  toggle_office_fan:
+    sequence:
+    - service: switch.toggle
+      entity_id: switch.office_fan
 
 input_boolean:
   music_moved:

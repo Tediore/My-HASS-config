@@ -237,7 +237,7 @@ script:
       data:
         entity_id: "light.buffet, light.other_buffet, light.hallway, light.entrance{{ ', light.living_room_lamps' if is_state('light.living_room_lamps', 'off') else '' }}"
         kelvin: 2700
-        transition: 3
+        transition: 5
         brightness_pct: "{{ 100 if 6 < now().hour < 21 else 75 }}"
     - service: script.turn_on
       entity_id:

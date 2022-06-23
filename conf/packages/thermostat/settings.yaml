@@ -191,7 +191,7 @@ sensor:
         {% elif is_state('climate.thermostat', 'off') %}
           Off
         {% else %}
-          Hold
+          Other
         {% endif %}
     
     tstat_current_temp:

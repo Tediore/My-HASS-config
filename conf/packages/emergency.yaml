@@ -7,20 +7,20 @@ automation:
   trigger:
   - platform: state
     entity_id: &water_sensors
-    - binary_sensor.bar_leak
-    - binary_sensor.basement_bathroom_sink_leak
-    - binary_sensor.basement_bathroom_toilet_leak
-    - binary_sensor.basement_shower_leak
-    - binary_sensor.dishwasher_leak
-    - binary_sensor.fridge_leak
-    - binary_sensor.hall_bath_toilet_leak
-    - binary_sensor.water_heater_leak
-    - binary_sensor.kitchen_sink_leak
-    - binary_sensor.master_bath_sink_leak
-    - binary_sensor.master_bath_toilet_leak
-    - binary_sensor.sump_pump_leak
-    - binary_sensor.washer_sink_leak
-    - binary_sensor.water_main_leak
+    - binary_sensor.bar_leak_detected
+    - binary_sensor.basement_bathroom_sink_leak_detected
+    - binary_sensor.basement_bathroom_toilet_leak_detected
+    - binary_sensor.basement_shower_leak_detected
+    - binary_sensor.dishwasher_leak_detected
+    - binary_sensor.fridge_leak_detected
+    - binary_sensor.hall_bath_toilet_leak_detected
+    - binary_sensor.water_heater_leak_detected
+    - binary_sensor.kitchen_sink_leak_detected
+    - binary_sensor.master_bath_sink_leak_detected
+    - binary_sensor.master_bath_toilet_leak_detected
+    - binary_sensor.sump_pump_leak_detected
+    - binary_sensor.washer_sink_leak_detected
+    - binary_sensor.water_main_leak_detected
     to: 'on'
   - platform: state
     entity_id: *water_sensors
@@ -103,120 +103,6 @@ automation:
   action:
   - scene: scene.before_leak
 
-
-# - alias: Notify smoke or CO
-#   initial_state: true
-#   mode: parallel
-#   trigger:
-#   - platform: state
-#     entity_id: sensor.smoke_alarm_status
-#   condition:
-#   - condition: state
-#     entity_id: input_text.alarm
-#     state: 'armed_away'
-#   - condition: template
-#     value_template: "{{ trigger.to_state.state in ['Smoke', 'CO'] or (trigger.from_state.state in ['Smoke', 'CO'] and trigger.to_state.state == 'OK') }}"
-#   action:
-#   - service: script.sms_send
-#     data_template:
-#       number: !secret phone_matt
-#       message: &smoke_message >
-#         {% if trigger.to_state.state in ['Smoke', 'CO'] %}
-#           {{ trigger.to_state.state.upper() }} DETECTED!
-#         {% else %}
-#           {{ trigger.from_state.state }} no longer detected.
-#         {% endif %}
-#   - service: notify.gotify_high
-#     data_template:
-#       title: &smoke_title >
-#         {% if trigger.to_state.state in ['Smoke', 'CO'] %}
-#           {{ trigger.to_state.state.upper() }} DETECTED!
-#         {% else %}
-#           {{ trigger.from_state.state }} cleared.
-#         {% endif %}
-#       message: *smoke_message
-#   - service: notify.mobile_app_matt_phone
-#     data_template:
-#       title: *smoke_title
-#       message: *smoke_message
-#       data:
-#         ttl: 0
-#         priority: high
-
-
-# - alias: Turn on lights when smoke or CO detected
-#   initial_state: true
-#   mode: parallel
-#   trigger:
-#   - platform: state
-#     entity_id: sensor.smoke_alarm_status
-#     to: 
-#     - 'Smoke'
-#     - 'CO'
-#   condition:
-#   - condition: template
-#     value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-#   action:
-#   - service: light.turn_on
-#     entity_id:
-#     - light.master_bedroom_lamps
-#     - light.living_room
-#     data:
-#       color_name: red
-#       brightness_pct: 100
-#   - service: light.turn_on
-#     entity_id: light.buffet
-#     data:
-#       brightness_pct: 100
-#       kelvin: 3000
-#   - service: light.turn_on
-#     entity_id: light.entrance
-
-
-# - alias: Turn off HVAC when smoke detected
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: sensor.smoke_alarm_status
-#     to: 'Smoke'
-#   action:
-#   - service: climate.turn_off
-#     entity_id: climate.thermostat
-
-
-# sensor:
-# - platform: template
-#   sensors:
-#     smoke_alarm_status:
-#       friendly_name: Smoke alarm status
-#       value_template: >
-#         {% set alarm = states('sensor.smoke_alarm_alarmtype') | float(0) %}
-#         {% set level = states('sensor.smoke_alarm_alarmlevel') | float(0) %}
-#         {% if alarm == 13 and level == 255 %}
-#           OK
-#         {% elif alarm == 1 and level == 255 %}
-#           Smoke
-#         {% elif alarm == 2 and level == 255 %}
-#           CO
-#         {% elif alarm == 12 and level == 0 %}
-#           Test
-#         {% else %}
-#           Unknown
-#         {% endif %}
-#       icon_template: >
-#         {% set alarm = states('sensor.smoke_alarm_alarmtype') | float(0) %}
-#         {% set level = states('sensor.smoke_alarm_alarmlevel') | float(0) %}
-#         {% if alarm == 13 and level == 255 %}
-#           mdi:smoke-detector
-#         {% elif alarm == 1 and level == 255 %}
-#           mdi:fire
-#         {% elif alarm == 2 and level == 255 %}
-#           mdi:cloud-alert
-#         {% elif alarm == 12 and level == 0 %}
-#           mdi:smoke-detector
-#         {% else %}
-#           mdi:cloud-question
-#         {% endif %}
 
 script:
   lights_before_leak:

@@ -5,10 +5,6 @@
   max: 100
   trigger:
   - platform: state
-    entity_id: sensor.hue_bridge
-    to: 'unavailable'
-    for: '00:00:45'
-  - platform: state
     entity_id:
     - binary_sensor.back_door
     - binary_sensor.basement_door
@@ -104,46 +100,6 @@
     data:
       title: *router_title
       message: *router_message
-
-
-- alias: Notify when Hue light unreachable
-  id: 'aShoqu1lohz1luov'
-  initial_state: true
-  mode: parallel
-  max: 100
-  trigger:
-  - platform: state
-    entity_id:
-    - light.andy
-    - light.andy_closet
-    - light.andy_desk
-    - light.basement_hallway
-    - light.bathroom_ejector_closet
-    - light.buffet
-    - light.dining_room_1
-    - light.dining_room_2
-    - light.dining_room_3
-    - light.dresser
-    - light.guest_bedroom_closet
-    - light.living_room_lamp_left
-    - light.matt
-    - light.matt_closet
-    - light.other_buffet
-    - light.right_lamp
-    - light.stand_lamp
-    to: 'unavailable'
-    for: '00:10:00'
-  condition:
-  - condition: template
-    value_template: "{{ not is_state('sensor.hue_bridge', 'unavailable') }}"
-  action:
-  - service: notify.mobile_app_matt_phone
-    data_template:
-      title: "Light unreachable"
-      message: "{{ trigger.to_state.name }} is unreachable"
-      data:
-        ttl: 0
-        priority: high
 
 
 - alias: Notify when sensor battery low
@@ -360,18 +316,3 @@
     data:
       title: "Basement fridge door has been open for 5 minutes"
       message: "Did you forget to close it?"
-
-
-- alias: Notify when Hue bridge is ready to update
-  id: 'iem9EiNgogoo2Oi8'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.hue_bridge
-    from: 'noupdates'
-    to: 'readytoinstall'
-  action:
-  - service: persistent_notification.create
-    data:
-      title: "Hue bridge update available"
-      message: "Please see Hue app for details."

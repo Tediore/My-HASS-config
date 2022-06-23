@@ -1,0 +1,68 @@
+automation:
+- alias: Master bedroom remote main
+  id: 'tohx5be8hahLa2yaeVexai9uv'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.master_bedroom_remote_action
+    to:
+    - 'on-press'
+    - 'off-press'
+    - 'up-press'
+    - 'down-press'
+  action:
+  - service: light.turn_on
+    data:
+      brightness: >
+        {% set hour = now().hour %}
+        {% set light = states('light.master_bedroom_lamps') %}
+        {% set trig = trigger.to_state.state %}
+        {% set brt = state_attr('light.master_bedroom_lamps', 'brightness') | int %}
+        {% if trig == 'off-press' %}
+          0
+        {% elif trig in ['up-press', 'down-press'] %}
+          {% if light %}
+            {% if trig == 'up-press' and brt < 231 %}
+              {{ brt + 25 }}
+            {% elif trig == 'down-press' and brt > 25 %}
+              {{ brt - 25 }}
+            {% else %}
+              {{ brt }}
+            {% endif %}
+          {% endif %}
+        {% else %}
+          {{ 168 if hour > 21 or hour < 6 else 255 }}
+        {% endif %}
+      kelvin: "{{ 3000 if is_state('input_boolean.dark_inside', 'on') else 5000 }}"
+      entity_id: &br_lamps light.master_bedroom_lamps
+      transition: 0.4
+
+
+# - alias: Master bedroom remote holds
+#   id: 'Phahaib3uephaeghoh1hie4gu'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: sensor.master_bedroom_remote_action
+#     to:
+#     - 'up-hold'
+#     - 'down-hold'
+#   action:
+#   - repeat:
+#       sequence:
+#       - service: light.turn_on
+#         entity_id: *br_lamps
+#         data:
+#           brightness_step_pct: "{{ 10 if trigger.to_state.state == 'up-hold' else -10 }}"
+#       - delay: 0.5
+#       until:
+#       - condition: template
+#         value_template: "{{ states('sensor.master_bedroom_remote_action') == 'down-hold-release' }}"
+
+
+light:
+- platform: group
+  name: Master bedroom lamps
+  entities:
+  - light.andy
+  - light.matt

@@ -26,7 +26,9 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: &bedroom_speaker media_player.master_bedroom_clock
+    entity_id:
+    - media_player.master_bedroom_clock
+    - media_player.guest_bedroom_speaker
     from: 'playing'
     to: 'idle'
   condition:
@@ -40,8 +42,8 @@ automation:
       state: 'on'
   action:
   - service: media_player.play_media
-    entity_id: *bedroom_speaker
     data:
+      entity_id: "{{ trigger.to_state.entity_id }}"
       media_content_id: !secret white_noise
       media_content_type: audio/mp3
 
@@ -69,9 +71,10 @@ script:
         - input_boolean.andy_sleep
     - service: script.turn_on
       entity_id: script.white_noise_bedroom
+    - service: script.turn_on
+      entity_id: script.lights_off_interior
     - service: homeassistant.turn_off
       entity_id: 
-      - group.lights_interior
       - input_boolean.washer
       - input_boolean.dryer
       - switch.air_freshener
@@ -170,13 +173,78 @@ script:
       entity_id: light.living_room
 
 
+  good_night_andy_basement:
+    sequence:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.andy_sleep
+    - service: light.turn_off
+      entity_id: light.guest_bedroom
+    - service: light.turn_on
+      entity_id: light.basement
+      data:
+        brightness_pct: 10
+    - service: script.white_noise_speaker
+      data:
+        speaker: media_player.guest_bedroom_speaker
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        entity_id: alarm_control_panel.home
+        code: !secret alarm_code_system
+
+
+  good_night_basement:
+    alias: Good night basement
+    sequence:
+    - service: input_boolean.turn_on
+      data_template:
+        entity_id: 
+        - input_boolean.andy_sleep
+        - input_boolean.sleep_mode
+    - service: script.turn_on
+      entity_id: script.lights_off_interior
+    - service: light.turn_off
+      entity_id:
+      - light.master_bath_night_light
+      - light.back_side_security
+    - service: homeassistant.turn_off
+      entity_id: 
+      - input_boolean.washer
+      - input_boolean.dryer
+      - switch.air_freshener
+    - service: homeassistant.turn_on
+      entity_id: 
+      - script.media_players_off
+      - script.christmas_lights_off
+      - switch.guest_bedroom_fan
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        entity_id: alarm_control_panel.home
+        code: !secret alarm_code_system
+    - condition: state
+      entity_id: media_player.guest_bedroom_speaker
+      state: 'off'
+    - service: script.white_noise_speaker
+      data:
+        speaker: media_player.guest_bedroom_speaker
+
+
+  good_night_guest:
+    sequence:
+    - service: script.turn_on
+      entity_id: script.white_noise_bedroom
+    - service: light.turn_on
+      entity_id: light.master_bath_night_light
+      data:
+        brightness_pct: 10
+
+
   white_noise_bedroom:
     alias: Play white noise on bedroom speaker
     sequence:
     - service: input_boolean.turn_on
       entity_id: input_boolean.white_noise
     - service: media_player.volume_mute
-      entity_id: *bedroom_speaker
+      entity_id: &bedroom_speaker media_player.master_bedroom_clock
       data:
         is_volume_muted: true
     - service: media_player.turn_on
@@ -203,6 +271,45 @@ script:
     - service: media_player.volume_mute
       entity_id: *bedroom_speaker
       data:
+        is_volume_muted: false
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.white_noise
+
+
+  white_noise_speaker:
+    alias: Play white noise on selected speaker
+    sequence:
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.white_noise
+    - service: media_player.volume_mute
+      data:
+        entity_id: &speaker "{{ speaker }}"
+        is_volume_muted: true
+    - service: media_player.turn_on
+      data:
+        entity_id: *speaker
+    - service: media_player.play_media
+      data:
+        entity_id: *speaker
+        media_content_id: 'http://10.0.0.2:8123/local/audio/silence.mp3'
+        media_content_type: audio/mp3
+    - delay: '00:00:02'
+    - service: media_player.volume_set
+      data:
+        entity_id: *speaker
+        volume_level: "{{ states('input_number.white_noise_vol') | int(0) / 100 }}"
+    - delay: '00:00:02'
+    - service: media_player.play_media
+      data:
+        entity_id: *speaker
+        media_content_id: !secret white_noise
+        media_content_type: audio/mp3
+    - wait_template: "{{ is_state('*bedroom_speaker', 'playing') }}"
+      timeout: '00:00:10'
+      continue_on_timeout: true
+    - service: media_player.volume_mute
+      data:
+        entity_id: *speaker
         is_volume_muted: false
     - service: input_boolean.turn_off
       entity_id: input_boolean.white_noise
@@ -252,6 +359,12 @@ script:
       entity_id: climate.bedroom_ac
 
 
+  lights_off_interior:
+    sequence:
+    - service: homeassistant.turn_off
+      entity_id: group.lights_interior
+
+
 input_number:
   white_noise_vol:
     name: White noise volume
@@ -265,5 +378,8 @@ input_number:
 input_boolean:
   sleep_mode:
   andy_sleep:
+  sleep_mode_guest:
   white_noise:
   auto_bedroom_ac:
+  basement_bedroom:
+  guest_in_master:

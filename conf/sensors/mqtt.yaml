@@ -15,7 +15,6 @@
   unit_of_measurement: 'C'
   device_class: temperature
 
-
 - platform: mqtt
   name: LR IR received
   state_topic: 'living_room/ir_received'
@@ -26,54 +25,3 @@
   value_template: "{{ value_json['SignalPercent'] }}"
   json_attributes_topic: *sms_topic
   unit_of_measurement: '%'
-
-- platform: mqtt
-  name: Snake plant moisture
-  state_topic: &snake_plant_0 'tele/tasmota_ble/Flora6c2a80'
-  value_template: "{{ value_json['Moisture'] }}"
-  json_attributes_topic: *snake_plant_0
-  unit_of_measurement: '%'
-
-- platform: mqtt
-  name: Hue bridge
-  state_topic: &hue_topic 'hue2mqtt'
-  value_template: "{{ value_json['Update status'] }}"
-  json_attributes_topic: *hue_topic
-  availability_topic: 'hue2mqtt/status'
-
-# - platform: mqtt
-#   name: Printer black ink level
-#   state_topic: &printer_topic 'ink2mqtt/printer'
-#   value_template: "{{ value_json['agent1-level'] }}"
-#   availability_topic: &printer_avail 'ink2mqtt/printer/status'
-#   unit_of_measurement: '%'
-#   icon: mdi:water
-
-# - platform: mqtt
-#   name: Printer black ink health
-#   state_topic: *printer_topic
-#   value_template: "{{ value_json['agent1-health-desc'] }}"
-#   availability_topic: *printer_avail
-#   icon: mdi:water-check
-
-# - platform: mqtt
-#   name: Printer color ink level
-#   state_topic: *printer_topic
-#   value_template: "{{ value_json['agent2-level'] }}"
-#   availability_topic: *printer_avail
-#   unit_of_measurement: '%'
-#   icon: mdi:water-outline
-
-# - platform: mqtt
-#   name: Printer color ink health
-#   state_topic: *printer_topic
-#   value_template: "{{ value_json['agent2-health-desc'] }}"
-#   availability_topic: *printer_avail
-#   icon: mdi:water-check-outline
-
-# - platform: mqtt
-#   name: Printer status
-#   state_topic: *printer_topic
-#   value_template: "{{ value_json['status-desc'] }}"
-#   availability_topic: *printer_avail
-#   icon: mdi:printer

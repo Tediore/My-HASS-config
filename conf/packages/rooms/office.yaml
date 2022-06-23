@@ -19,20 +19,6 @@ automation:
       brightness_pct: 100
 
 
-- alias: Turn basement ejector closet light on/off
-  id: 'xahK5deebaxeethaif9goh'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.bathroom_ejector_closet_door
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.bathroom_ejector_closet
-
-
 - alias: Turn game room bias lighting on if lamps are on
   id: 'RiePahthu5Ya6Aib9uemoh'
   initial_state: true
@@ -145,7 +131,7 @@ light:
   - light.office_table_lamp
 
 
-script:
+# script:
   # office_spooky:
   #   sequence:
   #   - service: light.turn_on

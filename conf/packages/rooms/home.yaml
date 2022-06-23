@@ -11,9 +11,7 @@ automation:
     for: &horizon_time '00:20:00'
   action:
   - service: "homeassistant.turn_{{ 'on' if trigger.to_state.state == 'below_horizon' else 'off' }}" 
-    entity_id:
-    - input_boolean.dark_inside
-    - switch.hue_dark_inside
+    entity_id: input_boolean.dark_inside
 
 
 - alias: Turn on sunset lights - light level
@@ -50,9 +48,7 @@ automation:
       for: *horizon_time
   action:
   - service: homeassistant.turn_on
-    entity_id: 
-    - input_boolean.dark_inside
-    - switch.hue_dark_inside
+    entity_id: input_boolean.dark_inside
 
 
 - alias: Turn lights back off if light level goes back up
@@ -172,8 +168,6 @@ script:
     sequence:
     - service: script.turn_on
       entity_id: 
-      - script.wait_dining_room_lights_off
-      - script.wait_master_bedroom_lights_off
       - script.christmas_lights_on
     - service: light.turn_on
       entity_id: light.kitchen_cabinets
@@ -187,7 +181,9 @@ script:
         kelvin: 2700
         transition: 10
     - service: light.turn_on
-      entity_id: light.hallway
+      entity_id:
+      - light.hallway
+      - light.buffet
       data:
         brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
         kelvin: 2700
@@ -262,28 +258,6 @@ script:
         transition: 1
     - service: script.turn_on
       entity_id: script.christmas_lights_off
-
-  wait_dining_room_lights_off:
-    sequence:
-    - wait_template: "{{ is_state('light.dining_room', 'off') }}"
-      timeout: '08:00:00'
-      continue_on_timeout: false
-    - service: light.turn_on
-      entity_id: light.buffet
-      data_template:
-        kelvin: 2700
-        transition: 10
-        brightness_pct: "{{ 100 if is_state('media_player.living_room_vizio', 'off') else 50 }}"
-
-  # wait_master_bedroom_lights_off:
-  #   sequence:
-  #   - wait_template: "{{ is_state('light.master_bedroom_lamps', 'off') }}"
-  #     timeout: '08:00:00'
-  #     continue_on_timeout: false
-  #   - service: light.turn_on
-  #     entity_id: light.tea_lights
-  #     data:
-  #       brightness_pct: 100
 
   christmas_tree_on:
     sequence:
