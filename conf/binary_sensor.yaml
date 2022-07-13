@@ -63,23 +63,4 @@
       max_samples: 60
       min_gradient: 0.005   # dew point increasing at least 3 degrees in a 10-minute period
 
-- platform: mqtt
-  name: "Hall bath motion"
-  state_topic: "hall_bath_motion/state"
-  availability_topic: "tele/hall_bath_night_light/LWT"
-  qos: 1
-  payload_on: "1"
-  payload_off: "0"
-  payload_available: "Online"
-  payload_not_available: "Offline"
-  device_class: motion
-
-- platform: mqtt
-  name: Weather station battery low
-  state_topic: &weather_station_topic "rtl_433/1291/event"
-  value_template: "{{ value_json.battery_ok }}"
-  payload_on: "0"
-  payload_off: "1"
-  device_class: battery
-
 - platform: apcupsd

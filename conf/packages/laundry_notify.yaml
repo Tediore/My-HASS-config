@@ -113,14 +113,14 @@ automation:
 #     - scene: scene.before_laundry_notify
 
 
-sensor:
-- platform: mqtt
-  name: Washer pwr
-  state_topic: 'washer/power'
-  availability_topic: 'tele/washer/LWT'
-  payload_available: "Online"
-  payload_not_available: "Offline"
-  unit_of_measurement: 'W'
+mqtt:
+  sensor:
+  - name: Washer pwr
+    state_topic: 'washer/power'
+    availability_topic: 'tele/washer/LWT'
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    unit_of_measurement: 'W'
 
 
 input_boolean:

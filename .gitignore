@@ -10,4 +10,4 @@ ip_bans.yaml
 secrets.yaml
 known_devices.yaml
 conf/packages/security_system/
-conf/automations/sms.yaml
+conf/packages/sms.yaml

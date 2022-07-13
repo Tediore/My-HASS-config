@@ -207,13 +207,15 @@ input_number:
     mode: slider
 
 
-binary_sensor:
-- platform: mqtt
-  name: Xbox
-  state_topic: 'xbox/status'
-  payload_on: 'Available'
-  payload_off: 'Unavailable'
+mqtt:
+  binary_sensor:
+  - name: Xbox
+    state_topic: 'xbox/status'
+    payload_on: 'Available'
+    payload_off: 'Unavailable'
 
+
+sensor:
 - platform: template
   sensors:
     in_office_at_night:

@@ -17,7 +17,7 @@ automation:
         {% set hour = now().hour %}
         {% set light = states('light.master_bedroom_lamps') %}
         {% set trig = trigger.to_state.state %}
-        {% set brt = state_attr('light.master_bedroom_lamps', 'brightness') | int %}
+        {% set brt = state_attr('light.master_bedroom_lamps', 'brightness') | int(0) %}
         {% if trig == 'off-press' %}
           0
         {% elif trig in ['up-press', 'down-press'] %}

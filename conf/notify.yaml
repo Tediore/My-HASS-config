@@ -43,11 +43,6 @@
     priority: 10
 
 - platform: file
-  name: SMS received
-  filename: sms_inbox
-  timestamp: true
-
-- platform: file
   name: RF received
   filename: rf_received
   timestamp: true

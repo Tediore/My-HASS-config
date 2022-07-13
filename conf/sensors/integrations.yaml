@@ -11,6 +11,7 @@
 - platform: statistics
   name: Indoor temp stats
   entity_id: sensor.tstat_current_temp
+  state_characteristic: mean
   sampling_size: 30
   max_age: 1800
   precision: 1
@@ -75,7 +76,6 @@
   - maxtime
   - battdate
   - battv
-  - itemp
   - lastxfer
   - sense
   - tonbatt

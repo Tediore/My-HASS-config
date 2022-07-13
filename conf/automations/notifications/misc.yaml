@@ -25,6 +25,27 @@
       message: "It's {{ states('sensor.tstat_current_temp') | float(0) | round(0) | int(0) }}° inside and only {{ states('sensor.outside_temp') | float(0) | round(0) | int(0) }}° outside."
 
 
+- alias: Notify when garage door opened or unavailable
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: cover.garage_door
+    to:
+    - 'open'
+    - 'unavailable'
+  action:
+  - service: notify.gotify
+    data:
+      title: "Garage door {{ trigger.to_state.state }}"
+      message: >
+        The garage door {% set state = trigger.to_state.state -%}
+        {%- if state == 'open' -%}
+          has been {{ state.replace('open', 'opened') }}
+        {%- else -%}
+          is {{ state }}
+        {%- endif -%}
+
+
 - alias: Notify when server CPU hot
   id: 'Wievoh1ii0phodei'
   initial_state: true
@@ -76,8 +97,8 @@
     event: start
   action:
   - service: notify.gotify
-    data_template:
-      title: "Home Assistant started"
+    data:
+      message: "Home Assistant started"
   - wait_template: "{{ is_state('persistent_notification.config_entry_discovery', 'notifying') }}"
     timeout: "00:01:00"
     continue_on_timeout: false

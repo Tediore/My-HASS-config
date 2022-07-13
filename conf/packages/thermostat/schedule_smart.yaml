@@ -1,5 +1,5 @@
 automation:
-- alias: Turn thermostat off if window opened
+- alias: Change thermostat state with windows
   id: 'eeCu9yoothielah9Xeiroe'
   initial_state: true
   trigger:
@@ -26,6 +26,8 @@ automation:
       - service: input_boolean.turn_on
         entity_id: *window_bool
     default:
+    - condition: template
+      value_template: "{{ (as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60 > 2 }}"
     - service: climate.set_hvac_mode
       data:
         entity_id: climate.thermostat
@@ -83,6 +85,20 @@ automation:
     id: 'cool'
     entity_id: *current_temp
     above: 76
+  condition:
+  - condition: template
+    value_template: >
+      {{  (
+            trigger.id == 'heat' 
+            and is_state('climate.thermostat', 'cool')
+          )
+          or 
+          (
+            trigger.id == 'cool'
+            and is_state('climate.thermostat', 'heat')
+          )
+          or is_state('climate.thermostat', 'off')
+      }}
   action:
   - service: input_text.set_value
     data:

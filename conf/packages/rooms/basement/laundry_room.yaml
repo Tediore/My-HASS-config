@@ -29,7 +29,6 @@ automation:
   - platform: state
     entity_id: &laundry_motion
     - binary_sensor.laundry_room_motion
-    - binary_sensor.storage_motion
     from: 'on'
     to: 'off'
     for: &laundry_motion_off_time '00:05:00'
@@ -40,6 +39,17 @@ automation:
   - condition: state
     entity_id: *laundry_motion
     state: 'off'
+  action: *laundry_room_light_action
+
+
+- alias: Turn laundry room storage light off with motion
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.storage_motion
+    from: 'on'
+    to: 'off'
+    for: *laundry_motion_off_time
   action: *laundry_room_light_action
 
 

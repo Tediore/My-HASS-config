@@ -3,10 +3,10 @@ automation: !include_dir_merge_list conf/automations/
 binary_sensor: !include conf/binary_sensor.yaml
 climate: !include conf/climate.yaml
 config:
+counter:
 discovery:
 fan: !include conf/fan.yaml
 frontend: !include conf_settings/frontend.yaml
-google: !include conf_static/calendar.yaml
 google_assistant: !include conf_static/google_assistant.yaml
 group: !include conf/groups.yaml
 history: !include conf_settings/history.yaml
@@ -22,6 +22,7 @@ logbook: !include conf_settings/logbook.yaml
 logger: !include conf_settings/logger.yaml
 media_source:
 mobile_app:
+mqtt: !include conf/mqtt.yaml
 notify: !include conf/notify.yaml
 panel_custom: !include conf_settings/panel_custom.yaml
 recorder: !include conf_settings/recorder.yaml

@@ -1,33 +1,43 @@
 automation:
-- alias: Cross stitch button
+- alias: Alex help button
   id: 'iehohd7Veiwi8yiegooth7'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.living_room_lamp_button
+    entity_id: sensor.alex_help_button_action
     to:
-    - 'on'
-    - 'off'
+    - 'single'
+    - 'double'
+    - 'hold'
   action:
-  - service: light.turn_on
-    entity_id: light.right_lamp
-    data:
-      brightness_pct: "{{ 0 if is_state('light.right_lamp', 'on') else 100 }}"
-      kelvin: 3000
+  - service: notify.gotify_high
+    data: &notify_data
+      title: Alex needs something
+      message: >
+        {% set action = trigger.to_state.state %}
+        {% if action == 'single' %}
+          Bathroom
+        {% elif action == 'double' %}
+          Food/water
+        {% else %}
+          Other
+        {% endif %}
+  - service: notify.gotify_high_andy
+    data: *notify_data
 
 
-- alias: Basement lamp button
-  id: 'cahgha9pol7riaHu5sei6k'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.basement_lamp_button_action
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: light.toggle
-    entity_id: light.basement_lamps
-    data:
-      brightness_pct: 100
-      kelvin: 2200
+# - alias: Basement lamp button
+#   id: 'cahgha9pol7riaHu5sei6k'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: sensor.basement_lamp_button_action
+#     to:
+#     - 'on'
+#     - 'off'
+#   action:
+#   - service: light.toggle
+#     entity_id: light.basement_lamps
+#     data:
+#       brightness_pct: 100
+#       kelvin: 2200

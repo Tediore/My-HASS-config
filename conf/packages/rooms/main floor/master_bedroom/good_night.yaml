@@ -203,9 +203,7 @@ script:
     - service: script.turn_on
       entity_id: script.lights_off_interior
     - service: light.turn_off
-      entity_id:
-      - light.master_bath_night_light
-      - light.back_side_security
+      entity_id: light.back_side_security
     - service: homeassistant.turn_off
       entity_id: 
       - input_boolean.washer
@@ -252,7 +250,7 @@ script:
     - service: media_player.play_media
       entity_id: *bedroom_speaker
       data:
-        media_content_id: 'http://10.0.0.2:8123/local/audio/silence.mp3'
+        media_content_id: 'http://10.0.1.2:8123/local/audio/silence.mp3'
         media_content_type: audio/mp3
     - delay: '00:00:02'
     - service: media_player.volume_set
@@ -291,7 +289,7 @@ script:
     - service: media_player.play_media
       data:
         entity_id: *speaker
-        media_content_id: 'http://10.0.0.2:8123/local/audio/silence.mp3'
+        media_content_id: 'http://10.0.1.2:8123/local/audio/silence.mp3'
         media_content_type: audio/mp3
     - delay: '00:00:02'
     - service: media_player.volume_set

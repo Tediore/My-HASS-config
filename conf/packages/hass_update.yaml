@@ -25,6 +25,8 @@ automation:
   - condition: template
     value_template: "{{ trigger.from_state.state != 'unknown' }}"
   - condition: template
+    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
+  - condition: template
     value_template: "{{ trigger.from_state.state.find('b') == -1 }}"
   action:
   - service: notify.gotify
@@ -53,15 +55,6 @@ automation:
 
 
 sensor:
-- platform: version
-  name: Latest version
-  beta: true
-  source: docker
-
-- platform: version
-  name: Current version
-  source: local
-
 - platform: template
   sensors:
     hass_update:

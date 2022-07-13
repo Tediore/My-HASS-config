@@ -1,11 +1,3 @@
-sms_send:
-  sequence:
-    service: mqtt.publish
-    data:
-      topic: 'sms2mqtt/send'
-      payload: '{"number":"+1{{ number }}", "text":"{{ message }}"}'
-
-
 tts_living_room:
   sequence:
   - service: media_player.volume_mute

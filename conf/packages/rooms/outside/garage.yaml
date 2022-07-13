@@ -92,9 +92,9 @@ automation:
     entity_id: input_boolean.leaving
 
 
-cover:
-  - platform: mqtt
-    name: Garage door
+mqtt:
+  cover:
+  - name: Garage door
     command_topic: "cmnd/garage_door/POWER"
     state_topic: "stat/garage_door/status"
     availability_topic: "tele/garage_door/LWT"
@@ -107,3 +107,21 @@ cover:
     state_open: "open"
     state_closed: "closed"
     device_class: garage
+
+
+script:
+  close_garage:
+    sequence:
+    - condition: state
+      entity_id: &garage cover.garage_door
+      state: 'open'
+    - service: cover.close_cover
+      entity_id: *garage
+
+  open_garage:
+    sequence:
+    - condition: state
+      entity_id: *garage
+      state: 'closed'
+    - service: cover.open_cover
+      entity_id: *garage

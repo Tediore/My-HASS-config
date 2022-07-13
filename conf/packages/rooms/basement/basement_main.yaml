@@ -104,17 +104,19 @@ automation:
   - delay: 2
 
 
-light:
-- platform: mqtt
-  name: Basement stairs
-  state_topic: "stat/basement_stairs/POWER1"
-  command_topic: "cmnd/basement_stairs/EVENT"
-  availability_topic: "tele/basement_stairs/LWT"
-  payload_on: "ON"
-  payload_off: "OFF"
-  payload_available: "Online"
-  payload_not_available: "Offline"
+mqtt:
+  light:
+  - name: Basement stairs
+    state_topic: "stat/basement_stairs/POWER1"
+    command_topic: "cmnd/basement_stairs/EVENT"
+    availability_topic: "tele/basement_stairs/LWT"
+    payload_on: "ON"
+    payload_off: "OFF"
+    payload_available: "Online"
+    payload_not_available: "Offline"
 
+
+light:
 - platform: group
   name: Basement stairs lights
   entities:
