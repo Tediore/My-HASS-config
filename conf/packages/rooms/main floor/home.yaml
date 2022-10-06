@@ -78,7 +78,7 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: &time '21:00:00'
+    at: &time '23:00:00'
   - platform: homeassistant
     event: start
   condition:
@@ -170,7 +170,7 @@ script:
       entity_id: 
       - script.christmas_lights_on
     - service: light.turn_on
-      entity_id: light.kitchen_cabinets
+      entity_id: light.cabinet_lights_dimmer
       data:
         brightness_pct: 100
         transition: 10
@@ -182,7 +182,7 @@ script:
         transition: 10
     - service: light.turn_on
       entity_id:
-      - light.hallway
+      - light.hall_light_dimmer
       - light.buffet
       data:
         brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
@@ -245,8 +245,8 @@ script:
       - light.buffet
       - light.other_buffet
       - light.entrance
-      - light.hallway
-      - light.kitchen_cabinets
+      - light.hall_light_dimmer
+      - light.cabinet_lights_dimmer
       data:
         transition: 10
     - delay: '00:00:10'

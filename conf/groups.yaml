@@ -39,6 +39,37 @@ select_lights_interior:
   - light.the_glow_light
   - switch.side_entrance_light
 
+lights_interior_guest_in_master:
+  entities:
+  - light.basement
+  - light.bar_lights
+  - light.basement_bath_night_light
+  - light.basement_hallway
+  - light.basement_lamps
+  - light.basement_stairs_lights
+  - light.bathroom_ejector_closet
+  - light.christmas_lights
+  - light.christmas_tree
+  - light.craft_room
+  - light.craft_room_lamps
+  - light.dining_room
+  - light.entrance
+  - light.hall_bath_night_light
+  - light.kitchen
+  - light.kitchen_cabinets
+  - light.laundry_room
+  - light.living_room_bias_lighting
+  - light.mini_christmas_tree
+  - light.office
+  - light.office_lamps
+  - light.other_buffet
+  - light.other_dining_room
+  - light.other_buffet
+  - light.portable_mini_christmas_tree
+  - light.tea_lights
+  - light.the_glow_light
+  - switch.side_entrance_light
+
 plugs:
   name: Smart plugs
   entities:

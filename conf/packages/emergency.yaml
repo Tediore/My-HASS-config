@@ -87,6 +87,15 @@ automation:
       brightness_pct: 100
       color_name: blue
       flash: long
+  - condition: state
+    entity_id:
+    - input_boolean.basement_bedroom
+    - input_boolean.sleep_mode
+    state: 'on'
+  - service: light.turn_on
+    entity_id: light.guest_bedroom
+    data:
+      brightness_pct: 100
 
 
 - alias: Return lights to state before water leak

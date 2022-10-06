@@ -1,13 +1,13 @@
 - platform: template
   sensors:
-    dewpoint_outside_display:
+    outside_dew_point_display:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dewpoint_outside') | float(0) | round(0) }}"
+      value_template: "{{ states('sensor.outside_dew_point') | float(0) | round(0) }}"
       unit_of_measurement: '°F'
 
-    dewpoint_inside_display:
+    inside_dew_point_display:
       friendly_name: "Dew point"
-      value_template: "{{ states('sensor.dewpoint_inside') | float(0) | round(0) }}"
+      value_template: "{{ states('sensor.inside_dew_point') | float(0) | round(0) }}"
       unit_of_measurement: '°F'
 
     ssd_temp_disp:

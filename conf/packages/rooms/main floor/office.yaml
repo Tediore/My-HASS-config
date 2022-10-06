@@ -17,6 +17,9 @@ automation:
       kelvin: 2200
       transition: 10
       brightness_pct: 100
+  - delay: 10
+  - service: switch.turn_on
+    entity_id: switch.game_room_bias_lighting
 
 
 - alias: Turn game room bias lighting on if lamps are on
@@ -35,6 +38,10 @@ automation:
     - binary_sensor.xbox
     - light.office_lamps
     state: 'on'
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+    for: '00:00:11'
   action:
   - service: switch.turn_on
     entity_id: switch.game_room_bias_lighting

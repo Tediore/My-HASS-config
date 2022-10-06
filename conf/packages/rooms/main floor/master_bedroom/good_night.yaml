@@ -180,9 +180,9 @@ script:
     - service: light.turn_off
       entity_id: light.guest_bedroom
     - service: light.turn_on
-      entity_id: light.basement
+      entity_id: light.basement_bath_night_light
       data:
-        brightness_pct: 10
+        brightness_pct: 100
     - service: script.white_noise_speaker
       data:
         speaker: media_player.guest_bedroom_speaker
@@ -317,8 +317,6 @@ script:
     sequence:
     - service: media_player.turn_off
       entity_id:
-      - media_player.bedroom_tv
-      - media_player.living_room_vizio
       - media_player.living_room_speaker
       - media_player.office_speaker
       - media_player.hub
@@ -360,7 +358,8 @@ script:
   lights_off_interior:
     sequence:
     - service: homeassistant.turn_off
-      entity_id: group.lights_interior
+      data:
+        entity_id: "group.lights_interior{{ '' if is_state('input_boolean.guest_in_master', 'off') else '_guest_in_master' }}"
 
 
 input_number:

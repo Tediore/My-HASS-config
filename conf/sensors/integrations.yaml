@@ -23,29 +23,6 @@
       value_template: "{{ state_attr('sensor.indoor_temp_stats', 'average_change') }}"
       unit_of_measurement: '°F'
 
-- platform: dewpoint
-  sensors:
-    dewpoint_inside:
-      friendly_name: Indoor dew point
-      temperature: sensor.tstat_current_temp
-      rel_hum: sensor.tstat_current_humidity
-    dewpoint_outside:
-      friendly_name: Outdoor dew point
-      temperature: sensor.outside_temp
-      rel_hum: sensor.outside_humidity
-    dewpoint_attic:
-      friendly_name: Attic dew point
-      temperature: sensor.attic_temp
-      rel_hum: sensor.attic_humidity
-    dewpoint_laundry_room:
-      friendly_name: Laundry room dew point
-      temperature: sensor.laundry_room_temp
-      rel_hum: sensor.laundry_room_humidity
-    dewpoint_basement:
-      friendly_name: Basement dew point
-      temperature: sensor.basement_temp
-      rel_hum: sensor.basement_humidity
-
 - platform: time_date
   display_options:
   - date
@@ -80,3 +57,11 @@
   - sense
   - tonbatt
   - linev
+
+- platform: statistics
+  name: Average voltage
+  entity_id: sensor.ups_input_voltage
+  state_characteristic: average_linear
+  max_age:
+    hours: 168
+  sampling_size: 10000

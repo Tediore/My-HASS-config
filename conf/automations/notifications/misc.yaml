@@ -65,19 +65,19 @@
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.dewpoint_inside
+    entity_id: binary_sensor.inside_dew_point
     from: 'off'
     to: 'on'
     for: '00:20:00'
   - platform: numeric_state
-    entity_id: sensor.dewpoint_inside
+    entity_id: sensor.inside_dew_point
     above: 55
   condition:
   - condition: numeric_state
-    entity_id: sensor.dewpoint_inside
+    entity_id: sensor.inside_dew_point
     above: 55
   - condition: state
-    entity_id: binary_sensor.dewpoint_inside
+    entity_id: binary_sensor.inside_dew_point
     state: 'on'
     for: '00:20:00'
   - condition: state
@@ -184,3 +184,16 @@
     data_template:
       number: !secret phone_matt
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
+
+
+- alias: Notify when Paygo balance low
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.paygo_balance
+    below: 3
+  action:
+  - service: notify.gotify
+    data:
+      title: Paygo balance below $3
+      message: Reload your Paygo balance as soon as possible.

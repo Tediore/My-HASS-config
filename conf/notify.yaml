@@ -20,28 +20,6 @@
   data:
     priority: 10
 
-- platform: rest
-  name: Gotify Andy
-  resource: !secret gotify_url
-  method: POST_JSON
-  headers:
-    X-Gotify-Key: &gotify_key_andy !secret gotify_key_andy
-  message_param_name: message
-  title_param_name: title
-  data:
-    priority: 5
-
-- platform: rest
-  name: Gotify high Andy
-  resource: !secret gotify_url
-  method: POST_JSON
-  headers:
-    X-Gotify-Key: *gotify_key_andy
-  message_param_name: message
-  title_param_name: title
-  data:
-    priority: 10
-
 - platform: file
   name: RF received
   filename: rf_received

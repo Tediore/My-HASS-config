@@ -17,6 +17,16 @@ switch.dining_room_fan:
   room: Dining room
 
 
+### Guest room
+light.guest_bedroom:
+  expose: true
+  room: Guest room
+
+switch.guest_bedroom_fan:
+  expose: true
+  room: Guest room
+
+
 ### Kitchen
 light.kitchen:
   expose: true

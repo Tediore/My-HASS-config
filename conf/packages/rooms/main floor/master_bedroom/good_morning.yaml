@@ -57,7 +57,9 @@ automation:
   initial_state: true
   trigger:
   - platform: time
-    at: '06:20:00'
+    at:
+    - '07:00:00'
+    - '08:00:00'
   condition:
   - condition: or
     conditions:
@@ -67,9 +69,14 @@ automation:
     - condition: state
       entity_id: input_boolean.andy_sleep
       state: 'on'
+    - condition: state
+      entity_id: input_boolean.guest_in_master
+      state: 'on'
   action:
   - service: script.turn_on
     entity_id: script.stop_white_noise
+  - condition: time
+    after: '07:30:00'
   - service: switch.turn_off
     entity_id: switch.bedroom_fan
   - condition: state
@@ -123,10 +130,8 @@ automation:
   trigger:
   - platform: time
     at: 
-    - '06:50:00'
+    - '07:00:00'
     - '07:15:00'
-  condition:
-  - "{{ (now().hour == 6 and is_state('binary_sensor.workday', 'on')) or (now().hour == 7 and is_state('binary_sensor.workday', 'off')) }}"
   action:
   - service: homeassistant.turn_off
     entity_id:

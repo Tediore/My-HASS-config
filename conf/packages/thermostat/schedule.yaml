@@ -55,6 +55,10 @@ automation:
   - condition: state
     entity_id: input_boolean.tstat_hold
     state: 'off'
+  - not:
+      condition: state
+      entity_id: sensor.tstat_profile
+      state: 'Away'
   action:
   - service: button.press
     entity_id: button.thermostat_clear_hold

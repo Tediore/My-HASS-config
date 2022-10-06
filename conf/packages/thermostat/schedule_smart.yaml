@@ -80,11 +80,11 @@ automation:
   - platform: numeric_state
     id: 'heat'
     entity_id: &current_temp sensor.thermostat_current_temperature
-    below: 69
+    below: 70
   - platform: numeric_state
     id: 'cool'
     entity_id: *current_temp
-    above: 76
+    above: 75.9
   condition:
   - condition: template
     value_template: >

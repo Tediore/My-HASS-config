@@ -54,19 +54,13 @@ automation:
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  - service: notify.gotify_andy
+  - service: notify.mobile_app_iphone
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
   - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
     data_template:
       entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
-  - condition: state
-    entity_id: binary_sensor.laundry_room_door
-    state: 'off'
-  - service: script.laundry_light_notify
-    data:
-      color_name: "{{ 'blue' if trigger.to_state.name == 'Washer' else 'orange' }}"
 
 
 - alias: Reset laundry reminder booleans
@@ -90,27 +84,6 @@ automation:
     entity_id:
     - input_boolean.washer_reminder
     - input_boolean.dryer_reminder
-
-
-# script:
-#   laundry_light_notify:
-#     sequence:
-#     - service: scene.create
-#       data:
-#         scene_id: before_laundry_notify
-#         snapshot_entities:
-#         - light.living_room_sconces
-#     - service: light.turn_on
-#       entity_id: light.living_room_sconces
-#       data_template:
-#         color_name: "{{ color_name }}"
-#     - delay: 1.5
-#     - service: light.turn_on
-#       entity_id: light.living_room_sconces
-#       data:
-#         flash: short
-#     - delay: 2
-#     - scene: scene.before_laundry_notify
 
 
 mqtt:

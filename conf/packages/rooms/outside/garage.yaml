@@ -92,6 +92,48 @@ automation:
     entity_id: input_boolean.leaving
 
 
+- alias: Unlock garage service door when leaving
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.leaving
+    to: 'on'
+    for: '00:00:05'
+  condition:
+  - condition: state
+    entity_id: lock.garage_service_door
+    state: 'locked'
+  action:
+  - service: lock.unlock
+    entity_id: lock.garage_service_door
+  - service: input_boolean.turn_on
+    entity_id: &autolock input_boolean.garage_service_door_autolock
+
+
+- alias: Relock garage service door if not opened
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.garage_service_door
+    to: 'on'
+    id: 'door'
+  - platform: state
+    entity_id: *autolock
+    to: 'on'
+    for: '00:01:00'
+    id: 'autolock'
+  condition:
+  - condition: state
+    entity_id: *autolock
+    state: 'on'
+  action:
+  - service: input_boolean.turn_off
+    entity_id: *autolock
+  - condition: "{{ trigger.id == 'autolock' }}"
+  - service: lock.lock
+    entity_id: lock.garage_service_door
+
+
 mqtt:
   cover:
   - name: Garage door
@@ -125,3 +167,22 @@ script:
       state: 'closed'
     - service: cover.open_cover
       entity_id: *garage
+
+
+template:
+- sensor:
+  - name: Garage service door lock
+    state: "{{ states('lock.garage_service_door').title() }}"
+    icon: >
+      {% set state = states('lock.front_door') %}
+      {% if state == 'locked' %}
+        mdi:lock-outline
+      {% elif state == 'unlocked' %}
+        mdi:lock-open-variant-outline
+      {% else %}
+        mdi:lock-question
+      {% endif %}
+
+
+input_boolean:
+  garage_service_door_autolock:

@@ -22,7 +22,7 @@ automation:
         {% else %}
           Other
         {% endif %}
-  - service: notify.gotify_high_andy
+  - service: notify.mobile_app_iphone
     data: *notify_data
 
 

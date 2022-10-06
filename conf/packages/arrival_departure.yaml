@@ -219,9 +219,9 @@ script:
         brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
         kelvin: 2700
     - service: light.turn_on
-      entity_id: light.kitchen_cabinets
+      entity_id: light.cabinet_lights_dimmer
       data:
-        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 75 }}"
+        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 23 else 75 }}"
     - service: light.turn_on
       entity_id: 
       - light.hall_bath_night_light

@@ -1,4 +1,4 @@
 use_x_forwarded_for: true
 trusted_proxies:
-- 10.0.1.2
+- 172.18.0.0/16
 server_port: 8123
