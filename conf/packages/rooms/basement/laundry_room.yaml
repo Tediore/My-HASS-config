@@ -31,7 +31,7 @@ automation:
     - binary_sensor.laundry_room_motion
     from: 'on'
     to: 'off'
-    for: &laundry_motion_off_time '00:05:00'
+    for: &laundry_motion_off_time '00:00:30'
   condition:
   - condition: state
     entity_id: input_boolean.laundry_motion
@@ -49,8 +49,10 @@ automation:
     entity_id: binary_sensor.storage_motion
     from: 'on'
     to: 'off'
-    for: *laundry_motion_off_time
-  action: *laundry_room_light_action
+    for: '00:05:00'
+  action:
+  - service: light.turn_off
+    entity_id: light.storage
 
 
 - alias: Disable laundry room light motion control

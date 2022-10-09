@@ -1,4 +1,4 @@
-master_bedroom_temp_offset:
+main_bedroom_temperature_offset:
   min: -3
   max: 3
   step: 0.5

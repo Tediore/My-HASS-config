@@ -1,4 +1,3 @@
-apcupsd:
 automation: !include_dir_merge_list conf/automations/
 binary_sensor: !include conf/binary_sensor.yaml
 climate: !include conf/climate.yaml

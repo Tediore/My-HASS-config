@@ -212,7 +212,7 @@ automation:
       {% endif %}
 
 
-- alias: Andy button - guest in master
+- alias: Andy button - guest in main bedroom
   id: 'Sheiqedxcder6sheex5zie'
   initial_state: true
   mode: parallel
@@ -273,7 +273,6 @@ script:
     - service: alarm_control_panel.alarm_disarm
       entity_id: alarm_control_panel.home
 
-
   button_andy_test:
     sequence:
     - service: notify.gotify
@@ -305,37 +304,9 @@ climate:
   name: Box fan
   heater: switch.box_fan
   ac_mode: true
-  target_sensor: &bedroom_temp sensor.master_bedroom_temp
+  target_sensor: &bedroom_temp sensor.main_bedroom_temperature
   min_temp: 64
   max_temp: 75
   cold_tolerance: 0
   hot_tolerance: 2
   precision: 0.5
-
-# - platform: generic_thermostat
-#   name: Bedroom AC 
-#   heater: switch.bedroom_ac
-#   ac_mode: true
-#   target_sensor: *bedroom_temp
-#   min_temp: 66
-#   max_temp: 75
-#   cold_tolerance: 0
-#   hot_tolerance: 2
-#   precision: 0.1
-#   min_cycle_duration: '00:05:00'
-
-
-input_number:
-  bedroom_ac_temp_matt:
-    name: Matt sleep
-    min: 65
-    max: 75
-    step: 1
-    mode: box
-
-  bedroom_ac_temp_andy:
-    name: Andy sleep
-    min: 65
-    max: 75
-    step: 1
-    mode: box

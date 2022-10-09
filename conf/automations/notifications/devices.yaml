@@ -48,7 +48,7 @@
     - binary_sensor.sump_pump_leak
     - binary_sensor.washer_sink_leak
 
-    - sensor.master_bedroom_temp
+    - sensor.main_bedroom_temperature
     - sensor.outdoor_light_level
     - light.kitchen_cabinets
     to: 'unavailable'
@@ -149,7 +149,7 @@
     - sensor.master_bath_sink_leak_sensor_battery
     - sensor.master_bath_toilet_leak_sensor_battery
     - sensor.master_bedroom_remote_battery_level
-    - sensor.master_bedroom_temp_sensor_battery
+    - sensor.main_bedroom_temperature_sensor_battery
     - sensor.master_bedroom_window_left_battery
     - sensor.master_bedroom_window_right_battery
     - sensor.matt_s_button_battery

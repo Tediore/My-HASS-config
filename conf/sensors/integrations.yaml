@@ -7,7 +7,6 @@
   - type: load_5m
   - type: load_15m
 
-
 - platform: statistics
   name: Indoor temp stats
   entity_id: sensor.tstat_current_temp
@@ -28,35 +27,6 @@
   - date
   - time
   - date_time_iso
-
-- platform: uptime
-
-- platform: apcupsd
-  resources:
-  - apc
-  - date
-  - hostname
-  - version
-  - upsname
-  - cable
-  - driver
-  - upsmode
-  - starttime
-  - model
-  - status
-  - linev
-  - loadpct
-  - bcharge
-  - timeleft
-  - mbattchg
-  - mintimel
-  - maxtime
-  - battdate
-  - battv
-  - lastxfer
-  - sense
-  - tonbatt
-  - linev
 
 - platform: statistics
   name: Average voltage

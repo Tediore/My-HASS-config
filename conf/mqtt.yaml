@@ -44,6 +44,24 @@ sensor:
   expire_after: *433-expiration
   unit_of_measurement: '%'
 
+- name: Garage attic temp
+  state_topic: &garage_attic_temp_topic "rtl_433/3646/event"
+  value_template: *433_temp_c_to_f
+  device_class: temperature
+  json_attributes_topic: *attic_temp_topic
+  force_update: true
+  expire_after: *433-expiration
+  unit_of_measurement: '°F'
+
+- name: Garage attic humidity
+  state_topic: *garage_attic_temp_topic
+  value_template: "{{ '{:.0f}'.format(value_json.humidity) }}"
+  device_class: temperature
+  json_attributes_topic: *garage_attic_temp_topic
+  force_update: true
+  expire_after: *433-expiration
+  unit_of_measurement: '%'
+
 - name: Outside temp
   state_topic: *weather_station_topic
   value_template: "{{ '{:.1f}'.format(value_json.temperature_F) }}"

@@ -62,5 +62,3 @@
       sample_duration: 1800
       max_samples: 60
       min_gradient: 0.005   # dew point increasing at least 3 degrees in a 10-minute period
-
-- platform: apcupsd

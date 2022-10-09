@@ -7,20 +7,22 @@ automation:
   trigger:
   - platform: state
     entity_id: &water_sensors
-    - binary_sensor.bar_leak_detected
-    - binary_sensor.basement_bathroom_sink_leak_detected
-    - binary_sensor.basement_bathroom_toilet_leak_detected
-    - binary_sensor.basement_shower_leak_detected
-    - binary_sensor.dishwasher_leak_detected
-    - binary_sensor.fridge_leak_detected
-    - binary_sensor.hall_bath_toilet_leak_detected
-    - binary_sensor.water_heater_leak_detected
-    - binary_sensor.kitchen_sink_leak_detected
-    - binary_sensor.master_bath_sink_leak_detected
-    - binary_sensor.master_bath_toilet_leak_detected
-    - binary_sensor.sump_pump_leak_detected
-    - binary_sensor.washer_sink_leak_detected
-    - binary_sensor.water_main_leak_detected
+    - binary_sensor.bar_leak_sensor_water_leak
+    - binary_sensor.basement_bathroom_sink_leak_sensor_water_leak
+    - binary_sensor.basement_bathroom_toilet_leak_sensor_water_leak
+    - binary_sensor.basement_shower_leak_sensor_water_leak
+    - binary_sensor.dishwasher_leak_sensor_water_leak
+    - binary_sensor.fridge_water_leak_detected
+    - binary_sensor.hall_bath_sink_water_leak_detected
+    - binary_sensor.hall_bath_toilet_leak_sensor_water_leak
+    - binary_sensor.hvac_leak_sensor_water_leak
+    - binary_sensor.kitchen_sink_water_leak_detected
+    - binary_sensor.master_bath_sink_water_leak_detected
+    - binary_sensor.master_bath_toilet_leak_sensor_water_leak
+    - binary_sensor.sump_pump_leak_sensor_water_leak
+    - binary_sensor.washer_sink_leak_sensor_water_leak
+    - binary_sensor.water_heater_leak_sensor_water_leak
+    - binary_sensor.water_main_leak_sensor_water_leak
     to: 'on'
   - platform: state
     entity_id: *water_sensors

@@ -2,14 +2,15 @@ automation:
 - alias: Master bedroom remote main
   id: 'tohx5be8hahLa2yaeVexai9uv'
   initial_state: true
+  mode: queued
   trigger:
   - platform: state
     entity_id: sensor.master_bedroom_remote_action
     to:
-    - 'on-press'
-    - 'off-press'
-    - 'up-press'
-    - 'down-press'
+    - 'on_press'
+    - 'off_press'
+    - 'up_press'
+    - 'down_press'
   action:
   - service: light.turn_on
     data:
@@ -18,13 +19,13 @@ automation:
         {% set light = states('light.master_bedroom_lamps') %}
         {% set trig = trigger.to_state.state %}
         {% set brt = state_attr('light.master_bedroom_lamps', 'brightness') | int(0) %}
-        {% if trig == 'off-press' %}
+        {% if trig == 'off_press' %}
           0
-        {% elif trig in ['up-press', 'down-press'] %}
+        {% elif trig in ['up_press', 'down_press'] %}
           {% if light %}
-            {% if trig == 'up-press' and brt < 231 %}
+            {% if trig == 'up_press' and brt < 231 %}
               {{ brt + 25 }}
-            {% elif trig == 'down-press' and brt > 25 %}
+            {% elif trig == 'down_press' and brt > 25 %}
               {{ brt - 25 }}
             {% else %}
               {{ brt }}
