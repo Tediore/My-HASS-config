@@ -4,7 +4,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.craft_room_desk_button
+    entity_id: sensor.craft_room_desk_button_action
     to: &remote_states
     - 'on'
     - 'off'
@@ -38,7 +38,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.craft_room_desk_remote
+    entity_id: sensor.craft_room_desk_remote_action
     to: *remote_states
   action:
   - choose:

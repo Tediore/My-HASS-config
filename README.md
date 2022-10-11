@@ -1,6 +1,6 @@
 # My Home Assistant configuration
 
-Currently running a Home Assistant Container install on an Optiplex 5040 (Intel i5-6500 with 24GB of RAM).
+Currently running a Home Assistant Container install on an Optiplex 5040 SFF (Intel i5-6500 with 24GB of RAM).
 
 The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_static` contains configs that I won't need to update often. 
 
