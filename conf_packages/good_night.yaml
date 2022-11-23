@@ -43,7 +43,7 @@ automation:
         {% set url = 'http://10.0.1.2:3453/audio/white_noise' %}
         {% set ext = '.mp3' %}
         {% set time = now().strftime('%H%M') | int %}
-        {% if time < 545 %}
+        {% if time < 545 or time > 2000 %}
           {% set file = '' %}
         {% elif time < 600 %}
           {% set file = '_45m' %}
@@ -52,10 +52,10 @@ automation:
         {% else %}
           {% set file = '_15m' %}
         {% endif %}
-        {{ url }}{{ file }}{{ ext }}
+        {{ url + file + ext }}
       media_content_type: audio/mp3
   - if:
-    - "{{ now().strftime('%H%M') | int > 540 }}"
+    - "{{ now().strftime('%H%M') | int > 540 and now().strftime('%H%M') | int < 1200 }}"
     then:
     - service: input_boolean.turn_off
       entity_id: input_boolean.white_noise
