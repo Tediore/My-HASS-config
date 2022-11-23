@@ -1,13 +1,13 @@
 /*
 !configuration.yaml
 !conf/
+!conf_packages/
 !conf_settings/
-!conf_static/
 !settings/
 !*.md
 
 ip_bans.yaml
 secrets.yaml
 known_devices.yaml
-conf/packages/security_system/
-conf/packages/sms.yaml
+conf_packages/security_system/
+conf_packages/sms.yaml

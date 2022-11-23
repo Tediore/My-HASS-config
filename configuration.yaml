@@ -6,10 +6,10 @@ counter:
 discovery:
 fan: !include conf/fan.yaml
 frontend: !include conf_settings/frontend.yaml
-google_assistant: !include conf_static/google_assistant.yaml
+google_assistant: !include conf/google_assistant.yaml
 group: !include conf/groups.yaml
 history: !include conf_settings/history.yaml
-homeassistant: !include conf/main.yaml
+homeassistant: !include conf_settings/main.yaml
 http: !include conf_settings/http.yaml
 input_boolean: !include conf/helpers/input_boolean.yaml
 input_datetime: !include conf/helpers/input_datetime.yaml
@@ -19,7 +19,6 @@ input_text: !include conf/helpers/input_text.yaml
 light: !include conf/light.yaml
 logbook: !include conf_settings/logbook.yaml
 logger: !include conf_settings/logger.yaml
-media_source:
 mobile_app:
 mqtt: !include conf/mqtt.yaml
 notify: !include conf/notify.yaml
@@ -30,7 +29,6 @@ script: !include conf/scripts.yaml
 sensor: !include_dir_merge_list conf/sensors/
 shell_command: !include conf/shell_command.yaml
 ssdp:
-stream:
 sun:
 switch: !include conf/switch.yaml
 system_health:

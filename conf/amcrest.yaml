@@ -1,8 +1,0 @@
-- name: Front door
-  host: 10.0.2.122
-  username: !secret amcrest_user
-  password: !secret amcrest_pass
-  resolution: high
-  stream_source: rtsp
-  binary_sensors:
-  - online

@@ -122,96 +122,11 @@ automation:
 
 
 light:
-# - platform: group
-#   name: Office cans
-#   entities:
-#   - light.office_ne
-#   - light.office_nw
-#   - light.office_middle
-#   - light.office_se
-#   - light.office_sw
-
 - platform: group
   name: Office lamps
   entities:
   - light.office_shelf_lamp
   - light.office_table_lamp
-
-
-# script:
-  # office_spooky:
-  #   sequence:
-  #   - service: light.turn_on
-  #     entity_id:
-  #     - light.office_middle
-  #     - light.office_nw
-  #     - light.office_se
-  #     data:
-  #       brightness_pct: 100
-  #       rgb_color: [255,63,0]
-  #   - service: light.turn_on
-  #     entity_id:
-  #     - light.office_ne
-  #     - light.office_sw
-  #     data:
-  #       brightness_pct: 100
-  #       rgb_color: [63,0,255]
-
-  # office_xmas:
-  #   sequence:
-  #   - service: light.turn_on
-  #     entity_id:
-  #     - light.office_middle
-  #     - light.office_nw
-  #     - light.office_se
-  #     data:
-  #       brightness_pct: 100
-  #       rgb_color: [255,0,0]
-  #   - service: light.turn_on
-  #     entity_id:
-  #     - light.office_ne
-  #     - light.office_sw
-  #     data:
-  #       brightness_pct: 100
-  #       rgb_color: [0,255,0]
-
-
-# scene:
-# - name: Office vibe
-#   entities:
-#     light.office_middle:
-#       state: 'on'
-#       rgb_color: [0, 128, 255]
-#       brightness_pct: 100
-#     light.office_ne:
-#       state: 'on'
-#       rgb_color: [0, 255, 0]
-#       brightness_pct: 100
-#     light.office_nw:
-#       state: 'on'
-#       rgb_color: [255, 0, 0]
-#       brightness_pct: 100
-#     light.office_se:
-#       state: 'on'
-#       rgb_color: [255, 64, 0]
-#       brightness_pct: 100
-#     light.office_sw:
-#       state: 'on'
-#       rgb_color: [191, 0, 255]
-#       brightness_pct: 100
-
-
-input_boolean:
-  office:
-
-
-input_number:
-  camera_monitor_brightness:
-    name: Camera monitor brightness
-    min: 0
-    max: 100
-    step: 5
-    mode: slider
 
 
 mqtt:
@@ -237,3 +152,15 @@ sensor:
           ) and
           is_state('sun.sun', 'below_horizon')
         }}
+
+
+input_number:
+  camera_monitor_brightness:
+    name: Camera monitor brightness
+    min: 0
+    max: 100
+    step: 5
+    mode: slider
+
+input_boolean:
+  office:

@@ -7,5 +7,5 @@ time_zone: America/Chicago
 customize: !include /config/customize.yaml
 auth_providers:
 - type: homeassistant
-packages: !include_dir_named /config/conf/packages/
+packages: !include_dir_named /config/conf_packages/
 external_url: !secret base_url

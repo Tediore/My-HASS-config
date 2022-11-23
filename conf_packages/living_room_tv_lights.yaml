@@ -1,0 +1,167 @@
+automation:
+- alias: Turn off lights and speakers when TV turned on with IR
+  id: 'esaengaH9lei7ahGhohfoh'
+  initial_state: true
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: &lr_ir sensor.lr_ir_received
+    to: &ir_codes
+    - '0X20DF10EF' # Power
+    - '0X20DF57A8' # Amazon Video
+    - '0X20DFD728' # Netflix
+    - '0X00FF827D'
+    - '0X20DFB44B' # SmartCast Home
+  condition:
+  - condition: state
+    entity_id: &lr_tv media_player.living_room_tv
+    state: 'off'
+  action:
+  - service: script.turn_on
+    entity_id: 
+    - script.pre_media
+    - script.ir_soundbar_vol_up
+
+
+- alias: Turn off lights and speakers with TV turned on without IR
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *lr_tv
+    to: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: 
+    - script.pre_media
+    - script.ir_soundbar_vol_up
+
+
+- alias: Turn lights back on with TV IR
+  id: 'Ook9zahch9eish9Cheeroo'
+  initial_state: true
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: *lr_ir
+    to: '0X20DF10EF'
+  condition:
+  - condition: state
+    entity_id: 
+    - *lr_tv
+    - input_boolean.dark_inside
+    state: 'on'
+  action:
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.lr_tv_ir
+  - service: script.turn_on
+    entity_id: script.post_media
+
+
+- alias: Restore lights when TV turned off without IR
+  id: 'wuudeaC1Ooyaiphe3uwaPh'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *lr_tv
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: 
+    - light.living_room_lamps
+    - input_boolean.andy_sleep
+    - input_boolean.sleep_mode
+    state: 'off'
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: script.turn_on
+    entity_id: script.post_media
+
+
+script:
+  pre_media:
+    alias: Turn stuff off when TV turned on
+    sequence:
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.lr_tv_ir
+    - condition: state
+      entity_id: input_boolean.dark_inside
+      state: 'on'
+    - service: light.turn_on
+      entity_id: light.living_room_bias_lighting
+      data:
+        brightness_pct: 100
+    - condition: state
+      entity_id: input_boolean.overnight_guest
+      state: 'off'
+    - service: script.turn_on
+      entity_id: script.dim_select_lights
+    - condition: state
+      entity_id: light.living_room_lamps
+      state: 'on'
+    - service: light.turn_off
+      entity_id:
+      - light.living_room_lamps
+      - light.other_buffet
+      data:
+        transition: 2
+
+  post_media:
+    alias: Turn lights back on when TV turned off
+    sequence:
+    - service: light.turn_on
+      data:
+        entity_id: "light.buffet, light.hallway, light.entrance{{ ', light.living_room_lamps' if is_state('light.living_room_lamps', 'off') else '' }}"
+        brightness_pct: 100
+        kelvin: 2700
+        transition: 5
+    - if:
+      - "{{ is_state('light.christmas_tree', 'unavailable') }}"
+      then:
+      - service: light.turn_on
+        data:
+          entity_id:
+          - light.other_buffet
+          - light.cabinet_lights_dimmer
+          brightness_pct: 100
+          kelvin: 2700
+          transition: 5
+    - service: light.turn_off
+      entity_id: light.living_room_bias_lighting
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.lr_tv_ir
+
+  dim_select_lights:
+    sequence:
+    - service: light.turn_on
+      entity_id: light.entrance
+      data: &dim_lights_data
+        brightness_pct: 50
+        transition: 2
+    - condition: state
+      entity_id: light.kitchen
+      state: 'off'
+    - service: light.turn_on
+      entity_id: light.cabinet_lights_dimmer
+      data: *dim_lights_data
+
+
+light:
+- platform: group
+  name: Living room lamps
+  entities:
+  - light.living_room_lamp_left
+  - light.living_room_lamp_right
+
+- platform: group
+  name: Living room
+  entities:
+  - light.living_room_lamps
+
+
+input_boolean:
+  lr_tv_ir:

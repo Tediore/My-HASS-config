@@ -50,7 +50,7 @@
 
     - sensor.main_bedroom_temperature
     - sensor.outdoor_light_level
-    - light.kitchen_cabinets
+    - light.cabinet_lights_dimmer
     to: 'unavailable'
     for: '00:01:00'
   - platform: state

@@ -23,7 +23,7 @@ select_lights_interior:
   - light.entrance
   - light.hall_bath_night_light
   - light.kitchen
-  - light.kitchen_cabinets
+  - light.cabinet_lights_dimmer
   - light.laundry_room
   - light.living_room_bias_lighting
   - light.master_bedroom_lamps
@@ -56,7 +56,7 @@ lights_interior_guest_in_master:
   - light.entrance
   - light.hall_bath_night_light
   - light.kitchen
-  - light.kitchen_cabinets
+  - light.cabinet_lights_dimmer
   - light.laundry_room
   - light.living_room_bias_lighting
   - light.mini_christmas_tree
@@ -78,7 +78,7 @@ plugs:
 
 speakers:
   entities:
-  - media_player.master_bedroom_clock
+  - media_player.bedroom_speaker
   - media_player.craft_room_speaker
   - media_player.hub
   - media_player.laundry_room_speaker

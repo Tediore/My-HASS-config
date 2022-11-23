@@ -54,7 +54,7 @@ automation:
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  - service: notify.mobile_app_iphone
+  - service: notify.mobile_app_andys_iphone
     data_template:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"

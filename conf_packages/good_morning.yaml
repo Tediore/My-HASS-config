@@ -1,0 +1,172 @@
+automation:
+- alias: Good morning - workday
+  id: 'Too9leichah6zeikee1nap'
+  initial_state: true
+  trigger:
+  - platform: time
+    at: &wakeup_time input_datetime.lights_wakeup
+  condition:
+  - condition: state
+    entity_id: input_boolean.basement_bedroom
+    state: 'off'
+  - condition: or
+    conditions:
+    - "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
+    - "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: script.turn_on
+    entity_id: script.good_morning
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+  - service: script.lights_sunset
+
+
+- alias: Set workday wakeup time
+  id: 'IG8faiheing2zohdeeBasa'
+  initial_state: true
+  trigger:
+  - platform: template
+    value_template: "{{ is_state_attr('calendar.andy_work', 'message', 'Work') }}"
+  - platform: template
+    value_template: "{{ 'from home' in state_attr('calendar.andy_work', 'message') }}"
+  action:
+  - service: input_datetime.set_datetime
+    entity_id: *wakeup_time
+    data:
+      time: "{{ '06:50:00' if is_state_attr('calendar.andy_work', 'message', 'Work') else '07:15:00' }}"
+
+
+- alias: Stop white noise and fan
+  id: 'zeeW2feeree1aloo5fuh0e'
+  initial_state: true
+  trigger:
+  - platform: time
+    at:
+    - '06:45:00'
+    - '08:00:00'
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.sleep_mode
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.andy_sleep
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.guest_in_master
+      state: 'on'
+  action:
+  - service: media_player.volume_mute
+    entity_id: &white_noise_spkrs
+    - media_player.bedroom_speaker
+    - media_player.guest_bedroom_clock
+    data:
+      is_volume_muted: true
+  - service: media_player.volume_set
+    data:
+      entity_id: *white_noise_spkrs
+      volume_level: 0.4
+  - service: media_player.volume_mute
+    entity_id: media_player.bedroom_speaker
+    data:
+      is_volume_muted: false
+  - condition: time
+    after: '07:30:00'
+  - service: switch.turn_off
+    entity_id: switch.bedroom_fan
+
+
+- alias: Reset volume after extra sleep
+  id: 'jat2nealoziep0Gee6weiv'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.bedroom_speaker
+    to:
+    - 'idle'
+    - 'off'
+  - platform: state
+    entity_id: media_player.bedroom_speaker
+    to: 'paused'
+    for: '00:00:15'
+  condition:
+  - condition: state
+    entity_id: input_boolean.extra_sleep
+    state: 'on'
+  action:
+  - service: homeassistant.turn_off
+    entity_id: 
+    - input_boolean.extra_sleep
+    - input_boolean.sleep_mode
+    - media_player.bedroom_speaker
+  - service: media_player.volume_mute
+    entity_id: media_player.bedroom_speaker
+    data:
+      is_volume_muted: true
+  - service: media_player.volume_set
+    data:
+      entity_id: media_player.bedroom_speaker
+      volume_level: 0.4
+  - service: media_player.volume_mute
+    entity_id: media_player.bedroom_speaker
+    data:
+      is_volume_muted: false
+
+
+script:
+  good_morning:
+    alias: Workday wakeup routine
+    sequence:
+    - service: script.turn_on
+      entity_id: script.lights_wakeup
+    - service: homeassistant.turn_off
+      entity_id:
+      - input_boolean.sleep_mode
+      - input_boolean.andy_sleep
+      - input_boolean.sleep_mode_guest
+      - light.master_bath_night_light
+      - switch.bedroom_fan
+    - if:
+      - "{{ is_state('switch.humidifier', 'on') }}"
+      then:
+      - service: switch.turn_off
+        entity_id: switch.humidifier
+  
+
+  lights_wakeup:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: 'zigbee2mqtt/Andy/set'
+        payload: &payload '{"scene_recall": 0}'
+    - service: mqtt.publish
+      data:
+        topic: 'zigbee2mqtt/Matt/set'
+        payload: *payload
+    - delay: '00:02:00'
+    - condition: state
+      entity_id: &lights_wakeup light.master_bedroom_lamps
+      state: 'on'
+    - service: light.turn_on
+      entity_id: *lights_wakeup
+      data:
+        transition: 360
+        brightness_pct: 100
+        kelvin: 4000
+
+
+input_boolean:
+  extra_sleep:
+
+
+input_datetime:
+  lights_wakeup:
+    has_time: true
+    has_date: false

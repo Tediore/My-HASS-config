@@ -1,0 +1,97 @@
+automation:
+- alias: Matt button - normal
+  id: 'iep4tahz8sah7riet7maiJ'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.button_matt
+    to:
+    - 'single'
+    - 'double'
+    - 'hold'
+  condition:
+  - condition: state
+    entity_id: &bsmt_bed input_boolean.basement_bedroom
+    state: 'off'
+  action:
+  - service: script.turn_on
+    data_template:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command == 'single' %}
+          {% if is_state('input_boolean.sleep_mode', 'off') %}
+            script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+          {% else %}
+            script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
+          {% endif %}
+        {% elif command == 'hold' %}
+          script.toggle_bedroom_fan
+        {% else %}
+          script.early_departure
+        {% endif %}
+
+
+- alias: Matt button - basement bedroom
+  id: 'joChuvuazoomee4ohqu8engu'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.button_matt
+    to:
+    - 'single'
+    - 'double'
+    - 'hold'
+  condition:
+  - condition: state
+    entity_id: *bsmt_bed
+    state: 'on'
+  action:
+  - service: script.turn_on
+    data:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command == 'single' %}
+          {% if is_state('light.guest_bedroom', 'on') %}
+            script.good_night_andy_basement
+          {% else %}
+            script.good_night_basement
+          {% endif %}
+        {% else %}
+          script.toggle_guest_bedroom_fan
+        {% endif %}
+
+
+script:
+  toggle_bedroom_fan:
+    sequence:
+    - service: switch.toggle
+      entity_id: switch.bedroom_fan
+  
+  early_departure:
+    sequence:
+    - service: media_player.turn_off
+      entity_id:
+      - media_player.bedroom_speaker
+      - media_player.guest_bedroom_clock
+    - service: input_boolean.turn_off
+      entity_id:
+      - input_boolean.sleep_mode
+      - input_boolean.andy_sleep
+      - input_boolean.white_noise
+    - service: light.turn_on
+      entity_id: 
+      - light.master_bedroom_lamps
+      - light.living_room_lamps
+      - light.buffet
+      data:
+        transition: 30
+        kelvin: 3000
+        brightness_pct: 50
+    - service: light.turn_on
+      entity_id: light.cabinet_lights_dimmer
+      data:
+        brightness_pct: 66
+    - service: alarm_control_panel.alarm_disarm
+      entity_id: alarm_control_panel.home

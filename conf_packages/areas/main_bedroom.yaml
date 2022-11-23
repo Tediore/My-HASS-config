@@ -1,0 +1,137 @@
+automation:
+- alias: Turn bedroom lights off in morning on workday
+  id: 'saoNg0IeZahlaiRuu4lahl'
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '07:45:00'
+  condition:
+  - condition: state
+    entity_id: light.master_bedroom_lamps
+    state: 'on'
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
+    - condition: template
+      value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  action:
+  - service: light.turn_off
+    entity_id: light.master_bedroom_lamps
+    data:
+      transition: 60
+
+
+- alias: Transition master bedroom lights to warm
+  id: 'EitaeNg7et5ogh2Ahph2Ae'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.dark_inside
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: light.matt
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.master_bedroom_lamps
+    data:
+      transition: 40
+      kelvin: 3000
+
+
+- alias: Turn closet lights on/off with doors
+  id: 'ahchooGeoph0ab6IiceuSh'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.andy_closet_door
+    - binary_sensor.matt_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: "light.{{ trigger.to_state.object_id.replace('_door','') }}"
+      brightness_pct: "{{ 67 if (trigger.to_state.state == 'on' and is_state('input_boolean.dark_inside', 'on')) else 100 }}"
+      transition: 0.4
+
+
+# - alias: Turn mini Christmas tree on
+#   id: 'Voh7tieRoh6jahthuojeit'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.master_bedroom_motion
+#     to: 'on'
+#   condition:
+#   - condition: state
+#     entity_id: input_boolean.dark_inside
+#     state: 'on'
+#   - condition: state
+#     entity_id: input_boolean.andy_sleep
+#     state: 'off'
+#   - "{{ now().month in [11, 12, 1, 2] }}"
+#   action:
+#   - service: light.turn_on
+#     entity_id: light.mini_christmas_tree
+
+
+# - alias: Turn mini Christmas tree off
+#   id: 'futok5uwu2paaMaigh7ied'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.master_bedroom_motion
+#     to: 'off'
+#     for: '00:05:00'
+#   - platform: state
+#     entity_id: light.matt
+#     from: 'on'
+#     to: 'off'
+#   condition:
+#   - condition: state
+#     entity_id: light.matt
+#     state: 'off'
+#   action:
+#   - service: light.turn_off
+#     entity_id: light.mini_christmas_tree
+
+
+switch:
+- platform: template
+  switches:
+    bedroom_fan:
+      friendly_name: Bedroom fan
+      value_template: "{{ is_state('switch.master_bedroom_fan', 'on') }}"
+      turn_on:
+      - service: switch.turn_on
+        entity_id: switch.master_bedroom_fan
+      - delay: 1
+      - service: mqtt.publish
+        data:
+          topic: 'cmnd/master_bedroom_fan/tuyasend4'
+          payload: '3,3' # max speed
+      turn_off:
+        service: switch.turn_off
+        entity_id: switch.master_bedroom_fan
+
+
+climate:
+- platform: generic_thermostat
+  name: Box fan
+  heater: switch.box_fan
+  ac_mode: true
+  target_sensor: &bedroom_temp sensor.main_bedroom_temperature
+  min_temp: 64
+  max_temp: 75
+  cold_tolerance: 0
+  hot_tolerance: 2
+  precision: 0.5

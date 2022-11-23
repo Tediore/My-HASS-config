@@ -2,16 +2,12 @@
 light.craft_room:
   expose: true
   room: Craft room
-light.craft_room_lamps:
-  expose: true
-  room: Other devices
 
 
 ### Dining room
 light.dining_room:
   expose: true
   room: Dining room
-
 switch.dining_room_fan:
   expose: true
   room: Dining room
@@ -21,7 +17,6 @@ switch.dining_room_fan:
 light.guest_bedroom:
   expose: true
   room: Guest room
-
 switch.guest_bedroom_fan:
   expose: true
   room: Guest room
@@ -31,10 +26,6 @@ switch.guest_bedroom_fan:
 light.kitchen:
   expose: true
   room: Kitchen
-light.kitchen_cabinets:
-  expose: true
-  room: Other devices
-
 switch.kitchen_fan:
   expose: true
   room: Kitchen
@@ -47,90 +38,27 @@ light.laundry_room:
 
 
 ### Living room
-light.living_room:
+switch.living_room_fan:
   expose: true
   room: Living room
-
-switch.living_room_fan:
+light.living_room_lamps:
   expose: true
   room: Living room
 
 
 ### Master bedroom
-climate.bedroom_ac:
-  name: Master bedroom AC
-  expose: true
-  room: Master bedroom
-
-light.master_bedroom_fan:
-  expose: true
-  room: Master bedroom
 light.master_bedroom_lamps:
   expose: true
   room: Master bedroom
-
 switch.bedroom_fan:
   expose: true
   room: Master bedroom
 
 
 ### Office
-light.office:
-  expose: true
-  room: Office
 light.office_lamps:
   expose: true
-  room: Other devices
-
+  room: Office
 switch.game_room_bias_lighting:
   expose: true
   room: Office
-
-
-### Other
-climate.thermostat:
-  expose: true
-  room: Other devices
-
-light.buffet:
-  expose: true
-  room: Other devices
-light.christmas_lights:
-  name: Christmas lights
-  expose: true
-  room: Other devices
-light.christmas_tree:
-  expose: true
-  room: Other devices
-light.entrance:
-  expose: true
-  room: Other devices
-light.front_closet:
-  expose: true
-  room: Other devices
-light.living_room_lamps:
-  expose: true
-  room: Other devices
-light.mini_christmas_tree:
-  expose: true
-  room: Other devices
-light.other_buffet:
-  expose: true
-  room: Other devices
-
-script.alarm_arm_home:
-  expose: true
-  room: Other devices
-script.cross_stitch_light:
-  expose: true
-  room: Other devices
-
-switch.porch_light:
-  expose: true
-  room: Other devices
-switch.side_entrance_light:
-  expose: true
-  room: Other devices
-switch.side_porch_light:
-  expose: true
-  room: Other devices

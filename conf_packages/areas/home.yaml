@@ -73,56 +73,56 @@ automation:
     entity_id: script.lights_sunrise
 
 
-- alias: Dim cabinet and buffet lights at night
-  id: 'faShei9wi9de8ia4aquoag'
-  initial_state: true
-  trigger:
-  - platform: time
-    at: &time '23:00:00'
-  - platform: homeassistant
-    event: start
-  condition:
-  - condition: state
-    entity_id: input_boolean.overnight_guest
-    state: 'off'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.kitchen_cabinets
-      state: 'on'
-    - condition: state
-      entity_id: light.buffet
-      state: 'on'
-    - condition: state
-      entity_id: light.hallway
-      state: 'on'
-    - condition: state
-      entity_id: light.entrance
-      state: 'on'
-  - condition: time
-    after: *time
-  action:
-  - wait_template: "{{ is_state('media_player.living_room_vizio', 'off') }}"
-    timeout: '00:30:00'
-    continue_on_timeout: false
-  - service: light.turn_on
-    entity_id:
-    - light.kitchen_cabinets
-    - light.hallway
-    - light.entrance
-    - light.other_buffet
-    data:
-      brightness_pct: 66
-      transition: 10
-      kelvin: 2700
-  - condition: template
-    value_template: "{{ state_attr('light.buffet', 'brightness') | int(0) > 170 }}"
-  - service: light.turn_on
-    entity_id: light.buffet
-    data:
-      brightness_pct: 66
-      transition: 10
-      kelvin: 2700
+# - alias: Dim cabinet and buffet lights at night
+#   id: 'faShei9wi9de8ia4aquoag'
+#   initial_state: true
+#   trigger:
+#   - platform: time
+#     at: &time '23:00:00'
+#   - platform: homeassistant
+#     event: start
+#   condition:
+#   - condition: state
+#     entity_id: input_boolean.overnight_guest
+#     state: 'off'
+#   - condition: or
+#     conditions:
+#     - condition: state
+#       entity_id: light.cabinet_lights_dimmer
+#       state: 'on'
+#     - condition: state
+#       entity_id: light.buffet
+#       state: 'on'
+#     - condition: state
+#       entity_id: light.hallway
+#       state: 'on'
+#     - condition: state
+#       entity_id: light.entrance
+#       state: 'on'
+#   - condition: time
+#     after: *time
+#   action:
+#   - wait_template: "{{ is_state('media_player.living_room_vizio', 'off') }}"
+#     timeout: '00:30:00'
+#     continue_on_timeout: false
+#   - service: light.turn_on
+#     entity_id:
+#     - light.cabinet_lights_dimmer
+#     - light.hallway
+#     - light.entrance
+#     - light.other_buffet
+#     data:
+#       brightness_pct: 66
+#       transition: 10
+#       kelvin: 2700
+#   - condition: template
+#     value_template: "{{ state_attr('light.buffet', 'brightness') | int(0) > 170 }}"
+#   - service: light.turn_on
+#     entity_id: light.buffet
+#     data:
+#       brightness_pct: 66
+#       transition: 10
+#       kelvin: 2700
 
 
 - alias: Turn lights on/off at sunset/sunrise
@@ -166,45 +166,35 @@ automation:
 script:
   lights_sunset:
     sequence:
-    - service: script.turn_on
-      entity_id: 
-      - script.christmas_lights_on
     - service: light.turn_on
-      entity_id: light.cabinet_lights_dimmer
+      entity_id:
+      - light.entrance
+      - light.cabinet_lights_dimmer
       data:
-        brightness_pct: 100
-        transition: 10
-    - service: light.turn_on
-      entity_id: light.entrance
-      data:
-        brightness_pct: "{{ 25 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
+        brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
         kelvin: 2700
         transition: 10
     - service: light.turn_on
       entity_id:
       - light.hall_light_dimmer
       - light.buffet
-      data:
-        brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
-        kelvin: 2700
-        transition: 10
-    - service: light.turn_on
-      entity_id: 
       - light.hall_bath_night_light
       - light.master_bath_night_light
       data:
         brightness_pct: 100
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
-    - condition: state
-      entity_id: media_player.living_room_vizio
-      state: 'off'
-    - service: light.turn_on
-      entity_id: light.other_buffet
-      data:
-        brightness_pct: 100
-        kelvin: 2700
-        transition: 10
+    - if:
+      - condition: state
+        entity_id: media_player.living_room_vizio
+        state: 'off'
+      then:
+      - service: light.turn_on
+        data:
+          entity_id: "light.{{ 'christmas_tree' if is_state('light.christmas_tree', 'off') else 'other_buffet' }}"
+          brightness_pct: 100
+          kelvin: 2700
+          transition: 10
 
   lr_lights_sunset:
     sequence:
@@ -222,7 +212,7 @@ script:
             transition: 10
       default:
       - wait_template: "{{ states('sensor.outdoor_light_level') | int(0) < 10 }}"
-        timeout: "00:30:00"
+        timeout: "00:20:00"
         continue_on_timeout: true
       - condition: template
         value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
@@ -259,44 +249,6 @@ script:
     - service: script.turn_on
       entity_id: script.christmas_lights_off
 
-  christmas_tree_on:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: light.turn_on
-      entity_id: 
-      - light.christmas_tree
-      - light.star_lights
-    - wait_template: "{{ is_state('light.dining_room', 'off') }}"
-      timeout: '08:00:00'
-      continue_on_timeout: false
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'off'
-    - service: light.turn_on
-      entity_id: light.portable_mini_christmas_tree
-
-  christmas_lights_on:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: light.turn_on
-      entity_id: 
-      - light.christmas_lights
-    - wait_template: "{{ is_state('media_player.living_room_vizio', 'off') or is_state('input_boolean.lr_tv_ir', 'on') }}"
-      timeout: '08:00:00'
-      continue_on_timeout: false
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'off'
-    - service: light.turn_on
-      entity_id:
-      - light.christmas_tree
-      - light.portable_mini_christmas_tree
-      - light.star_lights
-
   christmas_lights_off:
     sequence:
     - condition: state
@@ -322,7 +274,7 @@ script:
         # - light.entrance
         # - light.hallway
         - light.hall_bath_night_light
-        - light.kitchen_cabinets
+        - light.cabinet_lights_dimmer
         - light.living_room_lamps
         - light.master_bath_night_light
         - light.other_buffet

@@ -135,6 +135,11 @@ light:
   - light.basement_lamp_left
   - light.basement_lamp_right
 
+- platform: group
+  name: Bar lights
+  entities:
+  - light.bar_front
+  - light.bar_side
 
 group:
   basement_lights:

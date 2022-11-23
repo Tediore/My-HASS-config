@@ -1,6 +1,0 @@
-light:
-- platform: group
-  name: Bar lights
-  entities:
-  - light.bar_front
-  - light.bar_side

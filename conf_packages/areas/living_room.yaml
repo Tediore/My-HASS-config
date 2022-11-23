@@ -1,0 +1,39 @@
+script:
+  ir_fan_power:
+    sequence:
+    - service: mqtt.publish
+      data_template:
+        topic: &ir_topic "cmnd/{{ blaster }}/irsend"
+        payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0xD81"}'
+
+  ir_fan_speed:
+    sequence:
+    - service: mqtt.publish
+      data_template:
+        topic: *ir_topic
+        payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0xD88"}'
+
+  fan_on_with_speed:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: "cmnd/{{ room.lower().replace(' ','_') }}_fan/tuyasend4"
+        payload: "3,{{ (speed | int(0) - 1) | int(0) }}"
+    - delay: 1
+    - service: switch.turn_on
+      data:
+        entity_id: "switch.{{ room.lower().replace(' ','_') }}_fan"
+
+  ir_soundbar_vol_up:
+    sequence:
+    - service: mqtt.publish
+      data_template:
+        topic: &lr_ir_topic "cmnd/living_room_ir/irsend"
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FF827D"}'
+
+  ir_soundbar_vol_dn:
+    sequence:
+    - service: mqtt.publish
+      data_template:
+        topic: *lr_ir_topic
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FFA25D"}'

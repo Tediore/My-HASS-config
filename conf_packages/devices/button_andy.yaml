@@ -1,0 +1,64 @@
+automation:
+- alias: Andy button - normal
+  id: 'Sheiqueer6sheex5zie9ai'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.button_andy
+    to: 
+    - 'single'
+    - 'hold'
+  condition:
+  - condition: state
+    entity_id: input_boolean.guest_in_master
+    state: 'off'
+  action:
+    service_template: >
+      {% if trigger.to_state.state == 'single' %}
+        {% if is_state('input_boolean.andy_sleep', 'off') %}
+          script.good_night_andy
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
+      {% else %}
+        script.button_andy_test
+      {% endif %}
+
+
+- alias: Andy button - guest in main bedroom
+  id: 'Sheiqedxcder6sheex5zie'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.button_andy
+    to: 
+    - 'single'
+    - 'hold'
+  condition:
+  - condition: state
+    entity_id: input_boolean.guest_in_master
+    state: 'on'
+  action:
+  - service: "{{ 'light.turn_off' if is_state('light.master_bedroom_fan', 'on') or is_state('light.master_bedroom_lamps', 'on') else 'switch.toggle' }}"
+    data:
+      entity_id: >
+        {{ 'light.master_bedroom_fan, light.master_bedroom_lamps' 
+              if is_state('light.master_bedroom_fan', 'on') or is_state('light.master_bedroom_lamps', 'on') 
+            else 'switch.master_bedroom_fan' }}
+  - condition: state
+    entity_id: &guest_sleep input_boolean.sleep_mode_guest
+    state: 'off'
+  - service: input_boolean.turn_on
+    entity_id: *guest_sleep
+  - service: script.turn_on
+    entity_id: script.good_night_guest
+
+
+script:
+  button_andy_test:
+    sequence:
+    - service: notify.gotify
+      data:
+        message: "Andy's button is working."

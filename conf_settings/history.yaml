@@ -12,12 +12,12 @@ include:
   - light.entrance
   - light.front_closet
   - light.dining_room
-  - light.living_room
+  - light.living_room_lamps
   - light.master_bedroom_lamps
   - light.game_room
   - light.laundry_room
   - light.porch
-  - light.kitchen_cabinets
+  - light.cabinet_lights_dimmer
   - switch.game_room_bias_lighting
   - switch.master_bedroom_fan_plug
   - media_player.living_room_vizio

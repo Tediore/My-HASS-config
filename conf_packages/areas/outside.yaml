@@ -1,0 +1,44 @@
+automation:
+- alias: Turn outside lights on at night
+  id: 'Coquu3eiTh5eelah5oonai'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: &outdoor_light sensor.outdoor_light_level
+    below: &outdoor_light_threshold 5
+    for: '00:20:00'
+  action:
+  # tasmota rules will turn on these lights one hour after sunset if HA is down
+  - service: homeassistant.turn_on
+    entity_id: &outside_lights
+    - switch.pole_light
+    - switch.porch_light
+    - switch.side_porch_light
+  - service: light.turn_on
+    entity_id:
+    - light.garage_outside
+    - light.back_side_security
+    data:
+      brightness_pct: 35
+  - service: light.turn_on
+    entity_id: light.deck
+    data:
+      brightness_pct: 25
+
+
+- alias: Turn outside lights off at sunrise
+  id: 'Eingaefu7veiphooph8adu'
+  initial_state: true
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '-01:00:00'
+  action:
+  # tasmota rules will turn off the outside lights one hour before sunrise
+  # - service: homeassistant.turn_off
+  #   entity_id: *outside_lights
+  - condition: state
+    entity_id: input_boolean.christmas
+    state: 'on'
+  - service: light.turn_off
+    entity_id: light.christmas_lights

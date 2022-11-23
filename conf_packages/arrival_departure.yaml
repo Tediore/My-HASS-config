@@ -20,7 +20,7 @@ automation:
       entity_id: input_boolean.dark_inside
       state: 'on'
   - condition: state
-    entity_id: input_text.alarm
+    entity_id: alarm_control_panel.home
     state: 'armed_away'
     for: '00:00:30'
   action:
@@ -198,11 +198,7 @@ script:
       state: 'on'
     - service: script.turn_on
       data:
-        entity_id: "script.lights_{{ 'christmas' if is_state('input_boolean.christmas', 'on') else 'normal' }}"
-    - condition: template
-      value_template: "{{ now().month in [11, 12] }}"
-    - service: light.turn_on
-      entity_id: light.christmas_lights
+        entity_id: script.lights_normal
   
 
   lights_normal:
@@ -211,25 +207,28 @@ script:
       entity_id:
       - light.entrance
       - light.buffet
-      - light.other_buffet
       - light.hallway
       - light.living_room_lamps
       data:
         transition: 1
         brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
         kelvin: 2700
+    - if:
+      - "{{ is_state('light.christmas_tree', 'off') }}"
+      then:
+      - service: light.turn_on
+        entity_id: light.christmas_tree
+        data:
+          brightness_pct: 100
     - service: light.turn_on
-      entity_id: light.cabinet_lights_dimmer
-      data:
-        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 23 else 75 }}"
-    - service: light.turn_on
-      entity_id: 
+      entity_id:
+      - light.cabinet_lights_dimmer
       - light.hall_bath_night_light
       - light.master_bath_night_light
       data:
-        transition: 1
         brightness_pct: 100
         kelvin: 2700
+        transition: 1
 
 
   lights_christmas:
@@ -239,8 +238,6 @@ script:
     - service: homeassistant.turn_on
       entity_id: 
       - light.christmas_tree
-      - light.mini_christmas_tree
-      - light.christmas_lights
 
 
   lights_kitty:
@@ -249,7 +246,7 @@ script:
       entity_id:
       - light.buffet
       - light.hallway
-      - light.living_room
+      - light.living_room_lamps
       data:
         brightness_pct: 20
         kelvin: 2700

@@ -13,19 +13,17 @@ automation:
     - conditions:
       - "{{ trigger.to_state.state == 'on' }}"
       - condition: state
-        entity_id: light.kitchen_cabinets
+        entity_id: light.cabinet_lights_dimmer
         state: 'on'
-      - "{{ state_attr('light.kitchen_cabinets', 'brightness') | int(0) < 254 }}"
+      - "{{ state_attr('light.cabinet_lights_dimmer', 'brightness') | int(0) < 254 }}"
       sequence:
       - service: scene.create
         data:
           scene_id: kitchen_cabinets
           snapshot_entities:
-          - light.kitchen_cabinets
+          - light.cabinet_lights_dimmer
       - service: light.turn_on
-        entity_id: light.kitchen_cabinets
-        data:
-          brightness_pct: 100
+        entity_id: light.cabinet_lights_dimmer
       - service: input_boolean.turn_on
         entity_id: input_boolean.kitchen_cabinet_light_ctl
     - conditions:
@@ -81,14 +79,6 @@ mqtt:
     payload_off: "OFF"
     payload_available: "Online"
     payload_not_available: "Offline"
-
-
-light:
-- platform: group
-  name: Kitchen cabinets
-  entities:
-  - light.cabinet_lights_n
-  - light.cabinet_lights_s
 
 
 input_boolean:
