@@ -2,10 +2,10 @@
 
 Currently running a Home Assistant Container install on an Optiplex 5040 SFF (Intel i5-6500 with 24GB of RAM).
 
-The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_static` contains configs that I won't need to update often. 
+The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_packages` contains, well, packages.
 
 I currently have the following devices connected to Home Assistant:
-- 60+ Zigbee devices (zigbee2mqtt)
+- ~70 Zigbee devices (zigbee2mqtt)
     - Aqara light sensors
     - Aqara temp/humidity sensors
     - Aqara water leak sensors
@@ -39,7 +39,7 @@ I currently have the following devices connected to Home Assistant:
 - Roku TV
 
 Some of my favorite automations include:
-- Opening the garage door if the garage service door is opened within 3 minutes of arming the alarm (because that means we're driving somewhere)
+- Opening the garage door if the garage service door is opened within 3 minutes of arming the alarm (because that means we're biking or driving somewhere)
 - Adjusting my Google Home speakers' volume depending on which app is casting to them (since streaming radio is noticeably quieter than casting music from Google Play Music or Spotify)
 - Enabling sleep mode (lights and media players off, security system armed, play white noise) when my wife or I press the buttons on our nightstands
 - Turning the lights and media players off and setting the thermostat to away when the security system is armed away
