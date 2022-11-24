@@ -162,5 +162,13 @@ input_number:
     step: 5
     mode: slider
 
+  game_room_temp_offset:
+    min: -3
+    max: 3
+    step: 0.5
+    unit_of_measurement: '°F'
+    mode: slider
+
+
 input_boolean:
   office:

@@ -9,7 +9,6 @@ include:
   - binary_sensor.building_5_closet
   - binary_sensor.front_closet
   - binary_sensor.front_door
-  - binary_sensor.front_speakers
   - binary_sensor.hvac_closet
   - binary_sensor.laundry_room_door
   - binary_sensor.storage

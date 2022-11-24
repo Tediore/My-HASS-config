@@ -14,8 +14,6 @@ select_lights_interior:
   - light.basement_hallway
   - light.basement_lamps
   - light.basement_stairs_lights
-  - light.bathroom_ejector_closet
-  - light.christmas_lights
   - light.christmas_tree
   - light.craft_room
   - light.craft_room_lamps
@@ -34,9 +32,6 @@ select_lights_interior:
   - light.other_buffet
   - light.other_dining_room
   - light.other_buffet
-  - light.portable_mini_christmas_tree
-  - light.tea_lights
-  - light.the_glow_light
   - switch.side_entrance_light
 
 lights_interior_guest_in_master:
@@ -47,8 +42,6 @@ lights_interior_guest_in_master:
   - light.basement_hallway
   - light.basement_lamps
   - light.basement_stairs_lights
-  - light.bathroom_ejector_closet
-  - light.christmas_lights
   - light.christmas_tree
   - light.craft_room
   - light.craft_room_lamps
@@ -65,16 +58,12 @@ lights_interior_guest_in_master:
   - light.other_buffet
   - light.other_dining_room
   - light.other_buffet
-  - light.portable_mini_christmas_tree
-  - light.tea_lights
-  - light.the_glow_light
   - switch.side_entrance_light
 
 plugs:
   name: Smart plugs
   entities:
   - switch.game_room_bias_lighting
-  - switch.air_freshener
 
 speakers:
   entities:

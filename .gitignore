@@ -9,5 +9,5 @@
 ip_bans.yaml
 secrets.yaml
 known_devices.yaml
-conf_packages/security_system/
+conf_packages/security/
 conf_packages/sms.yaml

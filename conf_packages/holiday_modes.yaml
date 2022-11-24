@@ -91,25 +91,25 @@ automation:
 #     - service: script.holiday_porch_light
 
 
-- alias: Turn on balcony Christmas lights
-  id: 'Sheb6MiejahYaeX0eingee'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sun.sun
-    to: 'below_horizon'
-    for: '00:10:00'
-  - platform: homeassistant
-    event: start
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: 'below_horizon'
-  - condition: template
-    value_template: "{{ now().month in [11, 12] }}"
-  action:
-  - service: light.turn_on
-    entity_id: light.christmas_lights
+# - alias: Turn on balcony Christmas lights
+#   id: 'Sheb6MiejahYaeX0eingee'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: sun.sun
+#     to: 'below_horizon'
+#     for: '00:10:00'
+#   - platform: homeassistant
+#     event: start
+#   condition:
+#   - condition: state
+#     entity_id: sun.sun
+#     state: 'below_horizon'
+#   - condition: template
+#     value_template: "{{ now().month in [11, 12] }}"
+#   action:
+#   - service: light.turn_on
+#     entity_id: light.christmas_lights
 
 
 # - alias: Christmas porch light loop
@@ -137,26 +137,26 @@ automation:
 #       payload: "speed 5; {{ 'color1 1' if state_attr('light.porch', 'rgb_color')[1] == 255 else 'color1 2' }}; speed 1"
 
 
-script:
-  holiday_porch_light:
-    sequence:
-    - service: light.turn_on
-      entity_id: light.porch
-      data_template:
-        brightness_pct: 100
-        transition: 0.4
-        color_name: >
-          {% if is_state('input_boolean.valentines_day', 'on') %}
-            pink
-          {% elif is_state('input_boolean.autism_awareness', 'on') %}
-            blue
-          {% elif is_state('input_boolean.halloween', 'on') %}
-            orange
-          {% elif is_state('input_boolean.andy_birthday', 'on') or is_state('input_boolean.independence_day', 'on') %}
-            red
-          {% else %}
-            green
-          {% endif %}
+# script:
+#   holiday_porch_light:
+#     sequence:
+#     - service: light.turn_on
+#       entity_id: light.porch
+#       data_template:
+#         brightness_pct: 100
+#         transition: 0.4
+#         color_name: >
+#           {% if is_state('input_boolean.valentines_day', 'on') %}
+#             pink
+#           {% elif is_state('input_boolean.autism_awareness', 'on') %}
+#             blue
+#           {% elif is_state('input_boolean.halloween', 'on') %}
+#             orange
+#           {% elif is_state('input_boolean.andy_birthday', 'on') or is_state('input_boolean.independence_day', 'on') %}
+#             red
+#           {% else %}
+#             green
+#           {% endif %}
 
 
 input_boolean:

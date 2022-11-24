@@ -55,7 +55,9 @@ automation:
         {{ url + file + ext }}
       media_content_type: audio/mp3
   - if:
-    - "{{ now().strftime('%H%M') | int > 540 and now().strftime('%H%M') | int < 1200 }}"
+    - condition: time
+      after: '05:40:00'
+      before: '08:00:00'
     then:
     - service: input_boolean.turn_off
       entity_id: input_boolean.white_noise
@@ -89,12 +91,10 @@ script:
       entity_id: 
       - input_boolean.washer
       - input_boolean.dryer
-      - switch.air_freshener
     - service: homeassistant.turn_on
       entity_id: 
       - script.media_players_off
       - script.christmas_lights_off
-      - script.master_bedroom_ac_on
       - switch.master_bedroom_fan
     - service: light.turn_on
       entity_id: light.master_bath_night_light
@@ -122,7 +122,6 @@ script:
       - group.lights_interior
       - input_boolean.christmas_porch_light_loop
       - media_player.living_room_vizio
-      - switch.air_freshener
     - service: script.turn_on
       entity_id: script.christmas_lights_off
     - service: switch.turn_on
@@ -188,7 +187,7 @@ script:
         brightness_pct: 100
     - service: script.white_noise_speaker
       data:
-        speaker: media_player.guest_bedroom_speaker
+        speaker: media_player.guest_bedroom_clock
     - service: alarm_control_panel.alarm_arm_home
       data:
         entity_id: alarm_control_panel.home
@@ -211,7 +210,6 @@ script:
       entity_id: 
       - input_boolean.washer
       - input_boolean.dryer
-      - switch.air_freshener
     - service: homeassistant.turn_on
       entity_id: 
       - script.media_players_off
@@ -222,11 +220,11 @@ script:
         entity_id: alarm_control_panel.home
         code: !secret alarm_code_system
     - condition: state
-      entity_id: media_player.guest_bedroom_speaker
+      entity_id: media_player.guest_bedroom_clock
       state: 'off'
     - service: script.white_noise_speaker
       data:
-        speaker: media_player.guest_bedroom_speaker
+        speaker: media_player.guest_bedroom_clock
 
 
   good_night_guest:
@@ -322,38 +320,6 @@ script:
       - media_player.kitchen_speaker
 
 
-  master_bedroom_ac_on:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.auto_bedroom_ac
-      state: 'on'
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: climate.thermostat
-        state:
-        - 'heat'
-        - 'off'
-    - condition: numeric_state
-      entity_id: 
-      - sensor.outside_temp
-      - sensor.outside_temp_darksky
-      above: 65
-    - service: climate.set_temperature
-      entity_id: climate.bedroom_ac
-      data:
-        temperature: >
-          {% if is_state('climate.bedroom_ac', 'cool') %}
-            {{ state_attr('climate.bedroom_ac', 'temperature') | int(0) }}
-          {% elif is_state('input_boolean.sleep_mode', 'on') %}
-            {{ states('input_number.bedroom_ac_temp_matt') | int(0) }}
-          {% else %}
-            {{ states('input_number.bedroom_ac_temp_andy') | int(0) }}
-          {% endif %}
-    - service: climate.turn_on
-      entity_id: climate.bedroom_ac
-
-
   lights_off_interior:
     sequence:
     - service: homeassistant.turn_off
@@ -376,6 +342,5 @@ input_boolean:
   andy_sleep:
   sleep_mode_guest:
   white_noise:
-  auto_bedroom_ac:
   basement_bedroom:
   guest_in_master:

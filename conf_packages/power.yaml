@@ -4,7 +4,7 @@ automation:
   initial_state: true
   trigger:
   - platform: numeric_state
-    entity_id: sensor.server_ups_battery
+    entity_id: sensor.ups_battery
     below: 30
   condition:
   - condition: state
@@ -53,7 +53,7 @@ sensor:
         {% if ups == 'on' %}
           AC power
         {% elif ups == 'off' %}
-          On battery: {{ states('sensor.server_ups_battery') | float(0) }}% ({{ states('sensor.server_ups_time_left') | float(0) | round(0) }} min)
+          On battery: {{ states('sensor.ups_battery') | float(0) }}% ({{ states('sensor.server_ups_time_left') | float(0) | round(0) }} min)
         {% else %}
           Unknown
         {% endif %}

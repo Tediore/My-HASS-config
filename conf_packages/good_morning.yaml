@@ -49,7 +49,7 @@ automation:
   - platform: time
     at:
     - '06:45:00'
-    - '08:00:00'
+    - '07:30:00'
   condition:
   - condition: or
     conditions:
@@ -78,7 +78,7 @@ automation:
     data:
       is_volume_muted: false
   - condition: time
-    after: '07:30:00'
+    after: '07:29:00'
   - service: switch.turn_off
     entity_id: switch.bedroom_fan
 

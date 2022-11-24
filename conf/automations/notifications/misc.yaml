@@ -1,30 +1,3 @@
-- alias: Suggest opening the windows  # throttled - 8 hours
-  id: 'thaitheePuo3ohv8'
-  initial_state: true
-  trigger:
-    platform: template
-    value_template: "{{ (states('sensor.tstat_current_temp') | float(0) - states('sensor.outside_temp') | float(0)) > 9 }}"
-  condition:
-  - condition: template
-    value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.suggest_opening_the_windows', 'last_triggered'))) / 3600 > 8 }}"
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'cool'
-  - condition: numeric_state
-    entity_id: sensor.outside_dewpoint
-    below: 58
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'off'
-  action:
-  - service: notify.gotify
-    data_template:
-      title: "Consider opening the windows"
-      message: "It's {{ states('sensor.tstat_current_temp') | float(0) | round(0) | int(0) }}° inside and only {{ states('sensor.outside_temp') | float(0) | round(0) | int(0) }}° outside."
-
-
 - alias: Notify when garage door opened or unavailable
   initial_state: true
   trigger:
@@ -60,36 +33,6 @@
       message: "CPU temperature has been above 80 °C for more than five minutes."
 
 
-- alias: Notify when humidity rising quickly
-  id: 'alie4ciek7ingu6O'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.inside_dew_point
-    from: 'off'
-    to: 'on'
-    for: '00:20:00'
-  - platform: numeric_state
-    entity_id: sensor.inside_dew_point
-    above: 55
-  condition:
-  - condition: numeric_state
-    entity_id: sensor.inside_dew_point
-    above: 55
-  - condition: state
-    entity_id: binary_sensor.inside_dew_point
-    state: 'on'
-    for: '00:20:00'
-  - condition: state
-    entity_id: input_boolean.sleep_mode
-    state: 'off'
-  action:
-  - service: notify.gotify
-    data:
-      title: "Humidity rising quickly"
-      message: "The indoor dew point is rising rapidly."
-
-
 - alias: Notify when Home Assistant starts
   id: 'yo9Ju1Au6daePhaH'
   trigger:
@@ -105,21 +48,6 @@
   - service: persistent_notification.dismiss
     data:
       notification_id: config_entry_discovery
-
-
-- alias: Birthday reminder
-  id: 'seigoKush3DohW5w'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: calendar.birthdays
-    from: 'off'
-    to: 'on'
-  action:
-  - service: notify.gotify
-    data_template:
-      title: "{{ state_attr('calendar.birthdays', 'message') }} is today!"
-      message: Don't forget to say happy birthday!
 
 
 - alias: Dismiss discovery notification

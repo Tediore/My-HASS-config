@@ -48,7 +48,6 @@ automation:
     - script.entrance_light_on
     - script.tstat_smart_resume_cool
     - script.arrival_night
-    - input_boolean.arrival
 
 
 - alias: Activate away mode when armed away
