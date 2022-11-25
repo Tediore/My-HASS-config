@@ -60,7 +60,13 @@ automation:
   - service: light.turn_on
     data:
       entity_id: "light.{{ trigger.to_state.object_id.replace('_door','') }}"
-      brightness_pct: "{{ 67 if (trigger.to_state.state == 'on' and is_state('input_boolean.dark_inside', 'on')) else 100 }}"
+      brightness_pct: >
+        {% set state = trigger.to_state.state %}
+        {% if state == 'on' %}
+          {{ 67 if is_state('input_boolean.dark_inside', 'on') else 100 }}
+        {% else %}
+          0
+        {% endif %}
       transition: 0.4
 
 

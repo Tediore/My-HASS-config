@@ -1,36 +1,16 @@
-- alias: Notify when garage door opened or unavailable
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: cover.garage_door
-    to:
-    - 'open'
-    - 'unavailable'
-  action:
-  - service: notify.gotify
-    data:
-      title: "Garage door {{ trigger.to_state.state }}"
-      message: >
-        The garage door {% set state = trigger.to_state.state -%}
-        {%- if state == 'open' -%}
-          has been {{ state.replace('open', 'opened') }}
-        {%- else -%}
-          is {{ state }}
-        {%- endif -%}
-
-
+automation:
 - alias: Notify when server CPU hot
   id: 'Wievoh1ii0phodei'
   initial_state: true
   trigger:
   - platform: template
-    value_template: "{{ states('sensor.server_cpu_temp') | int(0) > 80 }}"
+    value_template: "{{ states('sensor.server_cpu_temp') | int(0) > 70 }}"
     for: '00:05:00'
   action:
   - service: notify.gotify_high
     data:
       title: "Server CPU temperature elevated"
-      message: "CPU temperature has been above 80 °C for more than five minutes."
+      message: "CPU temperature has been above 70 °C for more than five minutes."
 
 
 - alias: Notify when Home Assistant starts
@@ -125,3 +105,7 @@
     data:
       title: Paygo balance below $3
       message: Reload your Paygo balance as soon as possible.
+
+
+input_boolean:
+  internet:

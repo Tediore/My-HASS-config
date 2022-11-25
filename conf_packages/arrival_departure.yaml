@@ -275,3 +275,32 @@ script:
       state: 'on'
     - service: switch.turn_off
       entity_id: *lr_fan
+
+
+binary_sensor:
+- platform: template
+  sensors:
+    any_speaker:
+      friendly_name: Any speaker
+      value_template: >
+        {% set rejects = ['off', 'unavailable'] %}
+        {% set speakers = [
+          states('media_player.bedroom_speaker') not in rejects, 
+          states('media_player.living_room_speaker') not in rejects, 
+          states('media_player.kitchen_speaker') not in rejects,
+          states('media_player.craft_room_speaker') not in rejects,
+          states('media_player.office_speaker') not in rejects,
+          states('media_player.guest_bedroom_clock') not in rejects
+          ] %}
+        {{ speakers | sum > 0 }}
+
+    any_tv:
+      friendly_name: Any TV
+      value_template: >
+        {% set rejects = ['off', 'unavailable'] %}
+        {% set tvs = [
+          states('media_player.craft_room_tv') not in rejects,
+          states('media_player.bedroom_tv') not in rejects, 
+          states('media_player.living_room_vizio') not in rejects 
+          ] %}
+        {{ tvs | sum > 0 }}

@@ -9,12 +9,10 @@ automation:
   - condition: state
     entity_id: input_boolean.basement_bedroom
     state: 'off'
-  - condition: or
-    conditions:
-    - "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d') }}"
-    - "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
-  - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  - condition: state
+    entity_id: binary_sensor.workday
+    state: 'on'
+  - "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
   action:
   - service: script.turn_on
     entity_id: script.good_morning
@@ -80,44 +78,9 @@ automation:
   - condition: time
     after: '07:29:00'
   - service: switch.turn_off
-    entity_id: switch.bedroom_fan
-
-
-- alias: Reset volume after extra sleep
-  id: 'jat2nealoziep0Gee6weiv'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: media_player.bedroom_speaker
-    to:
-    - 'idle'
-    - 'off'
-  - platform: state
-    entity_id: media_player.bedroom_speaker
-    to: 'paused'
-    for: '00:00:15'
-  condition:
-  - condition: state
-    entity_id: input_boolean.extra_sleep
-    state: 'on'
-  action:
-  - service: homeassistant.turn_off
     entity_id: 
-    - input_boolean.extra_sleep
-    - input_boolean.sleep_mode
-    - media_player.bedroom_speaker
-  - service: media_player.volume_mute
-    entity_id: media_player.bedroom_speaker
-    data:
-      is_volume_muted: true
-  - service: media_player.volume_set
-    data:
-      entity_id: media_player.bedroom_speaker
-      volume_level: 0.4
-  - service: media_player.volume_mute
-    entity_id: media_player.bedroom_speaker
-    data:
-      is_volume_muted: false
+    - switch.bedroom_fan
+    - switch.humidifier
 
 
 script:
@@ -162,8 +125,16 @@ script:
         kelvin: 4000
 
 
-input_boolean:
-  extra_sleep:
+binary_sensor:
+- platform: template
+  sensors:
+    workday:
+      value_template: >
+        {{
+          as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.andy_work', 'start_time')) | timestamp_custom('%d')
+        or 
+          as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d')
+        }}
 
 
 input_datetime:

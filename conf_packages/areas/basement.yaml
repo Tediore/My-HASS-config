@@ -4,17 +4,55 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.basement_door
+    entity_id: &bsmt_door binary_sensor.basement_door
     from: 'off'
     to: 'on'
   - platform: state
-    entity_id: binary_sensor.basement_door
+    entity_id: *bsmt_door
     from: 'on'
     to: 'off'
     for: '00:00:30'
+  condition:
+  - condition: state
+    entity_id: &auto_lights input_boolean.auto_basement_lights
+    state: 'off'
   action:
   - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.basement_stairs
+    entity_id: &bsmt_stairs light.basement_stairs
+
+
+- alias: Turn basement lights on/off with door when auto enabled
+  id: 'kah7xefaeP4vah9apee0'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *bsmt_door
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: *bsmt_door
+    from: 'on'
+    to: 'off'
+    for: '00:10:00'
+  condition:
+  - condition: state
+    entity_id: *auto_lights
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id:
+    - *bsmt_stairs
+    - light.basement
+    - light.bar_lights
+    data:
+      brightness_pct: "{{ 100 if trigger.to_state.state == 'on' else 0 }}"
+      color_temp_kelvin: 2800
+  - service: light.turn_on
+    entity_id: light.old_style_sign
+    data:
+      brightness_pct: "{{ 50 if trigger.to_state.state == 'on' else 0 }}"
+  - service: "switch.turn_{{ trigger.to_state.state }}"
+    entity_id: switch.bud_light
 
 
 - alias: Turn basement stairs bottom light on/off with basement stairs
@@ -157,3 +195,15 @@ group:
 
 input_boolean:
   sync_basement_color_lights:
+  auto_basement_lights:
+
+
+sensor:
+- platform: history_stats
+  name: Basement door opened last 7 days
+  entity_id: binary_sensor.basement_door
+  state: 'on'
+  type: count
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7

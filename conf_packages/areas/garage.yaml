@@ -134,6 +134,27 @@ automation:
     entity_id: lock.garage_service_door
 
 
+- alias: Notify when garage door opened or unavailable
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: cover.garage_door
+    to:
+    - 'open'
+    - 'unavailable'
+  action:
+  - service: notify.gotify
+    data:
+      title: "Garage door {{ trigger.to_state.state }}"
+      message: >
+        The garage door {% set state = trigger.to_state.state -%}
+        {%- if state == 'open' -%}
+          has been {{ state.replace('open', 'opened') }}
+        {%- else -%}
+          is {{ state }}
+        {%- endif -%}
+
+
 mqtt:
   cover:
   - name: Garage door

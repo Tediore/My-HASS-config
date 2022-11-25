@@ -79,23 +79,19 @@ script:
   good_night:
     alias: Good night
     sequence:
-    - service: input_boolean.turn_on
+    - service: homeassistant.turn_on
       entity_id: 
       - input_boolean.sleep_mode
       - input_boolean.andy_sleep
-    - service: script.turn_on
-      entity_id: script.white_noise_bedroom
-    - service: script.turn_on
-      entity_id: script.lights_off_interior
-    - service: homeassistant.turn_off
-      entity_id: 
-      - input_boolean.washer
-      - input_boolean.dryer
-    - service: homeassistant.turn_on
-      entity_id: 
+      - script.white_noise_bedroom
+      - script.lights_off_interior
       - script.media_players_off
       - script.christmas_lights_off
       - switch.master_bedroom_fan
+    - service: homeassistant.turn_off
+      entity_id:
+      - input_boolean.washer
+      - input_boolean.dryer
     - service: light.turn_on
       entity_id: light.master_bath_night_light
       data:
@@ -330,7 +326,7 @@ script:
 input_number:
   white_noise_vol:
     name: White noise volume
-    min: 40
+    min: 20
     max: 80
     step: 2
     unit_of_measurement: '%'

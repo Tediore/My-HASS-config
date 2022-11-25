@@ -1,19 +1,4 @@
 automation:
-- alias: Toggle dark inside boolean
-  id: 'ainei8ohpetaa2cheLeilu'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sun.sun
-    to:
-    - 'below_horizon'
-    - 'above_horizon'
-    for: &horizon_time '00:20:00'
-  action:
-  - service: "homeassistant.turn_{{ 'on' if trigger.to_state.state == 'below_horizon' else 'off' }}" 
-    entity_id: input_boolean.dark_inside
-
-
 - alias: Turn on sunset lights - light level
   id: 'ieb7uceicaejai0eiLaoza'
   initial_state: true
@@ -30,7 +15,7 @@ automation:
   - condition: time
     after: '14:00:00'
   - condition: state
-    entity_id: input_boolean.dark_inside
+    entity_id: &dark_inside input_boolean.dark_inside
     state: 'off'
   - condition: state
     entity_id: input_text.alarm
@@ -45,10 +30,26 @@ automation:
     - condition: state
       entity_id: sun.sun
       state: 'below_horizon'
-      for: *horizon_time
+      for: &horizon_time '00:20:00'
   action:
-  - service: homeassistant.turn_on
-    entity_id: input_boolean.dark_inside
+  - service: input_boolean.turn_on
+    entity_id: *dark_inside
+
+
+- alias: Toggle dark inside boolean
+  description: Backup in case outdoor light sensor fails
+  id: 'ainei8ohpetaa2cheLeilu'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sun.sun
+    to:
+    - 'below_horizon'
+    - 'above_horizon'
+    for: *horizon_time
+  action:
+  - service: "homeassistant.turn_{{ 'on' if trigger.to_state.state == 'below_horizon' else 'off' }}" 
+    entity_id: *dark_inside
 
 
 - alias: Turn lights back off if light level goes back up
@@ -61,7 +62,7 @@ automation:
     for: '00:10:00'
   condition:
   - condition: state
-    entity_id: input_boolean.dark_inside
+    entity_id: *dark_inside
     state: 'on'
   - condition: state
     entity_id: input_text.alarm
@@ -73,64 +74,12 @@ automation:
     entity_id: script.lights_sunrise
 
 
-# - alias: Dim cabinet and buffet lights at night
-#   id: 'faShei9wi9de8ia4aquoag'
-#   initial_state: true
-#   trigger:
-#   - platform: time
-#     at: &time '23:00:00'
-#   - platform: homeassistant
-#     event: start
-#   condition:
-#   - condition: state
-#     entity_id: input_boolean.overnight_guest
-#     state: 'off'
-#   - condition: or
-#     conditions:
-#     - condition: state
-#       entity_id: light.cabinet_lights_dimmer
-#       state: 'on'
-#     - condition: state
-#       entity_id: light.buffet
-#       state: 'on'
-#     - condition: state
-#       entity_id: light.hallway
-#       state: 'on'
-#     - condition: state
-#       entity_id: light.entrance
-#       state: 'on'
-#   - condition: time
-#     after: *time
-#   action:
-#   - wait_template: "{{ is_state('media_player.living_room_vizio', 'off') }}"
-#     timeout: '00:30:00'
-#     continue_on_timeout: false
-#   - service: light.turn_on
-#     entity_id:
-#     - light.cabinet_lights_dimmer
-#     - light.hallway
-#     - light.entrance
-#     - light.other_buffet
-#     data:
-#       brightness_pct: 66
-#       transition: 10
-#       kelvin: 2700
-#   - condition: template
-#     value_template: "{{ state_attr('light.buffet', 'brightness') | int(0) > 170 }}"
-#   - service: light.turn_on
-#     entity_id: light.buffet
-#     data:
-#       brightness_pct: 66
-#       transition: 10
-#       kelvin: 2700
-
-
 - alias: Turn lights on/off at sunset/sunrise
   id: 'eifait7ohwo4haeW9oozah'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_boolean.dark_inside
+    entity_id: *dark_inside
     to:
     - 'on'
     - 'off'
@@ -138,7 +87,7 @@ automation:
   - service: script.turn_on
     data:
       entity_id: >
-        script.{%- set alarm = states('alarm_control_panel.home') -%}
+        script.{%- set alarm = states('input_text.alarm') -%}
         {%- if trigger.to_state.state == 'on' -%}
           {%- if alarm == 'armed_away' -%}
             lights_kitty
@@ -167,50 +116,60 @@ script:
   lights_sunset:
     sequence:
     - service: light.turn_on
-      entity_id:
-      - light.entrance
-      - light.cabinet_lights_dimmer
+      entity_id: light.cabinet_lights_dimmer
       data:
-        brightness_pct: "{{ 50 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
+        brightness_pct: "{{ 67 if is_state('media_player.living_room_vizio', 'on') else 100 }}"
         kelvin: 2700
         transition: 10
     - service: light.turn_on
       entity_id:
-      - light.hall_light_dimmer
       - light.buffet
+      - light.entrance
       - light.hall_bath_night_light
+      - light.hall_light_dimmer
       - light.master_bath_night_light
       data:
         brightness_pct: 100
+        kelvin: 2700
+        transition: 10
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
     - if:
       - condition: state
-        entity_id: media_player.living_room_vizio
+        entity_id:
+        - media_player.living_room_vizio
+        - input_boolean.christmas
         state: 'off'
       then:
       - service: light.turn_on
         data:
-          entity_id: "light.{{ 'christmas_tree' if is_state('light.christmas_tree', 'off') else 'other_buffet' }}"
+          entity_id: light.living_room_buffet
           brightness_pct: 100
           kelvin: 2700
           transition: 10
+    - if:
+      - &is_christmas "{{ is_state('input_boolean.christmas', 'on') }}"
+      then:
+      - service: light.turn_on
+        entity_id: &christmas_lights light.christmas_lights
+        data:
+          brightness_pct: 100
+
 
   lr_lights_sunset:
     sequence:
-    - choose:
-      - conditions:
-        - condition: state
-          entity_id: media_player.living_room_vizio
-          state: 'on'
-        sequence:
-        - service: light.turn_on
-          entity_id: light.living_room_bias_lighting
-          data:
-            brightness_pct: 100
-            kelvin: 5000
-            transition: 10
-      default:
+    - if:
+      - condition: state
+        entity_id: media_player.living_room_vizio
+        state: 'on'
+      then:
+      - service: light.turn_on
+        entity_id: light.living_room_bias_lighting
+        data:
+          brightness_pct: 100
+          kelvin: 5000
+          transition: 10
+      else:
       - wait_template: "{{ states('sensor.outdoor_light_level') | int(0) < 10 }}"
         timeout: "00:20:00"
         continue_on_timeout: true
@@ -229,11 +188,11 @@ script:
   lights_sunrise:
     sequence:
     - service: input_boolean.turn_off
-      entity_id: input_boolean.dark_inside
+      entity_id: *dark_inside
     - service: light.turn_off
       entity_id: 
       - light.buffet
-      - light.other_buffet
+      - light.living_room_buffet
       - light.entrance
       - light.hall_light_dimmer
       - light.cabinet_lights_dimmer
@@ -246,16 +205,11 @@ script:
       - light.master_bath_night_light
       data:
         transition: 1
-    - service: script.turn_on
-      entity_id: script.christmas_lights_off
-
-  christmas_lights_off:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.christmas
-      state: 'on'
-    - service: homeassistant.turn_off
-      entity_id: group.lights_christmas
+    - if:
+      - *is_christmas
+      then:
+      - service: light.turn_off
+        entity_id: *christmas_lights
 
   brightness_preset:
     sequence:
@@ -277,26 +231,24 @@ script:
         - light.cabinet_lights_dimmer
         - light.living_room_lamps
         - light.master_bath_night_light
-        - light.other_buffet
+        - light.living_room_buffet
     - service: light.turn_off
       entity_id: *main_floor_lights
     - service: input_boolean.turn_on
       entity_id: input_boolean.main_floor_lights_off
 
 
-group:
-  lights_christmas:
-    name: Christmas lights
-    entities:
-    - light.christmas_lights
-    - light.christmas_tree
-    - light.mini_christmas_tree
-    - light.portable_mini_christmas_tree
-    - light.star_lights
+light:
+- platform: group
+  name: Christmas lights
+  entities:
+  - light.christmas_tree
+  - light.mini_christmas_tree
+  - light.portable_mini_christmas_tree
+  - light.star_lights
 
 
 input_boolean:
   dark_inside:
   overnight_guest:
   main_floor_lights_off:
-  internet:

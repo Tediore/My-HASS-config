@@ -106,7 +106,7 @@ script:
     - service: light.turn_off
       entity_id:
       - light.living_room_lamps
-      - light.other_buffet
+      - light.living_room_buffet
       data:
         transition: 2
 
@@ -125,7 +125,7 @@ script:
       - service: light.turn_on
         data:
           entity_id:
-          - light.other_buffet
+          - light.living_room_buffet
           - light.cabinet_lights_dimmer
           brightness_pct: 100
           kelvin: 2700

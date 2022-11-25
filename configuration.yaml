@@ -1,5 +1,5 @@
 automation: !include_dir_merge_list conf/automations/
-binary_sensor: !include conf/binary_sensor.yaml
+binary_sensor:
 climate:
 config:
 counter:
@@ -26,7 +26,7 @@ panel_custom: !include conf_settings/panel_custom.yaml
 recorder: !include conf_settings/recorder.yaml
 scene: !include conf/scenes.yaml
 script:
-sensor: !include_dir_merge_list conf/sensors/
+sensor: !include conf/sensors.yaml
 shell_command: !include conf/shell_command.yaml
 ssdp:
 sun:

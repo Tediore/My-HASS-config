@@ -153,6 +153,32 @@ sensor:
           is_state('sun.sun', 'below_horizon')
         }}
 
+- platform: history_stats
+  name: Xbox time today
+  entity_id: binary_sensor.xbox
+  state: 'on'
+  type: time
+  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  end: '{{ now() }}'
+
+- platform: history_stats
+  name: Xbox time yesterday
+  entity_id: binary_sensor.xbox
+  state: 'on'
+  type: time
+  duration:
+    hours: 24
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
+- platform: history_stats
+  name: Xbox time last 7 days
+  entity_id: binary_sensor.xbox
+  state: 'on'
+  type: time
+  duration:
+    days: 7
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+
 
 input_number:
   camera_monitor_brightness:
@@ -160,13 +186,6 @@ input_number:
     min: 0
     max: 100
     step: 5
-    mode: slider
-
-  game_room_temp_offset:
-    min: -3
-    max: 3
-    step: 0.5
-    unit_of_measurement: '°F'
     mode: slider
 
 

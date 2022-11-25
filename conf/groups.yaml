@@ -29,9 +29,9 @@ select_lights_interior:
   - light.mini_christmas_tree
   - light.office
   - light.office_lamps
-  - light.other_buffet
+  - light.living_room_buffet
   - light.other_dining_room
-  - light.other_buffet
+  - light.living_room_buffet
   - switch.side_entrance_light
 
 lights_interior_guest_in_master:
@@ -55,9 +55,9 @@ lights_interior_guest_in_master:
   - light.mini_christmas_tree
   - light.office
   - light.office_lamps
-  - light.other_buffet
+  - light.living_room_buffet
   - light.other_dining_room
-  - light.other_buffet
+  - light.living_room_buffet
   - switch.side_entrance_light
 
 plugs:
