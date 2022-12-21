@@ -4,6 +4,7 @@ longitude: !secret lon_home
 elevation: !secret elev
 unit_system: imperial
 time_zone: America/Chicago
+country: US
 customize: !include /config/customize.yaml
 auth_providers:
 - type: homeassistant

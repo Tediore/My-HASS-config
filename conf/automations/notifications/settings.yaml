@@ -5,7 +5,7 @@
   - platform: event
     event_type: mobile_app_notification_action
   action:
-    service_template: >
+    service: >
       {% set action = trigger.event.data.action %}
       {% if action in ['heat_reenable'] %}
         homeassistant.turn_on
@@ -16,7 +16,7 @@
       {% else %}
         switch.turn_off
       {% endif %}
-    data_template:
+    data:
       target: >
         {% set action = trigger.event.data.action %}
         {% if action == 'alarm_arm_away' %}

@@ -1,5 +1,5 @@
 automation:
-- alias: Master bedroom remote main
+- alias: Main bedroom remote main
   id: 'tohx5be8hahLa2yaeVexai9uv'
   initial_state: true
   mode: queued

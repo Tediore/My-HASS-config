@@ -89,5 +89,5 @@ script:
       default:
       - service: media_player.volume_mute
         entity_id: media_player.craft_room_speaker
-        data_template:
+        data:
           is_volume_muted: "{{ false if state_attr('media_player.craft_room_speaker', 'is_volume_muted') else true }}"

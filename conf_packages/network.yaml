@@ -58,7 +58,7 @@ automation:
       title: "Server IPv6 address changed"
       message: "Check Home Assistant for details."
   - service: persistent_notification.create
-    data_template:
+    data:
       title: "Server IPv6 address changed"
       message: "IPv6 address is now {{ states('sensor.server_ipv6_address') }}."
 
@@ -77,7 +77,7 @@ automation:
     - 'on'
     for: '00:00:40'
   action:
-  - service_template: "input_boolean.turn_{{ trigger.to_state.state }}"
+  - service: "input_boolean.turn_{{ trigger.to_state.state }}"
     entity_id: input_boolean.internet
 
 
@@ -89,7 +89,7 @@ automation:
     entity_id: input_boolean.internet
   action:
   - service: script.sms_send
-    data_template:
+    data:
       number: !secret phone_matt
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
 

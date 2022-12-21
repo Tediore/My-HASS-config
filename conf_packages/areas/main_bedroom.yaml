@@ -24,7 +24,7 @@ automation:
       transition: 60
 
 
-- alias: Transition master bedroom lights to warm
+- alias: Transition main bedroom lights to warm
   id: 'EitaeNg7et5ogh2Ahph2Ae'
   initial_state: true
   trigger:
@@ -70,47 +70,6 @@ automation:
       transition: 0.4
 
 
-# - alias: Turn mini Christmas tree on
-#   id: 'Voh7tieRoh6jahthuojeit'
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.master_bedroom_motion
-#     to: 'on'
-#   condition:
-#   - condition: state
-#     entity_id: input_boolean.dark_inside
-#     state: 'on'
-#   - condition: state
-#     entity_id: input_boolean.andy_sleep
-#     state: 'off'
-#   - "{{ now().month in [11, 12, 1, 2] }}"
-#   action:
-#   - service: light.turn_on
-#     entity_id: light.mini_christmas_tree
-
-
-# - alias: Turn mini Christmas tree off
-#   id: 'futok5uwu2paaMaigh7ied'
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.master_bedroom_motion
-#     to: 'off'
-#     for: '00:05:00'
-#   - platform: state
-#     entity_id: light.matt
-#     from: 'on'
-#     to: 'off'
-#   condition:
-#   - condition: state
-#     entity_id: light.matt
-#     state: 'off'
-#   action:
-#   - service: light.turn_off
-#     entity_id: light.mini_christmas_tree
-
-
 switch:
 - platform: template
   switches:
@@ -128,25 +87,3 @@ switch:
       turn_off:
         service: switch.turn_off
         entity_id: switch.master_bedroom_fan
-
-
-climate:
-- platform: generic_thermostat
-  name: Box fan
-  heater: switch.box_fan
-  ac_mode: true
-  target_sensor: &bedroom_temp sensor.main_bedroom_temperature
-  min_temp: 64
-  max_temp: 75
-  cold_tolerance: 0
-  hot_tolerance: 2
-  precision: 0.5
-
-
-input_number:
-  main_bedroom_temperature_offset:
-    min: -3
-    max: 3
-    step: 0.5
-    unit_of_measurement: '°F'
-    mode: slider

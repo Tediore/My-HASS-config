@@ -67,12 +67,26 @@
     above: -1
   action:
   - service: notify.mobile_app_matt_phone
-    data_template:
+    data:
       title: "Device unavailable"
       message: "{{ trigger.to_state.name }} is unavailable"
       data:
         ttl: 0
         priority: high
+
+
+- alias: Notify when doorbell is rung
+  id: 'notify_doorbell_rung'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.front_door_camera_doorbell
+    from: 'off'
+    to: 'on'
+  action:
+  - service: notify.gotify
+    data:
+      message: 'Someone is at the front door'
 
 
 - alias: Notify when Zigbee router unavailable for 5 minutes
@@ -226,7 +240,7 @@
   #   value_template: "{{ trigger.to_state.state != '' }}"
   action:
   - service: notify.gotify_high
-    data_template:
+    data:
       title: &batt_low_title Device battery low
       message: &batt_low_msg "{{ trigger.to_state.name.replace('battery low', '').replace('battery', '') }} battery is low."
       data:
@@ -266,7 +280,7 @@
     entity_id: input_boolean.fridge_temp_ack
     state: 'off'
   - service: script.sms_send
-    data_template:
+    data:
       number: !secret phone_matt
       message: *fridge_title
 
@@ -302,7 +316,7 @@
   initial_state: true
   trigger:
   - platform: state
-    entity_id: binary_sensor.basement_fridge
+    entity_id: binary_sensor.basement_fridge_door
     to: 'on'
     for: '00:05:00'
   action:

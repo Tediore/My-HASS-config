@@ -29,11 +29,11 @@ automation:
     - 'off'
   action:
   - service: input_text.set_value
-    data_template:
+    data:
       entity_id: "{{ 'input_text.time_power_lost' if trigger.to_state.state == 'off' else 'input_text.time_power_restored' }}"
       value: "{{ as_timestamp(now()) }}"
   - service: notify.gotify_high
-    data_template:
+    data:
       title: "{{ 'Power lost' if trigger.to_state.state == 'off' else 'Power restored' }}"
       message: >
         {% if trigger.to_state.state == 'off' %}

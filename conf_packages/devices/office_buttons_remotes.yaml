@@ -16,15 +16,17 @@ automation:
     - 'colortemp_up'
     - 'colortemp_down'
   action:
-  - service_template: >
-      {% set command = trigger.to_state.state %}
-      {% if command in ['on', 'off'] %}
-        script.turn_off_office_speaker
-      {% elif 'colortemp' in command %}
-        script.toggle_office_fan
-      {% else %}
-        script.toggle_mute_office_speaker
-      {% endif %}
+  - service: script.turn_on
+    data:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command in ['on', 'off'] %}
+          script.turn_off_office_speaker
+        {% elif 'colortemp' in command %}
+          script.toggle_office_fan
+        {% else %}
+          script.toggle_mute_office_speaker
+        {% endif %}
 
 
 - alias: Office table button
@@ -91,7 +93,7 @@ script:
       default:
       - service: media_player.volume_mute
         entity_id: media_player.office_speaker
-        data_template:
+        data:
           is_volume_muted: "{{ false if state_attr('media_player.office_speaker', 'is_volume_muted') else true }}"
 
   move_music_all:
@@ -99,7 +101,7 @@ script:
     sequence:
     - service: media_player.play_media
       entity_id: &upstairs_speakers media_player.hub
-      data_template:
+      data:
         media_content_id: "{{ state_attr('media_player.office_speaker', 'media_content_id') }}"
         media_content_type: music
     - wait_template: "{{ state_attr('media_player.office_speaker', 'media_content_id') == state_attr('media_player.hub', 'media_content_id') }}"
@@ -122,7 +124,7 @@ script:
     sequence:
     - service: media_player.play_media
       entity_id: media_player.office_speaker
-      data_template:
+      data:
         media_content_id: "{{ state_attr('media_player.hub', 'media_content_id') }}"
         media_content_type: music
     - wait_template: "{{ state_attr('media_player.office_speaker', 'media_content_id') == state_attr('media_player.hub', 'media_content_id') }}"

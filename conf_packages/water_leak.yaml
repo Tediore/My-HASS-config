@@ -23,6 +23,7 @@ automation:
     - binary_sensor.washer_sink_leak_sensor_water_leak
     - binary_sensor.water_heater_leak_sensor_water_leak
     - binary_sensor.water_main_leak_sensor_water_leak
+    - binary_sensor.south_hose_bib_leak_sensor_water_leak
     to: 'on'
   - platform: state
     entity_id: *water_sensors
@@ -31,7 +32,7 @@ automation:
     for: '00:00:05'
   action:
   - service: script.sms_send
-    data_template:
+    data:
       number: !secret phone_matt
       message: &leak_message >
         {% if trigger.to_state.state == 'on' %}
@@ -40,11 +41,11 @@ automation:
           {{ trigger.to_state.name.replace('water leak', '').strip() }} cleared
         {% endif %}
   - service: notify.gotify_high
-    data_template:
+    data:
       title: &leak_title "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
       message: *leak_message
   - service: notify.mobile_app_matt_phone
-    data_template:
+    data:
       title: *leak_title
       message: *leak_message
       data:

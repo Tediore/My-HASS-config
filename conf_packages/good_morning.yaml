@@ -47,38 +47,17 @@ automation:
   - platform: time
     at:
     - '06:45:00'
-    - '07:30:00'
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: input_boolean.sleep_mode
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.andy_sleep
-      state: 'on'
-    - condition: state
-      entity_id: input_boolean.guest_in_master
-      state: 'on'
+    - '07:15:00'
   action:
-  - service: media_player.volume_mute
-    entity_id: &white_noise_spkrs
-    - media_player.bedroom_speaker
-    - media_player.guest_bedroom_clock
-    data:
-      is_volume_muted: true
-  - service: media_player.volume_set
-    data:
-      entity_id: *white_noise_spkrs
-      volume_level: 0.4
-  - service: media_player.volume_mute
-    entity_id: media_player.bedroom_speaker
-    data:
-      is_volume_muted: false
+  - service: input_boolean.turn_off
+    entity_id:
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    - input_boolean.sleep_mode_guest
   - condition: time
-    after: '07:29:00'
+    after: '07:14:00'
   - service: switch.turn_off
-    entity_id: 
+    entity_id:
     - switch.bedroom_fan
     - switch.humidifier
 

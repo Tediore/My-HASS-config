@@ -27,7 +27,7 @@
     state: 'off'
   action:
   - service: notify.mobile_app_matt_phone
-    data_template:
+    data:
       title: Lights have been turned on
       message: >
         {% set entity = trigger.to_state.entity_id %}

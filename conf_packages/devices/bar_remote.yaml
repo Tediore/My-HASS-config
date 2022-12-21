@@ -87,7 +87,7 @@ script:
       entity_id: input_boolean.bar_lights_color
     - service: light.turn_on
       entity_id: light.bar_lights
-      data_template:
+      data:
         brightness_pct: 100
         color_name: &color >
           {% set color = states('input_text.bar_lights_color') %}
@@ -103,7 +103,7 @@ script:
           {{ dict[color] }}
     - service: input_text.set_value
       entity_id: input_text.bar_lights_color
-      data_template:
+      data:
         value: *color
 
   bar_lights_reset:

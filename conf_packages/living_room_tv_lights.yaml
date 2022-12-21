@@ -115,7 +115,9 @@ script:
     sequence:
     - service: light.turn_on
       data:
-        entity_id: "light.buffet, light.hallway, light.entrance{{ ', light.living_room_lamps' if is_state('light.living_room_lamps', 'off') else '' }}"
+        entity_id: >
+          light.buffet, light.hall_light_dimmer, light.entrance, light.cabinet_lights_dimmer
+          {{- ', light.living_room_lamps' if is_state('light.living_room_lamps', 'off') else '' -}}
         brightness_pct: 100
         kelvin: 2700
         transition: 5
@@ -124,9 +126,7 @@ script:
       then:
       - service: light.turn_on
         data:
-          entity_id:
-          - light.living_room_buffet
-          - light.cabinet_lights_dimmer
+          entity_id: light.living_room_buffet
           brightness_pct: 100
           kelvin: 2700
           transition: 5
@@ -140,7 +140,7 @@ script:
     - service: light.turn_on
       entity_id: light.entrance
       data: &dim_lights_data
-        brightness_pct: 50
+        brightness_pct: 67
         transition: 2
     - condition: state
       entity_id: light.kitchen

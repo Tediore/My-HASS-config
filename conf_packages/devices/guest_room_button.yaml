@@ -1,0 +1,32 @@
+automation:
+- alias: Guest room button
+  id: 'guest_room_button'
+  mode: single
+  trigger:
+  - platform: state
+    entity_id: sensor.guest_room_button_action
+    to:
+    - 'on'
+    - 'off'
+    - 'brightness_move_up'
+    - 'brightness_move_down'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      sequence:
+      - if:
+        - condition: state
+          entity_id: &guest_room_lights light.guest_bedroom
+          state: 'off'
+        then:
+        - service: switch.toggle
+          entity_id: switch.guest_bedroom_fan
+        else:
+        - service: light.turn_off
+          entity_id: *guest_room_lights
+    default:
+    - service: light.turn_on
+      entity_id: *guest_room_lights
+      data:
+        brightness_pct: 50

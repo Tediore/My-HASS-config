@@ -8,33 +8,34 @@ automation:
     to:
     - 'on'
     - 'off'
+  condition:
+  - condition: state
+    entity_id: &cabinet_lights light.cabinet_lights_dimmer
+    state: 'on'
   action:
   - choose:
     - conditions:
       - "{{ trigger.to_state.state == 'on' }}"
-      - condition: state
-        entity_id: light.cabinet_lights_dimmer
-        state: 'on'
-      - "{{ state_attr('light.cabinet_lights_dimmer', 'brightness') | int(0) < 254 }}"
+      - "{{ state_attr('light.cabinet_lights_dimmer', 'brightness') | int(255) < 255 }}"
       sequence:
-      - service: scene.create
-        data:
-          scene_id: kitchen_cabinets
-          snapshot_entities:
-          - light.cabinet_lights_dimmer
       - service: light.turn_on
-        entity_id: light.cabinet_lights_dimmer
-      - service: input_boolean.turn_on
-        entity_id: input_boolean.kitchen_cabinet_light_ctl
+        entity_id: *cabinet_lights
+        data:
+          brightness_pct: 100
+          transition: 3
     - conditions:
       - "{{ trigger.to_state.state == 'off' }}"
       - condition: state
-        entity_id: input_boolean.kitchen_cabinet_light_ctl
+        entity_id:
+        - input_boolean.dark_inside
+        - media_player.living_room_tv
         state: 'on'
       sequence:
-      - scene: scene.kitchen_cabinets
-      - service: input_boolean.turn_off
-        entity_id: input_boolean.kitchen_cabinet_light_ctl
+      - service: light.turn_on
+        entity_id: *cabinet_lights
+        data:
+          brightness_pct: 67
+          transition: 3
 
 
 - alias: Record coffeemaker on/off
@@ -49,7 +50,7 @@ automation:
     below: 10
     for: '00:00:10'
   action:
-  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
+  - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
     data:
       entity_id: "input_boolean.{{ 'basement_' if 'basement' in trigger.to_state.entity_id else '' }}coffeemaker"
 
@@ -82,5 +83,4 @@ mqtt:
 
 
 input_boolean:
-  kitchen_cabinet_light_ctl:
   coffeemaker:

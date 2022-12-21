@@ -19,8 +19,8 @@ automation:
     entity_id: sensor.dryer_power
     below: 50
   action:
-  - service_template: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 250 else 'off' }}"
-    data_template:
+  - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 250 else 'off' }}"
+    data:
       entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','').replace('_pwr','') }}"
 
 
@@ -51,15 +51,15 @@ automation:
     state: 'off'
   action:
   - service: notify.gotify
-    data_template:
+    data:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
   - service: notify.mobile_app_andys_iphone
-    data_template:
+    data:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  - service_template: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
-    data_template:
+  - service: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
+    data:
       entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
 
 

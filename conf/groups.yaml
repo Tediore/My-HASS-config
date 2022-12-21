@@ -3,7 +3,7 @@ lights_interior:
   entities:
   - group.select_lights_interior
   - light.buffet
-  - light.hallway
+  - light.hall_light_dimmer
   - light.living_room_lamps
 
 select_lights_interior:
@@ -14,24 +14,21 @@ select_lights_interior:
   - light.basement_hallway
   - light.basement_lamps
   - light.basement_stairs_lights
-  - light.christmas_tree
+  - light.cabinet_lights_dimmer
   - light.craft_room
   - light.craft_room_lamps
   - light.dining_room
   - light.entrance
   - light.hall_bath_night_light
   - light.kitchen
-  - light.cabinet_lights_dimmer
   - light.laundry_room
   - light.living_room_bias_lighting
+  - light.living_room_buffet
+  - light.living_room_n
   - light.master_bedroom_lamps
   - light.master_bedroom_fan
-  - light.mini_christmas_tree
   - light.office
   - light.office_lamps
-  - light.living_room_buffet
-  - light.other_dining_room
-  - light.living_room_buffet
   - switch.side_entrance_light
 
 lights_interior_guest_in_master:

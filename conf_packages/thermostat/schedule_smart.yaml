@@ -52,7 +52,7 @@ automation:
   action:
   - service: input_text.set_value
     entity_id: &prev_mode input_text.tstat_prev_mode
-    data_template:
+    data:
       value: "{{ trigger.from_state.state }}"
 
 
@@ -111,7 +111,7 @@ automation:
     entity_id: script.tstat_sched_resume
 
 
-- alias: Start home mode earlier when cold in master bedroom
+- alias: Start home mode earlier when cold in main bedroom
   id: 'iu9ahs1Aigoophien7xei4'
   initial_state: true
   trigger:

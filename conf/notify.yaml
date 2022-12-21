@@ -19,8 +19,3 @@
   title_param_name: title
   data:
     priority: 10
-
-- platform: file
-  name: RF received
-  filename: rf_received
-  timestamp: true

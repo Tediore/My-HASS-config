@@ -7,8 +7,5 @@ logs:
 filters:
   homeassistant.util.logging:
     - "^Exception in message_received when handling msg on 'rtl_433/1291/event'*"
-  homeassistant.components.automation.store_last_alarm_code_and_action_sent:
-    - "Error while executing automation automation.store_last_alarm_code_and_action_sent: string value is None for dictionary value @ data['value']"
-    - "Store last alarm code and action sent: Choose at step 1: default: Error executing script. Invalid data for call_service at pos 1: string value is None for dictionary value @ data['value']"
   homeassistant.helpers.template:
   - "Template variable warning: 'dict object' has no attribute 'click' when rendering '{{ value_json.click }}'"

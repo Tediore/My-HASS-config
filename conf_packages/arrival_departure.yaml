@@ -29,7 +29,7 @@ automation:
   - service: light.turn_on
     entity_id: light.entrance
     data:
-      brightness_pct: "{{ 100 if 6 < now().hour < 22 else 66 }}"
+      brightness_pct: 100
   - service: script.turn_on
     entity_id: script.arrival_night
 
@@ -156,7 +156,7 @@ script:
   notify_away:
     sequence:
     - service: notify.mobile_app_matt_phone
-      data_template:
+      data:
         title: "{{ title }}"
         message: >
           {% set tstat = states('sensor.tstat_profile') %}
@@ -206,7 +206,7 @@ script:
       entity_id:
       - light.entrance
       - light.buffet
-      - light.hallway
+      - light.hall_light_dimmer
       - light.living_room_lamps
       data:
         transition: 1
@@ -244,7 +244,7 @@ script:
     - service: light.turn_on
       entity_id:
       - light.buffet
-      - light.hallway
+      - light.hall_light_dimmer
       - light.living_room_lamps
       data:
         brightness_pct: 20

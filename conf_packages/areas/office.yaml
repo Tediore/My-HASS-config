@@ -12,14 +12,13 @@ automation:
     state: 'on'
   action:
   - service: light.turn_on
-    entity_id: light.office_lamps
+    entity_id: 
+    - &office_lamps light.office_lamps
+    - &bias_lighting light.game_room_bias_lighting
     data:
       kelvin: 2200
       transition: 10
       brightness_pct: 100
-  - delay: 10
-  - service: switch.turn_on
-    entity_id: switch.game_room_bias_lighting
 
 
 - alias: Turn game room bias lighting on if lamps are on
@@ -27,24 +26,24 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id:
+    entity_id: &trigger_entities
     - binary_sensor.xbox
-    - light.office_lamps
+    - *office_lamps
     from: 'off'
     to: 'on'
   condition:
   - condition: state
-    entity_id:
-    - binary_sensor.xbox
-    - light.office_lamps
+    entity_id: *trigger_entities
     state: 'on'
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
     for: '00:00:11'
   action:
-  - service: switch.turn_on
-    entity_id: switch.game_room_bias_lighting
+  - service: light.turn_on
+    entity_id: *bias_lighting
+    data:
+      brightness_pct: 100
 
 
 - alias: Switch lights when Xbox turned on
@@ -57,21 +56,49 @@ automation:
     to: 'on'
   condition:
   - condition: state
-    entity_id:
-    - input_boolean.dark_inside
-    - light.office_fan
+    entity_id: *office_lamps
     state: 'on'
   action:
-  - service: light.turn_off
-    entity_id: light.office_fan
-    data:
-      transition: 5
   - service: light.turn_on
-    entity_id: light.office_lamps
+    entity_id: *office_lamps
     data:
       transition: 3
-  - service: media_player.turn_off
-    entity_id: media_player.office_speaker
+      brightness_pct: 50
+  - if:
+    - condition: state
+      entity_id: &office_fan_light light.office_fan
+      state: 'on'
+    then:
+    - service: light.turn_off
+      entity_id: *office_fan_light
+  - if:
+    - condition: state
+      entity_id: &office_spkr media_player.office_speaker
+      state: 'on'
+    then:
+    - service: media_player.turn_off
+      entity_id: *office_spkr
+
+
+- alias: Switch lights when Xbox turned off
+  id: 'wiyuShahNeifootho5ai'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+    from: 'on'
+    to: 'off'
+  action:
+  - service: light.turn_off
+    entity_id: *bias_lighting
+  - condition: state
+    entity_id: *office_lamps
+    state: 'on'
+  - service: light.turn_on
+    entity_id: *office_lamps
+    data:
+      transition: 3
+      brightness_pct: 100
 
 
 # - alias: Toggle camera monitor
@@ -95,7 +122,7 @@ automation:
 #   - platform: state
 #     entity_id:
 #     - light.office
-#     - light.office_lamps
+#     - *office_lamps
 #   condition:
 #   - "{{ trigger.to_state.state not in ['off', 'unavailable'] }}"
 #   action:
@@ -129,12 +156,18 @@ light:
   - light.office_table_lamp
 
 
-mqtt:
-  binary_sensor:
-  - name: Xbox
-    state_topic: 'xbox/status'
-    payload_on: 'Available'
-    payload_off: 'Unavailable'
+# mqtt:
+#   binary_sensor:
+#   - name: Xbox
+#     state_topic: 'xbox/status'
+#     payload_on: 'Available'
+#     payload_off: 'Unavailable'
+
+binary_sensor:
+- platform: template
+  sensors:
+    xbox:
+      value_template: "{{ states('sensor.xbox_ups_load') | float(0) > 14.5 }}"
 
 
 sensor:
@@ -187,7 +220,3 @@ input_number:
     max: 100
     step: 5
     mode: slider
-
-
-input_boolean:
-  office:

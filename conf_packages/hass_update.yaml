@@ -8,7 +8,7 @@ automation:
   - platform: state
     entity_id: sensor.hass_update
   action:
-  - service_template: "input_boolean.turn_{{ 'off' if is_state('sensor.hass_update', 'Newest') else 'on' }}"
+  - service: "input_boolean.turn_{{ 'off' if is_state('sensor.hass_update', 'Newest') else 'on' }}"
     entity_id: input_boolean.hass_update
 
 
@@ -30,7 +30,7 @@ automation:
     value_template: "{{ trigger.from_state.state.find('b') == -1 }}"
   action:
   - service: notify.gotify
-    data_template:
+    data:
       title: "Home Assistant beta is available!"
       message: "{{ states('sensor.latest_version') }} is now available."
 
@@ -49,7 +49,7 @@ automation:
     value_template: "{{ trigger.from_state.state != 'unknown' }}"
   action:
   - service: notify.gotify
-    data_template:
+    data:
       title: "Home Assistant update available!"
       message: "{{ states('sensor.latest_version') }} is now available."
 

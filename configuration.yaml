@@ -9,7 +9,7 @@ frontend: !include conf_settings/frontend.yaml
 google_assistant: !include conf/google_assistant.yaml
 group: !include conf/groups.yaml
 history: !include conf_settings/history.yaml
-homeassistant: !include conf_settings/main.yaml
+homeassistant: !include conf_settings/home-assistant.yaml
 http: !include conf_settings/http.yaml
 input_boolean:
 input_datetime:

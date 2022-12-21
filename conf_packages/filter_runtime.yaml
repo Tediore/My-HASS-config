@@ -15,7 +15,7 @@ automation:
     - sensor.heating_time_yesterday
   - service: input_number.set_value
     entity_id: input_number.hvac_runtime
-    data_template:
+    data:
       value: "{{ ((states('sensor.furnace_filter_life') | float(0)) + (states('sensor.cooling_time_yesterday') | float(0)) + (states('sensor.heating_time_yesterday') | float(0))) | round(1) }}"
 
 
@@ -32,7 +32,7 @@ automation:
     value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('automation.notify_when_furnace_filter_needs_replacement', 'last_triggered'))) / 3600 > 8 }}"
   action:
   - service: notify.mobile_app_matt_phone
-    data_template:
+    data:
       title: "Change the furnace filter"
       message: "Furnace filter has been used for {{ states('sensor.furnace_filter_life') | int(0) }} hours."
 
@@ -72,7 +72,7 @@ automation:
     - 'idle'
   action:
   - service: input_text.set_value
-    data_template:
+    data:
       entity_id: "input_text.time_cycle_{{ 'start' if trigger.to_state.state in ['heating', 'cooling'] else 'end' }}"
       value: "{{ now() }}"
 
@@ -189,7 +189,7 @@ script:
     sequence:
     - service: input_text.set_value
       entity_id: input_text.furnace_filter
-      data_template:
+      data:
         value: '{{ now() }}'
     - service: homeassistant.update_entity
       entity_id:
@@ -197,7 +197,7 @@ script:
       - sensor.heating_before_last_filter_change
     - service: input_number.set_value
       entity_id: input_number.hvac_runtime
-      data_template:
+      data:
         value: >
           {% set active = (states('sensor.cooling_before_last_filter_change') | float(0)) + (states('sensor.heating_before_last_filter_change') | float(0)) %}
           {{ 0 - active }}
@@ -209,7 +209,7 @@ script:
     sequence:
     - service: input_number.set_value
       entity_id: input_number.hvac_runtime
-      data_template:
+      data:
         value: >
           {% set active = (states('sensor.cooling_time_today') | float(0)) + (states('sensor.heating_time_today') | float(0)) %}
           {% set runtime = states('input_number.runtime_adjustment') | float(0) %}
