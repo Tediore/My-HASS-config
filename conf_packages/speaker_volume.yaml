@@ -14,7 +14,7 @@ automation:
     - sensor.office_speaker_app_name
   condition:
   - "{{ trigger.to_state.state not in ['', 'unknown'] }}"
-  - "{{ not ('master_bedroom' in trigger.to_state.object_id and is_state('input_boolean.white_noise', 'on')) }}"
+  - "{{ not ('main_bedroom' in trigger.to_state.object_id and is_state('input_boolean.white_noise', 'on')) }}"
   action:
   - wait_template: "{{ state_attr('media_player.' + trigger.to_state.object_id.replace('_app_name',''), 'media_album_name') != None }}"
     timeout: '00:00:03'
@@ -37,7 +37,7 @@ automation:
         {% elif app in ['Google Play Music', 'Spotify', 'YouTube Music'] %}
           {% if speaker in ['living room', 'craft room', 'office'] %}
             0.45
-          {% elif speaker in ['kitchen', 'master bedroom'] %}
+          {% elif speaker in ['kitchen', 'bedroom'] %}
             0.4
           {% else %}
             0.32

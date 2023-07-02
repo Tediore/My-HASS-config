@@ -7,19 +7,19 @@ include:
   - binary_sensor.storm_door
   - binary_sensor.drawer
   - binary_sensor.front_closet
-  - binary_sensor.master_bedroom_motion
+  - binary_sensor.main_bedroom_motion
   - binary_sensor.entrance_motion
   - light.entrance
   - light.front_closet
   - light.dining_room
   - light.living_room_lamps
-  - light.master_bedroom_lamps
+  - light.main_bedroom_lamps
   - light.game_room
   - light.laundry_room
   - light.porch
   - light.cabinet_lights_dimmer
   - switch.game_room_bias_lighting
-  - switch.master_bedroom_fan_plug
+  - switch.main_bedroom_fan_plug
   - media_player.living_room_vizio
   - media_player.bedroom_tv
   - climate.thermostat

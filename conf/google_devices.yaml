@@ -41,18 +41,23 @@ light.laundry_room:
 switch.living_room_fan:
   expose: true
   room: Living room
-light.living_room_lamps:
+light.living_room_lamp_left:
   expose: true
   room: Living room
-
-
-### Master bedroom
-light.master_bedroom_lamps:
+  name: Left lamp
+light.living_room_lamp_right:
   expose: true
-  room: Master bedroom
+  room: Living room
+  name: Right lamp
+
+
+### Main bedroom
+light.main_bedroom_lamps:
+  expose: true
+  room: Main bedroom
 switch.bedroom_fan:
   expose: true
-  room: Master bedroom
+  room: Main bedroom
 
 
 ### Office

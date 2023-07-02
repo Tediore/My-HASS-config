@@ -36,6 +36,24 @@ automation:
     - script.ir_soundbar_vol_up
 
 
+- alias: Change living room TV auto-brightness
+  id: 'lr-tv-auto-brightness'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &lr_tv_brightness_entities
+    - *lr_tv
+    - input_boolean.dark_inside
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: *lr_tv_brightness_entities
+    state: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: script.lr_tv_auto_brightness
+
+
 - alias: Turn lights back on with TV IR
   id: 'Ook9zahch9eish9Cheeroo'
   initial_state: true
@@ -149,6 +167,11 @@ script:
       entity_id: light.cabinet_lights_dimmer
       data: *dim_lights_data
 
+  lr_tv_brightness_ctl:
+    sequence:
+    - service: "switch.turn_{{ states('input_boolean.dark_inside') }}"
+      entity_id: switch.lr_tv_auto_brightness
+
 
 light:
 - platform: group
@@ -161,6 +184,15 @@ light:
   name: Living room
   entities:
   - light.living_room_lamps
+
+
+switch:
+- platform: command_line
+  switches:
+    lr_tv_auto_brightness:
+      friendly_name: Living room TV auto-brightness
+      command_on: !secret lr_tv_brightness_ctl_high
+      command_off: !secret lr_tv_brightness_ctl_off
 
 
 input_boolean:

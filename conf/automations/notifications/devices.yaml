@@ -11,7 +11,7 @@
     - binary_sensor.basement_fridge_door
     - binary_sensor.bathroom_ejector_closet_door
     - binary_sensor.front_door
-    - binary_sensor.garage_service_door
+    - binary_sensor.garage_service_door_contact
     - binary_sensor.laundry_room_door_back
     - binary_sensor.laundry_room_door_front
     - binary_sensor.patio_door
@@ -21,12 +21,10 @@
     - binary_sensor.kitchen_window
     - binary_sensor.living_room_window_left
     - binary_sensor.living_room_window_right
-    - binary_sensor.master_bedroom_window_left
-    - binary_sensor.master_bedroom_window_right
+    - binary_sensor.main_bedroom_window_left
+    - binary_sensor.main_bedroom_window_right
     - binary_sensor.second_bedroom_window
 
-    - binary_sensor.basement_motion
-    - binary_sensor.deck_motion
     - binary_sensor.dining_room_motion
     - binary_sensor.hall_motion
     - binary_sensor.laundry_room_motion_front
@@ -43,13 +41,13 @@
     - binary_sensor.hall_bath_sink_leak
     - binary_sensor.hall_bath_toilet_leak
     - binary_sensor.kitchen_leak
-    - binary_sensor.master_bath_sink_leak
-    - binary_sensor.master_bath_toilet_leak
+    - binary_sensor.main_bath_sink_leak_sensor_water_leak
+    - binary_sensor.main_bath_toilet_leak_sensor_water_leak
     - binary_sensor.sump_pump_leak
     - binary_sensor.washer_sink_leak
 
     - sensor.main_bedroom_temperature
-    - sensor.outdoor_light_level
+    - sensor.outdoor_light_level_east
     - light.cabinet_lights_dimmer
     to: 'unavailable'
     for: '00:01:00'
@@ -84,9 +82,12 @@
     from: 'off'
     to: 'on'
   action:
-  - service: notify.gotify
+  - service: notify.mobile_app_matt_phone
     data:
       message: 'Someone is at the front door'
+      data:
+        image: /api/camera_proxy/camera.front_door
+        clickAction: /lovelace/front_door
 
 
 - alias: Notify when Zigbee router unavailable for 5 minutes
@@ -100,7 +101,7 @@
     - switch.bathroom_ejector_closet
     - switch.garage_lights
     - switch.guest_bedroom_plug
-    - switch.master_bedroom_plug
+    - switch.main_bedroom_plug
     - sensor.siren_battery
     to: 'unavailable'
     for: '00:05:00'
@@ -130,17 +131,17 @@
     - sensor.andy_button_battery
     - sensor.andy_closet_door_battery
     - sensor.atc_f421_battery
-    - sensor.bar_leak_sensor_battery
+    - sensor.bar_leak_sensor_battery_average
     - sensor.bar_lights_remote_battery
-    - sensor.basement_bathroom_sink_leak_sensor_battery
-    - sensor.basement_bathroom_toilet_leak_sensor_battery
+    - sensor.basement_bathroom_sink_leak_sensor_battery_average
+    - sensor.basement_bathroom_toilet_leak_sensor_battery_average
     - sensor.basement_door_battery
     - sensor.basement_shower_leak_sensor_battery
     - sensor.basement_temp_sensor_battery
     - sensor.button_battery
     - sensor.craft_room_desk_button_battery
     - sensor.craft_room_desk_remote_battery
-    - sensor.dishwasher_leak_sensor_battery
+    - sensor.dishwasher_leak_sensor_battery_average
     - sensor.fridge_leak_sensor_battery
     - sensor.front_door_battery
     - sensor.front_door_keypad_battery
@@ -161,11 +162,11 @@
     - sensor.living_room_window_left_battery
     - sensor.living_room_window_right_battery
     - sensor.main_bedroom_battery
-    - sensor.master_bath_sink_leak_sensor_battery
-    - sensor.master_bath_toilet_leak_sensor_battery
-    - sensor.master_bedroom_remote_battery
-    - sensor.master_bedroom_window_left_battery
-    - sensor.master_bedroom_window_right_battery
+    - sensor.main_bath_sink_leak_sensor_battery
+    - sensor.main_bath_toilet_leak_sensor_battery
+    - sensor.main_bedroom_remote_battery
+    - sensor.main_bedroom_window_left_battery
+    - sensor.main_bedroom_window_right_battery
     - sensor.matt_button_battery
     - sensor.matt_closet_door_battery
     - sensor.office_battery
@@ -177,9 +178,10 @@
     - sensor.side_door_keypad_battery
     - sensor.siren_battery
     - sensor.soldering_station_remote_battery
+    - sensor.south_hose_bib_leak_sensor_battery_average
     - sensor.spare_room_window_battery
     - sensor.sump_pump_leak_sensor_battery
-    - sensor.washer_sink_leak_sensor_battery
+    - sensor.washer_sink_leak_sensor_battery_average
     - sensor.water_heater_leak_sensor_battery
     - sensor.water_main_leak_sensor_battery
     below: 21
@@ -217,10 +219,10 @@
     - binary_sensor.living_room_motion_sensor_battery_low_2
     - binary_sensor.living_room_window_left_battery_low
     - binary_sensor.living_room_window_right_battery_low
-    - binary_sensor.master_bath_sink_leak_sensor_battery_low
-    - binary_sensor.master_bath_toilet_leak_sensor_battery_low
-    - binary_sensor.master_bedroom_window_left_battery_low
-    - binary_sensor.master_bedroom_window_right_battery_low
+    - binary_sensor.main_bath_sink_leak_sensor_battery_low
+    - binary_sensor.main_bath_toilet_leak_sensor_battery_low
+    - binary_sensor.main_bedroom_window_left_battery_low
+    - binary_sensor.main_bedroom_window_right_battery_low
     - binary_sensor.matt_closet_door_battery_low
     - binary_sensor.office_desk_button_battery_low
     - binary_sensor.office_window_battery_low
@@ -324,3 +326,17 @@
     data:
       title: "Basement fridge door has been open for 5 minutes"
       message: "Did you forget to close it?"
+
+
+- alias: Notify when cooler temp too low
+  id: 'notify-cooler-temp-low'
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.atc_f421_temperature
+    below: 40
+    for: '00:10:00'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: Cooler temp too low
+      message: "Cooler temp is currently {{ trigger.to_state.state }} F"

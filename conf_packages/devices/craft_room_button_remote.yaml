@@ -1,10 +1,10 @@
 automation:
-- alias: Andy's desk button
-  id: 'lai8eiquah4quuf6theeXi'
+- alias: Andy's desk remote
+  id: 'AeGh4fuos1theiroej4zie'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.craft_room_desk_button_action
+    entity_id: sensor.andy_office_remote_action
     to: &remote_states
     - 'on'
     - 'off'
@@ -19,61 +19,21 @@ automation:
     - conditions:
       - "{{ trigger.to_state.state in ['on', 'off'] }}"
       sequence:
+      - service: media_player.turn_off
+        entity_id: media_player.craft_room_speaker
+    - conditions:
+      - "{{ 'brightness' in trigger.to_state.state }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.toggle_mute_craft_room_speaker
+    - conditions:
+      - "{{ 'colortemp' in trigger.to_state.state }}"
+      sequence:
       - service: light.toggle
         entity_id: light.andy_desk
         data:
           brightness_pct: 100
-          kelvin: "{{ 3000 if is_state('input_boolean.dark_inside', 'on') else 5000 }}"
-    - conditions:
-      - "{{ 'move' in trigger.to_state.state }}"
-      sequence:
-      - service: media_player.volume_mute
-        entity_id: media_player.craft_room_speaker
-        data:
-          is_volume_muted: "{{ true if is_state_attr('media_player.craft_room_speaker', 'is_volume_muted', false) else false }}"
-
-
-- alias: Andy's desk remote
-  id: 'AeGh4fuos1theiroej4zie'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.craft_room_desk_remote_action
-    to: *remote_states
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state in ['on', 'off'] }}"
-      sequence:
-      - service: script.toggle_mute_craft_room_speaker
-    - conditions:
-      - "{{ 'brightness' in trigger.to_state.state }}"
-      sequence:
-      - service: switch.toggle
-        entity_id: switch.andy_heater
-    - conditions:
-      - "{{ 'colortemp' in trigger.to_state.state }}"
-      - condition: state
-        entity_id: light.craft_room
-        state: 'on'
-      sequence:
-      - service: light.turn_off
-        entity_id: light.craft_room
-      - service: light.turn_on
-        entity_id: light.andy_desk
-        data:
-          brightness_pct: 100
-          kelvin: "{{ 3000 if is_state('input_boolean.dark_inside', 'on') else 5000 }}"
-    - conditions:
-      - "{{ 'colortemp' in trigger.to_state.state }}"
-      - condition: state
-        entity_id: light.craft_room
-        state: 'off'
-      sequence:
-      - service: light.turn_on
-        entity_id: light.craft_room
-      - service: light.turn_off
-        entity_id: light.andy_desk
+          kelvin: 2200
 
 
 script:
@@ -82,7 +42,7 @@ script:
     - choose:
       - conditions:
         - condition: template
-          value_template: "{{ is_state_attr('media_player.craft_room_speaker', 'app_name', 'Google Play Music') }}"
+          value_template: "{{ state_attr('media_player.craft_room_speaker', 'app_name') in ['Spotify'] }}"
         sequence:
         - service: media_player.media_play_pause
           entity_id: media_player.craft_room_speaker

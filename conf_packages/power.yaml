@@ -41,6 +41,12 @@ automation:
         {% else %}
           System was on battery for {{ states('sensor.power_outage_length') }}
         {% endif %}
+  - service: script.sms_send
+    data:
+      number: !secret phone_matt
+      message: >
+        {% set suffix = "System was on battery for " + states('sensor.power_outage_length') %}
+        {{ 'Power lost.' if trigger.to_state.state == 'off' else 'Power restored: ' + suffix }}
 
 
 sensor:

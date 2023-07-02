@@ -24,7 +24,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: &service_door binary_sensor.garage_service_door
+    entity_id: &service_door binary_sensor.garage_service_door_contact
     from: 'off'
     to: 'on'
   condition:
@@ -145,6 +145,11 @@ script:
       entity_id: *garage
       state: 'closed'
     - service: cover.open_cover
+      entity_id: *garage
+
+  toggle_garage:
+    sequence:
+    - service: cover.toggle
       entity_id: *garage
 
 

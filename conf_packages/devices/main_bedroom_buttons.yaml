@@ -3,26 +3,33 @@ automation:
   id: 'Sheiqueer6sheex5zie9ai'
   initial_state: true
   mode: parallel
-  trigger:
+  trigger: &andy_triggers
   - platform: state
-    entity_id: sensor.button_andy
+    id: single
+    entity_id: &andy_button sensor.andy_button_action
     to: 
-    - 'single'
-    - 'hold'
+    - 'on'
+    - 'off'
+  - platform: state
+    id: hold
+    entity_id: *andy_button
+    to: 
+    - 'brightness_move_up'
+    - 'brightness_move_down'
   condition:
   - condition: state
-    entity_id: input_boolean.guest_in_master
+    entity_id: input_boolean.guest_in_main
     state: 'off'
   action:
     service: >
-      {% if trigger.to_state.state == 'single' %}
+      {% if trigger.id == 'single' %}
         {% if is_state('input_boolean.andy_sleep', 'off') %}
           script.good_night_andy
         {% else %}
           script.toggle_bedroom_fan
         {% endif %}
       {% else %}
-        script.button_andy_test
+        script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
       {% endif %}
 
 
@@ -30,23 +37,18 @@ automation:
   id: 'Sheiqedxcder6sheex5zie'
   initial_state: true
   mode: parallel
-  trigger:
-  - platform: state
-    entity_id: sensor.button_andy
-    to: 
-    - 'single'
-    - 'hold'
+  trigger: *andy_triggers
   condition:
   - condition: state
-    entity_id: input_boolean.guest_in_master
+    entity_id: input_boolean.guest_in_main
     state: 'on'
   action:
-  - service: "{{ 'light.turn_off' if is_state('light.master_bedroom_fan', 'on') or is_state('light.master_bedroom_lamps', 'on') else 'switch.toggle' }}"
+  - service: "{{ 'light.turn_off' if is_state('light.main_bedroom_fan', 'on') or is_state('light.main_bedroom_lamps', 'on') else 'switch.toggle' }}"
     data:
       entity_id: >
-        {{ 'light.master_bedroom_fan, light.master_bedroom_lamps' 
-              if is_state('light.master_bedroom_fan', 'on') or is_state('light.master_bedroom_lamps', 'on') 
-            else 'switch.master_bedroom_fan' }}
+        {{ 'light.main_bedroom_fan, light.main_bedroom_lamps' 
+              if is_state('light.main_bedroom_fan', 'on') or is_state('light.main_bedroom_lamps', 'on') 
+            else 'switch.main_bedroom_fan' }}
   - condition: state
     entity_id: &guest_sleep input_boolean.sleep_mode_guest
     state: 'off'
@@ -60,13 +62,15 @@ automation:
   id: 'iep4tahz8sah7riet7maiJ'
   initial_state: true
   mode: parallel
-  trigger:
+  trigger: &matt_triggers
   - platform: state
-    entity_id: sensor.button_matt
-    to:
-    - 'single'
-    - 'double'
-    - 'hold'
+    id: single
+    entity_id: &matt_button sensor.matt_button_action
+    to: 'single'
+  - platform: state
+    id: hold
+    entity_id: *matt_button
+    to: 'hold'
   condition:
   - condition: state
     entity_id: &bsmt_bed input_boolean.basement_bedroom
@@ -75,17 +79,14 @@ automation:
   - service: script.turn_on
     data:
       entity_id: >
-        {% set command = trigger.to_state.state %}
-        {% if command == 'single' %}
+        {% if trigger.id == 'single' %}
           {% if is_state('input_boolean.sleep_mode', 'off') %}
             script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
           {% else %}
             script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
           {% endif %}
-        {% elif command == 'hold' %}
-          script.toggle_bedroom_fan
         {% else %}
-          script.early_departure
+          script.toggle_bedroom_fan
         {% endif %}
 
 
@@ -93,13 +94,7 @@ automation:
   id: 'joChuvuazoomee4ohqu8engu'
   initial_state: true
   mode: parallel
-  trigger:
-  - platform: state
-    entity_id: sensor.button_matt
-    to:
-    - 'single'
-    - 'double'
-    - 'hold'
+  trigger: *matt_triggers
   condition:
   - condition: state
     entity_id: *bsmt_bed
@@ -108,8 +103,7 @@ automation:
   - service: script.turn_on
     data:
       entity_id: >
-        {% set command = trigger.to_state.state %}
-        {% if command == 'single' %}
+        {% if trigger.id == 'single' %}
           {% if is_state('light.guest_bedroom', 'on') %}
             script.good_night_andy_basement
           {% else %}
@@ -126,12 +120,6 @@ script:
     - service: switch.toggle
       entity_id: switch.bedroom_fan
 
-  button_andy_test:
-    sequence:
-    - service: notify.gotify
-      data:
-        message: "Andy's button is working."
-
   early_departure:
     sequence:
     - service: media_player.turn_off
@@ -145,7 +133,7 @@ script:
       - input_boolean.white_noise
     - service: light.turn_on
       entity_id: 
-      - light.master_bedroom_lamps
+      - light.main_bedroom_lamps
       - light.living_room_lamps
       - light.buffet
       data:

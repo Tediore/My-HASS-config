@@ -17,13 +17,14 @@ automation:
     - binary_sensor.hall_bath_toilet_leak_sensor_water_leak
     - binary_sensor.hvac_leak_sensor_water_leak
     - binary_sensor.kitchen_sink_water_leak_detected
-    - binary_sensor.master_bath_sink_water_leak_detected
-    - binary_sensor.master_bath_toilet_leak_sensor_water_leak
+    - binary_sensor.main_bath_sink_leak_sensor_water_leak
+    - binary_sensor.main_bath_toilet_leak_sensor_water_leak
     - binary_sensor.sump_pump_leak_sensor_water_leak
     - binary_sensor.washer_sink_leak_sensor_water_leak
     - binary_sensor.water_heater_leak_sensor_water_leak
     - binary_sensor.water_main_leak_sensor_water_leak
     - binary_sensor.south_hose_bib_leak_sensor_water_leak
+    - binary_sensor.utility_sink_water_level_high
     to: 'on'
   - platform: state
     entity_id: *water_sensors
@@ -77,7 +78,7 @@ automation:
   - service: light.turn_on
     entity_id: &leak_lights
     - light.living_room_lamps
-    - light.master_bedroom_lamps
+    - light.main_bedroom_lamps
     - light.buffet
     - light.office
     - light.basement_lamps
@@ -125,3 +126,47 @@ script:
       data:
         scene_id: before_leak
         entities: *leak_lights
+
+
+sensor:
+- platform: statistics
+  name: Bar leak sensor battery average
+  entity_id: sensor.bar_leak_sensor_battery
+  state_characteristic: average_linear
+  sampling_size: 128
+  precision: 0
+
+- platform: statistics
+  name: Basement bathroom sink leak sensor battery average
+  entity_id: sensor.basement_bathroom_sink_leak_sensor_battery
+  state_characteristic: average_linear
+  sampling_size: 128
+  precision: 0
+
+- platform: statistics
+  name: Basement bathroom toilet leak sensor battery average
+  entity_id: sensor.basement_bathroom_toilet_leak_sensor_battery
+  state_characteristic: average_linear
+  sampling_size: 128
+  precision: 0
+
+- platform: statistics
+  name: Dishwasher leak sensor battery average
+  entity_id: sensor.dishwasher_leak_sensor_battery
+  state_characteristic: average_linear
+  sampling_size: 128
+  precision: 0
+
+- platform: statistics
+  name: South hose bib leak sensor battery average
+  entity_id: sensor.south_hose_bib_leak_sensor_battery
+  state_characteristic: average_linear
+  sampling_size: 128
+  precision: 0
+
+- platform: statistics
+  name: Washer/sink leak sensor battery average
+  entity_id: sensor.washer_sink_leak_sensor_battery
+  state_characteristic: average_linear
+  sampling_size: 128
+  precision: 0

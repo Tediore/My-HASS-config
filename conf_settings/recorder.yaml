@@ -9,7 +9,7 @@ exclude:
   - automation.poll_wkqx_song_info
   - automation.record_washer_dryer_on_off
   - automation.record_coffeemaker_on_off
-  - automation.master_bedroom_lights_night_arrival
+  - automation.main_bedroom_lights_night_arrival
   - automation.set_speaker_volume_based_on_app
   - automation.record_time_when_cycle_starts_ends
   - automation.toggle_vacation_mode

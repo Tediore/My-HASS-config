@@ -191,10 +191,12 @@ script:
       entity_id: input_text.furnace_filter
       data:
         value: '{{ now() }}'
+    - delay: 1
     - service: homeassistant.update_entity
       entity_id:
       - sensor.cooling_before_last_filter_change
       - sensor.heating_before_last_filter_change
+    - delay: 1
     - service: input_number.set_value
       entity_id: input_number.hvac_runtime
       data:

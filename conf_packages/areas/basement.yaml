@@ -21,6 +21,22 @@ automation:
     entity_id: &bsmt_stairs light.basement_stairs
 
 
+- alias: Turn basement stairs bottom light on/off with basement stairs
+  id: 'Afie9Daez7dohfooDoovai'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.basement_stairs
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - "{{ not is_state('light.basement_stairs_bottom', trigger.to_state.state) }}"
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.basement_stairs_bottom
+
+
 - alias: Turn basement lights on/off with door when auto enabled
   id: 'kah7xefaeP4vah9apee0'
   initial_state: true
@@ -47,28 +63,27 @@ automation:
     data:
       brightness_pct: "{{ 100 if trigger.to_state.state == 'on' else 0 }}"
       color_temp_kelvin: 2800
+
+
+- alias: Turn bar signs on with bar lights
+  id: 'bar-signs-on-bar-lights'
+  trigger:
+  - platform: state
+    entity_id: light.bar_lights
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.auto_bar_lights
+    state: 'on'
+  action:
   - service: light.turn_on
     entity_id: light.old_style_sign
     data:
       brightness_pct: "{{ 50 if trigger.to_state.state == 'on' else 0 }}"
   - service: "switch.turn_{{ trigger.to_state.state }}"
     entity_id: switch.bud_light
-
-
-- alias: Turn basement stairs bottom light on/off with basement stairs
-  id: 'Afie9Daez7dohfooDoovai'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.basement_stairs
-    to:
-    - 'on'
-    - 'off'
-  condition:
-  - "{{ not is_state('light.basement_stairs_bottom', trigger.to_state.state) }}"
-  action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.basement_stairs_bottom
 
 
 - alias: Turn basement bathroom night light on
@@ -142,6 +157,38 @@ automation:
   - delay: 2
 
 
+- alias: Turn basement heater on with basement lights
+  id: 'basement_heater_on_basement_lights'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.basement
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.auto_basement_heater
+    state: 'on'
+  action:
+  - service: "climate.turn_{{ trigger.to_state.state }}"
+    entity_id: climate.basement_heater
+
+
+- alias: Notify when dehumidifier bucket full
+  id: 'dehumidifier-bucket-full'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.dehumidifier_energy_power
+    below: 10
+  action:
+  - service: notify.gotify
+    data:
+      title: Dehumidifier bucket full
+      message: Empty the dehumidifier bucket.
+
+
 mqtt:
   light:
   - name: Basement stairs
@@ -195,7 +242,9 @@ group:
 
 input_boolean:
   sync_basement_color_lights:
+  auto_bar_lights:
   auto_basement_lights:
+  auto_basement_heater:
 
 
 sensor:
@@ -207,3 +256,16 @@ sensor:
   end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
   duration:
     days: 7
+
+
+climate:
+- platform: generic_thermostat
+  name: Basement heater
+  heater: switch.basement_heater
+  target_sensor: sensor.basement_temp
+  min_temp: 60
+  max_temp: 72
+  cold_tolerance: 0.5
+  hot_tolerance: 0.5
+  precision: 0.1
+  target_temp_step: 1

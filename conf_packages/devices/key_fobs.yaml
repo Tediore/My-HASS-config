@@ -1,0 +1,30 @@
+automation:
+- alias: Matt key fob
+  id: 'matt_key_fob'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.matt_key_fob_action
+    to:
+    - 'arm_all_zones'
+    - 'arm_day_zones'
+    - 'panic'
+  action:
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state == 'arm_day_zones' }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.close_garage
+    - conditions:
+      - "{{ trigger.to_state.state == 'arm_all_zones' }}"
+      sequence:
+      - service: alarm_control_panel.arm_all_zones
+        entity_id: alarm_control_panel.home
+        data:
+          code: !secret alarm_code_system
+    - conditions:
+      - "{{ trigger.to_state.state == 'panic' }}"
+      sequence:
+      - service: script.turn_on
+        entity_id: script.open_garage

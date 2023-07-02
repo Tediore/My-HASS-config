@@ -13,6 +13,12 @@ automation:
     - input_boolean.tstat_hold
     from: 'on'
     to: 'off'
+  condition:
+  - condition: state
+    entity_id:
+    - input_boolean.tstat_window_off
+    - input_boolean.tstat_hold
+    state: 'off'
   action:
   - service: button.press
     entity_id: button.thermostat_clear_hold
@@ -26,10 +32,6 @@ automation:
     entity_id: input_text.alarm
     to: 'armed_away'
     for: '00:30:00'
-  - platform: state
-    entity_id: input_text.alarm
-    to: 'armed_away'
-    for: '00:30:30'
   condition:
   - condition: state
     entity_id: input_boolean.tstat_hold
@@ -53,7 +55,9 @@ automation:
     - '21:30:00'
   condition:
   - condition: state
-    entity_id: input_boolean.tstat_hold
+    entity_id: 
+    - input_boolean.tstat_hold
+    - input_boolean.tstat_window_off
     state: 'off'
   - not:
       condition: state

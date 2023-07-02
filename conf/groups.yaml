@@ -25,20 +25,17 @@ select_lights_interior:
   - light.living_room_bias_lighting
   - light.living_room_buffet
   - light.living_room_n
-  - light.master_bedroom_lamps
-  - light.master_bedroom_fan
+  - light.main_bedroom_lamps
+  - light.main_bedroom_fan
   - light.office
   - light.office_lamps
   - switch.side_entrance_light
 
-lights_interior_guest_in_master:
+lights_interior_overnight_guest:
   entities:
-  - light.basement
   - light.bar_lights
-  - light.basement_bath_night_light
   - light.basement_hallway
   - light.basement_lamps
-  - light.basement_stairs_lights
   - light.christmas_tree
   - light.craft_room
   - light.craft_room_lamps
@@ -76,7 +73,7 @@ windows:
   - binary_sensor.kitchen_window
   - binary_sensor.living_room_window_left
   - binary_sensor.living_room_window_right
-  - binary_sensor.master_bedroom_window_left
-  - binary_sensor.master_bedroom_window_right
+  - binary_sensor.main_bedroom_window_left
+  - binary_sensor.main_bedroom_window_right
   - binary_sensor.office_window
   - binary_sensor.spare_room_window

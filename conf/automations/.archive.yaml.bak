@@ -61,7 +61,7 @@
     entity_id:
     - light.dining_room
     - light.living_room
-    - light.master_bedroom
+    - light.main_bedroom
     - light.game_room
     - light.laundry_room
     data:
@@ -87,7 +87,7 @@
       group_name: Master bedroom
       scene_name: Red
   - service: light.turn_on
-    entity_id: light.master_bedroom
+    entity_id: light.main_bedroom
     data:
       flash: long
   - service: hue.hue_activate_scene

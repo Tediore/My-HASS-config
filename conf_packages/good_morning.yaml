@@ -57,9 +57,7 @@ automation:
   - condition: time
     after: '07:14:00'
   - service: switch.turn_off
-    entity_id:
-    - switch.bedroom_fan
-    - switch.humidifier
+    entity_id: switch.bedroom_fan
 
 
 script:
@@ -73,7 +71,7 @@ script:
       - input_boolean.sleep_mode
       - input_boolean.andy_sleep
       - input_boolean.sleep_mode_guest
-      - light.master_bath_night_light
+      - light.main_bath_night_light
       - switch.bedroom_fan
     - if:
       - "{{ is_state('switch.humidifier', 'on') }}"
@@ -94,14 +92,14 @@ script:
         payload: *payload
     - delay: '00:02:00'
     - condition: state
-      entity_id: &lights_wakeup light.master_bedroom_lamps
+      entity_id: &lights_wakeup light.main_bedroom_lamps
       state: 'on'
     - service: light.turn_on
       entity_id: *lights_wakeup
       data:
         transition: 360
         brightness_pct: 100
-        kelvin: 4000
+        kelvin: 3500
 
 
 binary_sensor:

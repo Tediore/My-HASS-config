@@ -5,7 +5,7 @@ automation:
   mode: queued
   trigger:
   - platform: state
-    entity_id: sensor.master_bedroom_remote_action
+    entity_id: sensor.main_bedroom_remote_action
     to:
     - 'on_press'
     - 'off_press'
@@ -47,9 +47,9 @@ automation:
       data:
         brightness: >
           {% set hour = now().hour %}
-          {% set light = states('light.master_bedroom_lamps') %}
+          {% set light = states('light.main_bedroom_lamps') %}
           {% set trig = trigger.to_state.state %}
-          {% set brt = state_attr('light.master_bedroom_lamps', 'brightness') | int(0) %}
+          {% set brt = state_attr('light.main_bedroom_lamps', 'brightness') | int(0) %}
           {% if trig == 'off_press' %}
             0
           {% else %}
@@ -63,13 +63,5 @@ automation:
               {% endif %}
             {% endif %}
           {% endif %}
-        entity_id: &br_lamps light.master_bedroom_lamps
+        entity_id: &br_lamps light.main_bedroom_lamps
         transition: 0.5
-
-
-light:
-- platform: group
-  name: Master bedroom lamps
-  entities:
-  - light.andy
-  - light.matt

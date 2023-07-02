@@ -223,7 +223,7 @@ script:
       entity_id:
       - light.cabinet_lights_dimmer
       - light.hall_bath_night_light
-      - light.master_bath_night_light
+      - light.main_bath_night_light
       data:
         brightness_pct: 100
         kelvin: 2700
