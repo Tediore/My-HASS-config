@@ -1,3 +1,28 @@
+script:
+  tstat_away:
+    sequence:
+    - service: climate.set_temperature
+      entity_id: climate.thermostat
+      data:
+        temperature: "{{ states('input_number.tstat_away_' + states('climate.thermostat')) }}"
+
+
+input_number:
+  tstat_away_cool:
+    name: Away temp - cool
+    min: 75
+    max: 82
+    step: 1
+    mode: slider
+
+  tstat_away_heat:
+    name: Away temp - heat
+    min: 63
+    max: 70
+    step: 1
+    mode: slider
+
+
 sensor:
 - platform: template
   sensors:

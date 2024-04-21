@@ -48,7 +48,7 @@
 
     - sensor.main_bedroom_temperature
     - sensor.outdoor_light_level_east
-    - light.cabinet_lights_dimmer
+    - light.cabinet_lights
     to: 'unavailable'
     for: '00:01:00'
   - platform: state
@@ -73,23 +73,6 @@
         priority: high
 
 
-- alias: Notify when doorbell is rung
-  id: 'notify_doorbell_rung'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.front_door_camera_doorbell
-    from: 'off'
-    to: 'on'
-  action:
-  - service: notify.mobile_app_matt_phone
-    data:
-      message: 'Someone is at the front door'
-      data:
-        image: /api/camera_proxy/camera.front_door
-        clickAction: /lovelace/front_door
-
-
 - alias: Notify when Zigbee router unavailable for 5 minutes
   id: 'EphooCiob0oofaYo'
   initial_state: true
@@ -97,12 +80,16 @@
   trigger:
   - platform: state
     entity_id:
-    - switch.basement_fridge_plug
-    - switch.bathroom_ejector_closet
-    - switch.garage_lights
-    - switch.guest_bedroom_plug
-    - switch.main_bedroom_plug
-    - sensor.siren_battery
+    - light.andy
+    - light.matt
+    - switch.andy_office_plug
+    - switch.bedroom_plug
+    - switch.den_plug
+    - light.entrance_nightlight
+    - light.north_storage
+    - light.pantry
+    - switch.second_floor_hallway_plug
+    - light.south_storage
     to: 'unavailable'
     for: '00:05:00'
   action:
@@ -287,56 +274,19 @@
       message: *fridge_title
 
 
-- alias: Notify when 433MHz temp sensor battery low
-  id: 'idi6ahyahRupheir'
+- alias: Notify when Zigbee device joins or leaves network
+  id: 'notify_zigbee_leave_join'
   initial_state: true
-  mode: parallel
-  max: 10
   trigger:
-  - platform: template
-    value_template: "{{ is_state_attr('sensor.main_fridge_temp', 'battery_ok', 0) }}"
-  - platform: template
-    value_template: "{{ is_state_attr('sensor.basement_fridge_temp', 'battery_ok', 0) }}"
-  - platform: template
-    value_template: "{{ is_state_attr('sensor.attic_temp', 'battery_ok', 0) }}"
+  - platform: mqtt
+    topic: 'zigbee2mqtt/bridge/event'
+  condition:
+  - "{{ trigger.payload_json['type'] in ['device_leave', 'device_joined'] }}"
   action:
-  - service: notify.mobile_app_matt_phone
+  - service: notify.gotify_high
     data:
-      title: &fridge_batt_title "{{ trigger.to_state.name }} sensor battery low"
-      message: &fridge_batt_msg Change the temp sensor battery now.
+      title: Zigbee network notification
+      message: "{{ trigger.payload_json['data']['friendly_name'] }} {{ 'left' if 'leave' in trigger.payload_json else 'joined' }} the Zigbee network"
       data:
         ttl: 0
         priority: high
-  - service: notify.gotify_high
-    data:
-      title: *fridge_batt_title
-      message: *fridge_batt_msg
-
-
-- alias: Notify when basement fridge open more than 5 minutes
-  id: 'ieFeih9taingievo'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.basement_fridge_door
-    to: 'on'
-    for: '00:05:00'
-  action:
-  - service: notify.gotify_high
-    data:
-      title: "Basement fridge door has been open for 5 minutes"
-      message: "Did you forget to close it?"
-
-
-- alias: Notify when cooler temp too low
-  id: 'notify-cooler-temp-low'
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.atc_f421_temperature
-    below: 40
-    for: '00:10:00'
-  action:
-  - service: notify.gotify_high
-    data:
-      title: Cooler temp too low
-      message: "Cooler temp is currently {{ trigger.to_state.state }} F"

@@ -1,43 +1,4 @@
 automation:
-- alias: Dim down/up cabinet lights with kitchen lights
-  id: 'theit5ait1MieDi3Geixee'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: light.kitchen
-    to:
-    - 'on'
-    - 'off'
-  condition:
-  - condition: state
-    entity_id: &cabinet_lights light.cabinet_lights_dimmer
-    state: 'on'
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state == 'on' }}"
-      - "{{ state_attr('light.cabinet_lights_dimmer', 'brightness') | int(255) < 255 }}"
-      sequence:
-      - service: light.turn_on
-        entity_id: *cabinet_lights
-        data:
-          brightness_pct: 100
-          transition: 3
-    - conditions:
-      - "{{ trigger.to_state.state == 'off' }}"
-      - condition: state
-        entity_id:
-        - input_boolean.dark_inside
-        - media_player.living_room_tv
-        state: 'on'
-      sequence:
-      - service: light.turn_on
-        entity_id: *cabinet_lights
-        data:
-          brightness_pct: 67
-          transition: 3
-
-
 - alias: Record coffeemaker on/off
   id: 'gai4IeyaewaxuyeeWipei2'
   initial_state: true
@@ -70,16 +31,24 @@ automation:
       message: "Enjoy!"
 
 
-mqtt:
-  light:
-  - name: Kitchen
-    state_topic: "stat/kitchen_lights/POWER1"
-    command_topic: "cmnd/kitchen_lights/EVENT"
-    availability_topic: "tele/kitchen_lights/LWT"
-    payload_on: "ON"
-    payload_off: "OFF"
-    payload_available: "Online"
-    payload_not_available: "Offline"
+light:
+- platform: group
+  name: Cabinet lights
+  entities:
+  - light.cabinet_lights_n
+  - light.cabinet_lights_s
+
+
+# mqtt:
+#   light:
+#   - name: Kitchen
+#     state_topic: "stat/kitchen_lights/POWER1"
+#     command_topic: "cmnd/kitchen_lights/EVENT"
+#     availability_topic: "tele/kitchen_lights/LWT"
+#     payload_on: "ON"
+#     payload_off: "OFF"
+#     payload_available: "Online"
+#     payload_not_available: "Offline"
 
 
 input_boolean:

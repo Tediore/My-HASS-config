@@ -1,0 +1,13 @@
+automation:
+- alias: Android TV unavailable workaround
+  id: 'android-tv-workaround'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &lr_tv media_player.living_room_tv
+    to: 'unavailable'
+    for: '00:15:00'
+  action:
+  - service: homeassistant.reload_config_entry
+    data:
+      entry_id: 7303e277c04597709031294ca0385355

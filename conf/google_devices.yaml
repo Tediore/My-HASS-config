@@ -5,12 +5,12 @@ light.craft_room:
 
 
 ### Dining room
-light.dining_room:
-  expose: true
-  room: Dining room
-switch.dining_room_fan:
-  expose: true
-  room: Dining room
+# light.dining_room:
+#   expose: true
+#   room: Dining room
+# switch.dining_room_fan:
+#   expose: true
+#   room: Dining room
 
 
 ### Guest room
@@ -23,12 +23,12 @@ switch.guest_bedroom_fan:
 
 
 ### Kitchen
-light.kitchen:
-  expose: true
-  room: Kitchen
-switch.kitchen_fan:
-  expose: true
-  room: Kitchen
+# light.kitchen:
+#   expose: true
+#   room: Kitchen
+# switch.kitchen_fan:
+#   expose: true
+#   room: Kitchen
 
 
 ### Laundry room

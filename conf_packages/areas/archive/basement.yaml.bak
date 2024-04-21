@@ -1,0 +1,78 @@
+automation:
+- alias: Turn basement stairs light on/off with door
+  id: 'ixegoogee0ohSh4deekeer'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &bsmt_door binary_sensor.basement_door
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id: *bsmt_door
+    from: 'on'
+    to: 'off'
+    for: '00:00:30'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: &bsmt_stairs light.basement_stairs
+
+
+- alias: Turn basement stairs bottom light on/off with basement stairs
+  id: 'Afie9Daez7dohfooDoovai'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: light.basement_stairs
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - "{{ not is_state('light.basement_stairs_bottom', trigger.to_state.state) }}"
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.basement_stairs_bottom
+
+
+- alias: Notify when dehumidifier bucket full
+  id: 'dehumidifier-bucket-full'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.dehumidifier_energy_power
+    below: 10
+  action:
+  - service: notify.gotify
+    data:
+      title: Dehumidifier bucket full
+      message: Empty the dehumidifier bucket.
+
+
+mqtt:
+  light:
+  - name: Basement stairs
+    state_topic: "stat/basement_stairs/POWER1"
+    command_topic: "cmnd/basement_stairs/EVENT"
+    availability_topic: "tele/basement_stairs/LWT"
+    payload_on: "ON"
+    payload_off: "OFF"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+
+
+light:
+- platform: group
+  name: Basement stairs lights
+  entities:
+  - light.basement_stairs
+  - light.basement_stairs_bottom
+
+
+sensor:
+- platform: history_stats
+  name: Basement door opened last 7 days
+  entity_id: binary_sensor.basement_door
+  state: 'on'
+  type: count
+  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+  duration:
+    days: 7

@@ -20,31 +20,3 @@
   max_age:
     hours: 168
   sampling_size: 10000
-
-- platform: template
-  sensors:
-    outside_dew_point_display:
-      friendly_name: "Dew point"
-      value_template: "{{ states('sensor.outside_dew_point') | float(0) | round(0) }}"
-      unit_of_measurement: '°F'
-
-    inside_dew_point_display:
-      friendly_name: "Dew point"
-      value_template: "{{ states('sensor.inside_dew_point') | float(0) | round(0) }}"
-      unit_of_measurement: '°F'
-
-    ssd_temp_disp:
-      friendly_name: SSD temp
-      value_template: "{{ states('sensor.ssd_temp') }} °C"
-
-    attic_temp_delta:
-      friendly_name: Attic temp delta
-      value_template: "{{ (states('sensor.attic_temp') | float(0) - states('sensor.outside_temp') | float(0)) | round(1) }}"
-      unit_of_measurement: '°F'
-
-    wind_direction:
-      friendly_name: Wind direction
-      value_template: >
-        {% set degrees = ((states('sensor.wind_direction_degrees') | float(0) - 11.25) / 22.5) | round(0, 'ceil') | int(0) %}
-        {% set compass = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'] %}
-        {{ compass[degrees] }}

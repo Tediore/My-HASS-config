@@ -26,3 +26,10 @@ script:
       data:
         topic: *lr_ir_topic
         payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FFA25D"}'
+
+  ir_soundbar_pwr_on:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: *lr_ir_topic
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x0XFF02FD"}'

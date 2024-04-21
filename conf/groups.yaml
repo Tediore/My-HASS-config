@@ -1,68 +1,22 @@
 lights_interior:
   name: Interior lights
   entities:
-  - group.select_lights_interior
   - light.buffet
-  - light.hall_light_dimmer
-  - light.living_room_lamps
-
-select_lights_interior:
-  entities:
-  - light.basement
-  - light.bar_lights
-  - light.basement_bath_night_light
-  - light.basement_hallway
-  - light.basement_lamps
-  - light.basement_stairs_lights
-  - light.cabinet_lights_dimmer
-  - light.craft_room
-  - light.craft_room_lamps
-  - light.dining_room
-  - light.entrance
+  - light.cabinet_lights
+  - light.first_floor_hall_night_light
   - light.hall_bath_night_light
-  - light.kitchen
-  - light.laundry_room
+  - light.main_bath_night_light
+  - light.matt_office_bath_night_light
   - light.living_room_bias_lighting
-  - light.living_room_buffet
-  - light.living_room_n
+  - light.living_room_lamps
   - light.main_bedroom_lamps
   - light.main_bedroom_fan
-  - light.office
-  - light.office_lamps
-  - switch.side_entrance_light
-
-lights_interior_overnight_guest:
-  entities:
-  - light.bar_lights
-  - light.basement_hallway
-  - light.basement_lamps
-  - light.christmas_tree
-  - light.craft_room
-  - light.craft_room_lamps
-  - light.dining_room
-  - light.entrance
-  - light.hall_bath_night_light
-  - light.kitchen
-  - light.cabinet_lights_dimmer
-  - light.laundry_room
-  - light.living_room_bias_lighting
-  - light.mini_christmas_tree
-  - light.office
-  - light.office_lamps
-  - light.living_room_buffet
-  - light.other_dining_room
-  - light.living_room_buffet
-  - switch.side_entrance_light
-
-plugs:
-  name: Smart plugs
-  entities:
-  - switch.game_room_bias_lighting
+  - light.matt_office_lamps
 
 speakers:
   entities:
   - media_player.bedroom_speaker
-  - media_player.craft_room_speaker
+  - media_player.andy_office_hub
   - media_player.hub
   - media_player.laundry_room_speaker
   - media_player.living_room_speaker

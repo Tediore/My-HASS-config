@@ -13,7 +13,7 @@ automation:
   action:
   - service: light.turn_on
     entity_id: 
-    - &office_lamps light.office_lamps
+    - &office_lamps light.matt_office_lamps
     - &bias_lighting light.game_room_bias_lighting
     data:
       kelvin: 2200
@@ -101,67 +101,25 @@ automation:
       brightness_pct: 100
 
 
-# - alias: Toggle camera monitor
+# - alias: Poll Xbox UPS
+#   id: 'poll-xbox-ups'
 #   initial_state: true
 #   trigger:
-#   - platform: state
-#     entity_id: &in_office binary_sensor.in_office_at_night
-#     to: 'on'
-#   - platform: state
-#     entity_id: *in_office
-#     to: 'off'
-#     for: '00:00:03'
+#   - platform: time_pattern
+#     seconds: '/15'
 #   action:
-#   - service: "switch.turn_{{ trigger.to_state.state }}"
-#     entity_id: switch.camera_monitor
-
-
-# - alias: Adjust camera monitor brightness with office lights
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id:
-#     - light.office
-#     - *office_lamps
-#   condition:
-#   - "{{ trigger.to_state.state not in ['off', 'unavailable'] }}"
-#   action:
-#   - service: input_number.set_value
-#     entity_id: input_number.camera_monitor_brightness
+#   - service: homeassistant.update_entity
 #     data:
-#       value: >
-#         {% if trigger.to_state.object_id == 'office' %}
-#           {{ 100 if state_attr('light.office', 'brightness') | int > 128 else 45 }}
-#         {% else %}
-#           20
-#         {% endif %}
-
-
-# - alias: Adjust camera monitor brightness with input number
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: input_number.camera_monitor_brightness
-#   action:
-#   - service: shell_command.camera_monitor_brightness
-#     data:
-#       brightness_pct: "{{ trigger.to_state.state | int }}"
+#       entity_id: sensor.xbox_ups_load
 
 
 light:
 - platform: group
-  name: Office lamps
+  name: Matt office lamps
   entities:
   - light.office_shelf_lamp
   - light.office_table_lamp
 
-
-# mqtt:
-#   binary_sensor:
-#   - name: Xbox
-#     state_topic: 'xbox/status'
-#     payload_on: 'Available'
-#     payload_off: 'Unavailable'
 
 binary_sensor:
 - platform: template
@@ -181,7 +139,7 @@ sensor:
             is_state('binary_sensor.xbox', 'on') or
             is_state('binary_sensor.desktop', 'on') or
             is_state('light.office', 'on') or
-            is_state('light.office_lamps', 'on')
+            is_state('light.matt_office_lamps', 'on')
           ) and
           is_state('sun.sun', 'below_horizon')
         }}
@@ -211,12 +169,3 @@ sensor:
   duration:
     days: 7
   end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-
-
-input_number:
-  camera_monitor_brightness:
-    name: Camera monitor brightness
-    min: 0
-    max: 100
-    step: 5
-    mode: slider

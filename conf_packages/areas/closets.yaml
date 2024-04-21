@@ -1,0 +1,18 @@
+automation:
+- alias: Turn on/off closet lights with doors
+  id: 'closet-lights-on-off'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.pantry_door
+    - binary_sensor.north_storage_door
+    - binary_sensor.south_storage_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    data:
+      entity_id: "light.{{ trigger.to_state.object_id.replace('_door', '') }}"

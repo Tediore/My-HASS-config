@@ -19,6 +19,11 @@ automation:
     - input_boolean.tstat_window_off
     - input_boolean.tstat_hold
     state: 'off'
+  - condition: state
+    entity_id: climate.thermostat
+    state:
+    - 'cool'
+    - 'heat'
   action:
   - service: button.press
     entity_id: button.thermostat_clear_hold
@@ -37,10 +42,12 @@ automation:
     entity_id: input_boolean.tstat_hold
     state: 'off'
   action:
-  - service: select.select_option
-    entity_id: select.thermostat_current_mode
-    data:
-      option: 'away'
+  # - service: select.select_option
+  #   entity_id: select.thermostat_current_mode
+  #   data:
+  #     option: 'away'
+  - service: script.turn_on
+    entity_id: script.tstat_away
   - service: input_boolean.turn_off
     entity_id: input_boolean.tstat_smart
 
@@ -54,6 +61,11 @@ automation:
     - '06:15:00'
     - '21:30:00'
   condition:
+  - condition: state
+    entity_id: climate.thermostat
+    state:
+    - 'cool'
+    - 'heat'
   - condition: state
     entity_id: 
     - input_boolean.tstat_hold

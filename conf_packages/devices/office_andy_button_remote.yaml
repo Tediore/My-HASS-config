@@ -20,7 +20,7 @@ automation:
       - "{{ trigger.to_state.state in ['on', 'off'] }}"
       sequence:
       - service: media_player.turn_off
-        entity_id: media_player.craft_room_speaker
+        entity_id: media_player.andy_office_hub
     - conditions:
       - "{{ 'brightness' in trigger.to_state.state }}"
       sequence:
@@ -30,10 +30,18 @@ automation:
       - "{{ 'colortemp' in trigger.to_state.state }}"
       sequence:
       - service: light.toggle
-        entity_id: light.andy_desk
+        entity_id: light.andy_office
         data:
           brightness_pct: 100
           kelvin: 2200
+
+
+light:
+- platform: group
+  name: Andy office
+  entities:
+  - light.andy_desk
+  - light.andy_shelf_lamp
 
 
 script:
@@ -42,12 +50,12 @@ script:
     - choose:
       - conditions:
         - condition: template
-          value_template: "{{ state_attr('media_player.craft_room_speaker', 'app_name') in ['Spotify'] }}"
+          value_template: "{{ state_attr('media_player.andy_office_hub', 'app_name') in ['Spotify'] }}"
         sequence:
         - service: media_player.media_play_pause
-          entity_id: media_player.craft_room_speaker
+          entity_id: media_player.andy_office_hub
       default:
       - service: media_player.volume_mute
-        entity_id: media_player.craft_room_speaker
+        entity_id: media_player.andy_office_hub
         data:
-          is_volume_muted: "{{ false if state_attr('media_player.craft_room_speaker', 'is_volume_muted') else true }}"
+          is_volume_muted: "{{ false if state_attr('media_player.andy_office_hub', 'is_volume_muted') else true }}"

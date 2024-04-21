@@ -4,12 +4,11 @@ bluetooth:
 climate:
 config:
 counter:
-discovery:
 fan:
 frontend: !include conf_settings/frontend.yaml
 google_assistant: !include conf/google_assistant.yaml
 group: !include conf/groups.yaml
-history: !include conf_settings/history.yaml
+history:
 homeassistant: !include conf_settings/home-assistant.yaml
 http: !include conf_settings/http.yaml
 input_boolean:
@@ -29,7 +28,6 @@ recorder: !include conf_settings/recorder.yaml
 scene: !include conf/scenes.yaml
 script:
 sensor: !include conf/sensors.yaml
-shell_command: !include conf/shell_command.yaml
 ssdp:
 stream:
 sun:

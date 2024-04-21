@@ -50,7 +50,7 @@ automation:
     entity_id: input_boolean.tstat_hold
     state: 'off'
   - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_cool_home
   - service: input_boolean.turn_off
@@ -105,7 +105,7 @@ automation:
     entity_id: input_boolean.tstat_hold
     state: 'off'
   - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_cool_sleep
   - service: input_boolean.turn_off
@@ -162,7 +162,7 @@ automation:
     entity_id: input_boolean.tstat_hold
     state: 'off'
   - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_heat_home
   - service: input_boolean.turn_off
@@ -216,7 +216,7 @@ automation:
     entity_id: input_boolean.tstat_hold
     state: 'off'
   - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   - service: script.turn_on
     entity_id: script.tstat_heat_sleep
   - service: input_boolean.turn_off

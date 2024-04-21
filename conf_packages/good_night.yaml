@@ -14,40 +14,40 @@ automation:
       entity_id: group.lights_interior
       state: 'on'
     - condition: state
-      entity_id: light.cabinet_lights_dimmer
+      entity_id: light.cabinet_lights
       state: 'on'
   action:
   - service: script.turn_on
     entity_id: script.good_night_no_noise
 
 
-- alias: Repeat white noise in sleep mode
-  id: 'tha9phooh7ReicomahdieS'
+- alias: Repeat white noise in sleep mode - workday
+  id: 'repeat-white-noise-workday'
   initial_state: true
   trigger:
   - platform: state
-    entity_id:
-    - &bedroom_speaker media_player.bedroom_speaker
-    - &guest_room_speaker media_player.guest_bedroom_clock
+    entity_id: &bedroom_speaker media_player.bedroom_speaker
     from: 'playing'
     to: 'idle'
   condition:
   - condition: state
-    entity_id: input_boolean.white_noise
+    entity_id:
+    - input_boolean.white_noise
+    - binary_sensor.workday
     state: 'on'
   action:
   - service: media_player.play_media
     data:
       entity_id: "{{ trigger.to_state.entity_id }}"
       media_content_id: >
-        {% set url = 'http://10.0.1.3:3453/audio/white_noise' %}
+        {% set url = 'http://10.0.1.2:3453/audio/white_noise' %}
         {% set ext = '.mp3' %}
         {% set time = now().strftime('%H%M') | int %}
-        {% if time < 545 or time > 2000 %}
+        {% if time < 600 or time > 2000 %}
           {% set file = '' %}
-        {% elif time < 600 %}
-          {% set file = '_45m' %}
         {% elif time < 615 %}
+          {% set file = '_45m' %}
+        {% elif time < 630 %}
           {% set file = '_30m' %}
         {% else %}
           {% set file = '_15m' %}
@@ -63,6 +63,54 @@ automation:
       entity_id: input_boolean.white_noise
     - condition: state
       entity_id: &humidifier switch.humidifier
+      state: 'on'
+    - service: switch.turn_off
+      entity_id: *humidifier
+
+
+- alias: Repeat white noise in sleep mode - weekend
+  id: 'repeat-white-noise-weekend'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: media_player.bedroom_speaker
+    from: 'playing'
+    to: 'idle'
+  condition:
+  - condition: state
+    entity_id: input_boolean.white_noise
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.workday
+    state: 'off'
+  action:
+  - service: media_player.play_media
+    data:
+      entity_id: "{{ trigger.to_state.entity_id }}"
+      media_content_id: >
+        {% set url = 'http://10.0.1.2:3453/audio/white_noise' %}
+        {% set ext = '.mp3' %}
+        {% set time = now().strftime('%H%M') | int %}
+        {% if time < 645 or time > 2000 %}
+          {% set file = '' %}
+        {% elif time < 700 %}
+          {% set file = '_45m' %}
+        {% elif time < 715 %}
+          {% set file = '_30m' %}
+        {% else %}
+          {% set file = '_15m' %}
+        {% endif %}
+        {{ url + file + ext }}
+      media_content_type: audio/mp3
+  - if:
+    - condition: time
+      after: '05:40:00'
+      before: '08:00:00'
+    then:
+    - service: input_boolean.turn_off
+      entity_id: input_boolean.white_noise
+    - condition: state
+      entity_id: *humidifier
       state: 'on'
     - service: switch.turn_off
       entity_id: *humidifier
@@ -104,38 +152,35 @@ script:
         brightness_pct: 10
     - if:
       - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
+      - "{{ is_state('input_boolean.overnight_guest', 'off') }}"
       then:
       - service: alarm_control_panel.alarm_arm_home
         data:
           entity_id: alarm_control_panel.home
           code: !secret alarm_code_system
     - if:
-      - "{{ is_state('switch.humidifier', 'off') and is_state('input_boolean.auto_bedroom_ac', 'off') }}"
+      - "{{ is_state('switch.humidifier', 'off') }}"
       then:
       - service: switch.turn_on
         entity_id: switch.humidifier
-    - if:
-      - "{{ is_state('input_boolean.auto_bedroom_ac', 'on') }}"
-      then:
-      - service: climate.turn_on
-        entity_id: climate.main_bedroom_ac
 
 
   good_night_no_noise:
     alias: Good night routine - no white noise
     sequence:
     - service: homeassistant.turn_off
-      entity_id: 
-      - group.lights_interior
-      - media_player.living_room_vizio
+      entity_id: media_player.living_room_vizio
     - service: script.turn_on
-      entity_id: script.christmas_lights_off
+      entity_id: 
+      - script.christmas_lights_off
+      - script.lights_off_interior
     - service: switch.turn_on
       entity_id: switch.main_bedroom_fan
     - service: input_boolean.turn_on
       entity_id: input_boolean.sleep_mode
     - if:
       - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
+      - "{{ is_state('input_boolean.overnight_guest', 'off') }}"
       then:
       - service: alarm_control_panel.alarm_arm_home
         data:
@@ -156,7 +201,7 @@ script:
     - service: homeassistant.turn_off
       entity_id:
       - switch.pole_light
-      - light.hall_light_dimmer
+      - light.hallway
       - light.main_bedroom_lamps
       - light.main_bedroom_fan
       - light.craft_room
@@ -169,6 +214,7 @@ script:
         brightness_pct: 10
     - if:
       - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
+      - "{{ is_state('input_boolean.overnight_guest', 'off') }}"
       then:
       - service: alarm_control_panel.alarm_arm_home
         data:
@@ -179,65 +225,6 @@ script:
       then:
       - service: switch.turn_on
         entity_id: switch.humidifier
-
-  good_night_andy_basement:
-    sequence:
-    - service: input_boolean.turn_on
-      entity_id: input_boolean.andy_sleep
-    - service: light.turn_off
-      entity_id: light.guest_bedroom
-    - service: light.turn_on
-      entity_id: light.basement_bath_night_light
-      data:
-        brightness_pct: 100
-    - service: script.white_noise_speaker
-      data:
-        speaker: *guest_room_speaker
-    - service: alarm_control_panel.alarm_arm_home
-      data:
-        entity_id: alarm_control_panel.home
-        code: !secret alarm_code_system
-
-  good_night_basement:
-    alias: Good night basement
-    sequence:
-    - service: input_boolean.turn_on
-      data:
-        entity_id: 
-        - input_boolean.andy_sleep
-        - input_boolean.sleep_mode
-    - service: script.turn_on
-      entity_id: script.lights_off_interior
-    - service: light.turn_off
-      entity_id: light.back_side_security
-    - service: homeassistant.turn_off
-      entity_id: 
-      - input_boolean.washer
-      - input_boolean.dryer
-    - service: homeassistant.turn_on
-      entity_id: 
-      - script.media_players_off
-      - script.christmas_lights_off
-      - switch.guest_bedroom_fan
-    - service: alarm_control_panel.alarm_arm_home
-      data:
-        entity_id: alarm_control_panel.home
-        code: !secret alarm_code_system
-    - condition: state
-      entity_id: *guest_room_speaker
-      state: 'off'
-    - service: script.white_noise_speaker
-      data:
-        speaker: *guest_room_speaker
-
-  good_night_guest:
-    sequence:
-    - service: script.turn_on
-      entity_id: script.white_noise_bedroom
-    - service: light.turn_on
-      entity_id: light.main_bath_night_light
-      data:
-        brightness_pct: 10
 
   white_noise_bedroom:
     alias: Play white noise on bedroom speaker
@@ -253,7 +240,7 @@ script:
     - service: media_player.play_media
       entity_id: *bedroom_speaker
       data:
-        media_content_id: 'http://10.0.1.3:3453/audio/silence.mp3'
+        media_content_id: 'http://10.0.1.2:3453/audio/silence.mp3'
         media_content_type: audio/mp3
     - delay: '00:00:02'
     - service: media_player.volume_set
@@ -289,7 +276,7 @@ script:
     - service: media_player.play_media
       data:
         entity_id: *speaker
-        media_content_id: 'http://10.0.1.3:3453/audio/silence.mp3'
+        media_content_id: 'http://10.0.1.2:3453/audio/silence.mp3'
         media_content_type: audio/mp3
     - delay: '00:00:02'
     - service: media_player.volume_set
@@ -347,7 +334,4 @@ input_number:
 input_boolean:
   sleep_mode:
   andy_sleep:
-  sleep_mode_guest:
   white_noise:
-  basement_bedroom:
-  guest_in_main:

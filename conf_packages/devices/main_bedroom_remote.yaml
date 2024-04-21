@@ -21,20 +21,16 @@ automation:
     - service: mqtt.publish
       data:
         topic: 'zigbee2mqtt/Matt/set'
-        payload: &payload >
-          {% if is_state('input_boolean.dark_inside', 'on') %}
-            {% if now().hour > 21 or now().hour < 6 %}
-              {# warm white at 67% brightness #}
-              {% set scene_id = 3 %}
-            {% else %}
-              {# warm white at 100% brightness #}
-              {% set scene_id = 2 %}
-            {% endif %}
-          {% else %}
-            {# cool white at 100% brightness #}
-            {% set scene_id = 1 %}
-          {% endif %}
-          {"scene_recall": {{ scene_id }}}
+        payload: &payload '{"scene_recall": 0}'
+        # payload: &payload >
+        #   {% if is_state('input_boolean.dark_inside', 'on') %}
+        #     {# warm white at 100% brightness #}
+        #     {% set scene_id = 0 %}          
+        #   {% else %}
+        #     {# cool white at 100% brightness #}
+        #     {% set scene_id = 1 %}
+        #   {% endif %}
+        #   {"scene_recall": {{ scene_id }}}
 
     - service: mqtt.publish
       data:

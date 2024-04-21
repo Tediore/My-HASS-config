@@ -1,5 +1,5 @@
 automation:
-- alias: Andy button - normal
+- alias: Andy button
   id: 'Sheiqueer6sheex5zie9ai'
   initial_state: true
   mode: parallel
@@ -16,10 +16,6 @@ automation:
     to: 
     - 'brightness_move_up'
     - 'brightness_move_down'
-  condition:
-  - condition: state
-    entity_id: input_boolean.guest_in_main
-    state: 'off'
   action:
     service: >
       {% if trigger.id == 'single' %}
@@ -33,32 +29,7 @@ automation:
       {% endif %}
 
 
-- alias: Andy button - guest in main bedroom
-  id: 'Sheiqedxcder6sheex5zie'
-  initial_state: true
-  mode: parallel
-  trigger: *andy_triggers
-  condition:
-  - condition: state
-    entity_id: input_boolean.guest_in_main
-    state: 'on'
-  action:
-  - service: "{{ 'light.turn_off' if is_state('light.main_bedroom_fan', 'on') or is_state('light.main_bedroom_lamps', 'on') else 'switch.toggle' }}"
-    data:
-      entity_id: >
-        {{ 'light.main_bedroom_fan, light.main_bedroom_lamps' 
-              if is_state('light.main_bedroom_fan', 'on') or is_state('light.main_bedroom_lamps', 'on') 
-            else 'switch.main_bedroom_fan' }}
-  - condition: state
-    entity_id: &guest_sleep input_boolean.sleep_mode_guest
-    state: 'off'
-  - service: input_boolean.turn_on
-    entity_id: *guest_sleep
-  - service: script.turn_on
-    entity_id: script.good_night_guest
-
-
-- alias: Matt button - normal
+- alias: Matt button
   id: 'iep4tahz8sah7riet7maiJ'
   initial_state: true
   mode: parallel
@@ -71,10 +42,6 @@ automation:
     id: hold
     entity_id: *matt_button
     to: 'hold'
-  condition:
-  - condition: state
-    entity_id: &bsmt_bed input_boolean.basement_bedroom
-    state: 'off'
   action:
   - service: script.turn_on
     data:
@@ -87,30 +54,6 @@ automation:
           {% endif %}
         {% else %}
           script.toggle_bedroom_fan
-        {% endif %}
-
-
-- alias: Matt button - basement bedroom
-  id: 'joChuvuazoomee4ohqu8engu'
-  initial_state: true
-  mode: parallel
-  trigger: *matt_triggers
-  condition:
-  - condition: state
-    entity_id: *bsmt_bed
-    state: 'on'
-  action:
-  - service: script.turn_on
-    data:
-      entity_id: >
-        {% if trigger.id == 'single' %}
-          {% if is_state('light.guest_bedroom', 'on') %}
-            script.good_night_andy_basement
-          {% else %}
-            script.good_night_basement
-          {% endif %}
-        {% else %}
-          script.toggle_guest_bedroom_fan
         {% endif %}
 
 
@@ -141,7 +84,7 @@ script:
         kelvin: 3000
         brightness_pct: 50
     - service: light.turn_on
-      entity_id: light.cabinet_lights_dimmer
+      entity_id: light.cabinet_lights
       data:
         brightness_pct: 66
     - service: alarm_control_panel.alarm_disarm

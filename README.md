@@ -1,45 +1,20 @@
 # My Home Assistant configuration
 
-Currently running a Home Assistant Container install on an Optiplex 5040 SFF (Intel i5-6500 with 24GB of RAM).
+Currently running a Home Assistant Container install on an OptiPlex 3050.
 
 The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_packages` contains, well, packages.
 
 I currently have the following devices connected to Home Assistant:
-- ~70 Zigbee devices (zigbee2mqtt)
-    - Aqara light sensors
-    - Aqara temp/humidity sensors
-    - Aqara water leak sensors
-    - Ecolink contact sensors
-    - Iris motion sensors (gen 3)
-    - Leedarson four-button remotes
-    - Linkind buttons
-    - Linkind contact sensors
-    - Linkind water leak sensors
-    - Philips Hue lights
-    - SmartThings buttons
-    - SmartThings water leak sensors
-    - Sonoff S31 lite outlets
-    - THIRDREALITY contact sensor
-    - THIRDREALITY motion sensor
-    - THIRDREALITY water leak sensors
-    - Tradfri remotes
-    - Xfinity contact sensors
+- Various Zigbee devices (zigbee2mqtt)
 - Ecobee thermostat (local control via Homekit Controller)
 - Google Home speakers
-- APC UPSes (connected via apc2mqtt)
+- APC UPSes
 - Xiaomi Bluetooth thermometers (flashed with the custom ATC firmware and connected via ESPHome bluetooth proxy)
-- Huawei E3531 GSM modem for SMS notifications (connected via sms2mqtt)
-- 50+ Tasmota devices
-  - IR blasters
-  - Lights
-  - Plugs
-  - Shelly 1 (with a reed sensor) used to smartify my garage door opener
-  - Switches and dimmers
+- Various Tasmota devices
 - Vizio TVs
 - Roku TV
 
 Some of my favorite automations include:
-- Opening the garage door if the garage service door is opened within 3 minutes of arming the alarm (because that means we're biking or driving somewhere)
 - Adjusting my Google Home speakers' volume depending on which app is casting to them (since streaming radio is noticeably quieter than casting music from Google Play Music or Spotify)
 - Enabling sleep mode (lights and media players off, security system armed, play white noise) when my wife or I press the buttons on our nightstands
 - Turning the lights and media players off and setting the thermostat to away when the security system is armed away

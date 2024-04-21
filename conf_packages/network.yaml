@@ -109,3 +109,11 @@ automation:
 
 input_boolean:
   internet:
+
+
+binary_sensor:
+- platform: ping
+  name: Internet
+  host: 1.1.1.1
+  count: 2
+  scan_interval: 20

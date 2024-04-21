@@ -17,7 +17,7 @@ include:
   - light.game_room
   - light.laundry_room
   - light.porch
-  - light.cabinet_lights_dimmer
+  - light.cabinet_lights
   - switch.game_room_bias_lighting
   - switch.main_bedroom_fan_plug
   - media_player.living_room_vizio

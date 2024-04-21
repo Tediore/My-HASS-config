@@ -16,7 +16,7 @@ automation:
     - condition: template
       value_template: "{{ as_timestamp(now()) | timestamp_custom('%d') == as_timestamp(state_attr('calendar.work', 'start_time')) | timestamp_custom('%d') }}"
   - condition: template
-    value_template: "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   action:
   - service: light.turn_off
     entity_id: light.main_bedroom_lamps
@@ -24,123 +24,23 @@ automation:
       transition: 60
 
 
-- alias: Transition main bedroom lights to warm
-  id: 'EitaeNg7et5ogh2Ahph2Ae'
+- alias: Adjust main floor chime volume
+  id: 'adjust-main-floor-chime-volume'
   initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.dark_inside
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: light.matt
-    state: 'on'
-  action:
-  - service: light.turn_on
-    entity_id: light.main_bedroom_lamps
-    data:
-      transition: 40
-      kelvin: 3000
-
-
-- alias: Turn closet lights on/off with doors
-  id: 'ahchooGeoph0ab6IiceuSh'
-  initial_state: true
-  mode: parallel
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.andy_closet_door
-    - binary_sensor.matt_closet_door
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: light.turn_on
-    data:
-      entity_id: "light.{{ trigger.to_state.object_id.replace('_door','') }}"
-      brightness_pct: >
-        {% set state = trigger.to_state.state %}
-        {% if state == 'on' %}
-          {{ 67 if is_state('input_boolean.dark_inside', 'on') else 100 }}
-        {% else %}
-          0
-        {% endif %}
-      transition: 0.4
-
-
-- alias: Turn main bedroom AC on at night
-  id: 'turn-bedroom-ac-on-night'
-  initial_state: true
-  trigger:
-  - platform: time
-    at: '22:30:00'
-  condition:
-  - condition: state
-    entity_id: input_text.alarm
-    state:
-    - 'disarmed'
-    - 'armed_home'
-  - condition: state
-    entity_id: input_boolean.auto_bedroom_ac
-    state: 'on'
-  action:
-  - service: climate.turn_on
-    entity_id: climate.main_bedroom_ac
-
-
-- alias: Turn auto bedroom AC off if temp too low
-  id: 'turn-auto-bedroom-ac-off-temp'
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.outside_temp
-    below: 60
-    for: '00:10:00'
-  condition:
-  - "{{ is_state('input_boolean.auto_bedroom_ac', 'on') or is_state('climate.main_bedroom_ac', 'on') }}"
-  action:
-  - service: homeassistant.turn_off
-    entity_id:
-    - input_boolean.auto_bedroom_ac
-    - climate.main_bedroom_ac
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.auto_bedroom_ac_temp_ctl
-
-
-- alias: Turn auto bedroom AC back on if turned off outside temp
-  id: 'turn-auto-bedroom-ac-back-on-temp'
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.outside_temp
-    above: 60
-    for: '01:00:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.auto_bedroom_ac_temp_ctl
-    state: 'on'
-  action:
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.auto_bedroom_ac
-
-
-- alias: Turn auto bedroom AC temp safety off
-  id: 'turn-auto-bedroom-ac-temp-safety-off'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: input_boolean.auto_bedroom_ac
-    from: 'off'
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
     to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_boolean.auto_bedroom_ac_temp_ctl
-    state: 'on'
+  - platform: state
+    entity_id: input_boolean.sleep_mode
+    to: 'off'
   action:
-  - service: input_boolean.turn_off
-    entity_id: input_boolean.auto_bedroom_ac_temp_ctl
+  - service: media_player.volume_set
+    entity_id: media_player.main_floor_chime
+    data:
+      volume_level: "{{ 0.2 if trigger.to_state.state == 'on' else 0.4 }}"
 
 
 light:
@@ -151,42 +51,20 @@ light:
   - light.matt
 
 
-switch:
-- platform: template
-  switches:
-    bedroom_fan:
-      friendly_name: Bedroom fan
-      value_template: "{{ is_state('switch.main_bedroom_fan', 'on') }}"
-      turn_on:
-      - service: switch.turn_on
-        entity_id: switch.main_bedroom_fan
-      - delay: 1
-      - service: mqtt.publish
-        data:
-          topic: 'cmnd/main_bedroom_fan/tuyasend4'
-          payload: '3,3' # max speed
-      turn_off:
-        service: switch.turn_off
-        entity_id: switch.main_bedroom_fan
-
-
-climate:
-- platform: generic_thermostat
-  name: Main bedroom AC
-  unique_id: 'main-bedroom-ac-plug'
-  heater: switch.main_bedroom_ac
-  target_sensor: sensor.main_bedroom_temperature
-  min_temp: 68
-  max_temp: 80
-  ac_mode: true
-  min_cycle_duration:
-    minutes: 5
-  cold_tolerance: 0.75
-  hot_tolerance: 0.75
-  precision: 0.1
-  target_temp_step: 1.0
-
-
-input_boolean:
-  auto_bedroom_ac:
-  auto_bedroom_ac_temp_ctl:
+# switch:
+# - platform: template
+#   switches:
+#     bedroom_fan:
+#       friendly_name: Bedroom fan
+#       value_template: "{{ is_state('switch.main_bedroom_fan', 'on') }}"
+#       turn_on:
+#       - service: switch.turn_on
+#         entity_id: switch.main_bedroom_fan
+#       - delay: 1
+#       - service: mqtt.publish
+#         data:
+#           topic: 'cmnd/main_bedroom_fan/tuyasend4'
+#           payload: '3,3' # max speed
+#       turn_off:
+#         service: switch.turn_off
+#         entity_id: switch.main_bedroom_fan

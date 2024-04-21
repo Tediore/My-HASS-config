@@ -37,6 +37,7 @@ include:
   - zwave
 exclude:
   entities:
+  - automation.poll_xbox_ups
   - automation.dismiss_discovery_notification
   - automation.poll_power_strip
   - automation.poll_wkqx_song_info

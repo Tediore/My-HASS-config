@@ -101,7 +101,6 @@ automation:
             trigger.id == 'cool'
             and is_state('climate.thermostat', 'heat')
           )
-          or is_state('climate.thermostat', 'off')
       }}
   action:
   - service: input_text.set_value
@@ -128,7 +127,7 @@ automation:
   - condition: state
     entity_id: climate.thermostat
     state: 'heat'
-  - "{{ states('input_text.alarm') in ['armed_home', 'disarmed'] }}"
+  - "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   - condition: or
     conditions:
     - "{{ states('sensor.tstat_current_temp') | float < 62 and now().hour < 5 and now().minute < 51 }}"
