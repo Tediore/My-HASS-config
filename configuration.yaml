@@ -1,4 +1,4 @@
-automation: !include_dir_merge_list conf/automations/
+automation:
 binary_sensor:
 bluetooth:
 climate:
@@ -6,10 +6,11 @@ config:
 counter:
 fan:
 frontend: !include conf_settings/frontend.yaml
-google_assistant: !include conf/google_assistant.yaml
+google_assistant: !include conf_static/google_assistant.yaml
 group: !include conf/groups.yaml
 history:
 homeassistant: !include conf_settings/home-assistant.yaml
+homeassistant_alerts:
 http: !include conf_settings/http.yaml
 input_boolean:
 input_datetime:
@@ -25,16 +26,17 @@ mqtt: !include conf/mqtt.yaml
 notify: !include conf/notify.yaml
 panel_custom: !include conf_settings/panel_custom.yaml
 recorder: !include conf_settings/recorder.yaml
+rest_command: !include conf/rest_command.yaml
 scene: !include conf/scenes.yaml
-script:
+script: !include conf/scripts.yaml
 sensor: !include conf/sensors.yaml
-ssdp:
 stream:
 sun:
 switch:
 system_health:
+template: !include conf/template.yaml
 timer:
-tts: !include conf/tts.yaml
+tts: !include conf_static/tts.yaml
 wake_on_lan:
 zeroconf:
-zone: !include conf/zone.yaml
+zone: !include conf_settings/zone.yaml

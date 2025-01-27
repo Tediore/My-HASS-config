@@ -1,0 +1,6 @@
+tasker:
+  url: 'http://{{ip_address}}:{{port}}/{{path}}'
+  method: POST
+  verify_ssl: false
+  payload: "{{ event }}"
+  content_type: 'application/json; charset=utf-8'

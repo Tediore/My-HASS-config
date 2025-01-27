@@ -19,7 +19,3 @@
   title_param_name: title
   data:
     priority: 10
-    extras:
-      client::notification:
-        bigImageUrl:
-          url: "{{ img_url }}"

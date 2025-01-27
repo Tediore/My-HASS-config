@@ -239,7 +239,7 @@ input_number:
     icon: mdi:clock-outline
     mode: box
     min: -500
-    max: 500
+    max: 5000
     unit_of_measurement: 'h'
 
 # Used to set max number of hours of filter runtime to calculate days until filter change required

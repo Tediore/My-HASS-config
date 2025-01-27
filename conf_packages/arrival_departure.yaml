@@ -124,7 +124,10 @@ script:
         entity_id: "group.{{ 'lights_interior' if is_state('input_boolean.dark_inside', 'off') else 'select_lights_interior' }}"
     - service: homeassistant.turn_off
       target:
-        entity_id: group.plugs
+        entity_id:
+        - group.plugs
+        - fan.living_room
+        - fan.matt_office
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
@@ -206,6 +209,8 @@ script:
         brightness_pct: 100
         kelvin: 2700
         transition: 1
+    - service: light.turn_on
+      entity_id: light.stairs
 
 
   lights_christmas:

@@ -24,23 +24,195 @@ automation:
       transition: 60
 
 
-- alias: Adjust main floor chime volume
-  id: 'adjust-main-floor-chime-volume'
+- alias: Andy button
+  id: 'Sheiqueer6sheex5zie9ai'
+  initial_state: true
+  mode: parallel
+  trigger: &andy_triggers
+  - platform: state
+    id: single
+    entity_id: &andy_button sensor.andy_button_action
+    to: 
+    - 'on'
+    - 'off'
+  - platform: state
+    id: hold
+    entity_id: *andy_button
+    to: 
+    - 'brightness_move_up'
+    - 'brightness_move_down'
+  action:
+    service: >
+      {% if trigger.id == 'single' %}
+        {% if is_state('input_boolean.andy_sleep', 'off') %}
+          script.good_night_andy
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
+      {% else %}
+        script.good_night
+      {% endif %}
+    # {% if trigger.id == 'single' %}
+    #   {% if is_state('input_boolean.andy_sleep', 'off') %}
+    #     script.good_night_andy
+    #   {% else %}
+    #     script.toggle_bedroom_fan
+    #   {% endif %}
+    # {% else %}
+    #   script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+    # {% endif %}
+
+
+- alias: Matt button
+  id: 'iep4tahz8sah7riet7maiJ'
+  initial_state: true
+  mode: parallel
+  trigger: &matt_triggers
+  - platform: state
+    id: single
+    entity_id: &matt_button sensor.matt_button_action
+    to: 'single'
+  - platform: state
+    id: hold
+    entity_id: *matt_button
+    to: 'hold'
+  action:
+  - service: script.turn_on
+    data:
+      entity_id: >
+        {% if trigger.id == 'single' %}
+          {% if is_state('input_boolean.sleep_mode', 'off') %}
+            script.good_night{{ '_no_noise' if is_state('input_boolean.andy_sleep', 'on') else '' }}
+          {% else %}
+            script.{{ 'toggle_bedroom_fan' if is_state('media_player.bedroom_speaker', 'playing') else 'white_noise_bedroom' }}
+          {% endif %}
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
+
+
+- alias: Turn bedroom night light on/off with lights
+  id: 'bedroom-night-light-on-off-lights'
   initial_state: true
   trigger:
   - platform: state
+    entity_id: &main_br_lamps light.main_bedroom_lamps
+    to:
+    - 'on'
+    - 'off'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.home
+    state:
+    - 'disarmed'
+    - 'armed_home'
+    - 'armed_night'
+  - condition: state
     entity_id:
-    - input_boolean.sleep_mode
     - input_boolean.andy_sleep
-    to: 'on'
-  - platform: state
-    entity_id: input_boolean.sleep_mode
-    to: 'off'
+    - input_boolean.sleep_mode
+    state: 'off'
   action:
-  - service: media_player.volume_set
-    entity_id: media_player.main_floor_chime
-    data:
-      volume_level: "{{ 0.2 if trigger.to_state.state == 'on' else 0.4 }}"
+  - service: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
+    entity_id: light.bedroom_night_light
+
+
+- alias: Main bedroom remote main
+  id: 'tohx5be8hahLa2yaeVexai9uv'
+  initial_state: true
+  mode: queued
+  trigger:
+  - platform: state
+    entity_id: sensor.main_bedroom_remote_action
+    to:
+    - 'on_press'
+    - 'off_press'
+    - 'up_press'
+    - 'down_press'
+  action:
+  - if:
+    - "{{ trigger.to_state.state == 'on_press' }}"
+
+    # using Zigbee scenes turns the lights on at the desired color without
+    # turning on at the previous color and transitioning to the new color
+    then:
+    - service: mqtt.publish
+      data:
+        topic: 'zigbee2mqtt/Matt/set'
+        payload: &payload '{"scene_recall": 0}'
+        # payload: &payload >
+        #   {% if is_state('input_boolean.dark_inside', 'on') %}
+        #     {# warm white at 100% brightness #}
+        #     {% set scene_id = 0 %}          
+        #   {% else %}
+        #     {# cool white at 100% brightness #}
+        #     {% set scene_id = 1 %}
+        #   {% endif %}
+        #   {"scene_recall": {{ scene_id }}}
+
+    - service: mqtt.publish
+      data:
+        topic: 'zigbee2mqtt/Andy/set'
+        payload: *payload
+
+    else:
+    # when brightness up/down buttons or off button is pressed
+    - service: light.turn_on
+      data:
+        brightness: >
+          {% set hour = now().hour %}
+          {% set light = states('light.main_bedroom_lamps') %}
+          {% set trig = trigger.to_state.state %}
+          {% set brt = state_attr('light.main_bedroom_lamps', 'brightness') | int(0) %}
+          {% if trig == 'off_press' %}
+            0
+          {% else %}
+            {% if light %}
+              {% if trig == 'up_press' and brt < 231 %}
+                {{ brt + 25 }}
+              {% elif trig == 'down_press' and brt > 25 %}
+                {{ brt - 25 }}
+              {% else %}
+                {{ brt }}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        entity_id: &br_lamps light.main_bedroom_lamps
+        transition: 0.5
+
+
+script:
+  toggle_bedroom_fan:
+    sequence:
+    - service: switch.toggle
+      entity_id: switch.bedroom_fan
+
+  early_departure:
+    sequence:
+    - service: media_player.turn_off
+      entity_id:
+      - media_player.bedroom_speaker
+      - media_player.guest_bedroom_clock
+    - service: input_boolean.turn_off
+      entity_id:
+      - input_boolean.sleep_mode
+      - input_boolean.andy_sleep
+      - input_boolean.white_noise
+    - service: light.turn_on
+      entity_id: 
+      - light.main_bedroom_lamps
+      - light.living_room_lamps
+      - light.buffet
+      data:
+        transition: 30
+        kelvin: 3000
+        brightness_pct: 50
+    - service: light.turn_on
+      entity_id: light.cabinet_lights
+      data:
+        brightness_pct: 66
+    - service: alarm_control_panel.alarm_disarm
+      entity_id: alarm_control_panel.home
 
 
 light:

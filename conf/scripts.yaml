@@ -1,0 +1,20 @@
+ir_fan_power:
+  sequence:
+  - service: mqtt.publish
+    data:
+      topic: &ir_topic "cmnd/{{ blaster }}/irsend"
+      payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0XD84"}'
+
+ir_fan_speed:
+  sequence:
+  - service: mqtt.publish
+    data:
+      topic: *ir_topic
+      payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0XDC6"}'
+
+ir_fan_oscillation:
+  sequence:
+  - service: mqtt.publish
+    data:
+      topic: *ir_topic
+      payload: '{"Protocol":"SYMPHONY","Bits":12,"Data":"0XDC3"}'

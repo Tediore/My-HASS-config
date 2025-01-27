@@ -1,33 +1,34 @@
 lights_interior:
   name: Interior lights
   entities:
+  - light.andy_office_lamps
+  - light.bedroom_night_light
   - light.buffet
   - light.cabinet_lights
+  - light.entrance_lamp
   - light.first_floor_hall_night_light
   - light.hall_bath_night_light
-  - light.main_bath_night_light
   - light.matt_office_bath_night_light
+  - light.matt_office_lamps
   - light.living_room_bias_lighting
   - light.living_room_lamps
   - light.main_bedroom_lamps
-  - light.main_bedroom_fan
   - light.matt_office_lamps
+  - light.second_floor_hall_night_light
+  - light.stairs
+  - light.the_loop
 
 speakers:
   entities:
   - media_player.bedroom_speaker
-  - media_player.andy_office_hub
-  - media_player.hub
-  - media_player.laundry_room_speaker
-  - media_player.living_room_speaker
+  - media_player.andy_office_speaker
+  - media_player.kitchen_speaker
   - media_player.office_speaker
 
 windows:
   entities:
-  - binary_sensor.kitchen_window
-  - binary_sensor.living_room_window_left
-  - binary_sensor.living_room_window_right
-  - binary_sensor.main_bedroom_window_left
-  - binary_sensor.main_bedroom_window_right
-  - binary_sensor.office_window
-  - binary_sensor.spare_room_window
+  - binary_sensor.living_room_window_sw_middle
+
+plugs:
+  entities:
+  - switch.andy_office_plug

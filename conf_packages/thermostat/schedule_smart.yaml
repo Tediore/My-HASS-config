@@ -43,6 +43,32 @@ automation:
       entity_id: *window_bool
 
 
+- alias: Change thermostat mode with exterior temp
+  id: 'change-tstat-exterior-temp'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    id: 'cool'
+    entity_id: &temp sensor.outside_temp
+    above: 75
+  - platform: numeric_state
+    id: 'heat'
+    entity_id: *temp
+    below: 60
+  condition:
+  - condition: state
+    entity_id: climate.thermostat
+    state:
+    - 'heat'
+    - 'cool'
+  - "{{ states('climate.thermostat') != trigger.id }}"
+  action:
+  - service: climate.set_hvac_mode
+    entity_id: climate.thermostat
+    data:
+      hvac_mode: "{{ trigger.id }}"
+
+
 - alias: Record previous thermostat mode
   id: 'OhLoe1Ge6oGo0aiPhoJoo2'
   initial_state: true
@@ -75,70 +101,6 @@ automation:
   action:
   - service: script.turn_on
     entity_id: script.tstat_sched_resume
-
-
-- alias: Switch between heat and cool modes
-  id: 'haeP1IeYais9Eilai5IeK0oi'
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    id: 'heat'
-    entity_id: &current_temp sensor.thermostat_current_temperature
-    below: 70
-  - platform: numeric_state
-    id: 'cool'
-    entity_id: *current_temp
-    above: 75.9
-  condition:
-  - condition: template
-    value_template: >
-      {{  (
-            trigger.id == 'heat' 
-            and is_state('climate.thermostat', 'cool')
-          )
-          or 
-          (
-            trigger.id == 'cool'
-            and is_state('climate.thermostat', 'heat')
-          )
-      }}
-  action:
-  - service: input_text.set_value
-    data:
-      entity_id: *prev_mode
-      value: "{{ trigger.id }}"
-  - condition: state
-    entity_id: *windows
-    state: 'off'
-  - service: script.turn_on
-    entity_id: script.tstat_sched_resume
-
-
-- alias: Start home mode earlier when cold in main bedroom
-  id: 'iu9ahs1Aigoophien7xei4'
-  initial_state: true
-  trigger:
-  - platform: time_pattern
-    minutes: '/10'
-  condition:
-  - condition: time
-    after: '04:49:00'
-    before: '06:00:00'
-  - condition: state
-    entity_id: climate.thermostat
-    state: 'heat'
-  - "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
-  - condition: or
-    conditions:
-    - "{{ states('sensor.tstat_current_temp') | float < 62 and now().hour < 5 and now().minute < 51 }}"
-    - "{{ states('sensor.tstat_current_temp') | float < 63 and now().hour < 6 and now().minute < 11 }}"
-    - "{{ states('sensor.tstat_current_temp') | float < 64 and now().hour < 6 and now().minute < 31 }}"
-    - "{{ states('sensor.tstat_current_temp') | float < 65 and now().hour < 6 and now().minute < 51 }}"
-  action:
-  - service: climate.set_temperature
-    entity_id: climate.thermostat
-    data:
-      temperature: 70
 
 
 script:

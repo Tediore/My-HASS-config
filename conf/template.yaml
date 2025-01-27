@@ -1,0 +1,10 @@
+- sensor:
+  - name: Outside temp
+    state: "{{ state_attr('weather.home', 'temperature') }}"
+    unit_of_measurement: "°F"
+  - name: Outside dew point
+    state: "{{ state_attr('weather.home', 'dew_point') }}"
+    unit_of_measurement: "°F"
+  - name: Inside dew point
+    state: "{{ states('sensor.inside_dew_point_2') | float(0) | round(0) }}"
+    unit_of_measurement: "°F"

@@ -44,6 +44,13 @@ automation:
           {% endif %}
         entity_id: &matt_office_lamps light.matt_office_lamps
         transition: 0.5
+    - condition: "{{ trigger.to_state.state == 'off_press' }}"
+    - service: homeassistant.turn_off
+      target: 
+        entity_id:
+        - light.game_room_bias_lighting
+        - fan.matt_office
+
 
 - alias: Matt office desk remote
   id: 'phe5ea2ahCeid4joo6yoo4'
@@ -53,14 +60,19 @@ automation:
   - platform: state
     entity_id: sensor.matt_office_desk_remote_action
     to: &remote_states
+    # first button
     - 'on'
     - 'off'
+    # second button
     - 'brightness_down'
     - 'brightness_move_down'
     - 'brightness_move_up'
     - 'brightness_up'
+    # third button
     - 'colortemp_up'
     - 'colortemp_down'
+    # fourth button
+    - 'recall'
   action:
   - service: script.turn_on
     data:
@@ -68,10 +80,12 @@ automation:
         {% set command = trigger.to_state.state %}
         {% if command in ['on', 'off'] %}
           script.turn_off_office_speaker
+        {% elif 'brightness' in command %}
+          script.toggle_mute_office_speaker
         {% elif 'colortemp' in command %}
           script.toggle_office_fan
         {% else %}
-          script.toggle_mute_office_speaker
+          script.toggle_office_fan_position
         {% endif %}
 
 
@@ -112,8 +126,14 @@ script:
         data:
           is_volume_muted: "{{ false if state_attr('media_player.office_speaker', 'is_volume_muted') else true }}"
 
-
   toggle_office_fan:
     sequence:
-    - service: switch.toggle
-      entity_id: switch.office_fan
+    - service: script.ir_fan_power
+      data:
+        blaster: matt_office_ir
+
+  toggle_office_fan_position:
+    sequence:
+    - service: script.ir_fan_oscillation
+      data:
+        blaster: matt_office_ir

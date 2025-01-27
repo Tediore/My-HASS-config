@@ -21,7 +21,7 @@ automation:
   - platform: numeric_state
     entity_id: &outdoor_light sensor.outdoor_light_level
     below: &outdoor_light_threshold 100
-    for: &light_threshold_time '00:03:00'
+    for: &light_threshold_time '00:05:00'
   - platform: state
     entity_id: input_text.alarm
     from: 'armed_away'
@@ -84,6 +84,7 @@ automation:
   - platform: numeric_state
     entity_id: &outdoor_light_west sensor.outdoor_light_level_west
     above: *outdoor_light_threshold
+    for: '00:10:00'
   condition:
   - condition: time
     after: '06:00:00'
@@ -143,7 +144,8 @@ automation:
   action:
   - delay: "{{ range(60,900) | random | int }}"
   - service: homeassistant.turn_off
-    entity_id: group.lights_interior
+    target:
+      entity_id: group.lights_interior
 
 
 - alias: Sync Tasmota device states on restart
@@ -223,8 +225,21 @@ script:
         brightness_pct: 100
         kelvin: 2200
         transition: 10
+    - service: light.turn_on
+      entity_id:
+      - light.stairs
+      - light.the_loop
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
+    - if:
+      - condition: state
+        entity_id: light.main_bedroom_lamps
+        state: 'off'
+      then:
+      - service: light.turn_on
+        entity_id: light.bedroom_night_light
+        data:
+          brightness_pct: 100
     - if:
       - condition: state
         entity_id: media_player.living_room_tv
@@ -267,12 +282,16 @@ script:
       - condition: state
         entity_id: media_player.living_room_tv
         state: 'off'
+      - service: light.turn_off
+        entity_id: light.second_floor_hall_night_light
       - service: light.turn_on
         data:
           entity_id: light.living_room_lamps
           brightness_pct: 100
           kelvin: 2700
           transition: 10
+      - service: light.turn_on
+        entity_id: light.the_loop
   
   lights_sunrise:
     sequence:
@@ -291,6 +310,8 @@ script:
       - light.hall_bath_night_light
       - light.main_bath_night_light
       - light.matt_office_bath_night_light
+      - light.stairs
+      - light.the_loop
       data:
         transition: 1
     - if:
@@ -314,7 +335,6 @@ light:
   - light.christmas_tree
   - light.mini_christmas_tree
   - light.portable_mini_christmas_tree
-  - light.star_lights
 
 
 input_boolean:

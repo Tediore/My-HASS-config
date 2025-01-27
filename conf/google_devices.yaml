@@ -1,51 +1,27 @@
-### Craft room
-light.craft_room:
+### Andy's office
+light.andy_office_lamps:
   expose: true
-  room: Craft room
-
-
-### Dining room
-# light.dining_room:
-#   expose: true
-#   room: Dining room
-# switch.dining_room_fan:
-#   expose: true
-#   room: Dining room
-
-
-### Guest room
-light.guest_bedroom:
-  expose: true
-  room: Guest room
-switch.guest_bedroom_fan:
-  expose: true
-  room: Guest room
+  room: Andy's office
 
 
 ### Kitchen
-# light.kitchen:
-#   expose: true
-#   room: Kitchen
-# switch.kitchen_fan:
-#   expose: true
-#   room: Kitchen
-
-
-### Laundry room
-light.laundry_room:
+light.cabinet_lights:
   expose: true
-  room: Laundry room
+  room: Kitchen
 
 
 ### Living room
 switch.living_room_fan:
   expose: true
   room: Living room
+light.living_room_lamps:
+  expose: true
+  room: Living room
 light.living_room_lamp_left:
   expose: true
   room: Living room
   name: Left lamp
-light.living_room_lamp_right:
+light.living_room_lamp_r:
   expose: true
   room: Living room
   name: Right lamp
@@ -60,10 +36,10 @@ switch.bedroom_fan:
   room: Main bedroom
 
 
-### Office
+### Matt's office
 light.office_lamps:
   expose: true
-  room: Office
+  room: Matt's office
 switch.game_room_bias_lighting:
   expose: true
-  room: Office
+  room: Matt's office

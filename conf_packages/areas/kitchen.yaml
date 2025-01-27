@@ -5,15 +5,14 @@ automation:
   trigger:
   - platform: numeric_state
     entity_id: &coffeemaker sensor.coffeemaker_power
-    above: 1000
+    above: 700
   - platform: numeric_state
     entity_id: *coffeemaker
     below: 10
-    for: '00:00:10'
+    for: '00:01:30'
   action:
   - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 500 else 'off' }}"
-    data:
-      entity_id: "input_boolean.{{ 'basement_' if 'basement' in trigger.to_state.entity_id else '' }}coffeemaker"
+    entity_id: input_boolean.coffeemaker
 
 
 - alias: Notify when coffee done
@@ -31,12 +30,26 @@ automation:
       message: "Enjoy!"
 
 
+- alias: Turn cabinet lights on/off with switch
+  id: 'cabinet-lights-on-off-w-switch'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.cabinet_light_switch
+    to:
+    - 'enter'
+    - 'leave'
+  action:
+  - service: "light.turn_{{ 'on' if trigger.to_state.state == 'enter' else 'off' }}"
+    entity_id: light.cabinet_lights
+
+
 light:
 - platform: group
   name: Cabinet lights
   entities:
   - light.cabinet_lights_n
-  - light.cabinet_lights_s
+  - light.cabinet_lights_microwave
 
 
 # mqtt:

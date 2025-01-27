@@ -21,84 +21,73 @@ automation:
       brightness_pct: 100
 
 
-- alias: Turn game room bias lighting on if lamps are on
-  id: 'RiePahthu5Ya6Aib9uemoh'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: &trigger_entities
-    - binary_sensor.xbox
-    - *office_lamps
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: *trigger_entities
-    state: 'on'
-  - condition: state
-    entity_id: input_boolean.dark_inside
-    state: 'on'
-    for: '00:00:11'
-  action:
-  - service: light.turn_on
-    entity_id: *bias_lighting
-    data:
-      brightness_pct: 100
+# - alias: Turn game room bias lighting on
+#   id: 'RiePahthu5Ya6Aib9uemoh'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: &trigger_entities
+#     - binary_sensor.xbox
+#     - *office_lamps
+#     from: 'off'
+#     to: 'on'
+#   condition:
+#   - condition: state
+#     entity_id: *trigger_entities
+#     state: 'on'
+#   action:
+#   - service: light.turn_on
+#     entity_id: *bias_lighting
+#     data:
+#       brightness_pct: 100
 
 
-- alias: Switch lights when Xbox turned on
-  id: 'ungeiW8ieloid2Aedoht1s'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.xbox
-    from: 'off'
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: *office_lamps
-    state: 'on'
-  action:
-  - service: light.turn_on
-    entity_id: *office_lamps
-    data:
-      transition: 3
-      brightness_pct: 50
-  - if:
-    - condition: state
-      entity_id: &office_fan_light light.office_fan
-      state: 'on'
-    then:
-    - service: light.turn_off
-      entity_id: *office_fan_light
-  - if:
-    - condition: state
-      entity_id: &office_spkr media_player.office_speaker
-      state: 'on'
-    then:
-    - service: media_player.turn_off
-      entity_id: *office_spkr
+# - alias: Switch lights when Xbox turned on
+#   id: 'ungeiW8ieloid2Aedoht1s'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.xbox
+#     from: 'off'
+#     to: 'on'
+#   condition:
+#   - condition: state
+#     entity_id: *office_lamps
+#     state: 'on'
+#   action:
+#   - service: light.turn_on
+#     entity_id: *office_lamps
+#     data:
+#       transition: 3
+#       brightness_pct: 50
+#   - if:
+#     - condition: state
+#       entity_id: &office_spkr media_player.office_speaker
+#       state: 'on'
+#     then:
+#     - service: media_player.turn_off
+#       entity_id: *office_spkr
 
 
-- alias: Switch lights when Xbox turned off
-  id: 'wiyuShahNeifootho5ai'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.xbox
-    from: 'on'
-    to: 'off'
-  action:
-  - service: light.turn_off
-    entity_id: *bias_lighting
-  - condition: state
-    entity_id: *office_lamps
-    state: 'on'
-  - service: light.turn_on
-    entity_id: *office_lamps
-    data:
-      transition: 3
-      brightness_pct: 100
+# - alias: Switch lights when Xbox turned off
+#   id: 'wiyuShahNeifootho5ai'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.xbox
+#     from: 'on'
+#     to: 'off'
+#   action:
+#   - service: light.turn_off
+#     entity_id: *bias_lighting
+#   - condition: state
+#     entity_id: *office_lamps
+#     state: 'on'
+#   - service: light.turn_on
+#     entity_id: *office_lamps
+#     data:
+#       transition: 3
+#       brightness_pct: 100
 
 
 # - alias: Poll Xbox UPS
@@ -121,11 +110,43 @@ light:
   - light.office_table_lamp
 
 
+fan:
+- platform: template
+  fans:
+    matt_office:
+      friendly_name: Matt office fan
+      value_template: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) > 10 }}"
+      percentage_template: 12.5
+      oscillating_template: True
+      turn_on:
+      - condition: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) < 10 }}"
+      - service: script.ir_fan_power
+        data:
+          blaster: &blaster matt_office_ir
+      turn_off:
+      - condition: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) > 10 }}"
+      - service: script.ir_fan_power
+        data:
+          blaster: *blaster
+      set_percentage:
+      - service: script.ir_fan_speed
+        data:
+          blaster: *blaster
+      set_oscillating:
+      - service: script.ir_fan_oscillation
+        data:
+          blaster: *blaster
+      speed_count: 8
+
+
 binary_sensor:
 - platform: template
   sensors:
     xbox:
-      value_template: "{{ states('sensor.xbox_ups_load') | float(0) > 14.5 }}"
+      value_template: "{{ states('sensor.xbox_ups_load') | float(0) > 5 }}"
+
+    matt_office_fan:
+      value_template: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) > 10 }}"
 
 
 sensor:

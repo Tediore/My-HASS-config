@@ -1,0 +1,51 @@
+automation:
+- alias: Turn on/off closet lights with doors
+  id: 'closet-lights-on-off'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.laundry_closet_door
+    - binary_sensor.pantry_door
+    - binary_sensor.north_storage_door
+    - binary_sensor.south_storage_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    data:
+      entity_id: "light.{{ trigger.to_state.object_id.replace('_door', '') }}"
+
+
+light:
+- platform: template
+  lights:
+    stairs:
+      friendly_name: Stairs
+      value_template: "{{ states('switch.stair_light_switch_1f') != states('switch.stair_light_switch_2f') }}"
+      turn_on:
+        service: script.turn_on
+        entity_id: script.stair_light_on
+      turn_off:
+        service: script.turn_on
+        entity_id: script.stair_light_off
+
+
+script:
+  stair_light_on:
+    sequence:
+    - condition: state
+      entity_id: light.stairs
+      state: 'off'
+    - service: switch.toggle
+      entity_id: switch.stair_light_switch_2f
+
+  stair_light_off:
+    sequence:
+    - condition: state
+      entity_id: light.stairs
+      state: 'on'
+    - service: switch.toggle
+      entity_id: switch.stair_light_switch_2f

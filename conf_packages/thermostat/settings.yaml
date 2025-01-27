@@ -41,11 +41,11 @@ sensor:
       value_template: >
         {% set setpoint = state_attr('climate.thermostat', 'temperature') | int(0) %}
         {% set mode = states('climate.thermostat') %}
-        {% set cool_home = 75 %}
-        {% set cool_sleep = 74 %}
+        {% set cool_home = 74 %}
+        {% set cool_sleep = 68 %}
         {% set cool_away = 79 %}
-        {% set heat_home = 70 %}
-        {% set heat_sleep = 67 %}
+        {% set heat_home = 69 %}
+        {% set heat_sleep = 66 %}
         {% set heat_away = 65 %}
         {% if is_state('input_boolean.tstat_hold', 'on') %}
           Hold

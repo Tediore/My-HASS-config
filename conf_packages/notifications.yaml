@@ -1,0 +1,158 @@
+automation:
+- alias: Notify when device unavailable
+  id: 'Magah7iediTii3Bi'
+  initial_state: true
+  mode: parallel
+  max: 100
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.back_door
+    - binary_sensor.front_door
+    - binary_sensor.pantry_door
+
+    - binary_sensor.living_room_window_sw_middle
+
+    - sensor.main_bedroom_temperature
+    - sensor.outdoor_light_level_east
+    - light.cabinet_lights
+    to: 'unavailable'
+    for: '00:01:00'
+  - platform: state
+    entity_id: 
+    - binary_sensor.coffeemaker_status
+    to: 'unavailable'
+    for: '00:10:00'
+  - platform: numeric_state
+    entity_id: sensor.cell_modem_signal
+    above: -1
+  action:
+  - service: notify.mobile_app_matt_phone
+    data:
+      title: "Device unavailable"
+      message: "{{ trigger.to_state.name }} is unavailable"
+      data:
+        ttl: 0
+        priority: high
+
+
+- alias: Notify when Zigbee router unavailable for 5 minutes
+  id: 'EphooCiob0oofaYo'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - light.andy
+    - light.matt
+    - switch.andy_office_plug
+    - switch.bedroom_plug
+    - switch.den_plug
+    - light.entrance_nightlight
+    - light.north_storage
+    - light.pantry
+    - switch.second_floor_hallway_plug
+    - light.south_storage
+    to: 'unavailable'
+    for: '00:05:00'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: &router_title Zigbee router warning
+      message: &router_message "{{ trigger.to_state.name }} has been unavailable for 5 minutes."
+  - service: persistent_notification.create
+    data:
+      title: *router_title
+      message: *router_message
+
+
+- alias: Notify when sensor battery low
+  id: 'roo8eoBo2Meemi2s'
+  initial_state: true
+  mode: parallel
+  max: 100
+  trigger:
+
+# {% for state in states.sensor if 'battery' in state.entity_id and 'phone' not in state.entity_id and 'low' not in state.entity_id and 'ups' not in state.entity_id and 'hk' not in state.entity_id and 'lenovo' not in state.entity_id and 'pixel' not in state.entity_id %}
+# - {{ state.entity_id -}}
+# {% endfor %}
+  - platform: numeric_state
+    entity_id:
+    - sensor.front_door_keypad_battery
+    - sensor.main_bedroom_remote_battery
+    - sensor.front_door_battery
+    - sensor.matt_office_switch_battery
+    - sensor.outdoor_light_sensor_west_battery
+    - sensor.matt_office_desk_remote_battery
+    - sensor.back_door_battery
+    - sensor.north_storage_door_battery
+    - sensor.matt_button_battery
+    - sensor.andy_button_battery
+    - sensor.bedroom_fan_battery
+    - sensor.siren_battery
+    - sensor.laundry_closet_door_battery
+    - sensor.stair_light_switch_2f_battery
+    - sensor.stair_light_switch_1f_battery
+    - sensor.front_door_lock_battery
+    - sensor.andy_office_switch_battery
+    - sensor.office_desk_button_battery
+    - sensor.andy_office_remote_battery
+    - sensor.living_room_window_sw_middle_battery
+    - sensor.back_door_lock_battery
+    - sensor.garage_door_battery
+    - sensor.cabinet_lights_switch_battery
+    - sensor.south_storage_door_battery
+    - sensor.pantry_door_battery
+    - sensor.living_room_battery
+    - sensor.bedroom_temp_battery
+    below: 21
+    for: '08:00:00'
+
+# {% for state in states.binary_sensor if 'battery' in state.entity_id %}
+# - {{ state.entity_id -}}
+# {% endfor %}
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door_keypad_battery_low
+    - binary_sensor.front_door_battery_low
+    - binary_sensor.back_door_battery_low
+    - binary_sensor.north_storage_door_battery_low
+    - binary_sensor.andy_button_battery_low
+    - binary_sensor.laundry_closet_door_battery_low
+    - binary_sensor.office_desk_button_battery_low
+    - binary_sensor.garage_door_battery_low
+    - binary_sensor.pantry_door_battery_low
+    to: 'on'
+  # condition:
+  # - condition: template
+  #   value_template: "{{ trigger.to_state.state != '' }}"
+  action:
+  - service: notify.gotify_high
+    data:
+      title: &batt_low_title Device battery low
+      message: &batt_low_msg "{{ trigger.to_state.name.replace('battery low', '').replace('battery', '') }} battery is low."
+      data:
+        ttl: 0
+        priority: high
+  - service: persistent_notification.create
+    data:
+      title: *batt_low_title
+      message: *batt_low_msg
+
+
+- alias: Notify when Zigbee device joins or leaves network
+  id: 'notify_zigbee_leave_join'
+  initial_state: true
+  trigger:
+  - platform: mqtt
+    topic: 'zigbee2mqtt/bridge/event'
+  condition:
+  - "{{ trigger.payload_json['type'] in ['device_leave', 'device_joined'] }}"
+  action:
+  - service: notify.gotify_high
+    data:
+      title: Zigbee network notification
+      message: "{{ trigger.payload_json['data']['friendly_name'] }} {{ 'left' if 'leave' in trigger.payload_json else 'joined' }} the Zigbee network"
+      data:
+        ttl: 0
+        priority: high

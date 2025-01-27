@@ -1,62 +1,11 @@
 automation:
-# - alias: Record when LR IR received
-#   id: 'record-lr-ir-received'
-#   initial_state: true
-#   mode: single
-#   trigger:
-#   - platform: state
-#     entity_id: sensor.lr_ir_received
-#   action: 
-#   - service: input_text.set_value
-#     entity_id: input_text.lr_ir_received
-#     data:
-#       value: "{{ trigger.to_state.state }}"
-#   - delay: 0.5
-#   - service: input_text.set_value
-#     entity_id: input_text.lr_ir_received
-#     data:
-#       value: ' '
-
-
-- alias: Turn off lights and speakers when TV turned on with IR
-  id: 'esaengaH9lei7ahGhohfoh'
+- alias: Turn off lights and speakers when TV turned on
+  id: 'turn_off_lights_speakers_tv_on'
   initial_state: true
-  mode: single
   trigger:
   - platform: state
-    entity_id: &lr_ir sensor.lr_ir_received
-    to: &ir_codes
-    # - '0XD5F2A' # Power (Google TV)
-    - '0X20DF10EF' # Power
-    - '0X20DF57A8' # Amazon Video
-    - '0X20DFD728' # Netflix
-    - '0X00FF827D'
-    - '0X20DFB44B' # SmartCast Home
-  condition:
-  - condition: state
     entity_id: &lr_tv media_player.living_room_tv
-    state:
-    - 'off'
-    - 'unavailable'
-  action:
-  - service: script.turn_on
-    entity_id: 
-    - script.pre_media
-    - script.ir_soundbar_vol_up
-  - service: homeassistant.reload_config_entry
-    data:
-      entry_id: 'c1b22a0aa916a426315558917f5182a1'
-
-
-- alias: Turn off lights and speakers with TV turned on without IR
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: *lr_tv
     to: 'on'
-  # - platform: state
-  #   entity_id: media_player.living_room_cast
-  #   to: 'idle'
   action:
   - service: script.turn_on
     entity_id: 
@@ -64,46 +13,7 @@ automation:
     - script.ir_soundbar_vol_up
 
 
-# - alias: Change living room TV auto-brightness
-#   id: 'lr-tv-auto-brightness'
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: &lr_tv_brightness_entities
-#     - *lr_tv
-#     - input_boolean.dark_inside
-#     to: 'on'
-#   condition:
-#   - condition: state
-#     entity_id: *lr_tv_brightness_entities
-#     state: 'on'
-#   action:
-#   - service: script.turn_on
-#     entity_id: script.lr_tv_auto_brightness
-
-
-- alias: Turn lights back on with TV IR
-  id: 'Ook9zahch9eish9Cheeroo'
-  initial_state: true
-  mode: single
-  trigger:
-  - platform: state
-    entity_id: *lr_ir
-    to: '0X20DF10EF'
-  condition:
-  - condition: state
-    entity_id: 
-    - *lr_tv
-    - input_boolean.dark_inside
-    state: 'on'
-  action:
-  - service: input_boolean.turn_on
-    entity_id: input_boolean.lr_tv_ir
-  - service: script.turn_on
-    entity_id: script.post_media
-
-
-- alias: Restore lights when TV turned off without IR
+- alias: Restore lights when TV turned off
   id: 'wuudeaC1Ooyaiphe3uwaPh'
   initial_state: true
   trigger:
@@ -130,6 +40,92 @@ automation:
     entity_id: script.post_media
 
 
+# - alias: Record when LR IR received
+#   id: 'record-lr-ir-received'
+#   initial_state: true
+#   mode: single
+#   trigger:
+#   - platform: state
+#     entity_id: sensor.lr_ir_received
+#   action: 
+#   - service: input_text.set_value
+#     entity_id: input_text.lr_ir_received
+#     data:
+#       value: "{{ trigger.to_state.state }}"
+#   - delay: 0.5
+#   - service: input_text.set_value
+#     entity_id: input_text.lr_ir_received
+#     data:
+#       value: ' '
+
+
+# - alias: Turn off lights and speakers when TV turned on with IR
+#   id: 'esaengaH9lei7ahGhohfoh'
+#   initial_state: true
+#   mode: single
+#   trigger:
+#   - platform: state
+#     entity_id: &lr_ir sensor.lr_ir_received
+#     to: &ir_codes
+#     # - '0XD5F2A' # Power (Google TV)
+#     - '0X20DF10EF' # Power
+#     - '0X20DFD728' # Netflix
+#     - '0X00FF827D'
+#   condition:
+#   - condition: state
+#     entity_id: *lr_tv
+#     state:
+#     - 'off'
+#     - 'unavailable'
+#   action:
+#   - service: script.turn_on
+#     entity_id: 
+#     - script.pre_media
+#     - script.ir_soundbar_vol_up
+#   - service: homeassistant.reload_config_entry
+#     data:
+#       entry_id: 'c1b22a0aa916a426315558917f5182a1'
+
+
+# - alias: Change living room TV auto-brightness
+#   id: 'lr-tv-auto-brightness'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: &lr_tv_brightness_entities
+#     - *lr_tv
+#     - input_boolean.dark_inside
+#     to: 'on'
+#   condition:
+#   - condition: state
+#     entity_id: *lr_tv_brightness_entities
+#     state: 'on'
+#   action:
+#   - service: script.turn_on
+#     entity_id: script.lr_tv_auto_brightness
+
+
+# - alias: Turn lights back on with TV IR
+#   id: 'Ook9zahch9eish9Cheeroo'
+#   initial_state: true
+#   mode: single
+#   trigger:
+#   - platform: state
+#     entity_id: *lr_ir
+#     to: '0X20DF10EF'
+#   condition:
+#   - condition: state
+#     entity_id: 
+#     - *lr_tv
+#     - input_boolean.dark_inside
+#     state: 'on'
+#   action:
+#   - service: input_boolean.turn_on
+#     entity_id: input_boolean.lr_tv_ir
+#   - service: script.turn_on
+#     entity_id: script.post_media
+
+
 script:
   pre_media:
     alias: Turn stuff off when TV turned on
@@ -143,15 +139,16 @@ script:
       entity_id: light.living_room_bias_lighting
       data:
         brightness_pct: 100
-    - service: script.turn_on
-      entity_id: script.dim_select_lights
+    - service: media_player.turn_off
+      entity_id: media_player.kitchen_speaker
     - condition: state
       entity_id: light.living_room_lamps
       state: 'on'
     - service: light.turn_off
       entity_id:
       - light.living_room_lamps
-      - light.living_room_buffet
+      - light.entrance_lamp
+      - light.the_loop
       data:
         transition: 2
 
@@ -161,65 +158,15 @@ script:
     - service: light.turn_on
       data:
         entity_id: >
-          light.buffet, light.hallway, light.entrance, light.cabinet_lights
+          light.buffet, light.cabinet_lights, light.entrance_lamp, light.the_loop
           {{- ', light.living_room_lamps' if is_state('light.living_room_lamps', 'off') else '' -}}
         brightness_pct: 100
         kelvin: 2700
-        transition: 5
-    - if:
-      - "{{ is_state('light.christmas_tree', 'unavailable') }}"
-      then:
-      - service: light.turn_on
-        data:
-          entity_id: light.living_room_buffet
-          brightness_pct: 100
-          kelvin: 2700
-          transition: 5
+        transition: 6
     - service: light.turn_off
       entity_id: light.living_room_bias_lighting
     - service: input_boolean.turn_off
       entity_id: input_boolean.lr_tv_ir
-
-  dim_select_lights:
-    sequence:
-    - service: light.turn_on
-      entity_id: light.entrance
-      data: &dim_lights_data
-        brightness_pct: 67
-        transition: 2
-    - condition: state
-      entity_id: light.kitchen
-      state: 'off'
-    - service: light.turn_on
-      entity_id: light.cabinet_lights
-      data: *dim_lights_data
-
-  # lr_tv_brightness_ctl:
-  #   sequence:
-  #   - service: "switch.turn_{{ states('input_boolean.dark_inside') }}"
-  #     entity_id: switch.lr_tv_auto_brightness
-
-
-light:
-- platform: group
-  name: Living room lamps
-  entities:
-  - light.living_room_lamp_left
-  - light.living_room_lamp_right
-
-- platform: group
-  name: Living room
-  entities:
-  - light.living_room_lamps
-
-
-# switch:
-# - platform: command_line
-#   switches:
-#     lr_tv_auto_brightness:
-#       friendly_name: Living room TV auto-brightness
-#       command_on: !secret lr_tv_brightness_ctl_high
-#       command_off: !secret lr_tv_brightness_ctl_off
 
 
 mqtt:

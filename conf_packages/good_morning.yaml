@@ -12,7 +12,13 @@ automation:
   - "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   action:
   - service: script.turn_on
-    entity_id: script.good_morning
+    entity_id: 
+    - script.good_morning
+    - script.transit_display_on
+  - service: light.turn_on
+    entity_id: &2f_hall_light light.second_floor_hall_night_light
+    data:
+      brightness_pct: 100
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
@@ -20,6 +26,37 @@ automation:
     entity_id: sun.sun
     state: 'below_horizon'
   - service: script.lights_sunset
+
+
+- alias: Good morning - weekend
+  id: 'good-morning-weekend'
+  initial_state: true
+  trigger:
+  - platform: time
+    at: '07:00:00'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday
+    state: 'off'
+  - "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
+  action:
+  - service: homeassistant.turn_off
+    target:
+      entity_id:
+      - input_boolean.sleep_mode
+      - input_boolean.andy_sleep
+      - light.main_bath_night_light
+  - service: script.turn_on
+    entity_id: script.transit_display_on
+  - service: light.turn_on
+    entity_id: *2f_hall_light
+    data:
+      brightness_pct: 100
+  - if:
+    - "{{ is_state('switch.humidifier', 'on') }}"
+    then:
+    - service: switch.turn_off
+      entity_id: switch.humidifier
 
 
 - alias: Set workday wakeup time
@@ -44,10 +81,11 @@ script:
     - service: script.turn_on
       entity_id: script.lights_wakeup
     - service: homeassistant.turn_off
-      entity_id:
-      - input_boolean.sleep_mode
-      - input_boolean.andy_sleep
-      - light.main_bath_night_light
+      target:
+        entity_id:
+        - input_boolean.sleep_mode
+        - input_boolean.andy_sleep
+        - light.main_bath_night_light
     - if:
       - "{{ is_state('switch.humidifier', 'on') }}"
       then:
@@ -75,6 +113,19 @@ script:
         transition: 360
         brightness_pct: 100
         kelvin: 3500
+
+  transit_display_on:
+    sequence:
+    - service: rest_command.tasker
+      data:
+        ip_address: 10.0.4.246
+        port: 1821
+        path: home_assistant
+        event:
+                {
+                'device_id':'display_on',
+                'device_name':'Display On'
+              }
 
 
 binary_sensor:

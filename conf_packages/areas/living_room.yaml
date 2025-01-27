@@ -11,3 +11,81 @@ automation:
   - service: homeassistant.reload_config_entry
     data:
       entry_id: 7303e277c04597709031294ca0385355
+
+
+light:
+- platform: group
+  name: Living room lamps
+  entities:
+  - light.living_room_lamp_left
+  - light.living_room_lamp_r
+
+- platform: group
+  name: Living room lamp R
+  entities:
+  - light.living_room_lamp_right
+  - light.living_room_lamp_r2
+
+- platform: group
+  name: Living room
+  entities:
+  - light.living_room_lamps
+
+
+binary_sensor:
+- platform: template
+  sensors:
+    living_room_fan:
+      value_template: "{{ states('sensor.living_room_fan_plug_energy_power') | float(0) > 10 }}"
+
+
+script:
+  ir_soundbar_vol_up:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: &lr_ir_topic "cmnd/living_room_ir/irsend"
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FF827D"}'
+
+  ir_soundbar_vol_dn:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: *lr_ir_topic
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x00FFA25D"}'
+
+  ir_soundbar_pwr_on:
+    sequence:
+    - service: mqtt.publish
+      data:
+        topic: *lr_ir_topic
+        payload: '{"Protocol":"NEC","Bits":32,"Data":"0x0XFF02FD"}'
+
+
+fan:
+- platform: template
+  fans:
+    living_room:
+      friendly_name: Living room fan
+      value_template: "{{ states('sensor.living_room_fan_plug_energy_power') | float(0) > 10 }}"
+      percentage_template: 12.5
+      oscillating_template: True
+      turn_on:
+      - condition: "{{ states('sensor.living_room_fan_plug_energy_power') | float(0) < 10 }}"
+      - service: script.ir_fan_power
+        data:
+          blaster: &blaster living_room_ir
+      turn_off:
+      - condition: "{{ states('sensor.living_room_fan_plug_energy_power') | float(0) > 10 }}"
+      - service: script.ir_fan_power
+        data:
+          blaster: *blaster
+      set_percentage:
+      - service: script.ir_fan_speed
+        data:
+          blaster: *blaster
+      set_oscillating:
+      - service: script.ir_fan_oscillation
+        data:
+          blaster: *blaster
+      speed_count: 8
