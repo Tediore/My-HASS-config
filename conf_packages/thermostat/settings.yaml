@@ -1,3 +1,14 @@
+group:
+  windows:
+    entities:
+    - binary_sensor.andy_office_window
+    - binary_sensor.hall_window_e
+    - binary_sensor.hall_window_middle
+    - binary_sensor.hall_window_w
+    - binary_sensor.kitchen_window
+    - binary_sensor.matt_office_window
+    - binary_sensor.patio_door
+
 script:
   tstat_away:
     sequence:
@@ -81,8 +92,7 @@ sensor:
     
     tstat_setpoint:
       friendly_name: "Setpoint"
-      value_template: "{{ state_attr('climate.thermostat','temperature') | float('-') | round(0) }}"
-      unit_of_measurement: '°F'
+      value_template: "{{ 'Off' if is_state('climate.thermostat', 'off') else state_attr('climate.thermostat','temperature') | float('-') | round(0) ~ '°F' }}"
 
     tstat_status:
       friendly_name: Thermostat
@@ -105,3 +115,9 @@ input_boolean:
 input_text:
   tstat_prev_mode:
     name: Previous thermostat mode
+
+template:
+- sensor:
+  - name: Inside dew point
+    state: "{{ states('sensor.inside_dew_point_2') | float(0) | round(0) }}"
+    unit_of_measurement: "°F"

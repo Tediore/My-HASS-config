@@ -7,7 +7,7 @@ automation:
     at: '07:45:00'
   condition:
   - condition: state
-    entity_id: light.main_bedroom_lamps
+    entity_id: &bedroom_lamps light.bedroom_lamps
     state: 'on'
   - condition: or
     conditions:
@@ -19,7 +19,7 @@ automation:
     value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
   action:
   - service: light.turn_off
-    entity_id: light.main_bedroom_lamps
+    entity_id: *bedroom_lamps
     data:
       transition: 60
 
@@ -91,32 +91,6 @@ automation:
         {% endif %}
 
 
-- alias: Turn bedroom night light on/off with lights
-  id: 'bedroom-night-light-on-off-lights'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: &main_br_lamps light.main_bedroom_lamps
-    to:
-    - 'on'
-    - 'off'
-  condition:
-  - condition: state
-    entity_id: alarm_control_panel.home
-    state:
-    - 'disarmed'
-    - 'armed_home'
-    - 'armed_night'
-  - condition: state
-    entity_id:
-    - input_boolean.andy_sleep
-    - input_boolean.sleep_mode
-    state: 'off'
-  action:
-  - service: "light.turn_{{ 'on' if trigger.to_state.state == 'off' else 'off' }}"
-    entity_id: light.bedroom_night_light
-
-
 - alias: Main bedroom remote main
   id: 'tohx5be8hahLa2yaeVexai9uv'
   initial_state: true
@@ -136,24 +110,8 @@ automation:
     # using Zigbee scenes turns the lights on at the desired color without
     # turning on at the previous color and transitioning to the new color
     then:
-    - service: mqtt.publish
-      data:
-        topic: 'zigbee2mqtt/Matt/set'
-        payload: &payload '{"scene_recall": 0}'
-        # payload: &payload >
-        #   {% if is_state('input_boolean.dark_inside', 'on') %}
-        #     {# warm white at 100% brightness #}
-        #     {% set scene_id = 0 %}          
-        #   {% else %}
-        #     {# cool white at 100% brightness #}
-        #     {% set scene_id = 1 %}
-        #   {% endif %}
-        #   {"scene_recall": {{ scene_id }}}
-
-    - service: mqtt.publish
-      data:
-        topic: 'zigbee2mqtt/Andy/set'
-        payload: *payload
+    - service: scene.turn_on
+      entity_id: scene.bedroom_lamps_0_warm_white_100
 
     else:
     # when brightness up/down buttons or off button is pressed
@@ -161,9 +119,9 @@ automation:
       data:
         brightness: >
           {% set hour = now().hour %}
-          {% set light = states('light.main_bedroom_lamps') %}
+          {% set light = states('light.bedroom_lamps') %}
           {% set trig = trigger.to_state.state %}
-          {% set brt = state_attr('light.main_bedroom_lamps', 'brightness') | int(0) %}
+          {% set brt = state_attr('light.bedroom_lamps', 'brightness') | int(0) %}
           {% if trig == 'off_press' %}
             0
           {% else %}
@@ -177,8 +135,22 @@ automation:
               {% endif %}
             {% endif %}
           {% endif %}
-        entity_id: &br_lamps light.main_bedroom_lamps
+        entity_id: *bedroom_lamps
         transition: 0.5
+
+
+- alias: Turn bedroom closet light on/off with door
+  id: 'bedroom-closet-light-door'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.main_bedroom_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.main_bedroom_closet
 
 
 script:
@@ -200,12 +172,12 @@ script:
       - input_boolean.white_noise
     - service: light.turn_on
       entity_id: 
-      - light.main_bedroom_lamps
+      - light.bedroom_lamps
       - light.living_room_lamps
       - light.buffet
       data:
         transition: 30
-        kelvin: 3000
+        color_temp_kelvin: 3000
         brightness_pct: 50
     - service: light.turn_on
       entity_id: light.cabinet_lights
@@ -215,12 +187,9 @@ script:
       entity_id: alarm_control_panel.home
 
 
-light:
-- platform: group
-  name: Main bedroom lamps
-  entities:
-  - light.andy
-  - light.matt
+shell_command:
+  bedroom_powerline_leds_on: ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' matt@10.0.5.34 /home/matt/bedroom-powerline-leds-on
+  bedroom_powerline_leds_off: ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' matt@10.0.5.34 /home/matt/bedroom-powerline-leds-off
 
 
 # switch:

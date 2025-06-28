@@ -28,7 +28,7 @@ light.living_room_lamp_r:
 
 
 ### Main bedroom
-light.main_bedroom_lamps:
+light.bedroom_lamps:
   expose: true
   room: Main bedroom
 switch.bedroom_fan:
@@ -37,9 +37,6 @@ switch.bedroom_fan:
 
 
 ### Matt's office
-light.office_lamps:
-  expose: true
-  room: Matt's office
-switch.game_room_bias_lighting:
+light.matt_office_lamps:
   expose: true
   room: Matt's office

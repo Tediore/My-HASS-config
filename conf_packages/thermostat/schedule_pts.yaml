@@ -5,72 +5,34 @@ automation:
   trigger:
   - platform: event
     event_type: netgear_lte_sms
+#   - platform: mqtt
+#     topic: 'sms2mqtt/received'
   condition:
   - "{{ 'ComEd PTS Summer Hours Alert: TODAY' in trigger.event.data.message }}"
+#   - "{{ 'ComEd PTS Summer Hours Alert: TODAY' in trigger.payload }}"
   action:
   - service: input_datetime.set_datetime
     entity_id: input_datetime.tstat_peak_savings_start
     data:
       time: >
         {% set payload = trigger.event.data.message %}
-        {% set start = payload[payload.find('from') + 4:payload.find(' - ')] %}
-        {% set mid = payload[payload.find(' - ') + 3:] %}
-        {% if start.find('am') == -1 %}
-          {{- (start[:start.find('m') - 2] | int(0) + 12) | string + ':00:00' }}
-        {% else %}
-          {{- '0' + (start[:start.find('m') - 2] | int(0)) | string + ':00:00' }}
-        {% endif %}
+        {% set start = payload[payload.find('from') + 5:payload.find(' - ')] %}
+        {% set start_hr_12 = start[:start.find(':')] if ':' in start else start[:start.find(' ')] %}
+        {% set start_hr_24 = '0' + start_hr_12 if 'am' in start else int(start_hr_12) + 12 %}
+        {% set start_min = start[start.find(':'):-3] if ':' in start else ':00' %}
+        {{ start_hr_24 ~ start_min ~ ':00' }}
   - service: input_datetime.set_datetime
     entity_id: input_datetime.tstat_peak_savings_end
     data:
       time: >
         {% set payload = trigger.event.data.message %}
-        {% set mid = payload[payload.find(' - ') + 3:] %}
-        {% set end = mid[:mid.find('m') + 1] %}
-        {% if end.find('am') == -1 %}
-          {{- (end[:end.find('m') - 2] | int(0) + 12) | string + ':00:00' }}
-        {% else %}
-          {{- '0' + (end[:end.find('m') - 2] | int(0)) | string + ':00:00' }}
-        {% endif %}
+        {% set mid = payload[payload.find(' - ') + 3:payload.find('.')] %}
+        {% set end_hr_12 = mid[:mid.find(':')] if ':' in mid else mid[:mid.find(' ')] %}
+        {% set end_hr_24 = '0' + end_hr_12 if 'am' in mid else int(end_hr_12) + 12 %}
+        {% set end_min = mid[mid.find(':'):-3] if ':' in mid else ':00' %}
+        {{ end_hr_24 ~ end_min ~ ':00' }}
   - service: input_boolean.turn_on
     entity_id: input_boolean.tstat_peak_savings
-
-
-# - alias: Set PTS start/end time
-#   id: 'gohhohch3Eeloh7rahx2Ai'
-#   initial_state: true
-#   trigger:
-#   - platform: mqtt
-#     topic: 'sms2mqtt/received'
-#   condition:
-#   - "{{ 'ComEd PTS Summer Hours Alert: TODAY' in trigger.payload }}"
-#   action:
-#   - service: input_datetime.set_datetime
-#     entity_id: input_datetime.tstat_peak_savings_start
-#     data:
-#       time: >
-#         {% set payload = trigger.payload %}
-#         {% set start = payload[payload.find('from') + 4:payload.find(' - ')] %}
-#         {% set mid = payload[payload.find(' - ') + 3:] %}
-#         {% if start.find('am') == -1 %}
-#           {{- (start[:start.find('m') - 2] | int(0) + 12) | string + ':00:00' }}
-#         {% else %}
-#           {{- '0' + (start[:start.find('m') - 2] | int(0)) | string + ':00:00' }}
-#         {% endif %}
-#   - service: input_datetime.set_datetime
-#     entity_id: input_datetime.tstat_peak_savings_end
-#     data:
-#       time: >
-#         {% set payload = trigger.payload %}
-#         {% set mid = payload[payload.find(' - ') + 3:] %}
-#         {% set end = mid[:mid.find('m') + 1] %}
-#         {% if end.find('am') == -1 %}
-#           {{- (end[:end.find('m') - 2] | int(0) + 12) | string + ':00:00' }}
-#         {% else %}
-#           {{- '0' + (end[:end.find('m') - 2] | int(0)) | string + ':00:00' }}
-#         {% endif %}
-#   - service: input_boolean.turn_on
-#     entity_id: input_boolean.tstat_peak_savings
 
 
 - alias: Turn cooling off/on - peak time savings
@@ -109,10 +71,13 @@ automation:
         entity_id:
         - input_boolean.tstat_peak_savings
         - input_boolean.tstat_peak_savings_active
+      - service: climate.set_hvac_mode
+        data:
+          entity_id: climate.thermostat
+          hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
+      - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
       - service: button.press
         entity_id: button.thermostat_clear_hold
-      - service: climate.turn_on
-        entity_id: climate.thermostat
       - service: notify.gotify
         data:
           title: Peak time savings over

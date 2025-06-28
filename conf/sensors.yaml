@@ -4,10 +4,8 @@
   - time
   - date_time_iso
 
-- platform: statistics
-  name: Average voltage
-  entity_id: sensor.ups_input_voltage
-  state_characteristic: average_linear
-  max_age:
-    hours: 168
-  sampling_size: 10000
+- platform: template
+  sensors:
+    time_am_pm:
+      friendly_name: Time
+      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%I:%M %p') }}"

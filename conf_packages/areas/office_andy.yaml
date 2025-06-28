@@ -18,7 +18,7 @@ automation:
     - service: light.turn_on
       entity_id: light.andy_office_lamps
       data:
-        kelvin: 2200
+        color_temp_kelvin: 2200
         brightness_pct: 100
  
     else:
@@ -44,6 +44,9 @@ automation:
           {% endif %}
         entity_id: light.andy_office_lamps
         transition: 1
+    - condition: "{{ trigger.to_state.state == 'off_press' }}"
+    - service: light.turn_off
+      entity_id: light.andys_light_bar
 
 
 - alias: Andy's desk remote
@@ -88,7 +91,7 @@ automation:
       entity_id: light.andy_office_lamps
       data:
         brightness_pct: 100
-        kelvin: 2200
+        color_temp_kelvin: 2200
 
 
 - alias: Cycle candle warmer

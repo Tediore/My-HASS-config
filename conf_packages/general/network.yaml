@@ -1,0 +1,153 @@
+automation:
+- alias: Notify when Home Assistant starts
+  id: 'yo9Ju1Au6daePhaH'
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+  - service: notify.gotify
+    data:
+      message: "Home Assistant started"
+  - wait_template: "{{ is_state('persistent_notification.config_entry_discovery', 'notifying') }}"
+    timeout: "00:01:00"
+    continue_on_timeout: false
+  - service: persistent_notification.dismiss
+    data:
+      notification_id: config_entry_discovery
+
+
+- alias: Dismiss discovery notification
+  id: 'mieGhe9xai9lieco'
+  initial_state: true
+  trigger:
+    platform: state
+    entity_id: persistent_notification.config_entry_discovery
+    to: 'notifying'
+  action:
+    service: persistent_notification.dismiss
+    data:
+      notification_id: config_entry_discovery
+
+
+- alias: Record internet outage
+  id: 'WooWir8etaithoaz'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.internet
+    from: 
+    - 'on'
+    - 'off'
+    to: 
+    - 'off'
+    - 'on'
+    for: '00:00:40'
+  action:
+  - service: "input_boolean.turn_{{ trigger.to_state.state }}"
+    entity_id: input_boolean.internet
+
+
+- alias: Notify when switching to/from failover WAN
+  id: 'notify-switch-failover-wan'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.active_internet_connection
+    to:
+    - 'Primary'
+    - 'Secondary'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: Internet connection
+      message: "{{ trigger.to_state.state }} connection active."
+
+
+- alias: Notify when internet connection out/restored
+  id: 'notify-internet-out-restored'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: input_boolean.internet
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: notify.lte_modem
+    data:
+      target: !secret phone_matt
+      message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
+
+
+- alias: Notify when camera offline/online
+  id: 'notify-camera-offline-online'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door_camera
+    - binary_sensor.patio_camera
+    - binary_sensor.dungeon_camera
+    - binary_sensor.garage_camera
+    - binary_sensor.rear_doorbell
+    - binary_sensor.alley_camera
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: "Camera {{ 'offline' if trigger.to_state.state == 'off' else 'online' }}"
+      message: "{{ trigger.to_state.name }} is {{ 'offline' if trigger.to_state.state == 'off' else 'back online' }}."
+
+
+rest:
+- resource: !secret ipinfo_url
+  scan_interval: 54
+  sensor:
+  - name: ISP
+    value_template: "{{ value_json['org'] }}"
+  - name: WAN IP address
+    value_template: "{{ value_json['ip'] }}"
+
+
+template:
+- binary_sensor:
+  - name: Front door camera
+    state: "{{ not is_state('camera.front_door', 'unavailable') }}"
+    delay_off: &camera_offline_delay '00:02:00'
+    device_class: &camera_offline_class connectivity
+
+  - name: Patio camera
+    state: "{{ not is_state('camera.patio', 'unavailable') }}"
+    delay_off: *camera_offline_delay
+    device_class: *camera_offline_class
+
+  - name: Dungeon camera
+    state: "{{ not is_state('camera.dungeon', 'unavailable') }}"
+    delay_off: *camera_offline_delay
+    device_class: *camera_offline_class
+  
+  - name: Garage camera
+    state: "{{ not is_state('camera.garage', 'unavailable') }}"
+    delay_off: *camera_offline_delay
+    device_class: *camera_offline_class
+
+  - name: Rear doorbell
+    state: "{{ not is_state('camera.rear_doorbell', 'unavailable') }}"
+    delay_off: *camera_offline_delay
+    device_class: *camera_offline_class
+
+  - name: Alley camera
+    state: "{{ not is_state('camera.alley', 'unavailable') }}"
+    delay_off: *camera_offline_delay
+    device_class: *camera_offline_class
+
+- sensor:
+  - name: Active internet connection
+    state: "{{ 'Secondary' if ('Comcast' not in states('sensor.isp') and states('sensor.isp') not in ['unavailable', 'unknown']) else 'Primary' }}"
+
+
+input_boolean:
+  internet:

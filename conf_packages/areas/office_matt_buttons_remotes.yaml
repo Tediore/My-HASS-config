@@ -18,7 +18,7 @@ automation:
     - service: light.turn_on
       entity_id: light.matt_office_lamps
       data:
-        kelvin: 2700
+        color_temp_kelvin: 2700
         brightness_pct: 100
  
     else:
@@ -47,9 +47,7 @@ automation:
     - condition: "{{ trigger.to_state.state == 'off_press' }}"
     - service: homeassistant.turn_off
       target: 
-        entity_id:
-        - light.game_room_bias_lighting
-        - fan.matt_office
+        entity_id: fan.matt_office
 
 
 - alias: Matt office desk remote

@@ -1,3 +1,20 @@
+group:
+  lights_interior:
+    name: Interior lights
+    entities:
+    - light.andy_office_lamps
+    - light.buffet
+    - light.cabinet_lights
+    - light.hall_bath_night_light
+    - light.hall_light_bar
+    - light.hall_lights
+    - light.matt_office_lamps
+    - light.living_room_bias_lighting
+    - light.living_room_lamps
+    - light.living_room_overhead
+    - light.bedroom_lamps
+    - light.the_loop
+
 automation:
 - alias: Toggle dark inside boolean
   description: Backup in case outdoor light sensor fails
@@ -82,7 +99,7 @@ automation:
   initial_state: true
   trigger:
   - platform: numeric_state
-    entity_id: &outdoor_light_west sensor.outdoor_light_level_west
+    entity_id: &outdoor_light_west sensor.outdoor_light_level
     above: *outdoor_light_threshold
     for: '00:10:00'
   condition:
@@ -161,48 +178,35 @@ automation:
       payload: ''
 
 
-# - alias: Turn outside lights on at night
-#   id: 'Coquu3eiTh5eelah5oonai'
-#   initial_state: true
-#   trigger:
-#   - platform: numeric_state
-#     entity_id: *outdoor_light
-#     below: 10
-#     for: '00:05:00'
-#   condition:
-#   - condition: time
-#     after: '16:00:00'
-#     before: '22:00:00'
-#   action:
-#   # tasmota rules will turn on these lights one hour after sunset if HA is down
-#   - service: homeassistant.turn_on
-#     entity_id: &outside_lights
-#     - switch.pole_light
-#     - switch.porch_light
-#     - switch.side_porch_light
-#   - service: light.turn_on
-#     entity_id:
-#     - light.garage_outside
-#     - light.back_side_security
-#     data:
-#       brightness_pct: 35
-#   - service: light.turn_on
-#     entity_id: light.deck
-#     data:
-#       brightness_pct: 25
+- alias: Turn outside lights on at night
+  id: 'Coquu3eiTh5eelah5oonai'
+  initial_state: true
+  trigger:
+  - platform: numeric_state
+    entity_id: *outdoor_light
+    below: 10
+    for: '00:05:00'
+  condition:
+  - condition: time
+    after: '16:00:00'
+    before: '22:00:00'
+  action:
+  - service: homeassistant.turn_on
+    entity_id: &outside_lights light.patio_lights
+    data:
+      brightness_pct: 100
 
 
-# - alias: Turn outside lights off at sunrise
-#   id: 'Eingaefu7veiphooph8adu'
-#   initial_state: true
-#   trigger:
-#   - platform: sun
-#     event: sunrise
-#     offset: '-01:00:00'
-#   action:
-#   # tasmota rules will turn off the outside lights one hour before sunrise
-#   # - service: homeassistant.turn_off
-#   #   entity_id: *outside_lights
+- alias: Turn outside lights off at sunrise
+  id: 'Eingaefu7veiphooph8adu'
+  initial_state: true
+  trigger:
+  - platform: sun
+    event: sunrise
+    offset: '-01:00:00'
+  action:
+  - service: homeassistant.turn_off
+    entity_id: *outside_lights
 
 
 script:
@@ -211,35 +215,24 @@ script:
     - service: light.turn_on
       entity_id: light.cabinet_lights
       data:
-        brightness_pct: "{{ 67 if is_state('media_player.living_room_tv', 'on') else 100 }}"
-        kelvin: 2700
+        brightness_pct: 100
+        color_temp_kelvin: 2700
         transition: 10
     - service: light.turn_on
       entity_id:
-      - light.buffet
       - light.hall_bath_night_light
       - light.main_bath_night_light
-      - light.matt_office_bath_night_light
-      - light.first_floor_hall_night_light
       data:
         brightness_pct: 100
-        kelvin: 2200
+        color_temp_kelvin: 2200
         transition: 10
     - service: light.turn_on
-      entity_id:
-      - light.stairs
-      - light.the_loop
+      entity_id: light.alarm_indicators
+      data:
+        brightness_pct: 100
+        rgb_color: [255,168,90]
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
-    - if:
-      - condition: state
-        entity_id: light.main_bedroom_lamps
-        state: 'off'
-      then:
-      - service: light.turn_on
-        entity_id: light.bedroom_night_light
-        data:
-          brightness_pct: 100
     - if:
       - condition: state
         entity_id: media_player.living_room_tv
@@ -252,7 +245,7 @@ script:
         data:
           entity_id: light.buffet
           brightness_pct: 100
-          kelvin: 2200
+          color_temp_kelvin: 2200
           transition: 10
     - if:
       - &is_christmas "{{ not is_state('light.christmas_tree', 'unavailable') }}"
@@ -274,24 +267,28 @@ script:
         entity_id: light.living_room_bias_lighting
         data:
           brightness_pct: 100
-          kelvin: 5000
-          transition: 10
+          color_temp_kelvin: 5000
+          transition: 5
       else:
       - condition: template
         value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
       - condition: state
         entity_id: media_player.living_room_tv
         state: 'off'
-      - service: light.turn_off
-        entity_id: light.second_floor_hall_night_light
       - service: light.turn_on
         data:
           entity_id: light.living_room_lamps
           brightness_pct: 100
-          kelvin: 2700
-          transition: 10
+          color_temp_kelvin: 2200
+          transition: 5
       - service: light.turn_on
         entity_id: light.the_loop
+      - service: light.turn_on
+        entity_id: light.hall_light_bar
+        data:
+          brightness_pct: 100
+          white: true
+          transition: 5
   
   lights_sunrise:
     sequence:
@@ -309,9 +306,8 @@ script:
       entity_id: 
       - light.hall_bath_night_light
       - light.main_bath_night_light
-      - light.matt_office_bath_night_light
-      - light.stairs
       - light.the_loop
+      - light.hall_light_bar
       data:
         transition: 1
     - if:
@@ -319,6 +315,11 @@ script:
       then:
       - service: light.turn_off
         entity_id: *christmas_lights
+    - if:
+      - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
+      then:
+      - service: light.turn_off
+        entity_id: light.alarm_indicators
 
   brightness_preset:
     sequence:

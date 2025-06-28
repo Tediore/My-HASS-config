@@ -1,6 +1,6 @@
 # My Home Assistant configuration
 
-Currently running a Home Assistant Container install on an OptiPlex 7050 USFF.
+Currently running a Home Assistant Container install on an OptiPlex 3050 USFF.
 
 The `conf` directory (which is in the same directory as my configuration) contains all of my automations, scripts, etc. `conf_settings` contains things like `recorder`, `history`, `http` and so on. `conf_packages` contains, well, packages.
 

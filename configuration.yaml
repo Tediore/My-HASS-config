@@ -1,13 +1,15 @@
+amcrest: !include conf/amcrest.yaml
 automation:
 binary_sensor:
 bluetooth:
 climate:
+command_line:
 config:
 counter:
 fan:
 frontend: !include conf_settings/frontend.yaml
 google_assistant: !include conf_static/google_assistant.yaml
-group: !include conf/groups.yaml
+group:
 history:
 homeassistant: !include conf_settings/home-assistant.yaml
 homeassistant_alerts:
@@ -22,19 +24,20 @@ logbook: !include conf_settings/logbook.yaml
 logger: !include conf_settings/logger.yaml
 media_source:
 mobile_app:
-mqtt: !include conf/mqtt.yaml
+mqtt:
 notify: !include conf/notify.yaml
 panel_custom: !include conf_settings/panel_custom.yaml
 recorder: !include conf_settings/recorder.yaml
 rest_command: !include conf/rest_command.yaml
-scene: !include conf/scenes.yaml
+scene:
 script: !include conf/scripts.yaml
 sensor: !include conf/sensors.yaml
+shell_command:
 stream:
 sun:
 switch:
 system_health:
-template: !include conf/template.yaml
+template:
 timer:
 tts: !include conf_static/tts.yaml
 wake_on_lan:

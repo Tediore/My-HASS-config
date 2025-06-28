@@ -1,0 +1,154 @@
+automation:
+- alias: Turn laundry closet light on/off with sensor
+  id: 'laundry-light-on-off-sensor'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &laundry_door binary_sensor.laundry_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.laundry_light
+
+
+- alias: Record washer/dryer on/off
+  id: 'record-washer-dryer-on-off'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.washer_pwr
+    above: 300
+  - platform: numeric_state
+    entity_id: sensor.washer_pwr
+    below: 4
+    for: '00:03:00'
+  - platform: numeric_state
+    entity_id: sensor.dryer_power
+    above: 250
+    for: '00:00:30'
+  - platform: numeric_state
+    entity_id: sensor.dryer_power
+    below: 50
+  action:
+  - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state | float(0) > 250 else 'off' }}"
+    data:
+      entity_id: "input_boolean.{{ trigger.to_state.object_id.replace('_power','').replace('_pwr','') }}"
+
+
+- alias: Notify when washer/dryer done
+  id: 'notify-washer-dryer-done'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: 
+    - input_boolean.washer
+    - input_boolean.dryer
+    from: 'on'
+    to: 'off'
+  # - platform: state
+  #   entity_id:
+  #   - input_boolean.washer_reminder
+  #   - input_boolean.dryer_reminder
+  #   to: 'on'
+  #   for: '00:30:00'
+  condition:
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
+  - condition: state
+    entity_id: 
+    - input_boolean.sleep_mode
+    - input_boolean.andy_sleep
+    state: 'off'
+  action:
+  - service: notify.gotify
+    data:
+      title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
+      message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
+  - service: notify.mobile_app_andys_iphone
+    data:
+      title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
+      message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
+  # - service: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
+  #   data:
+  #     entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
+  - service: input_boolean.turn_on
+    data:
+      entity_id: "{{ trigger.to_state.entity_id }}_reminder"
+
+
+- alias: Reset laundry booleans
+  id: 'reset-laundry-booleans'
+  initial_state: true
+  trigger:
+  - platform: state
+    id: 'all0'
+    entity_id: 
+    - *laundry_door
+    - input_boolean.sleep_mode
+    from: 'off'
+    to: 'on'
+  - platform: state
+    id: 'all1'
+    entity_id: input_text.alarm
+    to: 'armed_away'
+  - platform: state
+    id: 'individual'
+    entity_id:
+    - input_boolean.washer_reminder
+    - input_boolean.dryer_reminder
+    to: 'on'
+    for: '02:00:00'
+  action:
+  - service: input_boolean.turn_off
+    data:
+      entity_id: "{{ 'input_boolean.washer_reminder, input_boolean.dryer_reminder' if 'all' in trigger.id else trigger.to_state.entity_id }}"
+    # - input_boolean.washer_reminder
+    # - input_boolean.dryer_reminder
+
+
+alert:
+  washer_done_reminder:
+    name: Washer done reminder
+    entity_id: input_boolean.washer_reminder
+    state: 'on'
+    repeat: &laundry_repeat 15
+    skip_first: true
+    title: Washer done reminder
+    message: Move clothes to the dryer.
+    notifiers: &laundry_notifiers
+    - mobile_app_andys_iphone
+
+  dryer_done_reminder:
+    name: Dryer done reminder
+    entity_id: input_boolean.dryer_reminder
+    state: 'on'
+    repeat: *laundry_repeat
+    skip_first: true
+    title: Dryer done reminder
+    message: Put your clothes away.
+    notifiers: *laundry_notifiers
+
+
+mqtt:
+  sensor:
+  - name: Washer pwr
+    state_topic: 'washer/power'
+    availability_topic: 'tele/washer/LWT'
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    unit_of_measurement: 'W'
+
+
+input_boolean:
+  washer:
+    name: Washer
+  dryer:
+    name: Dryer
+  washer_reminder:
+    name: Washer
+  dryer_reminder:
+    name: Dryer

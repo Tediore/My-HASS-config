@@ -1,0 +1,109 @@
+automation:
+- alias: Turn hall lights on/off with remotes
+  id: 'hall-lights-on-off-remotes'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.hall_lights_switch_e_action
+    - sensor.hall_lights_switch_w_action
+    to:
+    - 'on_press'
+    - 'off_press'
+    # - 'up_press'
+    # - 'down_press'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.hall_lights
+      brightness_pct: >
+        {% set state = trigger.to_state.state %}
+        {% set dark_inside = is_state('input_boolean.dark_inside', 'on') %}
+        {% if state == 'on_press' %}
+          {{ 50 if dark_inside else 100 }}
+        {% else %}
+          0
+        {% endif %}
+      color_temp_kelvin: 2000
+
+
+- alias: Turn laundry area light on/off with remote
+  id: 'laundry-area-light-remote'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.hall_light_middle_s_switch_action
+    to: 
+    # first button
+    - 'on'
+    - 'off'
+    # second button
+    # - 'brightness_down'
+    # - 'brightness_move_down'
+    # - 'brightness_move_up'
+    # - 'brightness_up'
+    # third button
+    # - 'colortemp_up'
+    # - 'colortemp_down'
+    # fourth button
+    - 'recall'
+  action:
+  - service: light.turn_on
+    entity_id: light.hall_light_middle_s
+    data:
+      brightness_pct: >
+        {% set state = trigger.to_state.state %}
+        {% set light = is_state('light.hall_light_middle_s', 'on') %}
+        {% set dark_inside = is_state('input_boolean.dark_inside', 'on') %}
+        {% if state in ['on', 'off'] %}
+          {{ 0 if light else 100 }}
+        {% elif state == 'recall' %}
+          0
+        {% endif %}
+      color_temp_kelvin: 2000
+
+
+- alias: Turn coat closet light on/off with door
+  id: 'coat-closet-on-off-door'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.coat_closet_door
+    to:
+    - 'on'
+    - 'off'
+  action:
+  - service: "light.turn_{{ trigger.to_state.state }}"
+    entity_id: light.coat_closet
+      
+
+light:
+- platform: template
+  lights:
+    front_door_lights:
+      friendly_name: Front door lights
+      value_template: "{{ states('switch.front_door_lights_entrance') != states('switch.front_door_lights_unit') }}"
+      turn_on:
+        service: script.turn_on
+        entity_id: script.front_door_lights_on
+      turn_off:
+        service: script.turn_on
+        entity_id: script.front_door_lights_off
+
+
+script:
+  front_door_lights_on:
+    sequence:
+    - condition: state
+      entity_id: &front_door_lights light.front_door_lights
+      state: 'off'
+    - service: switch.toggle
+      entity_id: &front_door_lights_switch switch.front_door_lights_unit
+
+  front_door_lights_off:
+    sequence:
+    - condition: state
+      entity_id: *front_door_lights
+      state: 'on'
+    - service: switch.toggle
+      entity_id: *front_door_lights_switch

@@ -146,20 +146,25 @@ script:
       - script.media_players_off
       - switch.bedroom_fan
       - script.transit_display_off
-    # - service: homeassistant.turn_off
-    #   target:
-    #     entity_id:
-    #     - input_boolean.washer
-    #     - input_boolean.dryer
+    - service: homeassistant.turn_off
+      entity_id:
+      - input_boolean.washer
+      - input_boolean.dryer
+      - fan.living_room
     - service: light.turn_on
       entity_id: light.main_bath_night_light
       data:
         brightness_pct: 10
+    - service: light.turn_on
+      entity_id: light.patio_lights
+      data:
+        brightness_pct: 5
+    # - service: shell_command.bedroom_powerline_leds_off
     - if:
       - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
       - "{{ is_state('input_boolean.overnight_guest', 'off') }}"
       then:
-      - service: alarm_control_panel.alarm_arm_home
+      - service: alarm_control_panel.alarm_arm_night
         data:
           entity_id: alarm_control_panel.home
           code: !secret alarm_code_system
@@ -180,7 +185,7 @@ script:
         entity_id:
         - switch.pole_light
         - light.hallway
-        - light.main_bedroom_lamps
+        - light.bedroom_lamps
         - light.main_bedroom_fan
         - light.craft_room
         - light.tea_lights
@@ -194,7 +199,7 @@ script:
       - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
       - "{{ is_state('input_boolean.overnight_guest', 'off') }}"
       then:
-      - service: alarm_control_panel.alarm_arm_home
+      - service: alarm_control_panel.alarm_arm_night
         data:
           entity_id: alarm_control_panel.home
           code: !secret alarm_code_system
@@ -255,7 +260,7 @@ script:
   #     - "{{ is_state('alarm_control_panel.home', 'disarmed') }}"
   #     - "{{ is_state('input_boolean.overnight_guest', 'off') }}"
   #     then:
-  #     - service: alarm_control_panel.alarm_arm_home
+  #     - service: alarm_control_panel.alarm_arm_night
   #       data:
   #         entity_id: alarm_control_panel.home
   #         code: !secret alarm_code_system

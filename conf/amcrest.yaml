@@ -1,0 +1,7 @@
+- name: Garage camera
+  host: 10.0.5.12
+  username: !secret garage_cam_user
+  password: !secret garage_cam_pwd
+  resolution: low
+  binary_sensors:
+  - motion_detected

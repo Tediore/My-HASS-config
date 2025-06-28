@@ -1,0 +1,165 @@
+automation:
+- alias: Notify when garage door opened/closed
+  id: 'notify-garage-open-closed'
+  initial_state: true
+  mode: 'parallel'
+  trigger:
+  - platform: state
+    entity_id: &garage_door cover.garage_door
+    to:
+  action:
+  - service: notify.gotify_high
+    data:
+      message: "Garage door {{ trigger.to_state.state }}"
+
+
+- alias: Open garage door when man door opened if leaving
+  id: 'open-garage-door-leaving'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: &man_door binary_sensor.garage_man_door
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.leaving
+    state: 'on'
+  - condition: state
+    entity_id: *garage_door
+    state: 'closed'
+  action:
+  - service: cover.open_cover
+    entity_id: *garage_door
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.leaving
+
+
+- alias: Turn garage lights on/off with doors
+  id: 'garage-lights-on-off-doors'
+  initial_state: true
+  trigger:
+  - platform: state
+    id: 'on-open'
+    entity_id: &garage_doors
+    - *garage_door
+    - *man_door
+    from:
+    - 'closed'
+    - 'off'
+    to:
+    - 'open'
+    - 'on'
+  - platform: state
+    id: 'on-closed'
+    entity_id: *garage_door
+    from: 'open'
+    to: 'closed'
+  - platform: state
+    id: 'off'
+    entity_id: binary_sensor.garage_camera_motion
+    to: 'off'
+    for: '00:10:00'
+  action:
+  - if:
+    - "{{ trigger.id == 'on-open' }}"
+    then:
+    - if:
+      - condition: state
+        entity_id: binary_sensor.turn_garage_lights_on
+        state: 'on'
+      then:
+      - service: light.turn_on
+        entity_id: &garage_lights light.garage
+    else:
+    - if: 
+      - "{{ trigger.id == 'on-closed' }}"
+      then:
+      - service: light.turn_on
+        entity_id: *garage_lights
+      else:
+      - service: light.turn_off
+        entity_id: *garage_lights
+
+
+- alias: Trigger garage siren if door opened when alarm armed
+  id: 'garage-siren-armed-home'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *garage_doors
+    to:
+    - 'on'
+    - 'open'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.home
+    state: 'armed_night'
+  action:
+  - service: switch.turn_on
+    entity_id: switch.garage_siren
+
+
+- alias: Sync patio light switch and lights state
+  id: 'sync-patio-lights-switch'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: 
+    - light.patio_lights
+    - switch.patio_lights_switch
+    to: 
+    - 'on'
+    - 'off'
+  action:
+  - service: "homeassistant.turn_{{ trigger.to_state.state }}"
+    data:
+      entity_id: "{{ 'switch.patio_lights_switch' if trigger.to_state.domain == 'light' else 'light.patio_lights' }}"
+
+
+template:
+- binary_sensor:
+  - name: Turn garage lights on
+    state: >
+      {% set garage = states('cover.garage_door') %}
+      {% set man_door = states('binary_sensor.garage_man_door') %}
+      {% set sun = states('sun.sun') %}
+      {{
+        man_door == 'on'
+        or
+        (garage == 'open' and sun == 'below_horizon')
+        or
+        garage == 'closed'
+        }}
+
+- sensor:
+  - name: Outside temp
+    state: "{{ states('sensor.outdoor_temp') | float(0) | round(1) }}"
+    unit_of_measurement: "°F"
+  - name: Outside dew point
+    state: "{{ states('sensor.outdoor_humidity') }}"
+    unit_of_measurement: "°F"
+  - name: Outside dew point display
+    state: "{{ states('sensor.outside_dew_point') | float(0) | round(0) }}"
+    unit_of_measurement: "°F"
+
+
+# mqtt:
+#   sensor:
+#   - name: Outside temp 433
+#     state_topic: &outside_temp_sensor rtl_433/5836/event
+#     value_template: "{{ ((value_json['temperature_C'] | float(0) * 9/5) + 32) | round(1) }}"
+#     device_class: temperature
+#     unit_of_measurement: "°F"
+#     expire_after: &outdoor_temp_expiry 300
+
+#   - name: Outside RH 433
+#     state_topic: *outside_temp_sensor
+#     value_template: "{{ value_json['humidity'] | float(0) }}"
+#     device_class: humidity
+#     expire_after: *outdoor_temp_expiry
+
+#   - name: Outside temp sensor 433 battery
+#     state_topic: *outside_temp_sensor
+#     value_template: "{{ 'ok' if value_json['battery_ok'] | int(0) > 0 else 'low' }}"
+#     expire_after: *outdoor_temp_expiry

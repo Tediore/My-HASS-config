@@ -44,24 +44,12 @@ automation:
     entity_id: light.cabinet_lights
 
 
-light:
-- platform: group
-  name: Cabinet lights
-  entities:
-  - light.cabinet_lights_n
-  - light.cabinet_lights_microwave
-
-
-# mqtt:
-#   light:
-#   - name: Kitchen
-#     state_topic: "stat/kitchen_lights/POWER1"
-#     command_topic: "cmnd/kitchen_lights/EVENT"
-#     availability_topic: "tele/kitchen_lights/LWT"
-#     payload_on: "ON"
-#     payload_off: "OFF"
-#     payload_available: "Online"
-#     payload_not_available: "Offline"
+# light:
+# - platform: group
+#   name: Cabinet lights
+#   entities:
+#   - light.cabinet_lights_east
+#   - light.cabinet_lights_south
 
 
 input_boolean:

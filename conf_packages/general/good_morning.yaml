@@ -15,17 +15,14 @@ automation:
     entity_id: 
     - script.good_morning
     - script.transit_display_on
-  - service: light.turn_on
-    entity_id: &2f_hall_light light.second_floor_hall_night_light
-    data:
-      brightness_pct: 100
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
   - condition: state
     entity_id: sun.sun
     state: 'below_horizon'
-  - service: script.lights_sunset
+  - service: script.turn_on
+    entity_id: script.lights_sunset
 
 
 - alias: Good morning - weekend
@@ -48,10 +45,7 @@ automation:
       - light.main_bath_night_light
   - service: script.turn_on
     entity_id: script.transit_display_on
-  - service: light.turn_on
-    entity_id: *2f_hall_light
-    data:
-      brightness_pct: 100
+  # - service: shell_command.bedroom_powerline_leds_on
   - if:
     - "{{ is_state('switch.humidifier', 'on') }}"
     then:
@@ -86,6 +80,7 @@ script:
         - input_boolean.sleep_mode
         - input_boolean.andy_sleep
         - light.main_bath_night_light
+    # - service: shell_command.bedroom_powerline_leds_on        
     - if:
       - "{{ is_state('switch.humidifier', 'on') }}"
       then:
@@ -95,30 +90,24 @@ script:
 
   lights_wakeup:
     sequence:
-    - service: mqtt.publish
-      data:
-        topic: 'zigbee2mqtt/Andy/set'
-        payload: &payload '{"scene_recall": 2}'
-    - service: mqtt.publish
-      data:
-        topic: 'zigbee2mqtt/Matt/set'
-        payload: *payload
+    - service: scene.turn_on
+      entity_id: scene.bedroom_lamps_2_very_warm_white_1
     - delay: '00:02:00'
     - condition: state
-      entity_id: &lights_wakeup light.main_bedroom_lamps
+      entity_id: &lights_wakeup light.bedroom_lamps
       state: 'on'
     - service: light.turn_on
       entity_id: *lights_wakeup
       data:
         transition: 360
         brightness_pct: 100
-        kelvin: 3500
+        color_temp_kelvin: 3500
 
   transit_display_on:
     sequence:
     - service: rest_command.tasker
       data:
-        ip_address: 10.0.4.246
+        ip_address: 10.0.2.246
         port: 1821
         path: home_assistant
         event:

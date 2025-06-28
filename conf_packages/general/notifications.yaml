@@ -14,7 +14,7 @@ automation:
     - binary_sensor.living_room_window_sw_middle
 
     - sensor.main_bedroom_temperature
-    - sensor.outdoor_light_level_east
+    - sensor.outdoor_light_level
     - light.cabinet_lights
     to: 'unavailable'
     for: '00:01:00'
@@ -23,9 +23,6 @@ automation:
     - binary_sensor.coffeemaker_status
     to: 'unavailable'
     for: '00:10:00'
-  - platform: numeric_state
-    entity_id: sensor.cell_modem_signal
-    above: -1
   action:
   - service: notify.mobile_app_matt_phone
     data:
@@ -43,23 +40,33 @@ automation:
   trigger:
   - platform: state
     entity_id:
+    - light.alarm_indicator_e
+    - light.alarm_indicator_w
     - light.andy
+    - light.hall_light_e1
+    - light.hall_light_e2
+    - light.hall_light_e3
+    - light.hall_light_middle_n
+    - light.hall_light_middle_s
+    - light.hall_light_w1
+    - light.hall_light_w2
+    - light.hall_light_w3
+    - light.laundry_light
     - light.matt
+    - light.patio_light_n
+    - light.patio_light_s
     - switch.andy_office_plug
-    - switch.bedroom_plug
-    - switch.den_plug
-    - light.entrance_nightlight
-    - light.north_storage
-    - light.pantry
-    - switch.second_floor_hallway_plug
-    - light.south_storage
+    - sensor.bedroom_router_transmit_power
+    - sensor.garage_router_transmit_power
+    - sensor.siren_battery
+    - switch.bedroom_fan
     to: 'unavailable'
-    for: '00:05:00'
+    for: '00:01:00'
   action:
   - service: notify.gotify_high
     data:
       title: &router_title Zigbee router warning
-      message: &router_message "{{ trigger.to_state.name }} has been unavailable for 5 minutes."
+      message: &router_message "{{ trigger.to_state.name }} has been unavailable for 1 minute."
   - service: persistent_notification.create
     data:
       title: *router_title
@@ -78,33 +85,46 @@ automation:
 # {% endfor %}
   - platform: numeric_state
     entity_id:
+    - sensor.outside_temp_sensor_battery
     - sensor.front_door_keypad_battery
     - sensor.main_bedroom_remote_battery
-    - sensor.front_door_battery
     - sensor.matt_office_switch_battery
     - sensor.outdoor_light_sensor_west_battery
     - sensor.matt_office_desk_remote_battery
-    - sensor.back_door_battery
-    - sensor.north_storage_door_battery
+    - sensor.patio_door_battery
     - sensor.matt_button_battery
     - sensor.andy_button_battery
-    - sensor.bedroom_fan_battery
     - sensor.siren_battery
-    - sensor.laundry_closet_door_battery
-    - sensor.stair_light_switch_2f_battery
-    - sensor.stair_light_switch_1f_battery
     - sensor.front_door_lock_battery
     - sensor.andy_office_switch_battery
-    - sensor.office_desk_button_battery
     - sensor.andy_office_remote_battery
-    - sensor.living_room_window_sw_middle_battery
     - sensor.back_door_lock_battery
-    - sensor.garage_door_battery
     - sensor.cabinet_lights_switch_battery
-    - sensor.south_storage_door_battery
-    - sensor.pantry_door_battery
+    - sensor.laundry_door_battery
+    - sensor.front_door_battery
+    - sensor.back_door_battery
+    - sensor.back_door_keypad_battery
+    - sensor.garage_man_door_battery
+    - sensor.hall_lights_switch_e_battery
+    - sensor.hall_lights_switch_w_battery
+    - sensor.front_door_lights_unit_battery
+    - sensor.front_door_lights_entrance_battery
+    - sensor.hall_light_middle_s_switch_battery
+    - sensor.main_bedroom_closet_door_battery
+    - sensor.living_room_lamps_button_battery
+    - sensor.building_door_battery
+    - sensor.bedroom_motion_sensor_battery
+    - sensor.coat_closet_door_battery
+    - sensor.bedroom_battery
     - sensor.living_room_battery
-    - sensor.bedroom_temp_battery
+    - sensor.matt_office_battery
+    - sensor.andy_office_battery
+    - sensor.kitchen_window_battery
+    - sensor.hall_window_w_battery
+    - sensor.andy_office_window_battery
+    - sensor.matt_office_window_battery
+    - sensor.hall_window_e_battery
+    - sensor.hall_window_middle_battery
     below: 21
     for: '08:00:00'
 

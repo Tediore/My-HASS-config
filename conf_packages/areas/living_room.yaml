@@ -13,6 +13,47 @@ automation:
       entry_id: 7303e277c04597709031294ca0385355
 
 
+- alias: Turn off lights and speakers when TV turned on
+  id: 'turn_off_lights_speakers_tv_on'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *lr_tv
+    to: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: 
+    - script.pre_media
+    - script.ir_soundbar_vol_up
+
+
+- alias: Restore lights when TV turned off
+  id: 'wuudeaC1Ooyaiphe3uwaPh'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *lr_tv
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
+  action:
+  - service: light.turn_off
+    entity_id: light.living_room_bias_lighting
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - condition: state
+    entity_id: 
+    - light.living_room_lamps
+    - input_boolean.andy_sleep
+    - input_boolean.sleep_mode
+    state: 'off'
+  - service: script.turn_on
+    entity_id: script.post_media
+
+
 light:
 - platform: group
   name: Living room lamps
@@ -27,9 +68,14 @@ light:
   - light.living_room_lamp_r2
 
 - platform: group
-  name: Living room
+  name: Living room overhead
   entities:
-  - light.living_room_lamps
+  - light.living_room_nw
+  - light.living_room_ne
+  - light.living_room_e
+  - light.living_room_sw
+  - light.living_room_se
+  - light.living_room_w
 
 
 binary_sensor:
@@ -40,6 +86,45 @@ binary_sensor:
 
 
 script:
+  pre_media:
+    alias: Turn stuff off when TV turned on
+    sequence:
+    - condition: state
+      entity_id: input_boolean.dark_inside
+      state: 'on'
+    - service: light.turn_on
+      entity_id: light.living_room_bias_lighting
+      data:
+        brightness_pct: 100
+    - service: media_player.turn_off
+      entity_id: media_player.kitchen_speaker
+    - condition: state
+      entity_id: light.living_room_lamps
+      state: 'on'
+    - service: light.turn_off
+      entity_id:
+      - light.living_room_lamps
+      - light.buffet
+      - light.the_loop
+      data:
+        transition: 2
+
+  post_media:
+    alias: Turn lights back on when TV turned off
+    sequence:
+    - service: light.turn_on
+      data:
+        entity_id:
+        - light.buffet
+        - light.cabinet_lights
+        - light.the_loop
+        - light.living_room_lamps
+        # brightness_pct: 100
+        color_temp_kelvin: 2700
+        transition: 5
+    - service: light.turn_off
+      entity_id: light.living_room_bias_lighting
+
   ir_soundbar_vol_up:
     sequence:
     - service: mqtt.publish

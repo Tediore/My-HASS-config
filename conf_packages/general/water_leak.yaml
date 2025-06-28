@@ -1,0 +1,109 @@
+automation:
+- alias: Notify water leak detected or cleared
+  id: 'ke5johth8ooKoosh8ooRoh'
+  initial_state: true
+  mode: parallel
+  max: 100
+  trigger:
+# {% for state in states.binary_sensor if 'leak' in state.entity_id and 'battery' not in state.entity_id and 'tamper' not in state.entity_id %}
+# - {{ state.entity_id -}}
+# {% endfor %} 
+  - platform: state
+    entity_id: &water_sensors
+    - binary_sensor.0xcc86ecfffed84e32_water_leak
+    - binary_sensor.dishwasher_leak
+    - binary_sensor.furnace_leak
+    - binary_sensor.kitchen_sink_leak
+    - binary_sensor.washer_leak
+    - binary_sensor.water_heater_leak
+    to: 'on'
+  - platform: state
+    entity_id: *water_sensors
+    from: 'on'
+    to: 'off'
+    for: '00:00:05'
+  action:
+  - service: notify.lte_modem
+    data:
+      target: !secret phone_matt
+      message: &leak_message >
+        {% if trigger.to_state.state == 'on' and trigger.to_state.object_id != 'utility_sink_water_level_high' %}
+          LEAK DETECTED BY {{ trigger.to_state.name.replace('water leak', '').replace('Moisture', '').upper().strip() }}!
+        {% else %}
+          {{ trigger.to_state.name.replace('water leak', '').replace('Moisture', '').strip() }} cleared
+        {% endif %}
+  - service: notify.gotify_high
+    data:
+      title: &leak_title "{{ 'LEAK DETECTED!' if trigger.to_state.state == 'on' else 'Leak no longer detected.' }}"
+      message: *leak_message
+  - service: notify.mobile_app_matt_phone
+    data:
+      title: *leak_title
+      message: *leak_message
+      data:
+        ttl: 0
+        priority: high
+  - condition: template
+    value_template: "{{ trigger.to_state.state == 'off' }}"
+  - service: persistent_notification.create
+    data:
+      notification_id: 'leak_cleared'
+      title: 'Water leak cleared'
+      message: 'Dismiss to return lights to previous state.'
+
+
+- alias: Turn lights on when leak detected
+  id: 'Ooghoh5idae9hieso5iFe5'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: *water_sensors
+    to: 'on'
+  condition:
+  - condition: template
+    value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
+  action:
+  - service: script.turn_on
+    entity_id: script.lights_before_leak
+  - service: light.turn_on
+    entity_id: &leak_lights
+    - light.andy_office_lamps
+    - light.bedroom_lamps
+    - light.buffet
+    - light.living_room_lamps
+    - light.matt_office_lamps
+    data:
+      color_name: blue
+      brightness_pct: 100
+  - delay: '00:00:01'
+  - service: light.turn_on
+    entity_id: *leak_lights
+    data:
+      flash: long
+
+
+- alias: Return lights to state before water leak
+  id: 'Tohqu4xahtheexaGh0phu2'
+  initial_state: true
+  trigger:
+  - platform: event
+    event_type: call_service
+    event_data:
+      domain: 'persistent_notification'
+      service: 'dismiss'
+      service_data:
+        notification_id: 'leak_cleared'
+  action:
+  - scene: scene.before_leak
+
+
+script:
+  lights_before_leak:
+    sequence:
+    # - condition: template
+    #   value_template: "{{ states('scene.before_leak') != 'scening' }}"
+    - service: scene.create
+      data:
+        scene_id: before_leak
+        snapshot_entities: *leak_lights

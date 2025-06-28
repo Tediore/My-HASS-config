@@ -3,32 +3,61 @@ automation:
   id: 'vei6Ilae0mooZohyaisaix'
   initial_state: true
   trigger:
-  - entity_id: 
-    - binary_sensor.front_door
-    - binary_sensor.back_door
+  - entity_id: binary_sensor.front_door
+    id: front_door
+    platform: state
+    to: 'on'
+  - entity_id: binary_sensor.back_door
+    id: back_door
     platform: state
     to: 'on'
   condition:
   - condition: or
-    conditions:
+    conditions: &dark_inside
     - condition: state
       entity_id: sun.sun
       state: 'below_horizon'
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_text.alarm
+      state: 'armed_away'
+      for: '00:00:30'
+    - condition: state
+      entity_id: input_boolean.arrival_night
+      state: 'on'
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: "light.{{ 'front_door_lights' if trigger.id == 'front_door' else 'hall_lights' }}"
+      brightness_pct: 67
+      color_temp_kelvin: 2000
+  - service: script.turn_on
+    entity_id: script.arrival_night
+
+
+- alias: Turn on arrival boolean when arriving at night
+  id: 'arrival-bool-on-night-arrival'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.front_door
+    - binary_sensor.back_door
+    to: 'on'
+  condition:
+  - condition: or
+    conditions: *dark_inside
   - condition: state
-    entity_id: alarm_control_panel.home
+    entity_id: input_text.alarm
     state: 'armed_away'
     for: '00:00:30'
   action:
-  - service: light.turn_on
-    entity_id: light.living_room_lamps
-    data:
-      brightness_pct: 100
-      kelvin: 2700
-  - service: script.turn_on
-    entity_id: script.arrival_night
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.arrival_night
 
 
 - alias: Alarm disarmed from away
@@ -36,7 +65,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.alarm
+    entity_id: &alarm input_text.alarm
     from: 'armed_away'
     to: 'disarmed'
   action:
@@ -44,6 +73,28 @@ automation:
     entity_id:
     - script.tstat_smart_resume_cool
     - script.arrival_night
+  - condition: or
+    conditions: *dark_inside
+  - service: input_boolean.turn_on
+    entity_id: input_boolean.arrival_night
+
+
+- alias: Turn arrival boolean and entrance lights off after disarmed
+  id: 'arrival-boolean-off-disarmed'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *alarm
+    from: 'armed_away'
+    to: 'disarmed'
+    for: '00:02:00'
+  action:
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.arrival_night
+  - service: light.turn_off
+    entity_id:
+    - light.front_door_lights
+    - light.hall_lights
 
 
 - alias: Activate away mode when armed away
@@ -51,69 +102,30 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.alarm
+    entity_id: *alarm
     to: 'armed_away'
     for: '00:00:05'
   action:
   - service: script.turn_on
     entity_id: script.away_mode
-  - delay: '00:00:05'
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: sensor.tstat_profile
-      state: 
-      - 'Away'
-      - 'Hold'
-      - 'PTS'
-      - 'Smart'
-    - condition: state
-      entity_id: climate.thermostat
-      state: 'off'
-  - condition: state
-    entity_id: group.lights_all
-    state: 'off'
-  - service: script.notify_away
-    data:
-      title: Away mode activated
 
 
-- alias: Away mode backup attempt
-  id: 'xooco5teb6bi9yaJeeth5P'
+- alias: Enable/disable leaving boolean
+  id: 'leaving-boolean'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_text.alarm
-    to: 'armed_away'
-    for: '00:00:35'
-  condition:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: group.lights_interior
-      state: 'on'
-    - condition: state
-      entity_id: binary_sensor.any_speaker
-      state: 'on'
-    - condition: state
-      entity_id: binary_sensor.any_tv
-      state: 'on'
+    entity_id: alarm_control_panel.home
+    to:
+    - 'arming'
+    - 'disarmed'
+  - platform: state
+    entity_id: input_boolean.leaving
+    to: 'on'
+    for: '00:03:00'
   action:
-  - service: script.turn_on
-    entity_id: script.away_mode
-  - delay: '00:00:05'
-  - condition: state
-    entity_id: group.lights_interior
-    state: 'off'
-  - condition: state
-    entity_id: binary_sensor.any_speaker
-    state: 'off'
-  - condition: state
-    entity_id: binary_sensor.any_tv
-    state: 'off'
-  - service: script.notify_away
-    data:
-      title: Away mode activated (second attempt)
+  - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state == 'arming' else 'off' }}"
+    entity_id: input_boolean.leaving
 
 
 script:
@@ -125,9 +137,11 @@ script:
     - service: homeassistant.turn_off
       target:
         entity_id:
+        - light.front_door_lights
         - group.plugs
         - fan.living_room
         - fan.matt_office
+        - switch.bedroom_fan
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
@@ -151,26 +165,6 @@ script:
     - service: script.turn_on
       entity_id: script.tstat_away
 
-
-  notify_away:
-    sequence:
-    - service: notify.mobile_app_matt_phone
-      data:
-        title: "{{ title }}"
-        message: >
-          {% set tstat = states('sensor.tstat_profile') %}
-          {% set action = states('sensor.hvac_action') %}
-          {% if tstat in ['Off', 'Away'] %}
-            Lights are off, thermostat is {{ 'off' if tstat == 'off' else 'set to away' }}.
-          {% elif action != 'idle' %}
-            Lights are off.
-          {% else %}
-            Uhh... this shouldn't be possible.
-          {% endif %}
-        data:
-          ttl: 0
-          priority: high
-
   
   arrival_night:
     sequence:
@@ -190,8 +184,8 @@ script:
       - light.buffet
       data:
         transition: 1
-        brightness_pct: "{{ 100 if now().hour > 6 or now().hour < 21 else 66 }}"
-        kelvin: 2700
+        brightness_pct: 100
+        color_temp_kelvin: 2700
     - if:
       - "{{ is_state('light.christmas_tree', 'off') }}"
       then:
@@ -204,13 +198,16 @@ script:
       - light.cabinet_lights
       - light.hall_bath_night_light
       - light.main_bath_night_light
-      - light.matt_office_bath_night_light
       data:
         brightness_pct: 100
-        kelvin: 2700
+        color_temp_kelvin: 2700
         transition: 1
     - service: light.turn_on
-      entity_id: light.stairs
+      entity_id: light.hall_light_bar
+      data:
+        white: true
+        brightness_pct: 100
+        transition: 1
 
 
   lights_christmas:
@@ -230,7 +227,7 @@ script:
       - light.living_room_lamps
       data:
         brightness_pct: 20
-        kelvin: 2700
+        color_temp_kelvin: 2700
 
 
   window_notify:
@@ -257,6 +254,12 @@ script:
       state: 'on'
     - service: switch.turn_off
       entity_id: *lr_fan
+
+
+group:
+  plugs:
+    entities:
+    - switch.andy_office_plug
 
 
 binary_sensor:
@@ -286,3 +289,9 @@ binary_sensor:
           states('media_player.living_room_vizio') not in rejects 
           ] %}
         {{ tvs | sum > 0 }}
+
+
+input_boolean:
+  arrival_night:
+  leaving:
+    initial: false

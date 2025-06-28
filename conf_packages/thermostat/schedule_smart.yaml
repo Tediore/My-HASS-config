@@ -54,19 +54,26 @@ automation:
   - platform: numeric_state
     id: 'heat'
     entity_id: *temp
-    below: 60
+    below: 50
   condition:
-  - condition: state
-    entity_id: climate.thermostat
-    state:
-    - 'heat'
-    - 'cool'
   - "{{ states('climate.thermostat') != trigger.id }}"
   action:
-  - service: climate.set_hvac_mode
-    entity_id: climate.thermostat
-    data:
-      hvac_mode: "{{ trigger.id }}"
+  - if:
+    - condition: state
+      entity_id: climate.thermostat
+      state:
+      - 'heat'
+      - 'cool'
+    then:
+    - service: climate.set_hvac_mode
+      entity_id: climate.thermostat
+      data:
+        hvac_mode: "{{ trigger.id }}"
+    else:
+    - service: input_text.set_value
+      entity_id: input_text.tstat_prev_mode
+      data:
+        value: "{{ trigger.id }}"
 
 
 - alias: Record previous thermostat mode
@@ -107,8 +114,15 @@ script:
   tstat_smart_resume_cool:
     sequence:
     - condition: state
-      entity_id: input_boolean.tstat_peak_savings
-      state: 'off'
+      entity_id:
+      - input_boolean.tstat_window_off
+      - input_boolean.tstat_peak_savings
+      state: 'off'    
+    - condition: state
+      entity_id: climate.thermostat
+      state:
+      - 'off'
+      - 'cool'
     - condition: numeric_state
       entity_id: sensor.tstat_current_temp
       above: 77.9
