@@ -1,91 +1,103 @@
 automation:
-- alias: Turn office lamps on at sunset
-  id: 'ra4naiPhohg3lighuu6aat'
+- alias: Matt's office remote main
+  id: 'matt_office_remote_main'
+  initial_state: true
+  mode: queued
+  trigger:
+  - platform: state
+    entity_id: sensor.matt_office_switch_action
+    to: 'off_press_release'
+  action:
+  - service: homeassistant.turn_off
+    target: 
+      entity_id: fan.matt_office
+
+
+- alias: Matt's office desk remote
+  id: 'phe5ea2ahCeid4joo6yoo4'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: sensor.matt_office_desk_remote_action
+    to: &remote_states
+    # first button
+    - 'on'
+    - 'off'
+    # second button
+    - 'brightness_down'
+    - 'brightness_move_down'
+    - 'brightness_move_up'
+    - 'brightness_up'
+    # third button
+    - 'colortemp_up'
+    - 'colortemp_down'
+    # fourth button
+    - 'recall'
+  action:
+  - service: script.turn_on
+    data:
+      entity_id: >
+        {% set command = trigger.to_state.state %}
+        {% if command in ['on', 'off'] %}
+          script.turn_off_office_speaker
+        {% elif 'brightness' in command %}
+          script.toggle_mute_office_speaker
+        {% elif 'colortemp' in command %}
+          script.toggle_office_fan
+        {% else %}
+          script.toggle_office_fan_position
+        {% endif %}
+
+
+- alias: Matt's office table button
+  id: 'ahtuph9teboo8jae2aiSai'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: input_boolean.dark_inside
-    to: 'on'
-  condition:
-  - condition: state
-    entity_id: binary_sensor.xbox
-    state: 'on'
+    entity_id: sensor.office_desk_button
+    to: *remote_states
   action:
-  - service: light.turn_on
-    entity_id: 
-    - &office_lamps light.matt_office_lamps
-    data:
-      color_temp_kelvin: 2200
-      transition: 10
-      brightness_pct: 100
+  - choose:
+    - conditions:
+      - "{{ trigger.to_state.state in ['on', 'off'] }}"
+      sequence:
+      - service: switch.toggle
+        entity_id: switch.office_fan
 
 
-# - alias: Switch lights when Xbox turned on
-#   id: 'ungeiW8ieloid2Aedoht1s'
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.xbox
-#     from: 'off'
-#     to: 'on'
-#   condition:
-#   - condition: state
-#     entity_id: *office_lamps
-#     state: 'on'
-#   action:
-#   - service: light.turn_on
-#     entity_id: *office_lamps
-#     data:
-#       transition: 3
-#       brightness_pct: 50
-#   - if:
-#     - condition: state
-#       entity_id: &office_spkr media_player.office_speaker
-#       state: 'on'
-#     then:
-#     - service: media_player.turn_off
-#       entity_id: *office_spkr
+script:
+  turn_off_office_speaker:
+    sequence:
+    - service: media_player.turn_off
+      entity_id: media_player.office_speaker
 
+  toggle_mute_office_speaker:
+    sequence:
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: "{{ is_state_attr('media_player.office_speaker', 'app_name', 'Google Play Music') }}"
+        sequence:
+        - service: media_player.media_play_pause
+          entity_id: media_player.office_speaker
+      default:
+      - service: media_player.volume_mute
+        entity_id: media_player.office_speaker
+        data:
+          is_volume_muted: "{{ false if state_attr('media_player.office_speaker', 'is_volume_muted') else true }}"
 
-# - alias: Switch lights when Xbox turned off
-#   id: 'wiyuShahNeifootho5ai'
-#   initial_state: true
-#   trigger:
-#   - platform: state
-#     entity_id: binary_sensor.xbox
-#     from: 'on'
-#     to: 'off'
-#   action:
-#   - service: light.turn_off
-#     entity_id: *bias_lighting
-#   - condition: state
-#     entity_id: *office_lamps
-#     state: 'on'
-#   - service: light.turn_on
-#     entity_id: *office_lamps
-#     data:
-#       transition: 3
-#       brightness_pct: 100
+  toggle_office_fan:
+    sequence:
+    - service: script.ir_fan_power
+      data:
+        blaster: matt_office_ir
 
-
-# - alias: Poll Xbox UPS
-#   id: 'poll-xbox-ups'
-#   initial_state: true
-#   trigger:
-#   - platform: time_pattern
-#     seconds: '/15'
-#   action:
-#   - service: homeassistant.update_entity
-#     data:
-#       entity_id: sensor.xbox_ups_load
-
-
-light:
-- platform: group
-  name: Matt office lamps
-  entities:
-  - light.office_shelf_lamp
-  - light.office_table_lamp
+  toggle_office_fan_position:
+    sequence:
+    - service: script.ir_fan_oscillation
+      data:
+        blaster: matt_office_ir
 
 
 fan:
@@ -93,6 +105,7 @@ fan:
   fans:
     matt_office:
       friendly_name: Matt office fan
+      unique_id: 'matt-office-fan'
       value_template: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) > 10 }}"
       percentage_template: 12.5
       oscillating_template: True
@@ -115,56 +128,3 @@ fan:
         data:
           blaster: *blaster
       speed_count: 8
-
-
-binary_sensor:
-- platform: template
-  sensors:
-    xbox:
-      value_template: "{{ states('sensor.xbox_ups_load') | float(0) > 5 }}"
-
-    matt_office_fan:
-      value_template: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) > 10 }}"
-
-
-sensor:
-- platform: template
-  sensors:
-    in_office_at_night:
-      friendly_name: In office at night
-      value_template: >
-        {{
-          (
-            is_state('binary_sensor.xbox', 'on') or
-            is_state('binary_sensor.desktop', 'on') or
-            is_state('light.office', 'on') or
-            is_state('light.matt_office_lamps', 'on')
-          ) and
-          is_state('sun.sun', 'below_horizon')
-        }}
-
-- platform: history_stats
-  name: Xbox time today
-  entity_id: binary_sensor.xbox
-  state: 'on'
-  type: time
-  start: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-  end: '{{ now() }}'
-
-- platform: history_stats
-  name: Xbox time yesterday
-  entity_id: binary_sensor.xbox
-  state: 'on'
-  type: time
-  duration:
-    hours: 24
-  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
-
-- platform: history_stats
-  name: Xbox time last 7 days
-  entity_id: binary_sensor.xbox
-  state: 'on'
-  type: time
-  duration:
-    days: 7
-  end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'

@@ -1,50 +1,23 @@
 automation:
-- alias: Andy office remote main
-  id: 'andy_office_remote_main'
+- alias: Sync Andy's light bar with lamps
+  id: 'sync-andys-light-bar-with-lamps'
   initial_state: true
-  mode: queued
   trigger:
   - platform: state
-    entity_id: sensor.andy_office_switch_action
+    entity_id: light.andys_office_lamps
     to:
-    - 'on_press'
-    - 'off_press'
-    - 'up_press'
-    - 'down_press'
+    - 'on'
+    - 'off'
   action:
   - if:
-    - "{{ trigger.to_state.state == 'on_press' }}"
+    - "{{ 'on' in trigger.to_state.state }}"
     then:
     - service: light.turn_on
-      entity_id: light.andy_office_lamps
+      entity_id: light.andys_light_bar
       data:
-        color_temp_kelvin: 2200
         brightness_pct: 100
- 
+        effect: Random
     else:
-    # when brightness up/down buttons or off button is pressed
-    - service: light.turn_on
-      data:
-        brightness: >
-          {% set light = states('light.andy_office_lamps') %}
-          {% set trig = trigger.to_state.state %}
-          {% set brt = state_attr('light.andy_office_lamps', 'brightness') | int(0) %}
-          {% if trig == 'off_press' %}
-            0
-          {% else %}
-            {% if light %}
-              {% if trig == 'up_press' and brt < 231 %}
-                {{ brt + 25 }}
-              {% elif trig == 'down_press' and brt > 25 %}
-                {{ brt - 25 }}
-              {% else %}
-                {{ brt }}
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        entity_id: light.andy_office_lamps
-        transition: 1
-    - condition: "{{ trigger.to_state.state == 'off_press' }}"
     - service: light.turn_off
       entity_id: light.andys_light_bar
 
@@ -87,8 +60,13 @@ automation:
       - service: media_player.volume_mute
         entity_id: *andy_office_speaker
     default:
+    - service: light.turn_on
+      entity_id: light.andys_light_bar
+      data:
+        brightness_pct: "{{ 0 if is_state('light.andys_light_bar', 'on') else 100 }}"
+        effect: Random
     - service: light.toggle
-      entity_id: light.andy_office_lamps
+      entity_id: light.andys_office_lamps
       data:
         brightness_pct: 100
         color_temp_kelvin: 2200
@@ -107,12 +85,7 @@ automation:
     to: 'disarmed'
   condition:
   - condition: time
-    weekday:
-    - 'mon'
-    - 'tue'
-    - 'wed'
-    - 'thu'
-    - 'fri'
+    weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
     after: '07:00:00'
     before: '16:30:00'
   - condition: state
@@ -138,12 +111,3 @@ script:
         entity_id: *andy_office_speaker
         data:
           is_volume_muted: "{{ false if state_attr('media_player.andy_office_hub', 'is_volume_muted') else true }}"
-
-
-light:
-- platform: group
-  name: Andy office lamps
-  entities:
-  - light.andy_shelf_lamp
-  - light.andy_stand_lamp
-  - light.andys_office_table_lamp

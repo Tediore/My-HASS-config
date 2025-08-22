@@ -1,3 +1,4 @@
 themes: !include_dir_named /config/themes
 extra_module_url:
 - /local/custom-sidebar.js
+- /local/card-mod.js

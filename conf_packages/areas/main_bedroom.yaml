@@ -92,7 +92,7 @@ automation:
 
 
 - alias: Main bedroom remote main
-  id: 'tohx5be8hahLa2yaeVexai9uv'
+  id: 'main-bedroom-remote'
   initial_state: true
   mode: queued
   trigger:
@@ -111,7 +111,7 @@ automation:
     # turning on at the previous color and transitioning to the new color
     then:
     - service: scene.turn_on
-      entity_id: scene.bedroom_lamps_0_warm_white_100
+      entity_id: scene.bedroom_lamps_1_warm_white_100
 
     else:
     # when brightness up/down buttons or off button is pressed
@@ -139,18 +139,19 @@ automation:
         transition: 0.5
 
 
-- alias: Turn bedroom closet light on/off with door
-  id: 'bedroom-closet-light-door'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.main_bedroom_closet_door
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.main_bedroom_closet
+# Not needed thanks to Zigbee binding!
+# - alias: Turn bedroom closet light on/off with door
+#   id: 'bedroom-closet-light-door'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.main_bedroom_closet_door
+#     to:
+#     - 'on'
+#     - 'off'
+#   action:
+#   - service: "light.turn_{{ trigger.to_state.state }}"
+#     entity_id: light.main_bedroom_closet
 
 
 script:
@@ -185,11 +186,6 @@ script:
         brightness_pct: 66
     - service: alarm_control_panel.alarm_disarm
       entity_id: alarm_control_panel.home
-
-
-shell_command:
-  bedroom_powerline_leds_on: ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' matt@10.0.5.34 /home/matt/bedroom-powerline-leds-on
-  bedroom_powerline_leds_off: ssh -i /config/.ssh/id_rsa -o 'StrictHostKeyChecking=no' matt@10.0.5.34 /home/matt/bedroom-powerline-leds-off
 
 
 # switch:

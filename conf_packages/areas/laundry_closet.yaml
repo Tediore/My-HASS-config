@@ -1,18 +1,4 @@
 automation:
-- alias: Turn laundry closet light on/off with sensor
-  id: 'laundry-light-on-off-sensor'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: &laundry_door binary_sensor.laundry_door
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.laundry_light
-
-
 - alias: Record washer/dryer on/off
   id: 'record-washer-dryer-on-off'
   initial_state: true
@@ -27,7 +13,7 @@ automation:
     for: '00:03:00'
   - platform: numeric_state
     entity_id: sensor.dryer_power
-    above: 250
+    above: 175
     for: '00:00:30'
   - platform: numeric_state
     entity_id: sensor.dryer_power
@@ -87,7 +73,7 @@ automation:
   - platform: state
     id: 'all0'
     entity_id: 
-    - *laundry_door
+    - binary_sensor.laundry_door
     - input_boolean.sleep_mode
     from: 'off'
     to: 'on'

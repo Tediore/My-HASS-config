@@ -84,7 +84,12 @@ sensor:
       friendly_name: "Inside"
       value_template: "{{ states('sensor.thermostat_current_temperature') | float('-') | round(1) }}"
       unit_of_measurement: '°F'
-    
+
+    tstat_current_temp_c:
+      friendly_name: "Inside"
+      value_template: "{{ ((states('sensor.thermostat_current_temperature') | float(0) - 32) * 5/9) | round(1) }}"
+      unit_of_measurement: '°C'
+
     tstat_current_humidity:
       friendly_name: "Humidity"
       value_template: "{{ state_attr('climate.thermostat','current_humidity') | float('-') | round(0) }}"
@@ -121,3 +126,6 @@ template:
   - name: Inside dew point
     state: "{{ states('sensor.inside_dew_point_2') | float(0) | round(0) }}"
     unit_of_measurement: "°F"
+  - name: Inside dew point C
+    state: "{{ ((states('sensor.inside_dew_point_2') | float(0) - 32) * 5/9) | round(1) }}"
+    unit_of_measurement: "°C"

@@ -11,5 +11,6 @@ auth_providers:
 packages: !include_dir_named /config/conf_packages/
 external_url: !secret base_url
 allowlist_external_dirs:
-- /config/www/snapshots
+- /config/www
+# - /config/www/snapshots
 - /config/.ssh

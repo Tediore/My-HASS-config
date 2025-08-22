@@ -7,11 +7,106 @@ automation:
   - platform: event
     event_type: netgear_lte_sms
   action:
-  - service: notify.gotify
-    data:
-      title: "SMS from {{ trigger.event.data.from }}"
-      message: "{{ trigger.event.data.message }}"
+  - if:
+    - "{{ is_state('input_boolean.number_blocklist', 'off') or trigger.event.data.from not in state_attr('input_select.banned_numbers', 'options') }}"
+    then:
+    - service: notify.gotify
+      data:
+        title: "SMS from {{ trigger.event.data.from }}"
+        message: "{{ trigger.event.data.message }}"
   - service: netgear_lte.delete_sms
     data:
       host: "{{ trigger.event.data.host }}"
       sms_id: "{{ trigger.event.data.sms_id }}"
+
+
+script:
+  add_banned_number:
+    alias: Add banned number
+    icon: mdi:phone-plus-outline
+    sequence:
+    - if:
+      - condition: template
+        value_template: >
+          {% set number = states('input_text.add_banned_number').replace('(', '').replace(')', '').replace('-', '').replace(' ', '') %}
+          {% if number | length < 10 %}
+            {% set number_fmt = number %}
+          {% else %}
+            {% set number_fmt = '(' + number[:3] + ') ' + number[3:6] + '-' + number[6:10] %}
+          {% endif %}
+          {{ number_fmt not in state_attr('input_select.banned_numbers', 'options') }}
+      then:
+      - service: input_select.set_options
+        entity_id: input_select.banned_numbers
+        data:
+          options: >
+            {% set banned_numbers = state_attr('input_select.banned_numbers', 'options') %}
+            {% set new_banned_number = states('input_text.add_banned_number') %}
+            {% set new_banned_number = '(' + new_banned_number[:3] + ') ' + new_banned_number[3:6] + '-' + new_banned_number[6:10] %}
+            {% set new_banned_number = [new_banned_number] %}
+            {% set new_banned_numbers = banned_numbers + new_banned_number %}
+            {{ new_banned_numbers }}
+
+  remove_banned_number:
+    alias: Remove banned number
+    icon: mdi:phone-minus
+    sequence:
+    - if:
+      - condition: template
+        value_template: >
+          {% set number = states('input_text.remove_banned_number').replace('(', '').replace(')', '').replace('-', '').replace(' ', '') %}
+          {% if number | length < 10 %}
+            {% set number_fmt = number %}
+          {% else %}
+            {% set number_fmt = '(' + number[:3] + ') ' + number[3:6] + '-' + number[6:10] %}
+          {% endif %}
+          {{ number_fmt in state_attr('input_select.banned_numbers', 'options') }}
+      then:
+      - service: input_select.set_options
+        entity_id: input_select.banned_numbers
+        data:
+          options: >
+            {% set banned_numbers = state_attr('input_select.banned_numbers', 'options') %}
+            {% set remove_banned_number = states('input_text.remove_banned_number') %}
+            {% set remove_banned_number = '(' + remove_banned_number[:3] + ') ' + remove_banned_number[3:6] + '-' + remove_banned_number[6:10] %}
+            {% set ns = namespace(new_banned_numbers=[]) %}
+            {% for number in banned_numbers if number != remove_banned_number %}
+              {% set readd_number = [number] %}
+              {% set ns.new_banned_numbers = ns.new_banned_numbers + readd_number %}
+            {% endfor %}
+            {{ ns.new_banned_numbers }}
+
+
+input_boolean:
+  number_blocklist:
+    name: Number blocklist
+
+
+input_select:
+  banned_numbers:
+    name: Banned numbers
+    options:
+    - '(000) 000-0000'
+
+
+input_text:
+  add_banned_number:
+    name: Number to ban
+    min: 3
+    max: 14
+
+  remove_banned_number:
+    name: Number to remove
+    min: 3
+    max: 14
+
+template:
+- sensor:
+    name: Banned numbers
+    icon: mdi:phone-cancel-outline
+    state: >
+      {% for number in state_attr('input_select.banned_numbers', 'options') -%}
+      {{ number -}}
+      {% if not loop.last %}, 
+      {% endif -%}
+      {% endfor %}

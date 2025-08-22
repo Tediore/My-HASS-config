@@ -10,12 +10,17 @@ automation:
 # {% endfor %} 
   - platform: state
     entity_id: &water_sensors
-    - binary_sensor.0xcc86ecfffed84e32_water_leak
-    - binary_sensor.dishwasher_leak
-    - binary_sensor.furnace_leak
-    - binary_sensor.kitchen_sink_leak
-    - binary_sensor.washer_leak
     - binary_sensor.water_heater_leak
+    - binary_sensor.furnace_leak
+    - binary_sensor.washer_leak
+    - binary_sensor.kitchen_sink_leak
+    - binary_sensor.main_bath_sink_r_leak_water_leak
+    - binary_sensor.dishwasher_leak
+    - binary_sensor.hall_bath_sink_l_leak_water_leak
+    - binary_sensor.hall_bath_toilet_leak_sensor_water_leak
+    - binary_sensor.main_bath_toilet_leak_sensor_water_leak
+    - binary_sensor.hall_bath_sink_r_leak_sensor_water_leak
+    - binary_sensor.main_bath_sink_l_leak_sensor_water_leak
     to: 'on'
   - platform: state
     entity_id: *water_sensors
@@ -68,11 +73,11 @@ automation:
     entity_id: script.lights_before_leak
   - service: light.turn_on
     entity_id: &leak_lights
-    - light.andy_office_lamps
+    - light.andys_office_lamps
     - light.bedroom_lamps
     - light.buffet
     - light.living_room_lamps
-    - light.matt_office_lamps
+    - light.matts_office_lamps
     data:
       color_name: blue
       brightness_pct: 100
@@ -101,8 +106,6 @@ automation:
 script:
   lights_before_leak:
     sequence:
-    # - condition: template
-    #   value_template: "{{ states('scene.before_leak') != 'scening' }}"
     - service: scene.create
       data:
         scene_id: before_leak

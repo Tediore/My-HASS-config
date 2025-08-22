@@ -10,7 +10,7 @@ automation:
   action:
   - service: homeassistant.reload_config_entry
     data:
-      entry_id: 7303e277c04597709031294ca0385355
+      entry_id: a3b5850bb9171b2954e0f956d24b9109
 
 
 - alias: Turn off lights and speakers when TV turned on
@@ -46,7 +46,7 @@ automation:
     state: 'on'
   - condition: state
     entity_id: 
-    - light.living_room_lamps
+    - &lr_lamps light.living_room_lamps
     - input_boolean.andy_sleep
     - input_boolean.sleep_mode
     state: 'off'
@@ -56,15 +56,9 @@ automation:
 
 light:
 - platform: group
-  name: Living room lamps
+  name: Living room lamp right
   entities:
-  - light.living_room_lamp_left
   - light.living_room_lamp_r
-
-- platform: group
-  name: Living room lamp R
-  entities:
-  - light.living_room_lamp_right
   - light.living_room_lamp_r2
 
 - platform: group
@@ -78,13 +72,6 @@ light:
   - light.living_room_w
 
 
-binary_sensor:
-- platform: template
-  sensors:
-    living_room_fan:
-      value_template: "{{ states('sensor.living_room_fan_plug_energy_power') | float(0) > 10 }}"
-
-
 script:
   pre_media:
     alias: Turn stuff off when TV turned on
@@ -95,6 +82,7 @@ script:
     - service: light.turn_on
       entity_id: light.living_room_bias_lighting
       data:
+        transition: 5
         brightness_pct: 100
     - service: media_player.turn_off
       entity_id: media_player.kitchen_speaker
@@ -107,7 +95,7 @@ script:
       - light.buffet
       - light.the_loop
       data:
-        transition: 2
+        transition: 4
 
   post_media:
     alias: Turn lights back on when TV turned off
@@ -116,11 +104,16 @@ script:
       data:
         entity_id:
         - light.buffet
-        - light.cabinet_lights
-        - light.the_loop
         - light.living_room_lamps
-        # brightness_pct: 100
-        color_temp_kelvin: 2700
+        brightness_pct: 100
+        color_temp_kelvin: 2200
+        transition: 5
+    - service: light.turn_on
+      entity_id: 
+      - light.cabinet_lights
+      - light.the_loop
+      data:
+        brightness_pct: 100
         transition: 5
     - service: light.turn_off
       entity_id: light.living_room_bias_lighting
@@ -152,6 +145,7 @@ fan:
   fans:
     living_room:
       friendly_name: Living room fan
+      unique_id: 'living-room-fan'
       value_template: "{{ states('sensor.living_room_fan_plug_energy_power') | float(0) > 10 }}"
       percentage_template: 12.5
       oscillating_template: True

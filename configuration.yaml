@@ -1,14 +1,11 @@
 amcrest: !include conf/amcrest.yaml
 automation:
 binary_sensor:
-bluetooth:
 climate:
-command_line:
 config:
 counter:
 fan:
 frontend: !include conf_settings/frontend.yaml
-google_assistant: !include conf_static/google_assistant.yaml
 group:
 history:
 homeassistant: !include conf_settings/home-assistant.yaml
@@ -32,14 +29,12 @@ rest_command: !include conf/rest_command.yaml
 scene:
 script: !include conf/scripts.yaml
 sensor: !include conf/sensors.yaml
-shell_command:
 stream:
 sun:
 switch:
 system_health:
 template:
 timer:
-tts: !include conf_static/tts.yaml
-wake_on_lan:
+tts: !include conf_settings/tts.yaml
 zeroconf:
 zone: !include conf_settings/zone.yaml

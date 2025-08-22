@@ -40,16 +40,19 @@ automation:
     - 'enter'
     - 'leave'
   action:
-  - service: "light.turn_{{ 'on' if trigger.to_state.state == 'enter' else 'off' }}"
+  - service: light.turn_on
     entity_id: light.cabinet_lights
+    data:
+      brightness_pct: "{{ 0 if trigger.to_state.state == 'leave' else 100 }}"
 
 
-# light:
-# - platform: group
-#   name: Cabinet lights
-#   entities:
-#   - light.cabinet_lights_east
-#   - light.cabinet_lights_south
+light:
+- platform: group
+  name: Cabinet lights
+  unique_id: 'cabinet-lights-group'
+  entities:
+  - light.cabinet_lights_e
+  - light.cabinet_lights_s
 
 
 input_boolean:

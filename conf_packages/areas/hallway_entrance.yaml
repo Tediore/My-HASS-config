@@ -63,18 +63,19 @@ automation:
       color_temp_kelvin: 2000
 
 
-- alias: Turn coat closet light on/off with door
-  id: 'coat-closet-on-off-door'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.coat_closet_door
-    to:
-    - 'on'
-    - 'off'
-  action:
-  - service: "light.turn_{{ trigger.to_state.state }}"
-    entity_id: light.coat_closet
+# Not needed thanks to Zigbee binding!
+# - alias: Turn coat closet light on/off with door
+#   id: 'coat-closet-on-off-door'
+#   initial_state: true
+#   trigger:
+#   - platform: state
+#     entity_id: binary_sensor.coat_closet_door
+#     to:
+#     - 'on'
+#     - 'off'
+#   action:
+#   - service: "light.turn_{{ trigger.to_state.state }}"
+#     entity_id: light.coat_closet
       
 
 light:

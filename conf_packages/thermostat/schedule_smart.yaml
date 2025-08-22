@@ -51,10 +51,12 @@ automation:
     id: 'cool'
     entity_id: &temp sensor.outside_temp
     above: 75
+    for: '00:30:00'
   - platform: numeric_state
     id: 'heat'
     entity_id: *temp
     below: 50
+    for: '00:30:00'
   condition:
   - "{{ states('climate.thermostat') != trigger.id }}"
   action:

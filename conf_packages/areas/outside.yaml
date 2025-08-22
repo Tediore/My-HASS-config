@@ -136,30 +136,15 @@ template:
   - name: Outside temp
     state: "{{ states('sensor.outdoor_temp') | float(0) | round(1) }}"
     unit_of_measurement: "°F"
+  - name: Outside temp C
+    state: "{{ ((states('sensor.outdoor_temp') | float(0) - 32) * 5/9) | round(1) }}"
+    unit_of_measurement: "°C"
   - name: Outside dew point
     state: "{{ states('sensor.outdoor_humidity') }}"
     unit_of_measurement: "°F"
   - name: Outside dew point display
     state: "{{ states('sensor.outside_dew_point') | float(0) | round(0) }}"
     unit_of_measurement: "°F"
-
-
-# mqtt:
-#   sensor:
-#   - name: Outside temp 433
-#     state_topic: &outside_temp_sensor rtl_433/5836/event
-#     value_template: "{{ ((value_json['temperature_C'] | float(0) * 9/5) + 32) | round(1) }}"
-#     device_class: temperature
-#     unit_of_measurement: "°F"
-#     expire_after: &outdoor_temp_expiry 300
-
-#   - name: Outside RH 433
-#     state_topic: *outside_temp_sensor
-#     value_template: "{{ value_json['humidity'] | float(0) }}"
-#     device_class: humidity
-#     expire_after: *outdoor_temp_expiry
-
-#   - name: Outside temp sensor 433 battery
-#     state_topic: *outside_temp_sensor
-#     value_template: "{{ 'ok' if value_json['battery_ok'] | int(0) > 0 else 'low' }}"
-#     expire_after: *outdoor_temp_expiry
+  - name: Outside dew point C display
+    state: "{{ ((states('sensor.outside_dew_point') | float(0) - 32) * 5/9) | round(1) }}"
+    unit_of_measurement: "°C"

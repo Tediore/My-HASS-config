@@ -9,11 +9,6 @@ automation:
     entity_id:
     - binary_sensor.back_door
     - binary_sensor.front_door
-    - binary_sensor.pantry_door
-
-    - binary_sensor.living_room_window_sw_middle
-
-    - sensor.main_bedroom_temperature
     - sensor.outdoor_light_level
     - light.cabinet_lights
     to: 'unavailable'
@@ -43,6 +38,8 @@ automation:
     - light.alarm_indicator_e
     - light.alarm_indicator_w
     - light.andy
+    - light.cabinet_lights_east
+    - light.cabinet_lights_south
     - light.hall_light_e1
     - light.hall_light_e2
     - light.hall_light_e3
@@ -61,12 +58,12 @@ automation:
     - sensor.siren_battery
     - switch.bedroom_fan
     to: 'unavailable'
-    for: '00:01:00'
+    for: '00:03:00'
   action:
   - service: notify.gotify_high
     data:
       title: &router_title Zigbee router warning
-      message: &router_message "{{ trigger.to_state.name }} has been unavailable for 1 minute."
+      message: &router_message "{{ trigger.to_state.name }} is unavailable."
   - service: persistent_notification.create
     data:
       title: *router_title
@@ -162,7 +159,7 @@ automation:
 
 - alias: Notify when Zigbee device joins or leaves network
   id: 'notify_zigbee_leave_join'
-  initial_state: true
+  # initial_state: true
   trigger:
   - platform: mqtt
     topic: 'zigbee2mqtt/bridge/event'

@@ -7,7 +7,6 @@ automation:
   - platform: state
     entity_id:
     - sensor.kitchen_speaker_app_name
-    # - sensor.living_room_speaker_app_name
     - sensor.office_speaker_app_name
   condition:
   - "{{ trigger.to_state.state not in ['', 'unknown'] }}"
@@ -49,7 +48,6 @@ sensor:
   attribute: app_name
   entities: &media_players
   - media_player.kitchen_speaker
-  # - media_player.living_room_speaker
   - media_player.office_speaker
 
 - platform: attributes

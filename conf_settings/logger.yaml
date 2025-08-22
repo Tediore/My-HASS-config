@@ -1,11 +1,10 @@
 default: info
 logs:
-  homeassistant.components.google_assistant.http: fatal
   custom_components.dewpoint.sensor: fatal
   zeroconf: error
   libav.tcp: critical
 filters:
-  homeassistant.util.logging:
-    - "^Exception in message_received when handling msg on 'rtl_433/1291/event'*"
   homeassistant.helpers.template:
   - "Template variable warning: 'dict object' has no attribute 'click' when rendering '{{ value_json.click }}'"
+  homeassistant.components.mqtt.light.schema_json:
+  - "Invalid color mode 'hs' received for entity.*"

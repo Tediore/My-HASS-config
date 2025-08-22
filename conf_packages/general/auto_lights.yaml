@@ -2,18 +2,20 @@ group:
   lights_interior:
     name: Interior lights
     entities:
-    - light.andy_office_lamps
+    - light.andys_office_lamps
+    - light.bedroom_lamps
     - light.buffet
     - light.cabinet_lights
     - light.hall_bath_night_light
     - light.hall_light_bar
     - light.hall_lights
-    - light.matt_office_lamps
+    - light.main_bath_night_light
+    - light.matts_office_lamps
     - light.living_room_bias_lighting
     - light.living_room_lamps
     - light.living_room_overhead
-    - light.bedroom_lamps
     - light.the_loop
+
 
 automation:
 - alias: Toggle dark inside boolean
@@ -191,7 +193,7 @@ automation:
     after: '16:00:00'
     before: '22:00:00'
   action:
-  - service: homeassistant.turn_on
+  - service: light.turn_on
     entity_id: &outside_lights light.patio_lights
     data:
       brightness_pct: 100
@@ -206,26 +208,27 @@ automation:
     offset: '-01:00:00'
   action:
   - service: homeassistant.turn_off
-    entity_id: *outside_lights
+    target:
+      entity_id: *outside_lights
 
 
 script:
   lights_sunset:
     sequence:
     - service: light.turn_on
-      entity_id: light.cabinet_lights
-      data:
-        brightness_pct: 100
-        color_temp_kelvin: 2700
-        transition: 10
-    - service: light.turn_on
-      entity_id:
+      entity_id: 
+      - light.cabinet_lights
       - light.hall_bath_night_light
       - light.main_bath_night_light
       data:
         brightness_pct: 100
-        color_temp_kelvin: 2200
         transition: 10
+    - service: light.turn_on
+      entity_id: light.hall_light_bar
+      data:
+        brightness_pct: 100
+        white: true
+        transition: 5
     - service: light.turn_on
       entity_id: light.alarm_indicators
       data:
@@ -266,8 +269,6 @@ script:
       - service: light.turn_on
         entity_id: light.living_room_bias_lighting
         data:
-          brightness_pct: 100
-          color_temp_kelvin: 5000
           transition: 5
       else:
       - condition: template
@@ -283,6 +284,8 @@ script:
           transition: 5
       - service: light.turn_on
         entity_id: light.the_loop
+        data:
+          transition: 5
       - service: light.turn_on
         entity_id: light.hall_light_bar
         data:
@@ -297,19 +300,14 @@ script:
     - service: light.turn_off
       entity_id: 
       - light.buffet
-      - light.living_room_lamps
       - light.cabinet_lights
+      - light.hall_bath_night_light      
+      - light.hall_light_bar
+      - light.living_room_lamps
+      - light.main_bath_night_light
+      - light.the_loop    
       data:
         transition: 10
-    - delay: '00:00:10'
-    - service: light.turn_off
-      entity_id: 
-      - light.hall_bath_night_light
-      - light.main_bath_night_light
-      - light.the_loop
-      - light.hall_light_bar
-      data:
-        transition: 1
     - if:
       - *is_christmas
       then:
@@ -320,13 +318,6 @@ script:
       then:
       - service: light.turn_off
         entity_id: light.alarm_indicators
-
-  brightness_preset:
-    sequence:
-    - service: mqtt.publish
-      data:
-        topic: "cmnd/{{ device }}/dimmer"
-        payload: "{{ brightness_pct }}"
 
 
 light:

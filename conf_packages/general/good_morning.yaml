@@ -45,7 +45,6 @@ automation:
       - light.main_bath_night_light
   - service: script.turn_on
     entity_id: script.transit_display_on
-  # - service: shell_command.bedroom_powerline_leds_on
   - if:
     - "{{ is_state('switch.humidifier', 'on') }}"
     then:
@@ -79,8 +78,7 @@ script:
         entity_id:
         - input_boolean.sleep_mode
         - input_boolean.andy_sleep
-        - light.main_bath_night_light
-    # - service: shell_command.bedroom_powerline_leds_on        
+        - light.main_bath_night_light       
     - if:
       - "{{ is_state('switch.humidifier', 'on') }}"
       then:
@@ -91,7 +89,7 @@ script:
   lights_wakeup:
     sequence:
     - service: scene.turn_on
-      entity_id: scene.bedroom_lamps_2_very_warm_white_1
+      entity_id: scene.bedroom_lamps_0_very_warm_white_1
     - delay: '00:02:00'
     - condition: state
       entity_id: &lights_wakeup light.bedroom_lamps
@@ -99,9 +97,9 @@ script:
     - service: light.turn_on
       entity_id: *lights_wakeup
       data:
-        transition: 360
+        transition: 300
         brightness_pct: 100
-        color_temp_kelvin: 3500
+        color_temp_kelvin: 3000
 
   transit_display_on:
     sequence:
