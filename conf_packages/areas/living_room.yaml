@@ -28,7 +28,7 @@ automation:
 
 
 - alias: Restore lights when TV turned off
-  id: 'wuudeaC1Ooyaiphe3uwaPh'
+  id: 'restore-lights-tv-off'
   initial_state: true
   trigger:
   - platform: state
@@ -61,21 +61,13 @@ light:
   - light.living_room_lamp_r
   - light.living_room_lamp_r2
 
-- platform: group
-  name: Living room overhead
-  entities:
-  - light.living_room_nw
-  - light.living_room_ne
-  - light.living_room_e
-  - light.living_room_sw
-  - light.living_room_se
-  - light.living_room_w
-
 
 script:
   pre_media:
     alias: Turn stuff off when TV turned on
     sequence:
+    - service: media_player.turn_off
+      entity_id: media_player.kitchen_speaker
     - condition: state
       entity_id: input_boolean.dark_inside
       state: 'on'
@@ -84,29 +76,29 @@ script:
       data:
         transition: 5
         brightness_pct: 100
-    - service: media_player.turn_off
-      entity_id: media_player.kitchen_speaker
     - condition: state
       entity_id: light.living_room_lamps
       state: 'on'
     - service: light.turn_off
       entity_id:
       - light.living_room_lamps
-      - light.buffet
       - light.the_loop
       data:
-        transition: 4
+        transition: 5
+    - if:
+      - &christmas_lights_available "{{ not is_state('light.christmas_lights', 'unavailable') }}"
+      then:
+      - service: light.turn_off
+        entity_id: &christmas_lights light.christmas_lights
 
   post_media:
     alias: Turn lights back on when TV turned off
     sequence:
     - service: light.turn_on
       data:
-        entity_id:
-        - light.buffet
-        - light.living_room_lamps
+        entity_id: light.living_room_lamps
         brightness_pct: 100
-        color_temp_kelvin: 2200
+        color_temp_kelvin: 2000
         transition: 5
     - service: light.turn_on
       entity_id: 
@@ -117,6 +109,13 @@ script:
         transition: 5
     - service: light.turn_off
       entity_id: light.living_room_bias_lighting
+    - if:
+      - *christmas_lights_available
+      then:
+      - service: light.turn_on
+        entity_id: *christmas_lights
+        data:
+          brightness_pct: 100      
 
   ir_soundbar_vol_up:
     sequence:

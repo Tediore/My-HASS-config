@@ -1,6 +1,6 @@
 automation:
 - alias: Notify when device unavailable
-  id: 'Magah7iediTii3Bi'
+  id: 'notify-device-unavailable'
   initial_state: true
   mode: parallel
   max: 100
@@ -28,18 +28,22 @@ automation:
         priority: high
 
 
-- alias: Notify when Zigbee router unavailable for 5 minutes
-  id: 'EphooCiob0oofaYo'
+- alias: Notify when Zigbee device unavailable
+  id: 'notify-zigbee-router-unavailable'
   initial_state: true
   mode: parallel
   trigger:
   - platform: state
     entity_id:
+    - cover.garage
     - light.alarm_indicator_e
     - light.alarm_indicator_w
     - light.andy
-    - light.cabinet_lights_east
-    - light.cabinet_lights_south
+    - light.andys_office_floor_lamp
+    - light.andys_office_shelf_lamp
+    - light.buffet
+    - light.coat_closet
+    - light.garage
     - light.hall_light_e1
     - light.hall_light_e2
     - light.hall_light_e3
@@ -50,19 +54,20 @@ automation:
     - light.hall_light_w3
     - light.laundry_light
     - light.matt
-    - light.patio_light_n
-    - light.patio_light_s
+    - light.matt_office_desk_lamp
+    - light.matt_office_dresser_lamp
+    - light.matts_office_closet
     - switch.andy_office_plug
-    - sensor.bedroom_router_transmit_power
-    - sensor.garage_router_transmit_power
-    - sensor.siren_battery
     - switch.bedroom_fan
+    - sensor.bedroom_router_linkquality
+    - sensor.garage_router_linkquality
+    - sensor.siren_battery
     to: 'unavailable'
     for: '00:03:00'
   action:
   - service: notify.gotify_high
     data:
-      title: &router_title Zigbee router warning
+      title: &router_title Zigbee device warning
       message: &router_message "{{ trigger.to_state.name }} is unavailable."
   - service: persistent_notification.create
     data:
@@ -71,7 +76,7 @@ automation:
 
 
 - alias: Notify when sensor battery low
-  id: 'roo8eoBo2Meemi2s'
+  id: 'notify-sensor-battery-low'
   initial_state: true
   mode: parallel
   max: 100
@@ -158,8 +163,8 @@ automation:
 
 
 - alias: Notify when Zigbee device joins or leaves network
-  id: 'notify_zigbee_leave_join'
-  # initial_state: true
+  id: 'notify-zigbee-leave-join'
+  initial_state: true
   trigger:
   - platform: mqtt
     topic: 'zigbee2mqtt/bridge/event'

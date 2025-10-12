@@ -5,11 +5,8 @@ automation:
   trigger:
   - platform: event
     event_type: netgear_lte_sms
-#   - platform: mqtt
-#     topic: 'sms2mqtt/received'
   condition:
   - "{{ 'ComEd PTS Summer Hours Alert: TODAY' in trigger.event.data.message }}"
-#   - "{{ 'ComEd PTS Summer Hours Alert: TODAY' in trigger.payload }}"
   action:
   - service: input_datetime.set_datetime
     entity_id: input_datetime.tstat_peak_savings_start

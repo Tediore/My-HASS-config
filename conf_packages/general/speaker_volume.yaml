@@ -1,6 +1,6 @@
 automation:
 - alias: Set speaker volume based on app
-  id: 'rai2eifeijahvaeFeev7to'
+  id: 'set-speaker-vol-based-on-app'
   initial_state: true
   mode: parallel
   trigger:
@@ -10,7 +10,6 @@ automation:
     - sensor.office_speaker_app_name
   condition:
   - "{{ trigger.to_state.state not in ['', 'unknown'] }}"
-  - "{{ not ('main_bedroom' in trigger.to_state.object_id and is_state('input_boolean.white_noise', 'on')) }}"
   action:
   - wait_template: "{{ state_attr('media_player.' + trigger.to_state.object_id.replace('_app_name',''), 'media_album_name') != None }}"
     timeout: '00:00:03'

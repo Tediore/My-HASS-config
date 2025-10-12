@@ -1,0 +1,126 @@
+automation:
+- alias: Notify when apartment buzzer buzzed
+  id: 'apt-buzzer-buzzed'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.apartment_buzzer
+    to: 'on'
+  action:
+  - service: input_datetime.set_datetime
+    entity_id: input_datetime.front_door_snapshot_time
+    data: 
+      timestamp: "{{ now().timestamp() }}"
+  - service: downloader.download_file
+    data:
+      url: http://front-door-cam.lan/cgi-bin/snapshot.cgi?channel=1
+      auth_type: digest
+      auth_username: !secret front_door_cam_user
+      auth_password: !secret front_door_cam_pass
+      filename: "front_door_{{ states('input_datetime.front_door_snapshot_time') }}.jpg"
+      overwrite: true
+  - delay: 0.25
+  - service: rest_command.gotify_notify_image
+    data:
+      title: Front door doorbell
+      message: Someone's at the front door.
+      image_url: !secret front_door_image_url
+      click_url: "homeassistant://navigate/lovelace/front-camera"
+
+
+- alias: Notify when rear doorbell pressed
+  id: 'rear-doorbell-pressed'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.rear_doorbell_visitor
+    to: 'on'
+  action:
+  - service: input_datetime.set_datetime
+    entity_id: input_datetime.rear_doorbell_snapshot_time
+    data: 
+      timestamp: "{{ now().timestamp() }}"
+  - service: downloader.download_file
+    data:
+      url: !secret rear_doorbell_snapshot_url
+      filename: "rear_doorbell_{{ states('input_datetime.rear_doorbell_snapshot_time') }}.jpg"
+      overwrite: true
+  - delay: 0.25
+  - service: rest_command.gotify_notify_image
+    data:
+      title: Back gate doorbell
+      message: Someone's at the back gate.
+      image_url: !secret rear_doorbell_image_url
+      # click_url: "homeassistant://navigate/lovelace/rear-doorbell"
+
+
+- alias: Notify when camera offline/online
+  id: 'notify-camera-offline-online'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    entity_id: &cameras
+    - camera.alley
+    - camera.dungeon    
+    - camera.front_door
+    - camera.garage    
+    - camera.patio
+    - camera.rear_doorbell
+    to: 'unavailable'
+    for: '00:01:00'
+    id: 'offline'
+  - platform: state
+    entity_id: *cameras
+    to: 'recording'
+    id: 'online'
+  action:
+  - service: notify.gotify_high
+    data:
+      title: "Camera {{ trigger.id }}"
+      message: "{{ trigger.to_state.name }} camera is {{ 'back ' if trigger.id == 'online' }}{{ trigger.id }}."
+
+
+script:
+  camera_display_on:
+    sequence:
+    - service: rest_command.tasker
+      data:
+        ip_address: &camera_display_ip 10.0.2.250
+        port: 1821
+        path: home_assistant
+        event:
+                {
+                'device_id':'display_on',
+                'device_name':'Display On'
+              }
+
+  camera_display_off:
+    sequence:
+    - service: rest_command.tasker
+      data:
+        ip_address: *camera_display_ip
+        port: 1821
+        path: home_assistant
+        event:
+                {
+                'device_id':'display_off',
+                'device_name':'Display Off'
+              }
+
+
+input_datetime:
+  front_door_snapshot_time:
+    name: Front door snapshot time
+    has_date: true
+    has_time: true
+
+  rear_doorbell_snapshot_time:
+    name: Rear doorbell snapshot time
+    has_date: true
+    has_time: true
+
+  alley_snapshot_time:
+    name: Alley snapshot time
+    has_date: true
+    has_time: true

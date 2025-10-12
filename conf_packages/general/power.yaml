@@ -1,6 +1,6 @@
 automation:
 - alias: Notify when shutting down
-  id: 'oojoodooH7urahron1teit'
+  id: 'shutdown-notif'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -18,7 +18,7 @@ automation:
 
 
 - alias: Notify when power lost or restored
-  id: 'sahf7phuQu0phaiZ8Jee9f'
+  id: 'power-lost-restored-notif'
   initial_state: true
   mode: parallel
   trigger:

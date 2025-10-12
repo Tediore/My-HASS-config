@@ -1,6 +1,6 @@
 automation:
 - alias: Matt's office remote main
-  id: 'matt_office_remote_main'
+  id: 'matts-office-remote-main'
   initial_state: true
   mode: queued
   trigger:
@@ -14,7 +14,7 @@ automation:
 
 
 - alias: Matt's office desk remote
-  id: 'phe5ea2ahCeid4joo6yoo4'
+  id: 'matts-office-desk-remote'
   initial_state: true
   mode: parallel
   trigger:
@@ -51,7 +51,7 @@ automation:
 
 
 - alias: Matt's office table button
-  id: 'ahtuph9teboo8jae2aiSai'
+  id: 'matts-office-table-button'
   initial_state: true
   trigger:
   - platform: state
@@ -66,6 +66,27 @@ automation:
         entity_id: switch.office_fan
 
 
+- alias: Change office lights when Xbox turned on/off
+  id: 'change-office-lights-xbox-on-off'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.xbox
+    to: 
+    - 'on'
+    - 'off'
+  condition:
+  - condition: state
+    entity_id: light.matts_office_lamps
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: light.matts_office_lamps
+    data:
+      brightness_pct: "{{ 10 if trigger.to_state.state == 'on' else 100 }}"
+      kelvin: 2000
+
+
 script:
   turn_off_office_speaker:
     sequence:
@@ -77,7 +98,7 @@ script:
     - choose:
       - conditions:
         - condition: template
-          value_template: "{{ is_state_attr('media_player.office_speaker', 'app_name', 'Google Play Music') }}"
+          value_template: "{{ is_state_attr('media_player.office_speaker', 'app_name', 'YouTubeGoogle Play Music') }}"
         sequence:
         - service: media_player.media_play_pause
           entity_id: media_player.office_speaker
@@ -103,7 +124,7 @@ script:
 fan:
 - platform: template
   fans:
-    matt_office:
+    matts_office:
       friendly_name: Matt office fan
       unique_id: 'matt-office-fan'
       value_template: "{{ states('sensor.matt_office_fan_plug_energy_power') | float(0) > 10 }}"
@@ -128,3 +149,37 @@ fan:
         data:
           blaster: *blaster
       speed_count: 8
+
+
+template:
+- binary_sensor:
+  - name: Xbox
+    state: "{{ states('sensor.ups_load') | float(0) > 20 }}"
+
+
+sensor:
+- platform: history_stats
+  name: Xbox time today
+  entity_id: binary_sensor.xbox
+  state: 'on'
+  type: time
+  start: "{{ today_at('00:00') }}"
+  end: "{{ now() }}"
+
+- platform: history_stats
+  name: Xbox time yesterday
+  entity_id: binary_sensor.xbox
+  state: 'on'
+  type: time
+  end: "{{ today_at('00:00') }}"
+  duration:
+    hours: 24
+
+- platform: history_stats
+  name: Xbox time last 7 days
+  entity_id: binary_sensor.xbox
+  state: 'on'
+  type: time
+  end: "{{ today_at('00:00') }}"
+  duration:
+    hours: 168

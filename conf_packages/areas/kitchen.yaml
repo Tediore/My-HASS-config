@@ -1,6 +1,6 @@
 automation:
 - alias: Record coffeemaker on/off
-  id: 'gai4IeyaewaxuyeeWipei2'
+  id: 'record-coffemaker-on-off'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -16,7 +16,7 @@ automation:
 
 
 - alias: Notify when coffee done
-  id: 'ul9ein6Faicheim9Chahku'
+  id: 'notify-when-coffee-done'
   initial_state: true
   trigger:
   - platform: state

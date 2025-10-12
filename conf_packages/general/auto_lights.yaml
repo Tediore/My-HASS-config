@@ -1,26 +1,27 @@
 group:
-  lights_interior:
-    name: Interior lights
-    entities:
-    - light.andys_office_lamps
-    - light.bedroom_lamps
-    - light.buffet
+  good_night_lights:
+    name: Good night lights
+    entities: &good_night_lights
+    - light.good_night_lights # Zigbee group
+    - light.breakfast_bar
     - light.cabinet_lights
     - light.hall_bath_night_light
     - light.hall_light_bar
     - light.hall_lights
-    - light.main_bath_night_light
-    - light.matts_office_lamps
     - light.living_room_bias_lighting
-    - light.living_room_lamps
-    - light.living_room_overhead
     - light.the_loop
+
+  interior_lights:
+    name: Interior lights
+    entities:
+    - group.good_night_lights
+    - light.main_bath_night_light
 
 
 automation:
 - alias: Toggle dark inside boolean
   description: Backup in case outdoor light sensor fails
-  id: 'ainei8ohpetaa2cheLeilu'
+  id: 'toggle-dark-inside-boolean-backup'
   initial_state: true
   trigger:
   - platform: state
@@ -34,7 +35,7 @@ automation:
 
 
 - alias: Turn on sunset lights - light level
-  id: 'ieb7uceicaejai0eiLaoza'
+  id: 'turn-on-lights-light-level'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -42,7 +43,7 @@ automation:
     below: &outdoor_light_threshold 100
     for: &light_threshold_time '00:05:00'
   - platform: state
-    entity_id: input_text.alarm
+    entity_id: &alarm input_text.alarm
     from: 'armed_away'
     to: 'disarmed'
   condition:
@@ -52,7 +53,7 @@ automation:
     entity_id: *dark_inside
     state: 'off'
   - condition: state
-    entity_id: input_text.alarm
+    entity_id: *alarm
     state:
     - 'disarmed'
     - 'armed_home'
@@ -71,7 +72,7 @@ automation:
 
 
 - alias: Turn lights back off if light level goes back up
-  id: 'eeXus7ugei6eirieGhivoh'
+  id: 'turn-lights-off-light-up'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -86,7 +87,7 @@ automation:
     entity_id: *dark_inside
     state: 'on'
   - condition: state
-    entity_id: input_text.alarm
+    entity_id: *alarm
     state:
     - 'disarmed'
     - 'armed_home'
@@ -112,7 +113,7 @@ automation:
     entity_id: *dark_inside
     state: 'on'
   - condition: state
-    entity_id: input_text.alarm
+    entity_id: *alarm
     state:
     - 'disarmed'
     - 'armed_home'
@@ -123,7 +124,7 @@ automation:
 
 
 - alias: Turn lights on/off at sunset/sunrise
-  id: 'eifait7ohwo4haeW9oozah'
+  id: 'turn-lights-on-off-sunset-sunrise'
   initial_state: true
   trigger:
   - platform: state
@@ -155,7 +156,7 @@ automation:
     at: '23:30:00'
   condition:
   - condition: state
-    entity_id: alarm_control_panel.home
+    entity_id: *alarm
     state: 'armed_away'
   - condition: state
     entity_id: input_boolean.vacation_mode
@@ -164,52 +165,7 @@ automation:
   - delay: "{{ range(60,900) | random | int }}"
   - service: homeassistant.turn_off
     target:
-      entity_id: group.lights_interior
-
-
-- alias: Sync Tasmota device states on restart
-  id: 'Neruw7Phaew0iuquai4eQu'
-  initial_state: true
-  trigger:
-  - platform: homeassistant
-    event: start
-  action:
-  - service: mqtt.publish
-    data:
-      topic: cmnd/tasmotas/state
-      payload: ''
-
-
-- alias: Turn outside lights on at night
-  id: 'Coquu3eiTh5eelah5oonai'
-  initial_state: true
-  trigger:
-  - platform: numeric_state
-    entity_id: *outdoor_light
-    below: 10
-    for: '00:05:00'
-  condition:
-  - condition: time
-    after: '16:00:00'
-    before: '22:00:00'
-  action:
-  - service: light.turn_on
-    entity_id: &outside_lights light.patio_lights
-    data:
-      brightness_pct: 100
-
-
-- alias: Turn outside lights off at sunrise
-  id: 'Eingaefu7veiphooph8adu'
-  initial_state: true
-  trigger:
-  - platform: sun
-    event: sunrise
-    offset: '-01:00:00'
-  action:
-  - service: homeassistant.turn_off
-    target:
-      entity_id: *outside_lights
+      entity_id: group.interior_lights
 
 
 script:
@@ -236,27 +192,6 @@ script:
         rgb_color: [255,168,90]
     - service: script.turn_on
       entity_id: script.lr_lights_sunset
-    - if:
-      - condition: state
-        entity_id: media_player.living_room_tv
-        state: 'off'
-      - condition: state
-        entity_id: light.christmas_tree
-        state: 'unavailable'
-      then:
-      - service: light.turn_on
-        data:
-          entity_id: light.buffet
-          brightness_pct: 100
-          color_temp_kelvin: 2200
-          transition: 10
-    - if:
-      - &is_christmas "{{ not is_state('light.christmas_tree', 'unavailable') }}"
-      then:
-      - service: light.turn_on
-        entity_id: &christmas_lights light.christmas_lights
-        data:
-          brightness_pct: 100
 
 
   lr_lights_sunset:
@@ -280,26 +215,27 @@ script:
         data:
           entity_id: light.living_room_lamps
           brightness_pct: 100
-          color_temp_kelvin: 2200
+          color_temp_kelvin: 2000
           transition: 5
       - service: light.turn_on
         entity_id: light.the_loop
         data:
           transition: 5
-      - service: light.turn_on
-        entity_id: light.hall_light_bar
-        data:
-          brightness_pct: 100
-          white: true
-          transition: 5
-  
+      - if:
+        - &christmas_lights_available "{{ not is_state('light.christmas_lights', 'unavailable') }}"
+        then:
+        - service: light.turn_on
+          entity_id: &christmas_lights light.christmas_lights
+          data:
+            brightness_pct: 100
+
+
   lights_sunrise:
     sequence:
     - service: input_boolean.turn_off
       entity_id: *dark_inside
     - service: light.turn_off
-      entity_id: 
-      - light.buffet
+      entity_id:
       - light.cabinet_lights
       - light.hall_bath_night_light      
       - light.hall_light_bar
@@ -309,7 +245,7 @@ script:
       data:
         transition: 10
     - if:
-      - *is_christmas
+      - *christmas_lights_available
       then:
       - service: light.turn_off
         entity_id: *christmas_lights
@@ -325,8 +261,6 @@ light:
   name: Christmas lights
   entities:
   - light.christmas_tree
-  - light.mini_christmas_tree
-  - light.portable_mini_christmas_tree
 
 
 input_boolean:

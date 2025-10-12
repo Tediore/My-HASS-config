@@ -35,12 +35,6 @@ automation:
     - input_boolean.dryer
     from: 'on'
     to: 'off'
-  # - platform: state
-  #   entity_id:
-  #   - input_boolean.washer_reminder
-  #   - input_boolean.dryer_reminder
-  #   to: 'on'
-  #   for: '00:30:00'
   condition:
   - condition: template
     value_template: "{{ states('input_text.alarm') in ['armed_home', 'armed_night', 'disarmed'] }}"
@@ -58,9 +52,6 @@ automation:
     data:
       title: "{{ trigger.to_state.name }} done {{ 'reminder' if 'reminder' in trigger.to_state.entity_id else '' }}"
       message: "{{ 'Move clothes to the dryer.' if trigger.to_state.name == 'Washer' else 'Put your clothes away.' }}"
-  # - service: "input_boolean.turn_{{ 'on' if 'reminder' not in trigger.to_state.entity_id else 'off' }}"
-  #   data:
-  #     entity_id: "{{ trigger.to_state.entity_id }}{{ '_reminder' if 'reminder' not in trigger.to_state.entity_id else '' }}"
   - service: input_boolean.turn_on
     data:
       entity_id: "{{ trigger.to_state.entity_id }}_reminder"
@@ -92,8 +83,6 @@ automation:
   - service: input_boolean.turn_off
     data:
       entity_id: "{{ 'input_boolean.washer_reminder, input_boolean.dryer_reminder' if 'all' in trigger.id else trigger.to_state.entity_id }}"
-    # - input_boolean.washer_reminder
-    # - input_boolean.dryer_reminder
 
 
 alert:

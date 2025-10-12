@@ -1,7 +1,7 @@
 automation:
 # Add previous day's runtime to input_number each night
 - alias: Store HVAC runtime nightly
-  id: 'Chukuk2Ikiep2Hooqu7ahd'
+  id: 'store-hvac-runtime-nightly'
   initial_state: true
   trigger:
   - platform: time
@@ -21,7 +21,7 @@ automation:
 
 # Exclude from repo
 - alias: Notify when furnace filter needs replacement  # throttled - 8 hours
-  id: 'Ahthaed7ijam7zu8ahmoM0'
+  id: 'furnace-filter-notif'
   initial_state: true
   trigger:
   - platform: template
@@ -39,7 +39,7 @@ automation:
 
 # Exclude from repo
 - alias: HVAC runtime adjustment
-  id: 'ieth4OoBe2ahBieyai2oH0'
+  id: 'hvac-runtime-adj'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -54,7 +54,7 @@ automation:
 
 # Exclude from repo
 - alias: Record time when cycle starts/ends
-  id: 'etee6eiPhaaneetahghieZ'
+  id: 'record-cycle-start-end'
   initial_state: true
   trigger:
   - platform: state

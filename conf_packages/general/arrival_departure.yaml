@@ -1,6 +1,6 @@
 automation:
 - alias: Turn lights on upon entrance
-  id: 'vei6Ilae0mooZohyaisaix'
+  id: 'turn-lights-on-upon-entrance'
   initial_state: true
   trigger:
   - entity_id: binary_sensor.front_door
@@ -23,7 +23,7 @@ automation:
   - condition: or
     conditions:
     - condition: state
-      entity_id: input_text.alarm
+      entity_id: &alarm input_text.alarm
       state: 'armed_away'
       for: '00:00:30'
     - condition: state
@@ -52,7 +52,7 @@ automation:
   - condition: or
     conditions: *dark_inside
   - condition: state
-    entity_id: input_text.alarm
+    entity_id: *alarm
     state: 'armed_away'
     for: '00:00:30'
   action:
@@ -61,11 +61,11 @@ automation:
 
 
 - alias: Alarm disarmed from away
-  id: 'luheechourei9Lowie2mui'
+  id: 'alarm-disarmed-from-away'
   initial_state: true
   trigger:
   - platform: state
-    entity_id: &alarm input_text.alarm
+    entity_id: *alarm
     from: 'armed_away'
     to: 'disarmed'
   action:
@@ -73,6 +73,7 @@ automation:
     entity_id:
     - script.tstat_smart_resume_cool
     - script.arrival_night
+    - script.camera_display_on
   - condition: or
     conditions: *dark_inside
   - service: input_boolean.turn_on
@@ -95,37 +96,27 @@ automation:
     entity_id:
     - light.front_door_lights
     - light.hall_lights
+  - condition: state
+    entity_id: input_boolean.dark_inside
+    state: 'on'
+  - service: light.turn_on
+    entity_id: light.living_room_lamps
+    data:
+      brightness_pct: 100
+      color_temp_kelvin: 2000
 
 
 - alias: Activate away mode when armed away
-  id: 'Del1UJaejeiK2eiy1goo9s'
+  id: 'activate-away-mode-armed-away'
   initial_state: true
   trigger:
   - platform: state
     entity_id: *alarm
     to: 'armed_away'
-    for: '00:00:05'
+    for: '00:00:30'
   action:
   - service: script.turn_on
     entity_id: script.away_mode
-
-
-- alias: Enable/disable leaving boolean
-  id: 'leaving-boolean'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: alarm_control_panel.home
-    to:
-    - 'arming'
-    - 'disarmed'
-  - platform: state
-    entity_id: input_boolean.leaving
-    to: 'on'
-    for: '00:03:00'
-  action:
-  - service: "input_boolean.turn_{{ 'on' if trigger.to_state.state == 'arming' else 'off' }}"
-    entity_id: input_boolean.leaving
 
 
 script:
@@ -145,7 +136,9 @@ script:
     - service: media_player.turn_off
       entity_id: all
     - service: script.turn_on
-      entity_id: script.christmas_lights_off
+      entity_id: 
+      - script.christmas_lights_off
+      - script.camera_display_off
     - service: script.turn_on
       data:
         entity_id: "{{ 'script.lights_kitty' if is_state('input_boolean.dark_inside', 'on') else none }}"
@@ -156,9 +149,7 @@ script:
       attribute: hvac_action
       state: 'idle'
     - condition: state
-      entity_id:
-      - input_boolean.tstat_hold
-      - input_boolean.tstat_away
+      entity_id: input_boolean.tstat_hold
       state: 'off'
     - service: script.turn_on
       entity_id: script.tstat_away
@@ -176,21 +167,28 @@ script:
 
   lights_normal:
     sequence:
-    - service: light.turn_on
-      entity_id:
-      - light.living_room_lamps
-      - light.buffet
-      data:
-        transition: 1
-        brightness_pct: 100
-        color_temp_kelvin: 2700
-    - if:
-      - "{{ is_state('light.christmas_tree', 'off') }}"
-      then:
+    - choose:
+      - conditions:
+        - "{{ is_state('binary_sensor.spookytime', 'on') }}"
+        sequence:
+        - service: scene.turn_on
+          entity_id:
+          - scene.buffet_light_10_spoopy_lamps
+          - scene.living_room_lamps_10_spoopy_lamps
+      - conditions:
+        - "{{ is_state('binary_sensor.christmastime', 'on') }}"
+        sequence:
+        - service: scene.turn_on
+          entity_id:
+          - scene.buffet_light_12_christmas_lamps
+          - scene.living_room_lamps_12_christmas_lamps
+      default:
       - service: light.turn_on
-        entity_id: light.christmas_tree
+        entity_id: light.living_room_lamps
         data:
+          transition: 1
           brightness_pct: 100
+          color_temp_kelvin: 2000
     - service: light.turn_on
       entity_id:
       - light.cabinet_lights
@@ -198,7 +196,7 @@ script:
       - light.main_bath_night_light
       data:
         brightness_pct: 100
-        color_temp_kelvin: 2700
+        color_temp_kelvin: 2000
         transition: 1
     - service: light.turn_on
       entity_id: light.hall_light_bar
@@ -206,23 +204,18 @@ script:
         white: true
         brightness_pct: 100
         transition: 1
-
-
-  lights_christmas:
-    sequence:
-    - service: script.turn_on
-      entity_id: script.lights_normal
-    - service: homeassistant.turn_on
-      entity_id: 
-      - light.christmas_tree
+    - condition:
+      - "{{ not is_state('light.christmas_lights', 'unavailable') }}"
+    - service: light.turn_on
+      entity_id: light.christmas_lights
+      data:
+        brightness_pct: 100
 
 
   lights_kitty:
     sequence:
     - service: light.turn_on
-      entity_id:
-      - light.buffet
-      - light.living_room_lamps
+      entity_id: light.living_room_lamps
       data:
         brightness_pct: 20
         color_temp_kelvin: 2700
@@ -251,36 +244,16 @@ group:
     - switch.andy_office_plug
 
 
-binary_sensor:
-- platform: template
-  sensors:
-    any_speaker:
-      friendly_name: Any speaker
-      value_template: >
-        {% set rejects = ['off', 'unavailable'] %}
-        {% set speakers = [
-          states('media_player.bedroom_speaker') not in rejects, 
-          states('media_player.living_room_speaker') not in rejects, 
-          states('media_player.kitchen_speaker') not in rejects,
-          states('media_player.andy_office_hub') not in rejects,
-          states('media_player.office_speaker') not in rejects,
-          states('media_player.guest_bedroom_clock') not in rejects
-          ] %}
-        {{ speakers | sum > 0 }}
+template:
+- binary_sensor:
+  - name: Christmastime
+    unique_id: christmas-bool
+    state: "{{ now().month == 12 }}"
 
-    any_tv:
-      friendly_name: Any TV
-      value_template: >
-        {% set rejects = ['off', 'unavailable'] %}
-        {% set tvs = [
-          states('media_player.craft_room_tv') not in rejects,
-          states('media_player.bedroom_tv') not in rejects, 
-          states('media_player.living_room_vizio') not in rejects 
-          ] %}
-        {{ tvs | sum > 0 }}
+  - name: Spookytime
+    unique_id: spoopytime-bool
+    state: "{{ now().month == 10 }}"
 
 
 input_boolean:
   arrival_night:
-  leaving:
-    initial: false

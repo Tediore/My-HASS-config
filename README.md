@@ -10,6 +10,7 @@ I currently have the following devices connected to Home Assistant:
 - Google Home speakers
 - APC UPSes
 - Various Tasmota devices
+- Various ESPHome devices (including some Zigbee devices I've made with an external Zigbee component)
 - Google TV
 - Roku TV
 - Cameras (Frigate)

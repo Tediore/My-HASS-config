@@ -1,6 +1,6 @@
 automation:
 - alias: Toggle update boolean
-  id: 'quei8ThaaCie7Oosh2eefe'
+  id: 'toggle-update-bool'
   initial_state: true
   trigger:
   - platform: homeassistant
@@ -13,7 +13,7 @@ automation:
 
 
 - alias: Notify when beta available
-  id: 'eNoh0aumoo7Do0oGhu0leh'
+  id: 'notify-beta-available'
   initial_state: true
   trigger:
   - platform: template
@@ -36,7 +36,7 @@ automation:
 
 
 - alias: Notify for all updates
-  id: 'zoor0aXizookeeto0iohee'
+  id: 'notify-all-updates'
   initial_state: true
   trigger:
   - platform: state

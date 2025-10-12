@@ -11,4 +11,3 @@ secrets.yaml
 known_devices.yaml
 conf_packages/security/
 conf_packages/general/sms.yaml.bak
-conf_packages/general/cameras.yaml

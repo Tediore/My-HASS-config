@@ -1,0 +1,31 @@
+light:
+- platform: template
+  lights:
+    front_door_lights:
+      friendly_name: Front door lights
+      unique_id: front_door_lights
+      value_template: "{{ states('switch.front_door_lights_entrance') != states('switch.front_door_lights_unit') }}"
+      turn_on:
+        service: script.turn_on
+        entity_id: script.front_door_lights_on
+      turn_off:
+        service: script.turn_on
+        entity_id: script.front_door_lights_off
+
+
+script:
+  front_door_lights_on:
+    sequence:
+    - condition: state
+      entity_id: &front_door_lights light.front_door_lights
+      state: 'off'
+    - service: switch.toggle
+      entity_id: &front_door_lights_switch switch.front_door_lights_unit
+
+  front_door_lights_off:
+    sequence:
+    - condition: state
+      entity_id: *front_door_lights
+      state: 'on'
+    - service: switch.toggle
+      entity_id: *front_door_lights_switch

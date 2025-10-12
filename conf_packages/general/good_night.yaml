@@ -1,3 +1,62 @@
+automation:
+- alias: Andy's button
+  id: 'andys-bedroom-button'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: state
+    id: single
+    entity_id: &andy_button sensor.andys_button_action
+    to: 
+    - 'on'
+    - 'off'
+  - platform: state
+    id: hold
+    entity_id: *andy_button
+    to: 
+    - 'brightness_move_up'
+    - 'brightness_move_down'
+  action:
+    service: >
+      {% if trigger.id == 'single' %}
+        {% if is_state('input_boolean.andy_sleep', 'off') %}
+          script.good_night_andy
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
+      {% else %}
+        script.good_night
+      {% endif %}
+
+
+- alias: Matt's button
+  id: 'matts-bedroom-button'
+  initial_state: true
+  mode: parallel
+  trigger: &matt_triggers
+  - platform: state
+    id: single
+    entity_id: &matt_button sensor.matt_button_action
+    to: 'single'
+  - platform: state
+    id: hold
+    entity_id: *matt_button
+    to: 'hold'
+  action:
+  - service: script.turn_on
+    data:
+      entity_id: >
+        {% if trigger.id == 'single' %}
+          {% if is_state('input_boolean.sleep_mode', 'off') %}
+            script.good_night
+          {% else %}
+            script.toggle_bedroom_fan
+          {% endif %}
+        {% else %}
+          script.toggle_bedroom_fan
+        {% endif %}
+
+
 script:
   good_night:
     alias: Good night
@@ -6,17 +65,18 @@ script:
       entity_id: 
       - input_boolean.sleep_mode
       - input_boolean.andy_sleep
-      - script.lights_off_interior
+      - script.good_night_lights_off
       - script.christmas_lights_off
       - script.media_players_off
       - switch.bedroom_fan
-      - script.transit_display_off
+      - script.camera_display_off
     - service: homeassistant.turn_off
       target:
         entity_id:
         - input_boolean.washer
         - input_boolean.dryer
         - fan.living_room
+        - fan.matts_office
     - service: light.turn_on
       entity_id: light.main_bath_night_light
       data:
@@ -69,11 +129,11 @@ script:
     - service: media_player.turn_off
       entity_id: all
 
-  lights_off_interior:
+  good_night_lights_off:
     sequence:
     - service: homeassistant.turn_off
       target:
-        entity_id: group.lights_interior
+        entity_id: group.good_night_lights
 
   christmas_lights_off:
     sequence:
@@ -82,19 +142,6 @@ script:
       state: 'on'
     - service: light.turn_off
       entity_id: light.christmas_lights
-
-  transit_display_off:
-    sequence:
-    - service: rest_command.tasker
-      data:
-        ip_address: 10.0.4.246
-        port: 1821
-        path: home_assistant
-        event:
-                {
-                'device_id':'display_off',
-                'device_name':'Display Off'
-              }
 
 
 input_boolean:

@@ -1,6 +1,6 @@
 automation:
 - alias: Notify water leak detected or cleared
-  id: 'ke5johth8ooKoosh8ooRoh'
+  id: 'notify-water-leak-detected-cleared'
   initial_state: true
   mode: parallel
   max: 100
@@ -58,7 +58,7 @@ automation:
 
 
 - alias: Turn lights on when leak detected
-  id: 'Ooghoh5idae9hieso5iFe5'
+  id: 'turn-lights-on-water-leak'
   initial_state: true
   mode: parallel
   trigger:
@@ -75,7 +75,6 @@ automation:
     entity_id: &leak_lights
     - light.andys_office_lamps
     - light.bedroom_lamps
-    - light.buffet
     - light.living_room_lamps
     - light.matts_office_lamps
     data:
@@ -89,7 +88,7 @@ automation:
 
 
 - alias: Return lights to state before water leak
-  id: 'Tohqu4xahtheexaGh0phu2'
+  id: 'restore-lights-after-leak'
   initial_state: true
   trigger:
   - platform: event

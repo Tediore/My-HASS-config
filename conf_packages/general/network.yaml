@@ -1,6 +1,24 @@
 automation:
+- alias: Process incoming SMS
+  id: 'process-incoming-sms'
+  initial_state: true
+  mode: parallel
+  trigger:
+  - platform: event
+    event_type: netgear_lte_sms
+  action:
+  - service: notify.gotify
+    data:
+      title: "SMS from {{ trigger.event.data.from }}"
+      message: "{{ trigger.event.data.message }}"
+  - service: netgear_lte.delete_sms
+    data:
+      host: "{{ trigger.event.data.host }}"
+      sms_id: "{{ trigger.event.data.sms_id }}"
+
+
 - alias: Notify when Home Assistant starts
-  id: 'yo9Ju1Au6daePhaH'
+  id: 'notify-ha-started'
   trigger:
     platform: homeassistant
     event: start
@@ -17,7 +35,7 @@ automation:
 
 
 - alias: Dismiss discovery notification
-  id: 'mieGhe9xai9lieco'
+  id: 'dismiss-discovery-notif'
   initial_state: true
   trigger:
     platform: state
@@ -29,8 +47,8 @@ automation:
       notification_id: config_entry_discovery
 
 
-- alias: Record internet outage
-  id: 'WooWir8etaithoaz'
+- alias: Record internet connection outage
+  id: 'record-inet-outage'
   initial_state: true
   trigger:
   - platform: state
@@ -79,31 +97,17 @@ automation:
       message: "Internet connection {{ 'lost' if trigger.to_state.state == 'off' else 'restored' }}."
 
 
-- alias: Notify when camera offline/online
-  id: 'notify-camera-offline-online'
+- alias: Sync Tasmota device states on restart
+  id: 'sync-tasmota-states-restart'
   initial_state: true
-  mode: parallel
   trigger:
-  - platform: state
-    entity_id: &cameras
-    - camera.alley
-    - camera.dungeon    
-    - camera.front_door
-    - camera.garage    
-    - camera.patio
-    - camera.rear_doorbell
-    to: 'unavailable'
-    for: '00:01:00'
-    id: 'offline'
-  - platform: state
-    entity_id: *cameras
-    to: 'recording'
-    id: 'online'
+  - platform: homeassistant
+    event: start
   action:
-  - service: notify.gotify_high
+  - service: mqtt.publish
     data:
-      title: "Camera {{ trigger.id }}"
-      message: "{{ trigger.to_state.name }} camera is {{ 'back ' if trigger.id == 'online' }}{{ trigger.id }}."
+      topic: cmnd/tasmotas/state
+      payload: ''
 
 
 rest:

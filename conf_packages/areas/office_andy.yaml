@@ -4,7 +4,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: light.andys_office_lamps
+    entity_id: &andy_lamps light.andys_office_lamps
     to:
     - 'on'
     - 'off'
@@ -22,8 +22,47 @@ automation:
       entity_id: light.andys_light_bar
 
 
+- alias: Turn Andy's light strip on with lamps
+  id: 'andys-light-strip-on-with-lamps'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *andy_lamps
+    to: 'on'
+  - platform: time
+    at: &led_start_time '07:00:00'
+  condition:
+  - condition: time
+    after: *led_start_time
+    before: '17:00:00'
+    weekday: &workdays ['mon', 'tue', 'wed', 'thu', 'fri']
+  - condition: state
+    entity_id: *andy_lamps
+    state: 'on'
+  action:
+  - service: light.turn_on
+    entity_id: &andys_light_strip light.andys_light_strip
+    data:
+      brightness_pct: 100
+
+
+- alias: Turn Andy's light strip off
+  id: 'andys-light-strip-off'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: *andy_lamps
+    to: 'off'
+  condition:
+  - condition: time
+    weekday: *workdays
+  action:
+  - service: light.turn_off
+    entity_id: *andys_light_strip
+
+
 - alias: Andy's desk remote
-  id: 'AeGh4fuos1theiroej4zie'
+  id: 'andys-desk-remote'
   initial_state: true
   trigger:
   - platform: state
@@ -69,7 +108,7 @@ automation:
       entity_id: light.andys_office_lamps
       data:
         brightness_pct: 100
-        color_temp_kelvin: 2200
+        color_temp_kelvin: 2000
 
 
 - alias: Cycle candle warmer
@@ -85,7 +124,7 @@ automation:
     to: 'disarmed'
   condition:
   - condition: time
-    weekday: ['mon', 'tue', 'wed', 'thu', 'fri']
+    weekday: *workdays
     after: '07:00:00'
     before: '16:30:00'
   - condition: state
