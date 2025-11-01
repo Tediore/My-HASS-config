@@ -65,6 +65,7 @@ automation:
     id: 'all0'
     entity_id: 
     - binary_sensor.laundry_door
+    - switch.laundry_light_switch
     - input_boolean.sleep_mode
     from: 'off'
     to: 'on'

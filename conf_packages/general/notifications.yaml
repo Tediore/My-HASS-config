@@ -9,6 +9,7 @@ automation:
     entity_id:
     - binary_sensor.back_door
     - binary_sensor.front_door
+    - binary_sensor.patio_door
     - sensor.outdoor_light_level
     - light.cabinet_lights
     to: 'unavailable'
@@ -39,10 +40,10 @@ automation:
     - light.alarm_indicator_e
     - light.alarm_indicator_w
     - light.andy
-    - light.andys_office_floor_lamp
-    - light.andys_office_shelf_lamp
+    - light.andy_office_floor_lamp
+    - light.andy_office_shelf_lamp
     - light.buffet
-    - light.coat_closet
+    - light.coat_closet_light
     - light.garage
     - light.hall_light_e1
     - light.hall_light_e2
@@ -56,7 +57,7 @@ automation:
     - light.matt
     - light.matt_office_desk_lamp
     - light.matt_office_dresser_lamp
-    - light.matts_office_closet
+    - light.matt_office_closet
     - switch.andy_office_plug
     - switch.bedroom_fan
     - sensor.bedroom_router_linkquality

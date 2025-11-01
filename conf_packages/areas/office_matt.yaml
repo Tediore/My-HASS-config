@@ -1,16 +1,33 @@
 automation:
-- alias: Matt's office remote main
-  id: 'matts-office-remote-main'
+- alias: Matt's office switch
+  id: 'matts-office-switch'
   initial_state: true
   mode: queued
   trigger:
   - platform: state
     entity_id: sensor.matt_office_switch_action
-    to: 'off_press_release'
+    to:
+    - 'on_hold'
+    - 'off_press_release'
   action:
-  - service: homeassistant.turn_off
-    target: 
-      entity_id: fan.matt_office
+  - choose:
+    - conditions:
+      # Light on/off is controlled by Zigbee binding; this is to offer a quicker way to reset to
+      # 100% brightness at warm white without holding the brightness up button for a few seconds.
+      - "{{ trigger.to_state.state == 'on_hold' }}"
+      sequence:
+      - service: light.turn_on
+        entity_id: light.matts_office_lamps
+        data:
+          brightness_pct: 100
+          color_temp_kelvin: 2000
+
+    - conditions:
+      - "{{ trigger.to_state.state == 'off_press_release' }}"
+      sequence:
+      - service: homeassistant.turn_off
+        target: 
+          entity_id: fan.matt_office
 
 
 - alias: Matt's office desk remote
@@ -50,22 +67,6 @@ automation:
         {% endif %}
 
 
-- alias: Matt's office table button
-  id: 'matts-office-table-button'
-  initial_state: true
-  trigger:
-  - platform: state
-    entity_id: sensor.office_desk_button
-    to: *remote_states
-  action:
-  - choose:
-    - conditions:
-      - "{{ trigger.to_state.state in ['on', 'off'] }}"
-      sequence:
-      - service: switch.toggle
-        entity_id: switch.office_fan
-
-
 - alias: Change office lights when Xbox turned on/off
   id: 'change-office-lights-xbox-on-off'
   initial_state: true
@@ -98,7 +99,7 @@ script:
     - choose:
       - conditions:
         - condition: template
-          value_template: "{{ is_state_attr('media_player.office_speaker', 'app_name', 'YouTubeGoogle Play Music') }}"
+          value_template: "{{ is_state_attr('media_player.office_speaker', 'app_name', 'YouTube Music') }}"
         sequence:
         - service: media_player.media_play_pause
           entity_id: media_player.office_speaker

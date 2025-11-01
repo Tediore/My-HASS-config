@@ -1,12 +1,12 @@
 group:
   windows:
     entities:
-    - binary_sensor.andy_office_window
-    - binary_sensor.hall_window_e
-    - binary_sensor.hall_window_middle
-    - binary_sensor.hall_window_w
-    - binary_sensor.kitchen_window
-    - binary_sensor.matt_office_window
+    - binary_sensor.andy_office_window_contact
+    - binary_sensor.hall_window_e_contact
+    - binary_sensor.hall_window_middle_contact
+    - binary_sensor.hall_window_w_contact
+    - binary_sensor.kitchen_window_contact
+    - binary_sensor.matt_office_window_contact
     - binary_sensor.patio_door
 
 script:

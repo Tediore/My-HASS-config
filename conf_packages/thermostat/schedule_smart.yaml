@@ -50,12 +50,12 @@ automation:
   - platform: numeric_state
     id: 'cool'
     entity_id: &temp sensor.outside_temp
-    above: 75
+    above: 75 # 24C
     for: '00:30:00'
   - platform: numeric_state
     id: 'heat'
     entity_id: *temp
-    below: 50
+    below: 50 # 10C
     for: '00:30:00'
   condition:
   - "{{ states('climate.thermostat') != trigger.id }}"
@@ -127,10 +127,10 @@ script:
       - 'cool'
     - condition: numeric_state
       entity_id: sensor.tstat_current_temp
-      above: 77.9
+      above: 25.5 # 78F
     - condition: numeric_state
       entity_id: sensor.outside_temp
-      above: 74.9
+      above: 24 # 74.9F
     - service: input_text.set_value
       entity_id: input_text.tstat_prev_mode
       data:
@@ -143,7 +143,7 @@ script:
     - service: climate.set_temperature
       entity_id: climate.thermostat
       data:
-        temperature: "{{ 65 if is_state('input_text.tstat_prev_mode', 'heat') else 80 }}"
+        temperature: "{{ 18.5 if is_state('input_text.tstat_prev_mode', 'heat') else 26.5 }}"
         hvac_mode: "{{ states('input_text.tstat_prev_mode') }}"
     - wait_template: "{{ states('climate.thermostat') == states('input_text.tstat_prev_mode') }}"
     - service: button.press

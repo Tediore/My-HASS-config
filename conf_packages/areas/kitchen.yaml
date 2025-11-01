@@ -1,6 +1,6 @@
 automation:
 - alias: Record coffeemaker on/off
-  id: 'record-coffemaker-on-off'
+  id: 'record-coffeemaker-on-off'
   initial_state: true
   trigger:
   - platform: numeric_state
@@ -35,7 +35,7 @@ automation:
   initial_state: true
   trigger:
   - platform: state
-    entity_id: sensor.cabinet_light_switch
+    entity_id: sensor.cabinet_light_switch_action
     to:
     - 'enter'
     - 'leave'

@@ -6,7 +6,7 @@ automation:
   trigger:
   - platform: state
     id: single
-    entity_id: &andy_button sensor.andys_button_action
+    entity_id: &andy_button sensor.andy_button_action
     to: 
     - 'on'
     - 'off'
@@ -65,6 +65,7 @@ script:
       entity_id: 
       - input_boolean.sleep_mode
       - input_boolean.andy_sleep
+      - input_boolean.garage_lock
       - script.good_night_lights_off
       - script.christmas_lights_off
       - script.media_players_off

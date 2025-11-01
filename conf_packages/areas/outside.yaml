@@ -101,6 +101,9 @@ template:
     - condition: state
       entity_id: &garage_door_state binary_sensor.garage_door_controller_contact_sensor
       state: 'off'
+    - condition: state
+      entity_id: input_boolean.garage_lock
+      state: 'off'
     - action: switch.turn_on
       entity_id: &garage_door_relay switch.garage_door_controller_relay
     close_cover: &close_or_stop
@@ -121,17 +124,23 @@ template:
 
 - sensor:
   - name: Outside temp
+    unique_id: outside-temp-c
     state: "{{ states('sensor.outdoor_temp') | float(0) | round(1) }}"
-    unit_of_measurement: "°F"
-  - name: Outside temp C
-    state: "{{ ((states('sensor.outdoor_temp') | float(0) - 32) * 5/9) | round(1) }}"
     unit_of_measurement: "°C"
-  - name: Outside dew point
-    state: "{{ states('sensor.outdoor_humidity') }}"
+  - name: Outside temp F
+    unique_id: outside-temp-f
+    state: "{{ (((states('sensor.outdoor_temp') | float(0)) * 9 / 5) + 32) | round(1) }}"
     unit_of_measurement: "°F"
   - name: Outside dew point display
-    state: "{{ states('sensor.outside_dew_point') | float(0) | round(0) }}"
-    unit_of_measurement: "°F"
-  - name: Outside dew point C display
-    state: "{{ ((states('sensor.outside_dew_point') | float(0) - 32) * 5/9) | round(1) }}"
+    unique_id: outside-dew-pt-c
+    state: "{{ states('sensor.outside_dew_point') | float(0) | round(1) }}"
     unit_of_measurement: "°C"
+  - name: Outside dew point F display
+    unique_id: outside-dew-pt-f
+    state: "{{ (((states('sensor.outside_dew_point') | float(0)) * 9 / 5) + 32) | round(1) }}"
+    unit_of_measurement: "°F"
+
+
+input_boolean:
+  garage_lock:
+    name: Garage lock

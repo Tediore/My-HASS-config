@@ -91,13 +91,13 @@ automation:
     - conditions:
       - "{{ 'brightness' in trigger.to_state.state }}"
       sequence:
-      - service: media_player.media_play_pause
-        entity_id: *andy_office_speaker
-    - conditions:
-      - "{{ 'colortemp' in trigger.to_state.state }}"
-      sequence:
-      - service: media_player.volume_mute
-        entity_id: *andy_office_speaker
+      - service: script.turn_on
+        entity_id: script.toggle_mute_andys_speaker
+    # - conditions:
+    #   - "{{ 'colortemp' in trigger.to_state.state }}"
+    #   sequence:
+    #   - service: media_player.volume_mute
+    #     entity_id: *andy_office_speaker
     default:
     - service: light.turn_on
       entity_id: light.andys_light_bar
@@ -126,7 +126,7 @@ automation:
   - condition: time
     weekday: *workdays
     after: '07:00:00'
-    before: '16:30:00'
+    before: '16:30:05'
   - condition: state
     entity_id: alarm_control_panel.home
     state: 'disarmed'
@@ -136,7 +136,7 @@ automation:
 
 
 script:
-  toggle_mute_craft_room_speaker:
+  toggle_mute_andys_speaker:
     sequence:
     - choose:
       - conditions:

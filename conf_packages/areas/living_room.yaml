@@ -54,6 +54,24 @@ automation:
     entity_id: script.post_media
 
 
+- alias: Living room switch
+  # Light on/off is controlled by Zigbee binding; this is to offer a quicker way to reset to
+  # 100% brightness at warm white without holding the brightness up button for a few seconds.
+  id: 'living-room-switch'
+  initial_state: true
+  trigger:
+  - platform: state
+    entity_id: sensor.living_room_remote_action
+    to:
+    - 'on_hold'
+  action:
+  - service: light.turn_on
+    entity_id: light.living_room_lamps
+    data:
+      brightness_pct: 100
+      color_temp_kelvin: 2000
+
+
 light:
 - platform: group
   name: Living room lamp right

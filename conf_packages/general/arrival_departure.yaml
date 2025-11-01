@@ -33,7 +33,7 @@ automation:
   - service: light.turn_on
     data:
       entity_id: "light.{{ 'front_door_lights' if trigger.id == 'front_door' else 'hall_lights' }}"
-      brightness_pct: 67
+      brightness_pct: 100
       color_temp_kelvin: 2000
   - service: script.turn_on
     entity_id: script.arrival_night
@@ -96,6 +96,7 @@ automation:
     entity_id:
     - light.front_door_lights
     - light.hall_lights
+    - light.breakfast_bar
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
@@ -175,6 +176,8 @@ script:
           entity_id:
           - scene.buffet_light_10_spoopy_lamps
           - scene.living_room_lamps_10_spoopy_lamps
+        - service: light.turn_on
+          entity_id: light.breakfast_bar
       - conditions:
         - "{{ is_state('binary_sensor.christmastime', 'on') }}"
         sequence:
@@ -182,6 +185,8 @@ script:
           entity_id:
           - scene.buffet_light_12_christmas_lamps
           - scene.living_room_lamps_12_christmas_lamps
+        - service: light.turn_on
+          entity_id: light.breakfast_bar
       default:
       - service: light.turn_on
         entity_id: light.living_room_lamps

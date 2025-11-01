@@ -13,6 +13,8 @@ automation:
   action:
   - service: script.turn_on
     entity_id: script.good_morning
+  - service: input_boolean.turn_off
+    entity_id: input_boolean.garage_lock
   - condition: state
     entity_id: input_boolean.dark_inside
     state: 'on'
@@ -40,6 +42,7 @@ automation:
       entity_id:
       - input_boolean.sleep_mode
       - input_boolean.andy_sleep
+      - input_boolean.garage_lock
       - light.main_bath_night_light
   - if:
     - "{{ is_state('switch.humidifier', 'on') }}"
